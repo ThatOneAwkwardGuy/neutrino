@@ -45,7 +45,6 @@ body {
   -webkit-app-region: drag;
   -webkit-user-select: none;
   user-select: none;
-  flex: 1;
   height: 40px;
   border-left: solid 5px #2745fb;
 }
@@ -310,12 +309,7 @@ svg {
 }
 
 .footer {
-  /* height: 40px; */
-  /* margin-top: 20px; */
-  padding: 20px;
-  position: absolute;
-  width: 100%;
-  bottom: 0;
+  padding: 10px 0px;
   user-select: none;
 }
 

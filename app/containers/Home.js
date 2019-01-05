@@ -44,7 +44,7 @@ class Home extends Component {
 
   render() {
     return (
-      <Container fluid>
+      <Container fluid className="d-flex flex-column">
         <Header changeActiveComponent={this.changeActiveComponent} activeWindow={this.state.activeWindow} />
         <Row className="homeContainer">{this.returnActiveComponent(this.state.activeWindow)}</Row>
         <Footer type="homepage" />

@@ -53,10 +53,17 @@ export default class ProfileTaskConverter extends Component {
       this.setState({ draggableBoxes: draggableBoxesNew });
     } else {
       const result = this.move(this.getList(source.droppableId), this.getList(destination.droppableId), source, destination);
-      this.setState({
-        items: result.droppable,
-        selected: result.droppable2
-      });
+      let draggableBoxesNew = { ...this.state.draggableBoxes };
+      for (const items in result) {
+        const idArray = items.split('-');
+        draggableBoxesNew[idArray[0]][idArray[1]].items = result[items];
+      }
+      this.setState({ draggableBoxes: draggableBoxesNew });
+
+      // this.setState({
+      //   items: result.droppable,
+      //   selected: result.droppable2
+      // });
     }
   };
 
@@ -68,8 +75,8 @@ export default class ProfileTaskConverter extends Component {
   };
 
   move = (source, destination, droppableSource, droppableDestination) => {
-    const sourceClone = Array.from(source);
-    const destClone = Array.from(destination);
+    const sourceClone = Array.from(source.items);
+    const destClone = Array.from(destination.items);
     const [removed] = sourceClone.splice(droppableSource.index, 1);
     destClone.splice(droppableDestination.index, 0, removed);
     const result = {};
@@ -78,58 +85,81 @@ export default class ProfileTaskConverter extends Component {
     return result;
   };
 
+  removeDraggableBox = (name, index) => {
+    const draggableBoxesNew = { ...this.state.draggableBoxes };
+    draggableBoxesNew[name].splice(index, 1);
+    this.setState({ draggableBoxes: draggableBoxesNew });
+  };
+
   returnDraggableBoxes = () => {
     const tree = [];
     for (let i = 0; i < this.state.draggableBoxes[this.state.mode].length; i++) {
-      let index = i;
+      const indexNumber = i;
       tree.push(
-        <Col xs="4" style={{ display: 'inline-block' }} className="draggableBoxContainer" key={`draggableBox-${i}`}>
-          <Container fluid style={{ padding: '0px' }} className="d-flex flex-column">
-            <Row className="flex-grow-1">
-              <Droppable droppableId={`profiles-${index}`}>
-                {(provided, snapshot) => (
-                  <div ref={provided.innerRef} className="col-12">
-                    {this.returnDraggableListUsingArray(this.state.draggableBoxes[this.state.mode][index], 'profileList', index, provided, snapshot)}
-                  </div>
-                )}
-              </Droppable>
-            </Row>
-            <Row className="draggableBoxSelectInput">
-              <Col xs="1" className="d-flex align-items-center justify-content-center draggableBoxBin">
-                <FontAwesome name="trash" onClick={this.addDraggableBox} />
-              </Col>
-              <Col xs="4" className="ml-auto" style={{ padding: '0px' }}>
-                <Input
-                  type="select"
-                  name="from"
-                  id="from"
-                  value={this.state.draggableBoxes[this.state.mode][index].from}
-                  onChange={e => {
-                    this.handleChangeFromToOption(index, e);
-                  }}
-                >
-                  {this.returnOptions(profileTaskConversionOptions, 'from')}
-                </Input>
-              </Col>
-              <Col xs="1" className="text-center d-flex align-items-center justify-content-center">
-                <FontAwesome name="arrow-right" onClick={this.addDraggableBox} />
-              </Col>
-              <Col xs="5" style={{ padding: '0px' }}>
-                <Input
-                  type="select"
-                  value={this.state.draggableBoxes[this.state.mode][index].to}
-                  name="to"
-                  id="to"
-                  onChange={e => {
-                    this.handleChangeFromToOption(index, e);
-                  }}
-                >
-                  {this.returnOptions(profileTaskConversionOptions, 'to')}
-                </Input>
-              </Col>
-            </Row>
-          </Container>
-        </Col>
+        <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
+          <Col xs="4" style={{ display: 'inline-block' }} className="draggableBoxContainer" key={`draggableBox-${i}`}>
+            <Container fluid style={{ padding: '0px' }} className="d-flex flex-column">
+              <Row className="flex-grow-1">
+                <Droppable droppableId={`profiles-${indexNumber}`}>
+                  {(provided, snapshot) => (
+                    <div ref={provided.innerRef} className="col-12">
+                      {this.returnDraggableListUsingArray(
+                        this.state.draggableBoxes[this.state.mode][indexNumber],
+                        'profileList',
+                        indexNumber,
+                        provided,
+                        snapshot
+                      )}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
+              </Row>
+              <Row className="draggableBoxSelectInput">
+                <Col xs="1" className="d-flex align-items-center justify-content-center draggableBoxBin">
+                  <FontAwesome
+                    name="trash"
+                    onClick={() => {
+                      this.removeDraggableBox(this.state.mode, indexNumber);
+                    }}
+                  />
+                </Col>
+                <Col xs="4" className="ml-auto" style={{ padding: '0px' }}>
+                  <Input
+                    type="select"
+                    name="from"
+                    id="from"
+                    value={this.state.draggableBoxes[this.state.mode][indexNumber].from}
+                    onChange={e => {
+                      this.handleChangeFromToOption(indexNumber, e);
+                    }}
+                  >
+                    {this.returnOptions(profileTaskConversionOptions, 'from')}
+                  </Input>
+                </Col>
+                <Col xs="1" className="text-center d-flex align-items-center justify-content-center">
+                  <FontAwesome name="arrow-right" />
+                </Col>
+                <Col xs="4" style={{ padding: '0px' }}>
+                  <Input
+                    type="select"
+                    value={this.state.draggableBoxes[this.state.mode][indexNumber].to}
+                    name="to"
+                    id="to"
+                    onChange={e => {
+                      this.handleChangeFromToOption(indexNumber, e);
+                    }}
+                  >
+                    {this.returnOptions(profileTaskConversionOptions, 'to')}
+                  </Input>
+                </Col>
+                <Col xs="1" className="d-flex align-items-center justify-content-center draggableBoxBin ml-auto">
+                  <FontAwesome name="save" onClick={this.addDraggableBox} />
+                </Col>
+              </Row>
+            </Container>
+          </Col>
+        </CSSTransition>
       );
     }
     return tree;
