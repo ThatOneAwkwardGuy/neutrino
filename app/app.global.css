@@ -29,7 +29,7 @@ html {
   flex-direction: column;
 }
 
-#app .container-fluid {
+#app > .container-fluid {
   padding-top: 20px;
 }
 
@@ -118,13 +118,13 @@ body {
 
 .active.list-group-item-action.list-group-item {
   transition: border-left 0.5s;
-  border-left: solid 5px #03a9f4 !important;
+  border-left: solid 5px #2745fb !important;
   color: white;
   outline: none;
 }
 
 .btn.btn-secondary {
-  background-color: #03a9f4;
+  background-color: #2745fb;
 }
 
 .activeContainerInner {
@@ -155,15 +155,24 @@ label {
 input[type='text'],
 input[type='password'],
 input,
-textarea,
-select {
+textarea {
   border-radius: 0px !important;
   border: none !important;
-  border-bottom: solid 1px #03a9f4 !important;
+  border-bottom: solid 1px #2745fb !important;
   transition: border 0.5s;
   -webkit-appearance: none;
   appearance: none;
   background-color: #222222 !important;
+  color: white !important;
+  font-weight: 700;
+}
+
+select {
+  background: #2745fb !important;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0px !important;
+  border: none !important;
   color: white !important;
   font-weight: 700;
 }
@@ -183,7 +192,7 @@ input[type='password']:focus {
   border-right: none !important;
   border-top: none !important;
   border-bottom: none !important;
-  border-left: solid 5px #03a9f4 !important;
+  border-left: solid 5px #2745fb !important;
   transition: border-left 0.5s;
 }
 
@@ -230,12 +239,12 @@ button {
 
 .taskButton:hover {
   box-shadow: none !important;
-  color: #03a9f4;
+  color: #2745fb;
 }
 
 .primaryButton:hover,
 .btn.btn-secondary:hover {
-  background-color: #03a9f4;
+  background-color: #2745fb;
   box-shadow: 0 5px 15px rgba(3, 169, 244, 1);
 }
 
@@ -307,6 +316,7 @@ svg {
   position: absolute;
   width: 100%;
   bottom: 0;
+  user-select: none;
 }
 
 .footerStatus {
@@ -373,7 +383,7 @@ svg {
   font-weight: 500;
 }
 
-.tableContainer .table-responsive {
+.table-responsive {
   overflow-y: scroll;
   flex: 1;
 }
@@ -411,7 +421,7 @@ canvas {
 }
 
 #editTaskModal .modal-content {
-  border-left: solid 5px #03a9f4;
+  border-left: solid 5px #2745fb;
 }
 
 .modal-body {
@@ -495,7 +505,7 @@ canvas {
 
 .releaseCardImg {
   border-radius: 0px;
-  border-left: solid 5px #03a9f4;
+  border-left: solid 5px #2745fb;
 }
 
 .releaseCard {
@@ -505,7 +515,7 @@ canvas {
 }
 
 .card-body {
-  border-left: solid 5px #03a9f4;
+  border-left: solid 5px #2745fb;
 }
 
 .card-body:hover {
@@ -514,7 +524,7 @@ canvas {
 
 .releaseCard .card-body {
   background-color: white;
-  color: #03a9f4;
+  color: #2745fb;
 }
 
 @keyframes fadein {
@@ -526,10 +536,19 @@ canvas {
   }
 }
 
+@keyframes fadeout {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 .releaseStoresList .list-group-item {
   border-radius: 0;
-  color: #03a9f4;
-  border-left: solid 5px #03a9f4;
+  color: #2745fb;
+  border-left: solid 5px #2745fb;
   cursor: pointer !important;
 }
 
@@ -550,7 +569,7 @@ canvas {
 
 /* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #03a9f4;
+  background: #2745fb;
 }
 
 /* Handle on hover */
@@ -607,12 +626,12 @@ canvas {
 }
 
 .react-toggle--checked .react-toggle-track {
-  background: #03a9f4;
+  background: #2745fb;
 }
 
 .react-toggle--checked .react-toggle-track,
 .react-toggle--checked:hover:not(.react-toggle--disabled) .react-toggle-track {
-  background: #03a9f4;
+  background: #2745fb;
 }
 
 .react-toggle {
@@ -680,9 +699,42 @@ canvas {
     transform: translatey(0px);
   }
   50% {
-    transform: translatey(-20px);
+    transform: translatey(-10px);
   }
   100% {
     transform: translatey(0px);
   }
+}
+
+.nButton {
+  background-color: #2745fb !important;
+  border-radius: 0px !important;
+}
+
+.draggableBoxPlus {
+  width: 38px;
+  height: 38px;
+  background: #2b4df7;
+}
+
+.draggableBoxBin {
+  background: #2b4df7;
+}
+
+.dropzone {
+  background: #2b4df7;
+  /* width: 100px; */
+  height: 100px;
+}
+
+.draggableBoxContainer {
+  background: #2b4df7;
+  color: white;
+  margin: 20px 0px 20px 20px;
+}
+
+.draggableBoxSelectInput {
+  bottom: 0;
+  background: #222222;
+  padding-top: 10px;
 }

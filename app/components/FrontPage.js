@@ -13,7 +13,7 @@ export default class FrontPage extends Component {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
         <Col className="activeWindow d-flex align-items-center justify-content-center">
-          <img style={{ maxWidth: '300px', animation: 'float 6s ease-in-out infinite' }} src={Logo} />
+          <img style={{ maxWidth: '300px', animation: 'float 6s ease-in-out infinite', userSelect: 'none' }} src={Logo} />
           <Particles
             className="frontPageParticles"
             params={{

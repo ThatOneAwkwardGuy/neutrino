@@ -63,6 +63,7 @@
     "ping-lite": "^1.0.2",
     "prop-types": "^15.5.10",
     "react": "^16.4.0",
+    "react-beautiful-dnd": "^10.0.3",
     "react-bootstrap": "^0.32.1",
     "react-datetime": "^2.14.0",
     "react-dom": "^16.4.0",
