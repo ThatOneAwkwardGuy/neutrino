@@ -9,7 +9,9 @@ export default class Settings extends Component {
     this.state = {
       settings: {
         googleCredentialsPath: '',
-        googleCredentialsPojectID: ''
+        googleCredentialsPojectID: '',
+        awsAccessKey: '',
+        awsSecretKey: ''
       }
     };
   }
@@ -76,6 +78,43 @@ export default class Settings extends Component {
                   type="text"
                   name="googleCredentialsPojectID"
                   value={this.state.settings.googleCredentialsPojectID}
+                  onChange={e => {
+                    this.handleChange(e);
+                  }}
+                />
+              </Col>
+            </FormGroup>
+            <FormGroup row>
+              <Col xs="6">
+                <label>Amazon AWS Access Key</label>
+                <Input
+                  type="text"
+                  name="awsAccessKey"
+                  value={this.state.settings.awsAccessKey}
+                  onChange={e => {
+                    this.handleChange(e);
+                  }}
+                />
+              </Col>
+              <Col xs="6">
+                <label>Amazon AWS Secret Key</label>
+                <Input
+                  type="text"
+                  name="awsSecretKey"
+                  value={this.state.settings.awsSecretKey}
+                  onChange={e => {
+                    this.handleChange(e);
+                  }}
+                />
+              </Col>
+            </FormGroup>
+            <FormGroup row>
+              <Col xs="6">
+                <label>Vultr API Key</label>
+                <Input
+                  type="text"
+                  name="vultrAPIKey"
+                  value={this.state.settings.vultrAPIKey}
                   onChange={e => {
                     this.handleChange(e);
                   }}

@@ -3,7 +3,7 @@ import { Row, Col, Button, Table, Container, Input, Label, FormGroup, Form } fro
 import { CSSTransition } from 'react-transition-group';
 const rp = require('request-promise');
 const Compute = require('@google-cloud/compute');
-const request = require('request-promise');
+const AWS = require('aws-sdk');
 
 export default class ProxyCreator extends Component {
   constructor(props) {
@@ -21,7 +21,7 @@ export default class ProxyCreator extends Component {
       proxyUser: '',
       proxyPassword: '',
       website: 'http://google.com',
-      quantity: '0'
+      quantity: '1'
     };
   }
 
@@ -63,10 +63,63 @@ export default class ProxyCreator extends Component {
     });
   };
 
+  initializeAmazonAWS = () => {
+    this.compute = new AWS.EC2({
+      accessKeyId: this.props.settings.awsAccessKey,
+      secretAccessKey: this.props.settings.awsSecretKey,
+      region: 'us-west-1',
+      apiVersion: '2016-11-15'
+    });
+    this.compute.describeRegions({}, function(err, data) {
+      if (err) {
+        console.log('Error', err);
+      } else {
+        console.log('Regions: ', data.Regions);
+      }
+    });
+  };
+
+  initializeVultr = async () => {
+    const regions = await rp({
+      method: 'GET',
+      uri: 'https://api.vultr.com/v1/regions/list',
+      json: true
+    });
+    const plansIDS = await rp({
+      method: 'GET',
+      uri: `https://api.vultr.com/v1/regions/availability?DCID=${regions[Object.keys(regions)[0]].DCID}`,
+      json: true
+    });
+    const plans = await rp({
+      method: 'GET',
+      uri: `https://api.vultr.com/v1/plans/list`,
+      json: true
+    });
+    console.log(plans);
+
+    const regionsArray = [];
+    const plansArray = [];
+    for (const key in regions) {
+      regionsArray.push(`${regions[key].name}-${regions[key].DCID}`);
+    }
+    for (const key of plansIDS) {
+      if (plans[key] !== undefined) {
+        plansArray.push(`${plans[key].name}-${plans[key].VPSPLANID}-$${plans[key].price_per_month}p/m`);
+      }
+    }
+    this.setState({ cloudRegions: regionsArray, region: regionsArray[0], machineTypes: plansArray, machine: plansArray[0] });
+  };
+
   intializeCloudLibrary = name => {
     switch (name) {
       case 'Google Cloud':
         this.initializeGoogleCloud();
+        break;
+      case 'Amazon AWS':
+        this.initializeAmazonAWS();
+        break;
+      case 'Vultr':
+        this.initializeVultr();
         break;
       default:
         break;
@@ -78,6 +131,12 @@ export default class ProxyCreator extends Component {
       case 'Google Cloud':
         Array.from(Array(parseInt(this.state.quantity))).forEach((x, i) => {
           this.createGoogleCloudInstance(i);
+        });
+        break;
+      case 'Vultr':
+        Array.from(Array(parseInt(this.state.quantity))).forEach((x, i) => {
+          console.log('In Array');
+          this.createVultrInstance(i);
         });
         break;
       default:
@@ -159,7 +218,126 @@ export default class ProxyCreator extends Component {
     console.log(`created succesfully`);
   };
 
-  updateMachineTypes = () => {
+  createVultrInstance = async index => {
+    try {
+      const startUpScriptResponse = await rp({
+        method: 'POST',
+        uri: 'https://api.vultr.com/v1/startupscript/create',
+        headers: {
+          'API-Key': this.props.settings.vultrAPIKey
+        },
+        json: true,
+        form: {
+          name: index,
+          script: `#!/bin/bash\nyum install squid wget httpd-tools openssl openssl-devel -y &&\ntouch /etc/squid/passwd &&\nhtpasswd -b /etc/squid/passwd ${
+            this.state.proxyUser
+          } ${
+            this.state.proxyPassword
+          } &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
+        }
+      });
+      const instanceCreateResponse = await rp({
+        method: 'POST',
+        uri: 'https://api.vultr.com/v1/server/create',
+        headers: {
+          'API-Key': this.props.settings.vultrAPIKey
+        },
+        json: true,
+        form: {
+          DCID: parseInt(this.state.region.split('-')[1]),
+          VPSPLANID: parseInt(this.state.machine.split('-')[1]),
+          OSID: 167,
+          SCRIPTID: startUpScriptResponse.SCRIPTID
+        }
+      });
+      await this.pollVultrInstance(instanceCreateResponse.SUBID, startUpScriptResponse.SCRIPTID);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  pollVultrInstance = async (SUBID, SCRIPTID) => {
+    let tryNumber = 0;
+    let exit = false;
+    let ip = '';
+    while (tryNumber < 100 && !exit) {
+      try {
+        tryNumber++;
+        const instanceResponse = await rp({
+          method: 'GET',
+          uri: `https://api.vultr.com/v1/server/list?SUBID=${SUBID}`,
+          headers: {
+            'API-Key': this.props.settings.vultrAPIKey
+          },
+          json: true
+        });
+        if (instanceResponse.status === 'active') {
+          ip = instanceResponse.main_ip;
+          exit = true;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      await new Promise(r => setTimeout(r, 2000));
+    }
+    const getWebsite = await this.pollWebsiteWithIP(`http://${this.state.proxyUser}:${this.state.proxyPassword}@${ip}:3128`, SCRIPTID);
+    if (getWebsite) {
+      const split = [this.state.proxyUser, this.state.proxyPassword, ip, '3128'];
+      this.setState({
+        proxyPings: [
+          ...this.state.proxyPings,
+          {
+            user: split[0],
+            pass: split[1],
+            ip: split[2],
+            port: split[3],
+            ping: Math.round(getWebsite.timings.response)
+          }
+        ]
+      });
+    }
+  };
+
+  pollWebsiteWithIP = async (ip, SCRIPTID) => {
+    let tryNumber = 0;
+    let exit = false;
+    while (tryNumber < 10 && !exit) {
+      try {
+        tryNumber++;
+        const getWebsite = await rp({
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+          },
+          uri: this.state.website,
+          time: true,
+          proxy: ip,
+          resolveWithFullResponse: true
+        });
+        if (getWebsite.statusCode === 200) {
+          exit = true;
+          await rp({
+            method: 'POST',
+            uri: 'https://api.vultr.com/v1/startupscript/destroy',
+            headers: {
+              'API-Key': this.props.settings.vultrAPIKey
+            },
+            json: true,
+            form: {
+              SCRIPTID: SCRIPTID
+            }
+          });
+          return getWebsite;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      await new Promise(r => setTimeout(r, 5000));
+    }
+    return false;
+  };
+
+  updateGoogleCloudMachineTypes = () => {
     this.compute.getMachineTypes({ filter: `zone eq ${this.state.region}` }, (err, machineTypes) => {
       if (err) {
         return err;
@@ -169,7 +347,38 @@ export default class ProxyCreator extends Component {
     });
   };
 
-  returnRegions = array => {
+  updateVultrMachineType = async () => {
+    const plansIDS = await rp({
+      method: 'GET',
+      uri: `https://api.vultr.com/v1/regions/availability?DCID=${this.state.region.split('-')[1]}`,
+      json: true
+    });
+    const plans = await rp({
+      method: 'GET',
+      uri: `https://api.vultr.com/v1/plans/list`,
+      json: true
+    });
+    const plansArray = [];
+    for (const key of plansIDS) {
+      if (plans[key] !== undefined) {
+        plansArray.push(`${plans[key].name}-${plans[key].VPSPLANID}-$${plans[key].price_per_month}p/m`);
+      }
+    }
+    this.setState({ machineTypes: plansArray, machine: plansArray[0] });
+  };
+
+  updateMachineTypes = () => {
+    switch (this.state.cloud) {
+      case 'Google Cloud':
+        this.updateGoogleCloudMachineTypes();
+        break;
+      case 'Vultr':
+        this.updateVultrMachineType();
+        break;
+    }
+  };
+
+  returnOptions = array => {
     return array.map((elem, index) => <option key={`region-${index}`}>{elem}</option>);
   };
 
@@ -253,7 +462,7 @@ export default class ProxyCreator extends Component {
                 }}
                 type="select"
               >
-                {this.returnRegions(this.state.cloudRegions)}
+                {this.returnOptions(this.state.cloudRegions)}
               </Input>
             </Col>
             <Col xs="3">
@@ -265,7 +474,7 @@ export default class ProxyCreator extends Component {
                 }}
                 type="select"
               >
-                {this.returnRegions(this.state.machineTypes)}
+                {this.returnOptions(this.state.machineTypes)}
               </Input>
             </Col>
           </FormGroup>
