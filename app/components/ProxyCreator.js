@@ -4,6 +4,8 @@ import { CSSTransition } from 'react-transition-group';
 const rp = require('request-promise');
 const Compute = require('@google-cloud/compute');
 const AWS = require('aws-sdk');
+const DigitalOcean = require('do-wrapper').default;
+const { clipboard } = require('electron');
 
 export default class ProxyCreator extends Component {
   constructor(props) {
@@ -110,6 +112,18 @@ export default class ProxyCreator extends Component {
     this.setState({ cloudRegions: regionsArray, region: regionsArray[0], machineTypes: plansArray, machine: plansArray[0] });
   };
 
+  initializeDigitalOcean = async () => {
+    this.compute = new DigitalOcean(this.props.settings.digitalOceanAPIKey, 10);
+    const regions = await this.compute.regionsGetAll();
+    const regionsArray = regions.body.regions.map(elem => `${elem.name}-${elem.slug}`);
+    this.setState({
+      cloudRegions: regionsArray,
+      machineTypes: regions.body.regions[1].sizes,
+      region: regionsArray[0],
+      machine: regions.body.regions[1].sizes[0]
+    });
+  };
+
   intializeCloudLibrary = name => {
     switch (name) {
       case 'Google Cloud':
@@ -121,12 +135,15 @@ export default class ProxyCreator extends Component {
       case 'Vultr':
         this.initializeVultr();
         break;
+      case 'DigitalOcean':
+        this.initializeDigitalOcean();
+        break;
       default:
         break;
     }
   };
 
-  createInstance = name => {
+  createInstance = async name => {
     switch (name) {
       case 'Google Cloud':
         Array.from(Array(parseInt(this.state.quantity))).forEach((x, i) => {
@@ -134,11 +151,16 @@ export default class ProxyCreator extends Component {
         });
         break;
       case 'Vultr':
-        Array.from(Array(parseInt(this.state.quantity))).forEach((x, i) => {
-          console.log('In Array');
+        for (let i = 0; i < this.state.quantity; i++) {
           this.createVultrInstance(i);
-        });
+          await new Promise(r => setTimeout(r, 1500));
+        }
         break;
+      case 'DigitalOcean':
+        Array.from(Array(parseInt(this.state.quantity))).forEach((x, i) => {
+          this.createDigitalOceanInstance(i);
+        });
+
       default:
         break;
     }
@@ -218,6 +240,21 @@ export default class ProxyCreator extends Component {
     console.log(`created succesfully`);
   };
 
+  createDigitalOceanInstance = async index => {
+    const response = await this.compute.dropletsCreate({
+      name: `${this.state.instanceName}-${index}`,
+      region: this.state.region.split('-')[1],
+      size: this.state.machine,
+      image: 'centos-7-x64',
+      user_data: `#!/bin/bash\nyum install squid wget httpd-tools openssl openssl-devel -y &&\ntouch /etc/squid/passwd &&\nhtpasswd -b /etc/squid/passwd ${
+        this.state.proxyUser
+      } ${
+        this.state.proxyPassword
+      } &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
+    });
+    await this.pollDigitalOceanInstance(response.body.droplet.id);
+  };
+
   createVultrInstance = async index => {
     try {
       const startUpScriptResponse = await rp({
@@ -247,7 +284,9 @@ export default class ProxyCreator extends Component {
           DCID: parseInt(this.state.region.split('-')[1]),
           VPSPLANID: parseInt(this.state.machine.split('-')[1]),
           OSID: 167,
-          SCRIPTID: startUpScriptResponse.SCRIPTID
+          SCRIPTID: startUpScriptResponse.SCRIPTID,
+          hostname: `${this.state.instanceName}-${index}`,
+          label: `${this.state.instanceName}-${index}`
         }
       });
       await this.pollVultrInstance(instanceCreateResponse.SUBID, startUpScriptResponse.SCRIPTID);
@@ -298,6 +337,41 @@ export default class ProxyCreator extends Component {
     }
   };
 
+  pollDigitalOceanInstance = async id => {
+    let tryNumber = 0;
+    let exit = false;
+    let ip = '';
+    while (tryNumber < 100 && !exit) {
+      try {
+        tryNumber++;
+        const instanceResponse = await this.compute.dropletsGetById(id);
+        if (instanceResponse.body.droplet.status === 'active') {
+          ip = instanceResponse.body.droplet.networks.v4[0].ip_address;
+          exit = true;
+        }
+      } catch (error) {
+        console.log(error);
+      }
+      await new Promise(r => setTimeout(r, 2000));
+    }
+    const getWebsite = await this.pollWebsiteWithIP(`http://${this.state.proxyUser}:${this.state.proxyPassword}@${ip}:3128`, '');
+    if (getWebsite) {
+      const split = [this.state.proxyUser, this.state.proxyPassword, ip, '3128'];
+      this.setState({
+        proxyPings: [
+          ...this.state.proxyPings,
+          {
+            user: split[0],
+            pass: split[1],
+            ip: split[2],
+            port: split[3],
+            ping: Math.round(getWebsite.timings.response)
+          }
+        ]
+      });
+    }
+  };
+
   pollWebsiteWithIP = async (ip, SCRIPTID) => {
     let tryNumber = 0;
     let exit = false;
@@ -316,17 +390,19 @@ export default class ProxyCreator extends Component {
         });
         if (getWebsite.statusCode === 200) {
           exit = true;
-          await rp({
-            method: 'POST',
-            uri: 'https://api.vultr.com/v1/startupscript/destroy',
-            headers: {
-              'API-Key': this.props.settings.vultrAPIKey
-            },
-            json: true,
-            form: {
-              SCRIPTID: SCRIPTID
-            }
-          });
+          if (this.state.cloud === 'Vultr') {
+            await rp({
+              method: 'POST',
+              uri: 'https://api.vultr.com/v1/startupscript/destroy',
+              headers: {
+                'API-Key': this.props.settings.vultrAPIKey
+              },
+              json: true,
+              form: {
+                SCRIPTID: SCRIPTID
+              }
+            });
+          }
           return getWebsite;
         }
       } catch (error) {
@@ -367,6 +443,16 @@ export default class ProxyCreator extends Component {
     this.setState({ machineTypes: plansArray, machine: plansArray[0] });
   };
 
+  updateDigitalOceanMachineType = async () => {
+    const region = this.state.region.split('-');
+    const regionsResponse = await this.compute.regionsGetAll();
+    const machineTypesArray = regionsResponse.body.regions.filter(elem => elem.name === this.state.region.split('-')[0])[0].sizes;
+    this.setState({
+      machineTypes: machineTypesArray,
+      machine: machineTypesArray[0]
+    });
+  };
+
   updateMachineTypes = () => {
     switch (this.state.cloud) {
       case 'Google Cloud':
@@ -375,11 +461,22 @@ export default class ProxyCreator extends Component {
       case 'Vultr':
         this.updateVultrMachineType();
         break;
+      case 'DigitalOcean':
+        this.updateDigitalOceanMachineType();
+        break;
     }
   };
 
   returnOptions = array => {
     return array.map((elem, index) => <option key={`region-${index}`}>{elem}</option>);
+  };
+
+  copyToClipboard = () => {
+    let string = '';
+    this.state.proxyPings.forEach(elem => {
+      string += `${elem.user}:${elem.pass}@${elem.ip}:${elem.port}\n`;
+    });
+    clipboard.writeText(string, 'selection');
   };
 
   render() {
@@ -479,7 +576,7 @@ export default class ProxyCreator extends Component {
             </Col>
           </FormGroup>
           <FormGroup row>
-            <Col xs="3">
+            <Col xs="2">
               <label>proxy username</label>
               <Input
                 name="proxyUser"
@@ -489,7 +586,7 @@ export default class ProxyCreator extends Component {
                 }}
               />
             </Col>
-            <Col xs="3">
+            <Col xs="2">
               <label>proxy password</label>
               <Input
                 name="proxyPassword"
@@ -509,7 +606,7 @@ export default class ProxyCreator extends Component {
                 }}
               />
             </Col>
-            <Col xs="3" className="d-flex flex-column justify-content-end">
+            <Col xs="2" className="d-flex flex-column justify-content-end">
               <Button
                 onClick={() => {
                   this.createInstance(this.state.cloud);
@@ -517,6 +614,16 @@ export default class ProxyCreator extends Component {
                 className="nButton"
               >
                 create
+              </Button>
+            </Col>
+            <Col xs="3" className="d-flex flex-column justify-content-end">
+              <Button
+                onClick={() => {
+                  this.copyToClipboard();
+                }}
+                className="nButton"
+              >
+                copy to clipboard
               </Button>
             </Col>
           </FormGroup>

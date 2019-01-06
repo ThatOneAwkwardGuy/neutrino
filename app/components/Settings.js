@@ -11,7 +11,9 @@ export default class Settings extends Component {
         googleCredentialsPath: '',
         googleCredentialsPojectID: '',
         awsAccessKey: '',
-        awsSecretKey: ''
+        awsSecretKey: '',
+        vultrAPIKey: '',
+        digitalOceanAPIKey: ''
       }
     };
   }
@@ -115,6 +117,19 @@ export default class Settings extends Component {
                   type="text"
                   name="vultrAPIKey"
                   value={this.state.settings.vultrAPIKey}
+                  onChange={e => {
+                    this.handleChange(e);
+                  }}
+                />
+              </Col>
+            </FormGroup>
+            <FormGroup row>
+              <Col xs="6">
+                <label>DigitalOcean API Key</label>
+                <Input
+                  type="text"
+                  name="digitalOceanAPIKey"
+                  value={this.state.settings.digitalOceanAPIKey}
                   onChange={e => {
                     this.handleChange(e);
                   }}
