@@ -1,13 +1,40 @@
 import React, { Component } from 'react';
-import { Container, Row, Col, Input, Label } from 'reactstrap';
+import { Button, Container, Row, Col, Input, Label, Modal, ModalBody, ModalFooter, Form, FormGroup } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import FontAwesome from 'react-fontawesome';
 import Dropzone from 'react-dropzone';
 var fs = require('fs');
-
+const { dialog } = require('electron').remote;
 const profileTaskConversionOptions = ['CyberSole', 'ProjectDestroyer', 'EveAIO', 'TheKickStation'];
-
+const profileAttributeMaping = {
+  profileID: 'profile name',
+  deliveryCountry: 'delivery country',
+  deliveryAddress: 'delivery address',
+  deliveryAddress2: 'delivery address 2',
+  deliveryCity: 'delivery city',
+  deliveryFirstName: 'delivery first name',
+  deliveryLastName: 'delivery last name',
+  deliveryProvince: 'delivery state',
+  deliveryZip: 'delivery zip',
+  billingZip: 'billing zip',
+  billingCountry: 'billing country',
+  billingAddress: 'billing address',
+  billingAddress2: 'billing address 2',
+  billingCity: 'billing city',
+  billingFirstName: 'billing first name',
+  billingLastName: 'billing last name',
+  billingProvince: 'billing state',
+  phoneNumber: 'phone no.',
+  paymentEmail: 'email',
+  paymentCardholdersName: 'cardholders name',
+  paymentCardnumber: 'card no.',
+  paymentCardExpiryMonth: 'card exp month',
+  paymentCardExpiryYear: 'card exp year',
+  paymentCVV: 'cvv',
+  deliveryAptorSuite: 'delivery apt/suite',
+  billingAptorSuite: 'billing apt/suite'
+};
 export default class ProfileTaskConverter extends Component {
   constructor(props) {
     super(props);
@@ -19,7 +46,8 @@ export default class ProfileTaskConverter extends Component {
       accepted: [],
       bot: 'CyberSole',
       mode: 'profiles',
-      errorNotification: false
+      errorNotification: false,
+      currentObject: {}
     };
   }
 
@@ -59,11 +87,6 @@ export default class ProfileTaskConverter extends Component {
         draggableBoxesNew[idArray[0]][idArray[1]].items = result[items];
       }
       this.setState({ draggableBoxes: draggableBoxesNew });
-
-      // this.setState({
-      //   items: result.droppable,
-      //   selected: result.droppable2
-      // });
     }
   };
 
@@ -96,16 +119,16 @@ export default class ProfileTaskConverter extends Component {
     for (let i = 0; i < this.state.draggableBoxes[this.state.mode].length; i++) {
       const indexNumber = i;
       tree.push(
-        <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
+        <CSSTransition in={true} appear={true} timeout={300} classNames="fade" key={`draggableBox-transition-container-${i}`}>
           <Col xs="4" style={{ display: 'inline-block' }} className="draggableBoxContainer" key={`draggableBox-${i}`}>
             <Container fluid style={{ padding: '0px' }} className="d-flex flex-column">
               <Row className="flex-grow-1">
                 <Droppable droppableId={`profiles-${indexNumber}`}>
                   {(provided, snapshot) => (
-                    <div ref={provided.innerRef} className="col-12">
+                    <div ref={provided.innerRef} className="col-12" style={{ padding: '0px' }}>
                       {this.returnDraggableListUsingArray(
                         this.state.draggableBoxes[this.state.mode][indexNumber],
-                        'profileList',
+                        `${this.state.mode}-${indexNumber}`,
                         indexNumber,
                         provided,
                         snapshot
@@ -124,23 +147,7 @@ export default class ProfileTaskConverter extends Component {
                     }}
                   />
                 </Col>
-                <Col xs="4" className="ml-auto" style={{ padding: '0px' }}>
-                  <Input
-                    type="select"
-                    name="from"
-                    id="from"
-                    value={this.state.draggableBoxes[this.state.mode][indexNumber].from}
-                    onChange={e => {
-                      this.handleChangeFromToOption(indexNumber, e);
-                    }}
-                  >
-                    {this.returnOptions(profileTaskConversionOptions, 'from')}
-                  </Input>
-                </Col>
-                <Col xs="1" className="text-center d-flex align-items-center justify-content-center">
-                  <FontAwesome name="arrow-right" />
-                </Col>
-                <Col xs="4" style={{ padding: '0px' }}>
+                <Col xs="10" style={{ padding: '0px' }}>
                   <Input
                     type="select"
                     value={this.state.draggableBoxes[this.state.mode][indexNumber].to}
@@ -153,8 +160,16 @@ export default class ProfileTaskConverter extends Component {
                     {this.returnOptions(profileTaskConversionOptions, 'to')}
                   </Input>
                 </Col>
-                <Col xs="1" className="d-flex align-items-center justify-content-center draggableBoxBin ml-auto">
-                  <FontAwesome name="save" onClick={this.addDraggableBox} />
+                <Col xs="1" className="d-flex align-items-center justify-content-center draggableBoxBin">
+                  <FontAwesome
+                    name="save"
+                    onClick={() => {
+                      this.convertToBot(
+                        this.state.draggableBoxes[this.state.mode][indexNumber].to,
+                        this.state.draggableBoxes[this.state.mode][indexNumber].items
+                      );
+                    }}
+                  />
                 </Col>
               </Row>
             </Container>
@@ -173,7 +188,7 @@ export default class ProfileTaskConverter extends Component {
           ...this.state.draggableBoxes[this.state.mode],
           {
             from: '',
-            to: '',
+            to: profileTaskConversionOptions[0],
             items: []
           }
         ]
@@ -224,10 +239,106 @@ export default class ProfileTaskConverter extends Component {
     this.appendProfile(items);
   };
 
+  baseProfileToCybersole = file => {
+    let items = {};
+    for (const profile of file) {
+      items[profile.profileID] = {
+        name: profile.profileID,
+        payment: {
+          email: profile.paymentEmail,
+          phone: profile.phoneNumber,
+          card: {
+            name: profile.paymentCardholdersName,
+            number: profile.paymentCardnumber,
+            exp_month: profile.paymentCardExpiryMonth,
+            exp_year: profile.paymentCardExpiryYear,
+            cvv: profile.paymentCVV
+          }
+        },
+        delivery: {
+          first_name: profile.deliveryFirstName,
+          last_name: profile.deliveryLastName,
+          addr1: profile.deliveryAddress,
+          addr2: profile.deliveryAddress2,
+          zip: profile.deliveryZip,
+          city: profile.deliveryCity,
+          country: profile.deliveryCountry,
+          state: profile.deliveryProvince,
+          same_as_del: profile.deliverySameAsDelivery
+        },
+        billing: {
+          first_name: profile.billingFirstName,
+          last_name: profile.billingLastName,
+          addr1: profile.billingAddress,
+          addr2: profile.billingAddress2,
+          zip: profile.billingZip,
+          city: profile.billingCity,
+          country: profile.billingCountry,
+          state: profile.billingProvince,
+          same_as_del: profile.billingSameAsDelivery
+        },
+        one_checkout: false,
+        favourite: false
+      };
+    }
+    this.saveToFile('CyberSole', 'json', items);
+  };
+
+  saveToFile = (name, extension, file) => {
+    if (extension === 'json') {
+      file = JSON.stringify(file);
+    }
+    dialog.showSaveDialog(
+      {
+        title: 'name',
+        defaultPath: `~/${name}.${extension}`,
+        filters: [{ name: `${name} Files`, extensions: [extension] }]
+      },
+      fileName => {
+        if (fileName === undefined) {
+          return;
+        }
+        fs.writeFile(fileName, file, err => {
+          if (err) {
+            this.setState({
+              profileExportFailure: true
+            });
+            return;
+          }
+          this.setState({
+            profileExportSuccess: true
+          });
+        });
+      }
+    );
+  };
+
   appendProfile = profilesArray => {
     this.setState({
-      draggableBoxes: { ...this.state.draggableBoxes, profiles: [...this.state.draggableBoxes.profiles, { items: profilesArray, from: this.state.bot }] }
+      draggableBoxes: {
+        ...this.state.draggableBoxes,
+        profiles: [...this.state.draggableBoxes.profiles, { items: profilesArray, from: this.state.bot, to: this.state.bot }]
+      }
     });
+  };
+
+  toggleModal = () => {
+    this.setState({
+      editModal: !this.state.editModal
+    });
+  };
+
+  editItem = (name, index) => {
+    const idArray = name.split('-');
+    const draggableBoxesNew = { ...this.state.draggableBoxes };
+    this.setState({ currentObject: draggableBoxesNew[idArray[0]][idArray[1]].items[index], editModal: true, idArray: idArray, index: index });
+  };
+
+  deleteItem = (name, index) => {
+    const idArray = name.split('-');
+    const draggableBoxesNew = { ...this.state.draggableBoxes };
+    draggableBoxesNew[idArray[0]][idArray[1]].items.splice(index, 1);
+    this.setState({ draggableBoxes: draggableBoxesNew });
   };
 
   returnDraggableListUsingArray = (listArray, name, listIndex, provided, snapshot) => {
@@ -239,7 +350,31 @@ export default class ProfileTaskConverter extends Component {
       >
         {(provided, snapshot) => (
           <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}>
-            {item.profileID}
+            <Container fluid>
+              <Row style={{ backgroundColor: '#1A36C4' }}>
+                <Col xs="8" style={{ padding: '10px' }}>
+                  {item.profileID}
+                </Col>
+                <Col xs="2" className="text-center">
+                  <FontAwesome
+                    name="edit"
+                    style={{ padding: '10px' }}
+                    onClick={() => {
+                      this.editItem(name, index);
+                    }}
+                  />
+                </Col>
+                <Col xs="2" className="text-center">
+                  <FontAwesome
+                    name="trash"
+                    style={{ padding: '10px' }}
+                    onClick={() => {
+                      this.deleteItem(name, index);
+                    }}
+                  />
+                </Col>
+              </Row>
+            </Container>
           </div>
         )}
       </Draggable>
@@ -262,10 +397,69 @@ export default class ProfileTaskConverter extends Component {
         default:
           break;
       }
-      // for (const profile in profileOBJ) {
-      //   this.props.onAddProfile(profileOBJ[profile]);
-      // }
     });
+  };
+
+  convertToBot = (botName, file) => {
+    switch (botName) {
+      case 'CyberSole':
+        this.baseProfileToCybersole(file);
+        break;
+      default:
+        break;
+    }
+  };
+
+  handleCurrentObjectChange = e => {
+    this.setState({
+      currentObject: { ...this.state.currentObject, [e.target.name]: e.target.value }
+    });
+  };
+
+  convertProfileObjectToFormGroup = profileObject => {
+    const tree = [];
+    let subTree = [];
+    let counter = 0;
+    for (const item in profileObject) {
+      if (profileAttributeMaping[item] !== undefined) {
+        counter++;
+        subTree.push(
+          <Col xs="4" key={`currentObject-${item}`}>
+            <Label>{profileAttributeMaping[item]}</Label>
+            <Input
+              name={item}
+              value={this.state.currentObject[item]}
+              onChange={event => {
+                this.handleCurrentObjectChange(event);
+              }}
+            />
+          </Col>
+        );
+
+        if (counter % 3 === 0 && Object.keys(profileObject).length - counter > 3) {
+          tree.push(
+            <Row style={{ marginBottom: '20px', marginTop: '20px' }} key={`currentObject-row-${item}`}>
+              {subTree}
+            </Row>
+          );
+          subTree = [];
+        } else if (Object.keys(profileObject).length - counter < 3) {
+          tree.push(
+            <Row style={{ marginBottom: '20px', marginTop: '20px' }} key={`currentObject-row-${item}`}>
+              {subTree}
+            </Row>
+          );
+        }
+      }
+    }
+    return tree;
+  };
+
+  saveCurrentObject = (newObject, idArray, index) => {
+    console.log(newObject);
+    const draggableBoxesNew = { ...this.state.draggableBoxes };
+    draggableBoxesNew[idArray[0]][idArray[1]].items[index] = newObject;
+    this.setState({ draggableBoxes: draggableBoxesNew });
   };
 
   render() {
@@ -335,6 +529,31 @@ export default class ProfileTaskConverter extends Component {
               </Col>
             </Row>
           </Container>
+          <Modal isOpen={this.state.editModal} toggle={this.toggleModal} centered={true} size="lg">
+            <ModalBody>
+              <Form>
+                <FormGroup className="container-fluid">{this.convertProfileObjectToFormGroup(this.state.currentObject)}</FormGroup>
+              </Form>
+            </ModalBody>
+            <ModalFooter>
+              <Button
+                onClick={() => {
+                  this.saveCurrentObject(this.state.currentObject, this.state.idArray, this.state.index);
+                  this.toggleModal();
+                }}
+              >
+                save
+              </Button>
+              <Button
+                onClick={() => {
+                  this.toggleModal();
+                }}
+                className="btn-danger"
+              >
+                cancel
+              </Button>
+            </ModalFooter>
+          </Modal>
         </Col>
       </CSSTransition>
     );

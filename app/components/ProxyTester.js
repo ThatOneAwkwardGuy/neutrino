@@ -53,7 +53,6 @@ export default class ProxyTester extends Component {
   async handleProxies() {
     if (this.state.proxyInput !== '') {
       const splitProxies = this.state.proxyInput.split('\n');
-      console.log(splitProxies);
       this.setState({
         proxyPings: []
       });
@@ -95,6 +94,7 @@ export default class ProxyTester extends Component {
             });
           }
         } catch (e) {
+          console.log(e);
           if (split.length === 4) {
             this.setState({
               proxyPings: [
@@ -130,7 +130,7 @@ export default class ProxyTester extends Component {
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-        <Col className="activeWindow">
+        <Col className="activeWindow d-flex flex-column">
           <Table responsive hover className="text-center">
             <thead>
               <tr>
@@ -144,62 +144,60 @@ export default class ProxyTester extends Component {
             </thead>
             <tbody>{this.state.proxyPings.map(this.returnProxyRow)}</tbody>
           </Table>
-          <Container>
-            <Row>
-              <Col xs="6">
-                <FormGroup>
-                  <Label>proxies</Label>
-                  <Input
-                    name="proxyInput"
-                    type="textarea"
-                    id="proxyInput"
-                    placeholder="user:pass:ip:port or ip:port"
-                    value={this.state.proxyInput}
-                    onChange={event => {
-                      this.handleChange(event);
+          <Row>
+            <Col xs="6">
+              <FormGroup>
+                <Label>proxies</Label>
+                <Input
+                  name="proxyInput"
+                  type="textarea"
+                  id="proxyInput"
+                  placeholder="user:pass:ip:port or ip:port"
+                  value={this.state.proxyInput}
+                  onChange={event => {
+                    this.handleChange(event);
+                  }}
+                />
+              </FormGroup>
+              <FormGroup row>
+                <div className="col-sm-4 text-center">
+                  <Button
+                    className="nButton"
+                    onClick={() => {
+                      this.handleProxies();
                     }}
-                  />
-                </FormGroup>
-                <FormGroup row>
-                  <div className="col-sm-4 text-center">
-                    <Button
-                      className="nButton"
-                      onClick={() => {
-                        this.handleProxies();
-                      }}
-                    >
-                      test proxies
-                    </Button>
-                  </div>
-                  <div className="col-sm-4 text-center">
-                    <Button
-                      className="nButton"
-                      onClick={async () => {
-                        this.clearProxyPings();
-                      }}
-                    >
-                      clear proxies
-                    </Button>
-                  </div>
-                </FormGroup>
-              </Col>
-              <Col xs="6">
-                <FormGroup>
-                  <Label>site</Label>
-                  <Input
-                    name="proxySite"
-                    type="text"
-                    id="proxySite"
-                    value={this.state.proxySite}
-                    placeholder="http://google.com"
-                    onChange={event => {
-                      this.handleChange(event);
+                  >
+                    test proxies
+                  </Button>
+                </div>
+                <div className="col-sm-4 text-center">
+                  <Button
+                    className="nButton"
+                    onClick={async () => {
+                      this.clearProxyPings();
                     }}
-                  />
-                </FormGroup>
-              </Col>
-            </Row>
-          </Container>
+                  >
+                    clear proxies
+                  </Button>
+                </div>
+              </FormGroup>
+            </Col>
+            <Col xs="6">
+              <FormGroup>
+                <Label>site</Label>
+                <Input
+                  name="proxySite"
+                  type="text"
+                  id="proxySite"
+                  value={this.state.proxySite}
+                  placeholder="http://google.com"
+                  onChange={event => {
+                    this.handleChange(event);
+                  }}
+                />
+              </FormGroup>
+            </Col>
+          </Row>
         </Col>
       </CSSTransition>
     );

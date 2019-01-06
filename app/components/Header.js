@@ -13,7 +13,8 @@ const componentToNameMapping = {
   AccountCreator: 'account creator',
   AddressJigger: 'address jigger',
   ProfileTaskConverter: 'profile/task converter',
-  RaffleBot: 'raffles'
+  RaffleBot: 'raffles',
+  Settings: 'settings'
 };
 
 const nameToSymbolMapping = {
@@ -23,7 +24,8 @@ const nameToSymbolMapping = {
   AccountCreator: <FontAwesome name="plus" />,
   AddressJigger: <FontAwesome name="cog" />,
   ProfileTaskConverter: <FontAwesome name="retweet" />,
-  RaffleBot: <FontAwesome name="ticket" />
+  RaffleBot: <FontAwesome name="ticket" />,
+  Settings: <FontAwesome name="cogs" />
 };
 
 export default class Header extends Component {
