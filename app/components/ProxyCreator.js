@@ -11,14 +11,17 @@ export default class ProxyCreator extends Component {
     this.compute = new Compute();
     this.state = {
       proxyPings: [],
-      googleCloudRegions: [],
+      cloudRegions: [],
+      machineTypes: [],
+      machine: '',
       region: '',
       cloud: '',
       proxyInput: '',
       instanceName: '',
       proxyUser: '',
       proxyPassword: '',
-      website: 'http://google.com'
+      website: 'http://google.com',
+      quantity: '0'
     };
   }
 
@@ -48,88 +51,17 @@ export default class ProxyCreator extends Component {
       if (err) {
         return err;
       }
-      console.log(regions);
       const regionsArray = regions.map(elem => elem.id);
-      this.setState({ googleCloudRegions: regionsArray, region: regionsArray[0] });
+      this.setState({ cloudRegions: regionsArray, region: regionsArray[0] });
+      this.compute.getMachineTypes({ filter: `zone eq ${regionsArray[0]}` }, (err, machineTypes) => {
+        if (err) {
+          return err;
+        }
+        const machineTypesArray = machineTypes.map(elem => elem.id);
+        this.setState({ machineTypes: machineTypesArray, machine: machineTypesArray[0] });
+      });
     });
   };
-
-  async handleProxies() {
-    if (this.state.proxyInput !== '') {
-      const splitProxies = this.state.proxyInput.split('\n');
-      this.setState({
-        proxyPings: []
-      });
-      splitProxies.forEach(async proxyItem => {
-        const split = proxyItem.split(':');
-        try {
-          const responsePing = await rp({
-            method: 'GET',
-            time: true,
-            resolveWithFullResponse: true,
-            uri: this.state.proxySite,
-            proxy: split.length === 4 ? `http://${split[0]}:${split[1]}@${split[2]}:${split[3]}` : split.length === 2 ? `http://${split[0]}:${split[1]}` : ''
-          });
-          if (split.length === 4) {
-            this.setState({
-              proxyPings: [
-                ...this.state.proxyPings,
-                {
-                  user: split[0],
-                  pass: split[1],
-                  ip: split[2],
-                  port: split[3],
-                  ping: Math.round(responsePing.timings.response)
-                }
-              ]
-            });
-          } else if (split.length === 2) {
-            this.setState({
-              proxyPings: [
-                ...this.state.proxyPings,
-                {
-                  user: 'none',
-                  pass: 'none',
-                  ip: split[0],
-                  port: split[1],
-                  ping: Math.round(responsePing.timings.response)
-                }
-              ]
-            });
-          }
-        } catch (e) {
-          console.log(e);
-          if (split.length === 4) {
-            this.setState({
-              proxyPings: [
-                ...this.state.proxyPings,
-                {
-                  user: split[0],
-                  pass: split[1],
-                  ip: split[2],
-                  port: split[3],
-                  ping: 'error'
-                }
-              ]
-            });
-          } else if (split.length === 2) {
-            this.setState({
-              proxyPings: [
-                ...this.state.proxyPings,
-                {
-                  user: 'none',
-                  pass: 'none',
-                  ip: split[0],
-                  port: split[1],
-                  ping: 'error'
-                }
-              ]
-            });
-          }
-        }
-      });
-    }
-  }
 
   intializeCloudLibrary = name => {
     switch (name) {
@@ -144,14 +76,16 @@ export default class ProxyCreator extends Component {
   createInstance = name => {
     switch (name) {
       case 'Google Cloud':
-        this.createGoogleCloudInstance();
+        Array.from(Array(parseInt(this.state.quantity))).forEach((x, i) => {
+          this.createGoogleCloudInstance(i);
+        });
         break;
       default:
         break;
     }
   };
 
-  pingVM = async ip => {
+  pingVM = async (ip, zone, instanceName) => {
     let exit = false;
     let res;
     while (!exit) {
@@ -169,6 +103,7 @@ export default class ProxyCreator extends Component {
         });
         console.log(res);
         if (res.statusCode !== 200) {
+          zone.vm(instanceName).delete();
           throw new Error(res.statusCode);
         }
         exit = true;
@@ -191,11 +126,13 @@ export default class ProxyCreator extends Component {
     });
   };
 
-  createGoogleCloudInstance = async () => {
+  createGoogleCloudInstance = async index => {
     const zone = this.compute.zone(this.state.region);
     const config = {
       os: 'centos-7',
       http: true,
+      https: true,
+      machineType: this.state.machineType,
       metadata: {
         items: [
           {
@@ -203,7 +140,7 @@ export default class ProxyCreator extends Component {
             value: `#!/bin/bash
             yum install squid wget httpd-tools openssl openssl-devel -y &&
             touch /etc/squid/passwd &&
-            htpasswd -b /etc/squid/passwd admin photon123 &&
+            htpasswd -b /etc/squid/passwd ${this.state.proxyUser} ${this.state.proxyPassword} &&
             wget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&
             touch /etc/squid/blacklist.acl &&
             systemctl restart squid.service && systemctl enable squid.service &&
@@ -213,13 +150,23 @@ export default class ProxyCreator extends Component {
         ]
       }
     };
-    const vm = zone.vm(this.state.instanceName);
+    const vm = zone.vm(`${this.state.instanceName}-${index + 1}`);
     const [, operation] = await vm.create(config);
     await operation.promise();
     const [metadata] = await vm.getMetadata();
     const ip = metadata.networkInterfaces[0].accessConfigs[0].natIP;
-    await this.pingVM(ip);
+    await this.pingVM(ip, vm, `${this.state.instanceName}-${index + 1}`);
     console.log(`created succesfully`);
+  };
+
+  updateMachineTypes = () => {
+    this.compute.getMachineTypes({ filter: `zone eq ${this.state.region}` }, (err, machineTypes) => {
+      if (err) {
+        return err;
+      }
+      const machineTypesArray = machineTypes.map(elem => elem.id);
+      this.setState({ machineTypes: machineTypesArray, machine: machineTypesArray[0] });
+    });
   };
 
   returnRegions = array => {
@@ -276,7 +223,14 @@ export default class ProxyCreator extends Component {
             </Col>
             <Col xs="2">
               <label>quantity</label>
-              <Input type="select">
+              <Input
+                type="select"
+                name="quantity"
+                value={this.state.quantity}
+                onChange={e => {
+                  this.handleChange(e);
+                }}
+              >
                 <option>1</option>
                 <option>2</option>
                 <option>3</option>
@@ -289,31 +243,34 @@ export default class ProxyCreator extends Component {
                 <option>10</option>
               </Input>
             </Col>
-            <Col xs="4">
-              <label>instance type</label>
+            <Col xs="3">
+              <label>region</label>
               <Input
                 name="region"
+                onChange={e => {
+                  this.handleChange(e);
+                  this.updateMachineTypes(e.target.value);
+                }}
+                type="select"
+              >
+                {this.returnRegions(this.state.cloudRegions)}
+              </Input>
+            </Col>
+            <Col xs="3">
+              <label>machine</label>
+              <Input
+                name="machine"
                 onChange={e => {
                   this.handleChange(e);
                 }}
                 type="select"
               >
-                {this.returnRegions(this.state.googleCloudRegions)}
+                {this.returnRegions(this.state.machineTypes)}
               </Input>
-            </Col>
-            <Col xs="2" className="d-flex flex-column justify-content-end">
-              <Button
-                onClick={() => {
-                  this.createInstance(this.state.cloud);
-                }}
-                className="nButton"
-              >
-                create
-              </Button>
             </Col>
           </FormGroup>
           <FormGroup row>
-            <Col xs="4">
+            <Col xs="3">
               <label>proxy username</label>
               <Input
                 name="proxyUser"
@@ -323,7 +280,7 @@ export default class ProxyCreator extends Component {
                 }}
               />
             </Col>
-            <Col xs="4">
+            <Col xs="3">
               <label>proxy password</label>
               <Input
                 name="proxyPassword"
@@ -333,7 +290,7 @@ export default class ProxyCreator extends Component {
                 }}
               />
             </Col>
-            <Col xs="4">
+            <Col xs="3">
               <label>website</label>
               <Input
                 name="website"
@@ -342,6 +299,16 @@ export default class ProxyCreator extends Component {
                   this.handleChange(e);
                 }}
               />
+            </Col>
+            <Col xs="3" className="d-flex flex-column justify-content-end">
+              <Button
+                onClick={() => {
+                  this.createInstance(this.state.cloud);
+                }}
+                className="nButton"
+              >
+                create
+              </Button>
             </Col>
           </FormGroup>
         </Container>
