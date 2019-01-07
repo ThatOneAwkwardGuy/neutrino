@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Row, Col, Button, Table, Container, Input, Label, FormGroup, Form } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
+import Countries from '../store/countries';
+const { clipboard } = require('electron');
 const TRANSLATIONS = [
   ['street', 'st.', 'st'],
   ['drive', 'dr.', 'dr'],
@@ -12,11 +14,13 @@ const TRANSLATIONS = [
   ['south', 's.', 's'],
   ['east', 'e.', 'e'],
   ['boulevard', 'blvd', 'blvd.'],
-  ['mountain', 'mtn.', 'mtn']
+  ['mountain', 'mtn.', 'mtn'],
+  ['road', 'rd', 'raod']
 ];
 export default class AddressJigger extends Component {
   constructor(props) {
     super(props);
+    this.countryNames = _.keys(Countries);
     this.state = {
       deliveryCountry: '',
       deliveryAddress: '',
@@ -25,7 +29,8 @@ export default class AddressJigger extends Component {
       deliveryZip: '',
       deliveryAptorSuite: '',
       numberOfAddresses: '1',
-      jiggedAddress: []
+      jiggedAddress: [],
+      regionArrayShipping: []
     };
   }
 
@@ -35,16 +40,37 @@ export default class AddressJigger extends Component {
     });
   };
 
+  returnCountry = (name, index) => <option key={`country-${index}`}>{name}</option>;
+
+  setRegionArrayShipping = countryName => {
+    this.setState({
+      regionArrayShipping: Countries[countryName].provinces
+    });
+    if (Countries[countryName].provinces !== null) {
+      this.setState(prevState => ({
+        formdata: {
+          ...prevState.formdata,
+          deliveryProvince: Countries[countryName].provinces[0]
+        }
+      }));
+    } else {
+      this.setState(prevState => ({
+        formdata: {
+          ...prevState.formdata,
+          deliveryProvince: ''
+        }
+      }));
+    }
+  };
+
   jigAddress = addressString => {
-    jigs = new Set([addressString]);
-    lines = addressString.split('\n');
-    parts = lines[0].split(' ');
-    console.log('Address Lines: ' + lines);
-    console.log('Address parts: ' + parts);
+    let jigs = new Set([addressString]);
+    let lines = addressString.split('\n');
+    let parts = lines[0].split(' ');
     for (var index = 0; index < parts.length; index++) {
-      part = parts[index];
+      let part = parts[index];
       TRANSLATIONS.forEach(entry => {
-        possibleJigs = [];
+        let possibleJigs = [];
         entry.forEach(val => {
           if (part.toLowerCase() === val) {
             entry.forEach(value => {
@@ -56,9 +82,9 @@ export default class AddressJigger extends Component {
         });
         possibleJigs.forEach(jig => {
           jigs.forEach(address => {
-            fullJig = '';
-            valueLines = address.split('\n');
-            valueParts = valueLines[0].split(' ');
+            let fullJig = '';
+            let valueLines = address.split('\n');
+            let valueParts = valueLines[0].split(' ');
             for (var i = 0; i < valueParts.length; i++) {
               fullJig += (i !== index ? valueParts[i] : jig) + ' ';
             }
@@ -74,14 +100,14 @@ export default class AddressJigger extends Component {
     if (parts.length >= 3) {
       jigs.forEach(address => {
         if (lines.length == 1 && !address.includes('\n')) {
-          addressParts = address.split(' ');
+          let addressParts = address.split(' ');
           for (var i = 2; i < addressParts.length; i++) {
             if (addressParts.length == 3) {
               if (addressParts[2].length < 3) {
                 continue;
               }
             }
-            splitAddress = '';
+            let splitAddress = '';
             for (var j = 0; j < i; j++) {
               splitAddress += addressParts[j] + ' ';
             }
@@ -97,13 +123,22 @@ export default class AddressJigger extends Component {
     return jigs;
   };
 
+  copyToClipboard = () => {
+    let string = '';
+    this.state.jiggedAddress.forEach(elem => {
+      string += `${elem}\n`;
+    });
+    clipboard.writeText(string, 'selection');
+  };
+
   generateAddresses = () => {
     const addressString = `${this.state.deliveryAddress} ${this.state.deliveryAptorSuite}
     ${this.state.deliveryCity}, ${this.state.deliveryProvince}
     ${this.state.deliveryZip}
     ${this.state.deliveryCountry}`;
 
-    const jigs = this.jigAddress(addressString);
+    const jigsSet = this.jigAddress(addressString);
+    const jigs = Array.from(jigsSet);
 
     if (jigs.length < parseInt(this.state.numberOfAddresses)) {
       this.setState({ jiggedAddress: jigs });
@@ -113,14 +148,20 @@ export default class AddressJigger extends Component {
   };
 
   returnJiggedAddresses = addressArray => {
-    return addressArray.map(elem => <Col>{elem}</Col>);
+    return addressArray.map(elem => (
+      <Col xs="3" style={{ padding: '25px', border: 'solid 5px #222222', background: '#2B4DF7' }}>
+        {elem}
+      </Col>
+    ));
   };
 
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
         <Container fluid className="activeWindow d-flex flex-column">
-          <Row className="flex-grow-1">{this.returnJiggedAddresses(this.state.jiggedAddress)}</Row>
+          <Row className="flex-grow-1" style={{ overflowX: 'scroll', padding: '25px', maxHeight: '75%' }}>
+            {this.returnJiggedAddresses(this.state.jiggedAddress)}
+          </Row>
           <FormGroup row>
             <Col xs="4">
               <Label for="store">address</Label>
@@ -134,7 +175,7 @@ export default class AddressJigger extends Component {
                 }}
               />
             </Col>
-            <Col xs="2">
+            <Col xs="1">
               <Label for="store">apt,suite</Label>
               <Input
                 type="text"
@@ -146,9 +187,7 @@ export default class AddressJigger extends Component {
                 }}
               />
             </Col>
-          </FormGroup>
-          <FormGroup row>
-            <Col xs="12">
+            <Col xs="2">
               <Label for="store">city</Label>
               <Input
                 type="text"
@@ -160,9 +199,7 @@ export default class AddressJigger extends Component {
                 }}
               />
             </Col>
-          </FormGroup>
-          <FormGroup row>
-            <Col xs="4">
+            <Col xs="2">
               <Label for="store">country</Label>
               <Input
                 type="select"
@@ -178,7 +215,7 @@ export default class AddressJigger extends Component {
                 {this.countryNames.map(this.returnCountry)}
               </Input>
             </Col>
-            <Col xs="4">
+            <Col xs="3">
               <Label for="store">region</Label>
               <Input
                 type="select"
@@ -189,17 +226,12 @@ export default class AddressJigger extends Component {
                   this.handleChange(event);
                 }}
               >
-                {/* {this.state.regionArrayShipping !== null && this.state.regionArrayShipping !== [] ? (
-                        this.state.deliveryProvince !== null && this.state.deliveryProvince !== '' ? (
-                          <option key="country-load">{this.state.deliveryProvince}</option>
-                        ) : (
-                          this.state.regionArrayShipping.map(this.returnCountry)
-                        )
-                      ) : null} */}
                 {this.state.regionArrayShipping !== null ? this.state.regionArrayShipping.map(this.returnCountry) : null}
               </Input>
             </Col>
-            <Col xs="4">
+          </FormGroup>
+          <FormGroup row>
+            <Col xs="2">
               <Label for="store">zip code</Label>
               <Input
                 type="text"
@@ -211,9 +243,7 @@ export default class AddressJigger extends Component {
                 }}
               />
             </Col>
-          </FormGroup>
-          <FormGroup row>
-            <Col xs="4">
+            <Col xs="2">
               <Label for="numberOfAddresses">number</Label>
               <Input
                 name="numberOfAddresses"
@@ -224,14 +254,24 @@ export default class AddressJigger extends Component {
                 type="number"
               />
             </Col>
-            <Col xs="4">
-              <Label for="numberOfAddresses">number</Label>
+            <Col xs="2" className="d-flex flex-row justify-content-end align-items-end">
               <Button
+                className="nButton"
                 onClick={() => {
                   this.generateAddresses();
                 }}
               >
                 generate
+              </Button>
+            </Col>
+            <Col xs="2" className="d-flex flex-row justify-content-end align-items-end">
+              <Button
+                className="nButton"
+                onClick={() => {
+                  this.copyToClipboard();
+                }}
+              >
+                copy
               </Button>
             </Col>
           </FormGroup>
