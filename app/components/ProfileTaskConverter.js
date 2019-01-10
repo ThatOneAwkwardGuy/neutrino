@@ -6,6 +6,7 @@ import FontAwesome from 'react-fontawesome';
 import Dropzone from 'react-dropzone';
 var fs = require('fs');
 const { dialog } = require('electron').remote;
+const csvtojsonV2 = require('csvtojson/v2');
 const profileTaskConversionOptions = ['CyberSole', 'ProjectDestroyer', 'EveAIO', 'TheKickStation'];
 const profileAttributeMaping = {
   profileID: 'profile name',
@@ -202,6 +203,11 @@ export default class ProfileTaskConverter extends Component {
     });
   };
 
+  csvToBase = csvJSON => {
+    const items = csvJSON;
+    this.appendProfile(items);
+  };
+
   cybersoleProfileToBase = file => {
     const items = [];
     for (const profile in file) {
@@ -382,22 +388,28 @@ export default class ProfileTaskConverter extends Component {
   };
 
   convertToBase = file => {
-    fs.readFile(file[0].path, 'utf-8', (err, data) => {
-      if (err) {
-        this.setState({
-          profileImportFailure: true
-        });
-        return;
-      }
-      const profileOBJ = JSON.parse(data);
-      switch (this.state.bot) {
-        case 'CyberSole':
-          this.cybersoleProfileToBase(profileOBJ);
-          break;
-        default:
-          break;
-      }
-    });
+    const fileExtention = file[0].path.split('.').pop();
+    if (fileExtention === 'json') {
+      fs.readFile(file[0].path, 'utf-8', (err, data) => {
+        if (err) {
+          this.setState({
+            profileImportFailure: true
+          });
+          return;
+        }
+        const profileOBJ = JSON.parse(data);
+        switch (this.state.bot) {
+          case 'CyberSole':
+            this.cybersoleProfileToBase(profileOBJ);
+            break;
+          default:
+            break;
+        }
+      });
+    } else if (fileExtention === 'csv') {
+      const csvJSON = await csvtojsonV2.fromFile(file[0].path);
+      this.csvToBase(csvJSON);
+    }
   };
 
   convertToBot = (botName, file) => {
@@ -470,7 +482,7 @@ export default class ProfileTaskConverter extends Component {
             <Row>
               <div className="col-10">
                 <Dropzone
-                  accept="application/json"
+                  accept="application/json, text/csv"
                   onDrop={accepted => {
                     this.convertToBase(accepted);
                   }}

@@ -50,6 +50,7 @@
     "cheerio": "^1.0.0-rc.2",
     "connected-react-router": "^6.0.0",
     "crypto-js": "^3.1.9-1",
+    "csvtojson": "^2.0.8",
     "do-wrapper": "^3.19.0",
     "electron-updater": "^4.0.6",
     "emotion": "^10.0.5",

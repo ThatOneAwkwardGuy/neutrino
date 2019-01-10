@@ -4,10 +4,10 @@ import { CSSTransition } from 'react-transition-group';
 import Countries from '../store/countries';
 const { clipboard } = require('electron');
 const TRANSLATIONS = [
-  ['street', 'st.', 'st'],
-  ['drive', 'dr.', 'dr'],
+  ['street', 'st.', 'st', 'streett', 'steet', 'sreet'],
+  ['drive', 'dr.', 'dr', 'drivee', 'driv', 'drv'],
   ['lane', 'ln.', 'ln'],
-  ['avenue', 'ave.', 'ave'],
+  ['avenue', 'ave.', 'ave', 'av', 'avene', 'avenu'],
   ['west', 'w.', 'w'],
   ['east', 'e.', 'e'],
   ['north', 'n.', 'n'],
@@ -15,8 +15,10 @@ const TRANSLATIONS = [
   ['east', 'e.', 'e'],
   ['boulevard', 'blvd', 'blvd.'],
   ['mountain', 'mtn.', 'mtn'],
-  ['road', 'rd', 'raod']
+  ['road', 'rd', 'raod', 'roaad', 'rooad'],
+  ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace']
 ];
+
 export default class AddressJigger extends Component {
   constructor(props) {
     super(props);
@@ -138,7 +140,13 @@ export default class AddressJigger extends Component {
     ${this.state.deliveryCountry}`;
 
     const jigsSet = this.jigAddress(addressString);
-    const jigs = Array.from(jigsSet);
+    const jigs = Array.from(jigsSet).forEach(text => {
+      text
+        .toLowerCase()
+        .split(' ')
+        .map(s => s.charAt(0).toUpperCase() + s.substring(1))
+        .join(' ');
+    });
 
     if (jigs.length < parseInt(this.state.numberOfAddresses)) {
       this.setState({ jiggedAddress: jigs });
