@@ -28,7 +28,7 @@ export default class Footer extends Component {
           </a>
         </Col>
         <Col xs="8" className="text-center footerCenterSection">
-          Copyright © 2018 Neutrino - All Rights Reserved
+          Copyright © 2019 Neutrino - All Rights Reserved
         </Col>
         <Col xs="2" className="text-right footerRightSection">
           <img style={{ maxWidth: '100px' }} src={Logo} className="ml-auto" />

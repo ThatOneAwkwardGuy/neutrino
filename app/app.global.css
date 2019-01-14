@@ -732,3 +732,8 @@ canvas {
   background: #222222;
   padding-top: 10px;
 }
+
+.alignBottomToggle {
+  position: absolute !important;
+  bottom: 0px;
+}

@@ -4,9 +4,11 @@ import { CSSTransition } from 'react-transition-group';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import FontAwesome from 'react-fontawesome';
 import Dropzone from 'react-dropzone';
-var fs = require('fs');
+const fs = require('fs');
 const { dialog } = require('electron').remote;
-const csvtojsonV2 = require('csvtojson/v2');
+const csvtojsonV2 = require('csvtojson');
+const csvToJson = require('convert-csv-to-json');
+const Papa = require('papaparse');
 const profileTaskConversionOptions = ['CyberSole', 'ProjectDestroyer', 'EveAIO', 'TheKickStation'];
 const profileAttributeMaping = {
   profileID: 'profile name',
@@ -139,7 +141,7 @@ export default class ProfileTaskConverter extends Component {
                   )}
                 </Droppable>
               </Row>
-              <Row className="draggableBoxSelectInput">
+              <Row className="draggableBoxSelectInput d-flex justify-content-center">
                 <Col xs="1" className="d-flex align-items-center justify-content-center draggableBoxBin">
                   <FontAwesome
                     name="trash"
@@ -387,7 +389,8 @@ export default class ProfileTaskConverter extends Component {
     ));
   };
 
-  convertToBase = file => {
+  convertToBase = async file => {
+    console.log(file);
     const fileExtention = file[0].path.split('.').pop();
     if (fileExtention === 'json') {
       fs.readFile(file[0].path, 'utf-8', (err, data) => {
@@ -407,8 +410,19 @@ export default class ProfileTaskConverter extends Component {
         }
       });
     } else if (fileExtention === 'csv') {
-      const csvJSON = await csvtojsonV2.fromFile(file[0].path);
-      this.csvToBase(csvJSON);
+      // const csvJSON = await csvtojsonV2().fromFile(file[0].path);
+      const json = csvToJson.fieldDelimiter(',').getJsonFromCsv(file[0].path);
+      this.csvToBase(json);
+
+      // Papa.parse(new File([''], file[0].path), {
+      //   header: true,
+      //   delimiter: ',',
+      //   complete: (result, file) => {
+      //     console.log(result);
+      //     console.log(file);
+      //     this.csvToBase(result);
+      //   }
+      // });
     }
   };
 
