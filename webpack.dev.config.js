@@ -58,9 +58,6 @@ const appConfig = {
   node: {
     __dirname: true
   },
-  devServer: {
-    hot: true
-  },
   module: {
     rules: [
       {
