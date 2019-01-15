@@ -6,6 +6,7 @@ const randomEmail = require('random-email');
 const randomize = require('randomatic');
 const request = require('request-promise');
 const random = require('random-name');
+var tough = require('tough-cookie');
 
 const sites = {
   undefeated: 'https://undefeated.com',
@@ -29,36 +30,8 @@ export default class AccountCreator extends Component {
       firstName: '',
       lastName: ''
     };
-    // fetch('https://undefeated.com/account', {
-    //   credentials: 'include',
-    //   headers: {
-    //     accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    //     'accept-language': 'en-US,en;q=0.9',
-    //     'cache-control': 'no-cache',
-    //     'content-type': 'application/x-www-form-urlencoded',
-    //     pragma: 'no-cache',
-    //     'upgrade-insecure-requests': '1'
-    //   },
-    //   referrer: 'https://undefeated.com/account/login',
-    //   referrerPolicy: 'no-referrer-when-downgrade',
-    //   body:
-    //     'form_type=create_customer&utf8=%E2%9C%93&customer%5Bfirst_name%5D=Moyo&customer%5Blast_name%5D=George&customer%5Bemail%5D=dadux%40youmails.online&customer%5Bpassword%5D=asdasdasd',
-    //   method: 'POST',
-    //   mode: 'cors'
-    // });
 
-    this.rp = request.defaults({
-      headers: {
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        'content-type': 'application/x-www-form-urlencoded',
-        pragma: 'no-cache',
-        referrer: 'https://undefeated.com/account/login',
-        'upgrade-insecure-requests': '1',
-        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
-      }
-    });
+    this.rp = request;
   }
 
   returnOptions = (optionsArray, name) => {
@@ -89,44 +62,32 @@ export default class AccountCreator extends Component {
     const pass = this.state.randomPassword ? randomize('a', 10) : this.state.password;
     const firstName = this.state.randomFirstLast ? random.first() : this.state.firstName;
     const lastName = this.state.randomFirstLast ? random.last() : this.state.lastName;
-    let cookieJar = request.jar();
-    const payload = {
-      form_type: 'create_customer',
-      utf8: '✓',
-      'customer[first_name]': firstName,
-      'customer[last_name]': lastName,
-      'customer[email]': 'dadux@youmails.online',
-      'customer[password]': pass
-    };
 
-    const payloadString = `form_type=create_customer&utf8=%E2%9C%93&customer%5Bfirst_name%5D=${firstName}&customer%5Blast_name%5D=${lastName}&customer%5Bemail%5D=${email.replace(
-      '@',
-      '%40'
-    )}&customer%5Bpassword%5D=${pass}`;
+    const payload = {
+      form_type: ' create_customer',
+      utf8: ' ✓',
+      'customer[first_name]': 'Moyo',
+      'customer[last_name]': 'George',
+      'customer[email]': 'xtremexx_11@hotmail.com1',
+      'customer[password]': 'test',
+      undefined: undefined
+    };
 
     console.log(payload);
 
     try {
-      const response1 = await this.rp({
-        method: 'GET',
-        uri: `${sites[this.state.site]}/account`,
-        proxy: this.state.proxies ? this.getRandomProxy() : '',
-        followAllRedirects: true,
-        resolveWithFullResponse: true,
-        cookie: cookieJar
-      });
-      console.log(response1);
-
-      const response2 = await this.rp({
-        proxy: this.state.proxies ? this.getRandomProxy() : '',
+      const response = await this.rp({
         method: 'POST',
-        uri: `${sites[this.state.site]}/account`,
-        form: payload,
-        followAllRedirects: true,
-        resolveWithFullResponse: true,
-        cookie: cookieJar
+        url: 'https://undefeated.com/account',
+        followRedirect: true,
+        jar: true,
+        headers: {
+          'cache-control': 'no-cache',
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+        },
+        form: payload
       });
-      console.log(response2);
+      console.log(response);
     } catch (error) {
       console.log(error);
     }
