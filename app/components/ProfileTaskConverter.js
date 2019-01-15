@@ -387,7 +387,7 @@ export default class ProfileTaskConverter extends Component {
     ));
   };
 
-  convertToBase = file => {
+  convertToBase = async file => {
     const fileExtention = file[0].path.split('.').pop();
     if (fileExtention === 'json') {
       fs.readFile(file[0].path, 'utf-8', (err, data) => {
