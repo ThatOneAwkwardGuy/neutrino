@@ -13,7 +13,7 @@ const componentToNameMapping = {
   AccountCreator: 'account creator',
   AddressJigger: 'address jigger',
   ProfileTaskConverter: 'profile/task converter',
-  RaffleBot: 'raffles',
+  // RaffleBot: 'raffles',
   Settings: 'settings'
 };
 

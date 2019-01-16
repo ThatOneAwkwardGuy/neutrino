@@ -6,13 +6,20 @@ const randomEmail = require('random-email');
 const randomize = require('randomatic');
 const request = require('request-promise');
 const random = require('random-name');
-var tough = require('tough-cookie');
+const { clipboard } = require('electron');
 
 const sites = {
-  undefeated: 'https://undefeated.com',
-  xhibition: 'https://www.xhibition.co',
+  // undefeated: 'https://undefeated.com',
+  // xhibition: 'https://www.xhibition.co',
   cncpts: 'https://cncpts.com',
   bdgastore: 'https://bdgastore.com'
+};
+
+const captcha = {
+  undefeated: true,
+  xhibition: true,
+  cncpts: false,
+  bdgastore: false
 };
 
 export default class AccountCreator extends Component {
@@ -31,18 +38,22 @@ export default class AccountCreator extends Component {
       lastName: ''
     };
 
-    this.rp = request;
+    this.rp = request.defaults({
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+      }
+    });
   }
 
   returnOptions = (optionsArray, name) => {
     return optionsArray.map((elem, index) => <option key={`option-${name}-${index}`}>{elem}</option>);
   };
 
-  returnAccountRow = (optionsArray, index) => (
+  returnAccountRow = (account, index) => (
     <tr key={`account-${index}`}>
-      <td>test</td>
-      <td>test</td>
-      <td>test</td>
+      <td>{index + 1}</td>
+      <td>{account.email}</td>
+      <td>{account.pass}</td>
     </tr>
   );
 
@@ -66,28 +77,38 @@ export default class AccountCreator extends Component {
     const payload = {
       form_type: ' create_customer',
       utf8: ' ✓',
-      'customer[first_name]': 'Moyo',
-      'customer[last_name]': 'George',
-      'customer[email]': 'xtremexx_11@hotmail.com1',
-      'customer[password]': 'test',
-      undefined: undefined
+      'customer[first_name]': firstName,
+      'customer[last_name]': lastName,
+      'customer[email]': email,
+      'customer[password]': pass
     };
-
-    console.log(payload);
 
     try {
       const response = await this.rp({
         method: 'POST',
-        url: 'https://undefeated.com/account',
+        url: `${sites[this.state.site]}/account`,
         followRedirect: true,
         jar: true,
+        proxy: this.state.useProxies ? this.getRandomProxy() : '',
+        followAllRedirects: true,
         headers: {
           'cache-control': 'no-cache',
           'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
         },
         form: payload
       });
-      console.log(response);
+      if (captcha[this.state.site]) {
+      } else {
+        this.setState({
+          createdAccount: [
+            ...this.state.createdAccount,
+            {
+              email: email,
+              pass: pass
+            }
+          ]
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -95,10 +116,18 @@ export default class AccountCreator extends Component {
 
   start = async () => {
     if (Object.keys(sites).includes(this.state.site)) {
-      for (let i = 0; i < this.state.quantity; i++) {
+      for (let i = 0; i < parseInt(this.state.quantity); i++) {
         await this.createShopifyAccount();
       }
     }
+  };
+
+  copyToClipboard = () => {
+    let string = '';
+    this.state.createdAccount.forEach(elem => {
+      string += `${elem.email} ${elem.pass}\n`;
+    });
+    clipboard.writeText(string, 'selection');
   };
 
   render() {
@@ -106,8 +135,8 @@ export default class AccountCreator extends Component {
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
         <Col className="activeWindow">
           <Container fluid className="d-flex flex-column">
-            <Row className="d-flex flex-grow-1">
-              <Col xs="12">
+            <Row className="d-flex flex-grow-1" style={{ maxHeight: '100%' }}>
+              <Col xs="12" style={{ overflowY: 'scroll', marginBottom: '30px' }}>
                 <Table responsive hover className="text-center">
                   <thead>
                     <tr>
@@ -194,13 +223,22 @@ export default class AccountCreator extends Component {
                   }}
                 />
               </Col>
-              <Col xs="2">
+              <Col xs="1">
                 <Button
                   onClick={() => {
                     this.start();
                   }}
                 >
                   Start
+                </Button>
+              </Col>
+              <Col xs="1">
+                <Button
+                  onClick={() => {
+                    this.copyToClipboard();
+                  }}
+                >
+                  copy
                 </Button>
               </Col>
             </Row>

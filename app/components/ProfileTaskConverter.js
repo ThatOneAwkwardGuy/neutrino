@@ -247,6 +247,34 @@ export default class ProfileTaskConverter extends Component {
     this.appendProfile(items);
   };
 
+  cybersoleTaskToBase = file => {
+    const items = [];
+    for (const task in file) {
+      items.push({
+        store: file[task].store,
+        mode: 'url',
+        modeInput: '',
+        keywords: '',
+        proxy: '',
+        size: Sizes['Shoes(UK/US)'][0],
+        quantity: '1',
+        profile: this.profileNames[0],
+        tasks: '1',
+        color: '',
+        keywordColor: '',
+        category: 'Accessories',
+        scheduledTime: '',
+        atcBypass: false,
+        captchaBypass: false,
+        monitorDelay: '',
+        checkoutDelay: '',
+        username: '',
+        password: ''
+      });
+    }
+    this.appendProfile(items);
+  };
+
   baseProfileToCybersole = file => {
     let items = {};
     for (const profile of file) {
