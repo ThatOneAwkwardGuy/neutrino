@@ -8,12 +8,12 @@ require('firebase/firestore').default;
 global.XMLHttpRequest = require('xmlhttprequest').XMLHttpRequest;
 
 const prodConfig = {
-  apiKey: 'AIzaSyBIhzR3KT792-UJBRNgd2wmM9exbZsZh3I',
-  authDomain: 'photon-bot.firebaseapp.com',
-  databaseURL: 'https://photon-bot.firebaseio.com',
-  projectId: 'photon-bot',
-  storageBucket: 'photon-bot.appspot.com',
-  messagingSenderId: '518062381695'
+  apiKey: "AIzaSyDlzPKlXXaSbLAibvNXjVUWfi90n2paZ9U",
+  authDomain: "neutrino-tools.firebaseapp.com",
+  databaseURL: "https://neutrino-tools.firebaseio.com",
+  projectId: "neutrino-tools",
+  storageBucket: "neutrino-tools.appspot.com",
+  messagingSenderId: "683216035842"
 };
 
 // const devConfig = {

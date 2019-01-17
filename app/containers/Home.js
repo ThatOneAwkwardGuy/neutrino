@@ -17,7 +17,7 @@ class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      activeWindow: 'AccountCreator'
+      activeWindow: 'ProfileTaskConverter'
     };
   }
 
