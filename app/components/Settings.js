@@ -63,7 +63,7 @@ export default class Settings extends Component {
           <Form>
             <FormGroup row>
               <Col xs="4">
-                <label>Google Cloud Credentials</label>
+                <label>Google Cloud Credentials File (json)</label>
                 <Button
                   style={{ display: 'block' }}
                   className="nButton"

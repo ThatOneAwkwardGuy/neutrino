@@ -6,10 +6,8 @@ import FontAwesome from 'react-fontawesome';
 import Dropzone from 'react-dropzone';
 const fs = require('fs');
 const { dialog } = require('electron').remote;
-const csvtojsonV2 = require('csvtojson');
 const csvToJson = require('convert-csv-to-json');
-const Papa = require('papaparse');
-const profileTaskConversionOptions = ['CyberSole', 'ProjectDestroyer', 'EveAIO', 'TheKickStation'];
+const profileTaskConversionOptions = ['CyberSole', 'Photon'];
 const profileAttributeMaping = {
   profileID: 'profile name',
   deliveryCountry: 'delivery country',
@@ -36,7 +34,10 @@ const profileAttributeMaping = {
   paymentCardExpiryYear: 'card exp year',
   paymentCVV: 'cvv',
   deliveryAptorSuite: 'delivery apt/suite',
-  billingAptorSuite: 'billing apt/suite'
+  billingAptorSuite: 'billing apt/suite',
+  keywords: 'keywords',
+  proxy: 'proxy',
+  quantity: 'quantity'
 };
 export default class ProfileTaskConverter extends Component {
   constructor(props) {
@@ -248,31 +249,27 @@ export default class ProfileTaskConverter extends Component {
   };
 
   cybersoleTaskToBase = file => {
+    const tasks = file.tasks;
     const items = [];
-    for (const task in file) {
+    for (const task in tasks) {
       items.push({
-        store: file[task].store,
-        mode: 'url',
-        modeInput: '',
-        keywords: '',
-        proxy: '',
-        size: Sizes['Shoes(UK/US)'][0],
-        quantity: '1',
-        profile: this.profileNames[0],
-        tasks: '1',
-        color: '',
-        keywordColor: '',
-        category: 'Accessories',
-        scheduledTime: '',
-        atcBypass: false,
-        captchaBypass: false,
-        monitorDelay: '',
-        checkoutDelay: '',
-        username: '',
-        password: ''
+        store: tasks[task].store,
+        size: tasks[task].size,
+        custom_url: tasks[task].custom_url,
+        profileID: tasks[task].profile,
+        afk: tasks[task].afk,
+        proxy: tasks[task].proxy,
+        keywords: tasks[task].keywords,
+        cyber_shopify_store_password: '',
+        cyber_login: tasks[task].login,
+        cyber_supreme: tasks[task].supreme,
+        cyber_bank_transfer: tasks[task].bank_transfer,
+        cyber_pay_on_delivery: tasks[task].pay_on_delivery,
+        id: tasks[task].id
       });
     }
-    this.appendProfile(items);
+    console.log(items);
+    this.appendTask(items);
   };
 
   baseProfileToCybersole = file => {
@@ -317,7 +314,71 @@ export default class ProfileTaskConverter extends Component {
         favourite: false
       };
     }
-    this.saveToFile('CyberSole', 'json', items);
+    this.saveToFile('CyberSole-Profiles', 'json', items);
+  };
+
+  baseProfileToPhoton = file => {
+    let items = {};
+    for (const profile of file) {
+      items[profile.profileID] = {
+        profileID: profile.profileID,
+        deliveryCountry: profile.deliveryCountry,
+        deliveryAddress: profile.deliveryAddress,
+        deliveryCity: profile.deliveryCity,
+        deliveryFirstName: profile.deliveryFirstName,
+        deliveryLastName: profile.deliveryLastName,
+        deliveryProvince: profile.deliveryProvince,
+        deliveryZip: profile.deliveryZip,
+        deliveryAptorSuite: profile.deliveryAptorSuite,
+        billingZip: profile.billingZip,
+        billingCountry: profile.billingCountry,
+        billingAddress: profile.billingAddress,
+        billingCity: profile.billingCity,
+        billingFirstName: profile.billingFirstName,
+        billingLastName: profile.billingLastName,
+        billingProvince: profile.billingProvince,
+        billingAptorSuite: profile.billingAptorSuite,
+        phoneNumber: profile.phoneNumber,
+        paymentEmail: profile.paymentEmail,
+        paymentCardholdersName: profile.paymentCardholdersName,
+        paymentCardnumber: profile.paymentCardnumber,
+        paymentCardExpiryMonth: profile.paymentCardExpiryMonth,
+        paymentCardExpiryYear: profile.paymentCardExpiryYear,
+        paymentCVV: profile.paymentCVV
+      };
+    }
+    this.saveToFile('Photon-Profiles', 'json', items);
+  };
+
+  baseTaskToPhoton = file => {
+    let items = [];
+    for (const task of file) {
+      items.push({
+        task: {
+          store: task.store !== undefined ? task.store : '',
+          mode: task.mode !== undefined ? task.mode : '',
+          modeInput: task.modeInput !== undefined ? task.modeInput : '',
+          keywords: task.keywords !== undefined ? task.keywords : '',
+          proxy: task.proxy !== undefined ? task.proxy : '',
+          quantity: task.quantity !== undefined ? task.quantity : '',
+          tasks: task.tasks !== undefined ? task.tasks : '',
+          color: task.color !== undefined ? task.color : '',
+          category: task.category !== undefined ? task.category : '',
+          size: '',
+          profile: '',
+          keywordColor: '',
+          scheduledTime: '',
+          atcBypass: false,
+          captchaBypass: false,
+          monitorDelay: '',
+          checkoutDelay: '',
+          username: '',
+          password: ''
+        },
+        profileID: ''
+      });
+    }
+    this.saveToFile('Photon-Taskss', 'json', { tasks: items });
   };
 
   saveToFile = (name, extension, file) => {
@@ -358,6 +419,15 @@ export default class ProfileTaskConverter extends Component {
     });
   };
 
+  appendTask = tasksArray => {
+    this.setState({
+      draggableBoxes: {
+        ...this.state.draggableBoxes,
+        tasks: [...this.state.draggableBoxes.tasks, { items: tasksArray, from: this.state.bot, to: this.state.bot }]
+      }
+    });
+  };
+
   toggleModal = () => {
     this.setState({
       editModal: !this.state.editModal
@@ -380,8 +450,8 @@ export default class ProfileTaskConverter extends Component {
   returnDraggableListUsingArray = (listArray, name, listIndex, provided, snapshot) => {
     return listArray.items.map((item, index) => (
       <Draggable
-        key={`${name}-draggableListItem-${listIndex}-${item.profileID}-${index}`}
-        draggableId={`${name}-draggableListItem-${listIndex}-${item.profileID}-${index}`}
+        key={`${name}-draggableListItem-${listIndex}-${this.state.mode === 'profiles' ? item.profileID : item.id}-${index}`}
+        draggableId={`${name}-draggableListItem-${listIndex}-${this.state.mode === 'profiles' ? item.profileID : item.id}-${index}`}
         index={index}
       >
         {(provided, snapshot) => (
@@ -389,7 +459,7 @@ export default class ProfileTaskConverter extends Component {
             <Container fluid>
               <Row style={{ backgroundColor: '#1A36C4' }}>
                 <Col xs="8" style={{ padding: '10px' }}>
-                  {item.profileID}
+                  {this.state.mode === 'profiles' ? item.profileID : `Task - ${item.id}`}
                 </Col>
                 <Col xs="2" className="text-center">
                   <FontAwesome
@@ -418,7 +488,6 @@ export default class ProfileTaskConverter extends Component {
   };
 
   convertToBase = async file => {
-    console.log(file);
     const fileExtention = file[0].path.split('.').pop();
     if (fileExtention === 'json') {
       fs.readFile(file[0].path, 'utf-8', (err, data) => {
@@ -429,38 +498,52 @@ export default class ProfileTaskConverter extends Component {
           return;
         }
         const profileOBJ = JSON.parse(data);
-        switch (this.state.bot) {
-          case 'CyberSole':
-            this.cybersoleProfileToBase(profileOBJ);
-            break;
-          default:
-            break;
+        console.log(profileOBJ);
+        if (this.state.mode === 'profiles') {
+          switch (this.state.bot) {
+            case 'CyberSole':
+              this.cybersoleProfileToBase(profileOBJ);
+              break;
+            default:
+              break;
+          }
+        } else if (this.state.mode === 'tasks') {
+          switch (this.state.bot) {
+            case 'CyberSole':
+              this.cybersoleTaskToBase(profileOBJ);
+              break;
+            default:
+              break;
+          }
         }
       });
     } else if (fileExtention === 'csv') {
-      // const csvJSON = await csvtojsonV2().fromFile(file[0].path);
       const json = csvToJson.fieldDelimiter(',').getJsonFromCsv(file[0].path);
       this.csvToBase(json);
-
-      // Papa.parse(new File([''], file[0].path), {
-      //   header: true,
-      //   delimiter: ',',
-      //   complete: (result, file) => {
-      //     console.log(result);
-      //     console.log(file);
-      //     this.csvToBase(result);
-      //   }
-      // });
     }
   };
 
   convertToBot = (botName, file) => {
-    switch (botName) {
-      case 'CyberSole':
-        this.baseProfileToCybersole(file);
-        break;
-      default:
-        break;
+    if (this.state.mode == 'profiles') {
+      switch (botName) {
+        case 'CyberSole':
+          this.baseProfileToCybersole(file);
+          break;
+        case 'Photon':
+          this.baseProfileToPhoton(file);
+        default:
+          break;
+      }
+    } else if (this.state.mode === 'tasks') {
+      switch (botName) {
+        case 'CyberSole':
+          this.baseProfileToCybersole(file);
+          break;
+        case 'Photon':
+          this.baseTaskToPhoton(file);
+        default:
+          break;
+      }
     }
   };
 

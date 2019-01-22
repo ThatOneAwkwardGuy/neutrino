@@ -9,10 +9,119 @@ const random = require('random-name');
 const { clipboard } = require('electron');
 
 const sites = {
-  // undefeated: 'https://undefeated.com',
-  // xhibition: 'https://www.xhibition.co',
   cncpts: 'https://cncpts.com',
-  bdgastore: 'https://bdgastore.com'
+  bdgastore: 'https://bdgastore.com',
+  '12amrun': 'https://www.12amrun.com',
+  '18montrose': 'https://18montrose.com',
+  'a-ma-maniere': 'https://www.a-ma-maniere.com',
+  'above the clouds': 'https://www.abovethecloudsstore.com',
+  addictmiami: 'https://www.addictmiami.com',
+  'a life new york': 'https://alifenewyork.com',
+  'amigo skate shop': 'https://amigoskateshop.com',
+  'amongst few': 'https://www.amongstfew.com',
+  apbstore: 'https://www.apbstore.com',
+  antisocialsocialclub: 'https://www.antisocialsocialclub.com',
+  atmosny: 'https://atmosny.com',
+  'bape-us': 'https://us.bape.com',
+  bbbranded: 'https://www.bbbranded.com',
+  'bbcicecream-us': 'https://www.bbcicecream.com',
+  'bbcicecream-eu': 'https://bbcicecream.eu',
+  blacksheepskateshop: 'https://blacksheepskateshop.com',
+  blkmkt: 'https://www.blkmkt.us',
+  blendsus: 'https://www.blendsus.com',
+  bdgastore: 'https://bdgastore.com',
+  bowsandarrowsberkeley: 'https://www.bowsandarrowsberkeley.com',
+  beatniconline: 'https://beatniconline.com',
+  'the canteen': 'https://canteen.theberrics.com',
+  capsuletoronto: 'https://www.capsuletoronto.com',
+  centre214: 'https://centre214.com',
+  cityblueshop: 'https://www.cityblueshop.com',
+  commonwealth: 'https://commonwealth-ftgg.com',
+  cncpts: 'https://cncpts.com',
+  concrete: 'https://concrete.nl',
+  thedarksideinitiative: 'https://www.thedarksideinitiative.com',
+  deadstock: 'https://www.deadstock.ca',
+  defcongroup: 'https://defcongroup.com',
+  diamondsupplyco: 'https://www.diamondsupplyco.com',
+  doomsday: 'https://doomsday-store.com',
+  'dope-factory': 'https://www.dope-factory.com',
+  exclucitylife: 'https://shop.exclucitylife.com',
+  extrabutterny: 'https://shop.extrabutterny.com',
+  fearofgod: 'https://fearofgod.com',
+  featuresneakerboutique: 'https://www.featuresneakerboutique.com',
+  ficegallery: 'https://www.ficegallery.com',
+  flatspot: 'https://www.flatspot.com',
+  freshragsfl: 'https://freshragsfl.com',
+  funkoshop: 'https://www.funko-shop.com',
+  ghostlifestyle: 'https://www.ghostlifestyle.com',
+  hanon: 'https://www.hanon-shop.com',
+  havenshop: 'https://havenshop.com',
+  highsandlows: 'https://www.highsandlows.net.au',
+  justdon: 'https://justdon.com',
+  kith: 'https://kith.com',
+  kongonline: 'https://www.kongonline.co.uk',
+  kyliecosmetics: 'https://www.kyliecosmetics.com',
+  laceupnyc: 'https://laceupnyc.com',
+  lapstoneandhammer: 'https://www.lapstoneandhammer.com',
+  toytokyo: 'https://launch.toytokyo.com',
+  leaders1354: 'https://www.leaders1354.com',
+  machusonline: 'https://www.machusonline.com',
+  manorphx: 'https://www.manorphx.com',
+  menuskateshop: 'https://menuskateshop.com',
+  minishopmadrid: 'https://www.minishopmadrid.com',
+  mondotees: 'https://mondotees.com',
+  nocturnalskateshop: 'https://www.nocturnalskateshop.com',
+  noirfonce: 'https://www.noirfonce.eu',
+  notre: 'https://www.notre-shop.com',
+  nrml: 'https://nrml.ca',
+  'octobersveryown-us': 'https://us.octobersveryown.com',
+  'octobersveryown-ca': 'https://ca.octobersveryown.com',
+  'octobersveryown-uk': 'https://uk.octobersveryown.com',
+  offthehook: 'https://offthehook.ca',
+  oipolloi: 'https://www.oipolloi.com',
+  oneness287: 'https://www.oneness287.com',
+  over9000: 'https://over9000.com',
+  oqium: 'https://oqium.com',
+  packershoes: 'https://packershoes.com',
+  'palace-uk': 'https://shop.palaceskateboards.com',
+  'palace-us': 'https://shop-usa.palaceskateboards.com',
+  pampamlondon: 'https://www.pampamlondon.com',
+  'par5 milano': 'https://par5-milano-yeezy.com',
+  philipbrownemenswear: 'https://www.philipbrownemenswear.co.uk',
+  properlbc: 'https://properlbc.com',
+  publicschoolnyc: 'https://publicschoolnyc.com',
+  reigningchamp: 'https://reigningchamp.com',
+  renarts: 'https://renarts.com',
+  rimenyc: 'https://www.rimenyc.com',
+  rise45: 'https://rise45.com',
+  rockcitykicks: 'https://rockcitykicks.com',
+  rooneyshop: 'https://www.rooneyshop.com',
+  rooted: 'https://stay-rooted.com',
+  rsvpgallery: 'https://rsvpgallery.com',
+  saintalfred: 'https://www.saintalfred.com',
+  shoegallerymiami: 'https://shoegallerymiami.com',
+  unionjordan: 'https://secure.unionjordan.com',
+  shopnicekicks: 'https://shopnicekicks.com',
+  sneakerpolitics: 'https://sneakerpolitics.com',
+  sneakerworldshop: 'https://sneakerworldshop.com',
+  socialstatuspgh: 'https://www.socialstatuspgh.com',
+  soleclassics: 'https://soleclassics.com',
+  solefly: 'https://www.solefly.com',
+  solestop: 'https://www.solestop.com',
+  sotostore: 'https://www.sotostore.com',
+  'suede-store': 'https://suede-store.com',
+  super7: 'https://super7.com',
+  sukamii: 'https://www.sukamii.com',
+  swanstreet: 'https://swanstreet.la',
+  thepremierstore: 'https://thepremierstore.com',
+  trophyroomstore: 'https://www.trophyroomstore.com',
+  undefeated: 'https://undefeated.com',
+  unknwn: 'https://www.unknwn.com',
+  urbanindustry: 'https://www.urbanindustry.co.uk',
+  westnyc: 'https://www.westnyc.com',
+  wishatl: 'https://wishatl.com',
+  worldofhombre: 'https://www.worldofhombre.com',
+  xhibition: 'https://www.xhibition.co'
 };
 
 const captcha = {
@@ -31,7 +140,7 @@ export default class AccountCreator extends Component {
       useProxies: false,
       createdAccount: [],
       site: Object.keys(sites)[0],
-      quantity: '',
+      quantity: '1',
       catchall: '',
       password: '',
       firstName: '',
@@ -158,6 +267,7 @@ export default class AccountCreator extends Component {
                   onChange={e => {
                     this.handleChange(e);
                   }}
+                  value={this.state.site}
                 >
                   {this.returnOptions(Object.keys(sites), 'sites')}
                 </Input>
@@ -168,6 +278,7 @@ export default class AccountCreator extends Component {
                   onChange={e => {
                     this.handleChange(e);
                   }}
+                  value={this.state.quantity}
                   name="quantity"
                   type="number"
                 />
@@ -178,6 +289,7 @@ export default class AccountCreator extends Component {
                   onChange={e => {
                     this.handleChange(e);
                   }}
+                  value={this.state.catchall}
                   name="catchall"
                   type="text"
                   placeholder="example.com"
@@ -189,6 +301,7 @@ export default class AccountCreator extends Component {
                   onChange={e => {
                     this.handleChange(e);
                   }}
+                  value={this.state.password}
                   name="password"
                   type="password"
                 />

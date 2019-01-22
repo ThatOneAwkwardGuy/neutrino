@@ -97,7 +97,6 @@ export default class ProxyCreator extends Component {
       uri: `https://api.vultr.com/v1/plans/list`,
       json: true
     });
-    console.log(plans);
 
     const regionsArray = [];
     const plansArray = [];
@@ -508,9 +507,10 @@ export default class ProxyCreator extends Component {
                   this.handleChange(e);
                   this.intializeCloudLibrary(e.target.value);
                 }}
+                defaultValue="select a provider"
               >
-                <option />
-                <option>Amazon AWS</option>
+                <option disabled>select a provider</option>
+                {/* <option>Amazon AWS</option> */}
                 <option>Google Cloud</option>
                 <option>Vultr</option>
                 <option>DigitalOcean</option>

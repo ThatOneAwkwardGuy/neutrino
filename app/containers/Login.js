@@ -49,9 +49,10 @@ class Login extends Component {
   }
 
   checkLoggedIn = async () => {
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV !== 'development') {
       await auth.authorise.onAuthStateChanged(async user => {
         if (user !== null) {
+          console.log(user);
           this.setState({
             currentlyLoggingIn: true
           });
@@ -91,10 +92,11 @@ class Login extends Component {
     return (
       <div>
         {/* <Particles
+          className="frontPageParticles"
           params={{
             particles: {
               number: {
-                value: 5,
+                value: 80,
                 density: {
                   enable: true,
                   value_area: 800
@@ -104,19 +106,27 @@ class Login extends Component {
                 value: '#ffffff'
               },
               shape: {
-                type: 'edge',
+                type: 'circle',
                 stroke: {
                   width: 0,
                   color: '#000000'
+                },
+                polygon: {
+                  nb_sides: 5
+                },
+                image: {
+                  src: 'img/github.svg',
+                  width: 100,
+                  height: 100
                 }
               },
               opacity: {
-                value: 1,
-                random: true,
+                value: 0.5,
+                random: false,
                 anim: {
-                  enable: true,
+                  enable: false,
                   speed: 1,
-                  opacity_min: 0,
+                  opacity_min: 0.1,
                   sync: false
                 }
               },
@@ -125,59 +135,30 @@ class Login extends Component {
                 random: true,
                 anim: {
                   enable: false,
-                  speed: 4,
-                  size_min: 0.3,
+                  speed: 40,
+                  size_min: 0.1,
                   sync: false
                 }
               },
               line_linked: {
-                enable: false
+                enable: true,
+                distance: 150,
+                color: '#2745fb',
+                opacity: 0.9,
+                width: 1
               },
               move: {
                 enable: true,
-                speed: 30,
-                direction: 'top',
-                random: true,
-                straight: true,
+                speed: 6,
+                direction: 'none',
+                random: false,
+                straight: false,
                 out_mode: 'out',
-                bounce: false
-              }
-            },
-            interactivity: {
-              detect_on: 'canvas',
-              events: {
-                onhover: {
-                  enable: true,
-                  mode: 'bubble'
-                },
-                onclick: {
-                  enable: false
-                },
-                resize: true
-              },
-              modes: {
-                grab: {
-                  distance: 400,
-                  line_linked: {
-                    opacity: 1
-                  }
-                },
-                bubble: {
-                  distance: 250,
-                  size: 0,
-                  duration: 2,
-                  opacity: 0,
-                  speed: 3
-                },
-                repulse: {
-                  distance: 400,
-                  duration: 0.4
-                },
-                push: {
-                  particles_nb: 4
-                },
-                remove: {
-                  particles_nb: 2
+                bounce: false,
+                attract: {
+                  enable: false,
+                  rotateX: 600,
+                  rotateY: 1200
                 }
               }
             },
@@ -185,9 +166,7 @@ class Login extends Component {
           }}
         /> */}
         <Container fluid>
-          <div className="loginTopBar">
-            <Header />
-          </div>
+          <div className="loginTopBar" />
           <Row className="loginContainer">
             <Container>
               <Row>
