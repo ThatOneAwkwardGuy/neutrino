@@ -166,7 +166,9 @@ class Login extends Component {
           }}
         /> */}
         <Container fluid>
-          <div className="loginTopBar" />
+          <div className="loginTopBar">
+            <Header headerType="Login" />
+          </div>
           <Row className="loginContainer">
             <Container>
               <Row>
