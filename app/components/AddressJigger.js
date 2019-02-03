@@ -22,7 +22,7 @@ const TRANSLATIONS = [
 export default class AddressJigger extends Component {
   constructor(props) {
     super(props);
-    this.countryNames = _.keys(Countries);
+    this.countryNames = Object.keys(Countries);
     this.state = {
       deliveryCountry: '',
       deliveryAddress: '',
@@ -140,14 +140,14 @@ export default class AddressJigger extends Component {
     ${this.state.deliveryCountry}`;
 
     const jigsSet = this.jigAddress(addressString);
-    const jigs = Array.from(jigsSet).forEach(text => {
-      text
+    const jigs = Array.from(jigsSet).map(text => {
+      return text
         .toLowerCase()
         .split(' ')
         .map(s => s.charAt(0).toUpperCase() + s.substring(1))
         .join(' ');
     });
-
+    console.log(jigs);
     if (jigs.length < parseInt(this.state.numberOfAddresses)) {
       this.setState({ jiggedAddress: jigs });
     } else {
@@ -156,8 +156,8 @@ export default class AddressJigger extends Component {
   };
 
   returnJiggedAddresses = addressArray => {
-    return addressArray.map(elem => (
-      <Col xs="3" style={{ padding: '25px', border: 'solid 5px #222222', background: '#2B4DF7' }}>
+    return addressArray.map((elem, index) => (
+      <Col key={index} xs="3" style={{ padding: '25px', border: 'solid 5px #222222' }}>
         {elem}
       </Col>
     ));

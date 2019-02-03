@@ -1,12 +1,25 @@
 import React, { Component } from 'react';
-import { Button, Container, Row, Col, Input, Label, Table } from 'reactstrap';
+import { Button, Container, Row, Col, Input, Label, Table, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
+import FontAwesome from 'react-fontawesome';
 import Toggle from 'react-toggle';
 const randomEmail = require('random-email');
 const randomize = require('randomatic');
 const request = require('request-promise');
 const random = require('random-name');
 const { clipboard } = require('electron');
+const uuidv4 = require('uuid/v4');
+const ipcRenderer = require('electron').ipcRenderer;
+var tough = require('tough-cookie');
+const cheerio = require('cheerio');
+
+import {
+  BOT_SEND_COOKIES_AND_CAPTCHA_PAGE,
+  OPEN_CAPTCHA_WINDOW,
+  RECEIVE_CAPTCHA_TOKEN,
+  FINISH_SENDING_CAPTCHA_TOKEN,
+  RESET_CAPTCHA_WINDOW
+} from '../utils/constants';
 
 const sites = {
   cncpts: 'https://cncpts.com',
@@ -124,33 +137,34 @@ const sites = {
   xhibition: 'https://www.xhibition.co'
 };
 
-const captcha = {
-  undefeated: true,
-  xhibition: true,
-  cncpts: false,
-  bdgastore: false
-};
+const captcha = {};
 
 export default class AccountCreator extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      confModal: false,
       randomPassword: false,
       randomFirstLast: true,
       useProxies: false,
+      advancedSettings: false,
+      accountCreationDelay: false,
       createdAccount: [],
       site: Object.keys(sites)[0],
       quantity: '1',
       catchall: '',
       password: '',
       firstName: '',
-      lastName: ''
+      lastName: '',
+      accountCreationDelayAmount: ''
     };
-
+    this.tokenID = uuidv4();
+    this.cookieJar = request.jar();
     this.rp = request.defaults({
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
-      }
+      },
+      jar: this.cookieJar
     });
   }
 
@@ -158,11 +172,33 @@ export default class AccountCreator extends Component {
     return optionsArray.map((elem, index) => <option key={`option-${name}-${index}`}>{elem}</option>);
   };
 
+  toggleConfModal = () => {
+    this.setState({
+      confModal: !this.state.confModal
+    });
+  };
+
+  loadAllAccounts = () => {
+    this.setState({
+      createdAccount: this.props.accounts.accounts
+    });
+  };
+
   returnAccountRow = (account, index) => (
     <tr key={`account-${index}`}>
       <td>{index + 1}</td>
+      <td>{account.site}</td>
       <td>{account.email}</td>
       <td>{account.pass}</td>
+      <td>
+        <FontAwesome
+          name="trash"
+          style={{ padding: '10px' }}
+          onClick={() => {
+            this.props.onRemoveAccount(account);
+          }}
+        />
+      </td>
     </tr>
   );
 
@@ -208,14 +244,10 @@ export default class AccountCreator extends Component {
       });
       if (captcha[this.state.site]) {
       } else {
-        this.setState({
-          createdAccount: [
-            ...this.state.createdAccount,
-            {
-              email: email,
-              pass: pass
-            }
-          ]
+        this.props.onCreateAccount({
+          email: email,
+          site: this.state.site,
+          pass: pass
         });
       }
     } catch (error) {
@@ -223,20 +255,117 @@ export default class AccountCreator extends Component {
     }
   };
 
+  getSotoStoreToken = async captchaToken => {
+    try {
+      await this.rp({
+        method: 'GET',
+        url: 'https://www.sotostore.com/en/auth/view?op=register',
+        headers: {
+          Cookie: this.cookieJar.getCookieString('https://www.sotostore.com')
+        }
+      });
+    } catch (error) {
+      const $ = cheerio.load(error.error);
+      const s = $('input[name="s"]').attr('value');
+      const id = '4a280b22e8aa3572';
+      const response = await this.rp({
+        method: 'GET',
+        resolveWithFullResponse: true,
+        url: `https://www.sotostore.com/cdn-cgi/l/chk_captcha?s=${s}id=${id}&g-recaptcha-response=${captchaToken}`
+      });
+      for (const cookie in response.headers['set-cookie']) {
+        if (cookie.includes('AntiCsrfToken')) {
+          return cookie.split('=')[1];
+        }
+      }
+      console.log(response);
+    }
+  };
+
+  createSotoStoreAccount = async () => {
+    ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
+    ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
+      cookies: '',
+      checkoutURL: 'https://www.sotostore.com/en/auth/view',
+      id: this.tokenID,
+      proxy: this.state.useProxies ? this.getRandomProxy() : '',
+      baseURL: 'https://www.sotostore.com/en/auth/view'
+    });
+    ipcRenderer.once(RECEIVE_CAPTCHA_TOKEN, async (event, captchaToken) => {
+      ipcRenderer.send(FINISH_SENDING_CAPTCHA_TOKEN, {});
+      captchaToken.cookies.split(';').forEach(cookiePair => {
+        const splitCookie = cookiePair.split('=');
+        let cart1Cookie = new tough.Cookie({
+          key: splitCookie[0],
+          value: splitCookie[1],
+          domain: '.sotostore.com',
+          path: '/'
+        });
+        this.cookieJar.setCookie(cart1Cookie.toString(), 'https://www.sotostore.com');
+      });
+
+      const antiCsrfToken = await this.getSotoStoreToken(captchaToken);
+      const email = randomEmail({ domain: this.state.catchall });
+      const pass = this.state.randomPassword ? randomize('a', 10) : this.state.password;
+      const firstName = this.state.randomFirstLast ? random.first() : this.state.firstName;
+      const lastName = this.state.randomFirstLast ? random.last() : this.state.lastName;
+      const payload = {
+        _AntiCsrfToken: antiCsrfToken,
+        firstName: firstName,
+        email: email,
+        password: pass,
+        'g-recaptcha-response': captchaToken.captchaResponse,
+        action: 'register'
+      };
+      try {
+        const response = await this.rp({
+          method: 'POST',
+          url: `${sites[this.state.site]}/account`,
+          followRedirect: true,
+          jar: true,
+          proxy: this.state.useProxies ? this.getRandomProxy() : '',
+          followAllRedirects: true,
+          headers: {
+            'cache-control': 'no-cache',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+          },
+          form: payload
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  };
+
   start = async () => {
     if (Object.keys(sites).includes(this.state.site)) {
       for (let i = 0; i < parseInt(this.state.quantity); i++) {
-        await this.createShopifyAccount();
+        switch (this.state.site) {
+          case 'sotostore':
+            this.createSotoStoreAccount();
+            break;
+          default:
+            await this.createShopifyAccount();
+            if (this.state.accountCreationDelay) {
+              this.sleep(parseInt(this.state.accountCreationDelayAmount));
+            }
+            break;
+        }
       }
     }
   };
 
   copyToClipboard = () => {
     let string = '';
-    this.state.createdAccount.forEach(elem => {
+    this.props.accounts.accounts.forEach(elem => {
       string += `${elem.email} ${elem.pass}\n`;
     });
     clipboard.writeText(string, 'selection');
+  };
+
+  sleep = ms => {
+    console.log(`[${moment().format('HH:mm:ss:SSS')}] - Sleeping For ${ms}ms`);
+    return new Promise(resolve => setTimeout(resolve, ms));
   };
 
   render() {
@@ -250,8 +379,10 @@ export default class AccountCreator extends Component {
                   <thead>
                     <tr>
                       <th>#</th>
+                      <th>store</th>
                       <th>email</th>
                       <th>password</th>
+                      <th>action</th>
                     </tr>
                   </thead>
                   <tbody>{this.state.createdAccount.map(this.returnAccountRow)}</tbody>
@@ -259,7 +390,7 @@ export default class AccountCreator extends Component {
               </Col>
             </Row>
             <Row>
-              <Col xs="2">
+              <Col xs="1">
                 <Label>Site</Label>
                 <Input
                   name="site"
@@ -317,50 +448,91 @@ export default class AccountCreator extends Component {
                 />
               </Col>
               <Col xs="1">
-                <h6 style={{ fontWeight: 600 }}>Proxies</h6>
+                <h6 style={{ fontWeight: 600 }}>Advanced</h6>
                 <Toggle
                   className="alignBottomToggle"
-                  defaultChecked={this.state.useProxies}
+                  defaultChecked={this.state.advancedSettings}
                   onChange={() => {
-                    this.setState({ useProxies: !this.state.useProxies });
+                    this.setState({ advancedSettings: !this.state.advancedSettings });
                   }}
                 />
               </Col>
-              <Col xs="1">
-                <h6 style={{ fontWeight: 600 }}>Random Name</h6>
-                <Toggle
-                  className="alignBottomToggle"
-                  defaultChecked={this.state.randomFirstLast}
-                  onChange={() => {
-                    this.setState({ randomFirstLast: !this.state.randomFirstLast });
-                  }}
-                />
-              </Col>
-              <Col xs="1">
+              <Col xs="4">
                 <Button
+                  style={{ margin: '5px' }}
                   onClick={() => {
                     this.start();
                   }}
                 >
                   Start
                 </Button>
-              </Col>
-              <Col xs="1">
                 <Button
+                  style={{ margin: '5px' }}
+                  onClick={() => {
+                    this.loadAllAccounts();
+                  }}
+                >
+                  Load All
+                </Button>
+                <Button
+                  style={{ margin: '5px' }}
                   onClick={() => {
                     this.copyToClipboard();
                   }}
                 >
-                  copy
+                  Copy All
+                </Button>
+                <Button color="danger" style={{ margin: '5px' }} onClick={this.toggleConfModal}>
+                  Delete All
+                </Button>
+                <Button
+                  color="danger"
+                  style={{ margin: '5px' }}
+                  onClick={() => {
+                    console.log('reset');
+                    ipcRenderer.send(RESET_CAPTCHA_WINDOW, 'reset');
+                  }}
+                >
+                  Reload Captcha
                 </Button>
               </Col>
             </Row>
-            {this.state.proxies || !this.state.randomFirstLast ? (
+            {this.state.advancedSettings ? (
               <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
                 <Row style={{ paddingTop: '20px' }}>
-                  {this.state.proxies ? (
-                    <Col xs="6">
-                      <Label>proxies</Label>
+                  <Col xs="1">
+                    <h6 style={{ fontWeight: 600, marginBottom: '50px' }}>Proxies</h6>
+                    <Toggle
+                      className="alignBottomToggle"
+                      defaultChecked={this.state.useProxies}
+                      onChange={() => {
+                        this.setState({ useProxies: !this.state.useProxies });
+                      }}
+                    />
+                  </Col>
+                  <Col xs="1">
+                    <h6 style={{ fontWeight: 600 }}>Random Name</h6>
+                    <Toggle
+                      className="alignBottomToggle"
+                      defaultChecked={this.state.randomFirstLast}
+                      onChange={() => {
+                        this.setState({ randomFirstLast: !this.state.randomFirstLast });
+                      }}
+                    />
+                  </Col>
+                  <Col xs="1">
+                    <h6 style={{ fontWeight: 600 }}>Delay</h6>
+                    <Toggle
+                      className="alignBottomToggle"
+                      defaultChecked={this.state.accountCreationDelay}
+                      onChange={() => {
+                        this.setState({ accountCreationDelay: !this.state.accountCreationDelay });
+                      }}
+                    />
+                  </Col>
+                  {this.state.useProxies ? (
+                    <Col xs="3">
+                      <Label>Proxies</Label>
                       <Input
                         onChange={e => {
                           this.handleChange(e);
@@ -373,7 +545,7 @@ export default class AccountCreator extends Component {
                     ''
                   )}
                   {!this.state.randomFirstLast ? (
-                    <Col xs="3">
+                    <Col xs="2">
                       <Label>First Name</Label>
                       <Input
                         onChange={e => {
@@ -387,7 +559,7 @@ export default class AccountCreator extends Component {
                     ''
                   )}
                   {!this.state.randomFirstLast ? (
-                    <Col xs="3">
+                    <Col xs="2">
                       <Label>Last Name</Label>
                       <Input
                         onChange={e => {
@@ -400,12 +572,47 @@ export default class AccountCreator extends Component {
                   ) : (
                     ''
                   )}
+                  {this.state.accountCreationDelay ? (
+                    <Col xs="2">
+                      <Label>Delay Amount (ms)</Label>
+                      <Input
+                        name="accountCreationDelayAmount"
+                        onChange={e => {
+                          this.handleChange(e);
+                        }}
+                        type="number"
+                      />
+                    </Col>
+                  ) : (
+                    ''
+                  )}
                 </Row>
               </CSSTransition>
             ) : (
               ''
             )}
           </Container>
+          <Modal isOpen={this.state.confModal} toggle={this.toggleConfModal} centered={true}>
+            <ModalHeader toggle={this.toggleConfModal} style={{ borderBottom: 'none' }}>
+              Delete All Accounts?
+            </ModalHeader>
+            <ModalBody>Are you sure you want to delete all the accounts you have previously generated using Neutrino?</ModalBody>
+            <ModalFooter>
+              <Button color="primary" onClick={this.toggleConfModal}>
+                Cancel
+              </Button>
+              <Button
+                color="danger"
+                onClick={() => {
+                  this.props.onRemoveAllAccounts();
+                  this.setState({ createdAccount: [] });
+                  this.toggleConfModal();
+                }}
+              >
+                Delete All
+              </Button>
+            </ModalFooter>
+          </Modal>
         </Col>
       </CSSTransition>
     );

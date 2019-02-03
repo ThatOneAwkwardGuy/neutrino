@@ -1,10 +1,12 @@
 import { UPDATE_SETTINGS } from '../actions/settings';
 
 const initialState = {
-  monitorTime: 1000,
-  errorTime: 3000,
-  checkoutTime: 2500,
-  monitorProxies: []
+  googleCredentialsPath: '',
+  googleCredentialsPojectID: '',
+  awsAccessKey: '',
+  awsSecretKey: '',
+  vultrAPIKey: '',
+  digitalOceanAPIKey: ''
 };
 
 export default function settingsReducer(state = initialState, action) {

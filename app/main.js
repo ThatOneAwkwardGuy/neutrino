@@ -2,6 +2,20 @@ import path from 'path';
 import url from 'url';
 import { app, crashReporter, BrowserWindow, Menu } from 'electron';
 import { autoUpdater } from 'electron-updater';
+import {
+  CAPTCHA_RECEIVE_COOKIES_AND_CAPTCHA_PAGE,
+  BOT_SEND_COOKIES_AND_CAPTCHA_PAGE,
+  OPEN_CAPTCHA_WINDOW,
+  RESET_CAPTCHA_WINDOW,
+  SET_GLOBAL_ID_VARIABLE,
+  ALERT_UPDATE_AVAILABLE,
+  RESET_CAPTCHA_TOKENS_ARRAY,
+  RECEIVE_RESET_CAPTCHA_TOKENS_ARRAY,
+  SEND_CAPTCHA_TOKEN,
+  RECEIVE_CAPTCHA_TOKEN,
+  FINISH_SENDING_CAPTCHA_TOKEN,
+  MAIN_PROCESS_CLEAR_RECEIVE_CAPTCHA_TOKEN_LISTENERS
+} from './utils/constants';
 const ipcMain = require('electron').ipcMain;
 
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -10,33 +24,33 @@ let mainWindow = null;
 let captchaWindow = null;
 let forceQuit = false;
 
-// let initialiseCaptchaWindow = () => {
-//   captchaWindow = new BrowserWindow({
-//     webPreferences: {
-//       contextIsolation: false
-//     },
-//     modal: true,
-//     show: false,
-//     minWidth: 200,
-//     minHeight: 300,
-//     width: 500,
-//     height: 650,
-//     frame: false,
-//     resizable: true,
-//     focusable: true,
-//     minimizable: true,
-//     closable: true,
-//     allowRunningInsecureContent: true
-//   });
-//   captchaWindow.loadURL(
-//     url.format({
-//       pathname: path.join(__dirname, 'index.html'),
-//       protocol: 'file:',
-//       slashes: true,
-//       hash: 'captcha'
-//     })
-//   );
-// };
+let initialiseCaptchaWindow = () => {
+  captchaWindow = new BrowserWindow({
+    webPreferences: {
+      contextIsolation: false
+    },
+    modal: true,
+    show: false,
+    minWidth: 200,
+    minHeight: 300,
+    width: 500,
+    height: 650,
+    frame: false,
+    resizable: true,
+    focusable: true,
+    minimizable: true,
+    closable: true,
+    allowRunningInsecureContent: true
+  });
+  captchaWindow.loadURL(
+    url.format({
+      pathname: path.join(__dirname, 'index.html'),
+      protocol: 'file:',
+      slashes: true,
+      hash: 'captcha'
+    })
+  );
+};
 
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
@@ -89,7 +103,7 @@ app.on('ready', async () => {
     })
   );
 
-  // initialiseCaptchaWindow();
+  initialiseCaptchaWindow();
 
   // show window once on first load
   mainWindow.webContents.once('did-finish-load', () => {
@@ -141,6 +155,52 @@ app.on('ready', async () => {
       ]).popup(mainWindow);
     });
   }
+
+  ipcMain.on(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, (event, args) => {
+    captchaWindow.send(CAPTCHA_RECEIVE_COOKIES_AND_CAPTCHA_PAGE, args);
+  });
+
+  ipcMain.on(OPEN_CAPTCHA_WINDOW, (event, arg) => {
+    if (captchaWindow.isDestroyed()) {
+      initialiseCaptchaWindow();
+      captchaWindow.show();
+    } else {
+      captchaWindow.show();
+    }
+  });
+
+  ipcMain.on(MAIN_PROCESS_CLEAR_RECEIVE_CAPTCHA_TOKEN_LISTENERS, (event, arg) => {
+    ipcMain.removeAllListeners(RECEIVE_CAPTCHA_TOKEN);
+  });
+
+  ipcMain.on(RESET_CAPTCHA_TOKENS_ARRAY, (event, arg) => {
+    captchaWindow.send(RECEIVE_RESET_CAPTCHA_TOKENS_ARRAY, 'reset');
+  });
+
+  ipcMain.on(SET_GLOBAL_ID_VARIABLE, (event, arg) => {
+    global.captcaTokenID = arg;
+    event.returnValue = true;
+  });
+
+  ipcMain.on(SEND_CAPTCHA_TOKEN, (event, arg) => {
+    mainWindow.send(RECEIVE_CAPTCHA_TOKEN, arg);
+    console.log(arg.id);
+  });
+
+  ipcMain.on(FINISH_SENDING_CAPTCHA_TOKEN, (event, arg) => {
+    captchaWindow.send(FINISH_SENDING_CAPTCHA_TOKEN, arg);
+  });
+
+  ipcMain.on(RESET_CAPTCHA_WINDOW, (event, arg) => {
+    captchaWindow.loadURL(
+      url.format({
+        pathname: path.join(__dirname, 'index.html'),
+        protocol: 'file:',
+        slashes: true,
+        hash: 'captcha'
+      })
+    );
+  });
 
   autoUpdater.on('update-downloaded', info => {
     mainWindow.send(ALERT_UPDATE_AVAILABLE, info);

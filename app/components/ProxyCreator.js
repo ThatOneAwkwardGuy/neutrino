@@ -124,6 +124,10 @@ export default class ProxyCreator extends Component {
   };
 
   intializeCloudLibrary = name => {
+    this.setState({
+      cloudRegions: [],
+      machineTypes: []
+    });
     switch (name) {
       case 'Google Cloud':
         this.initializeGoogleCloud();

@@ -1,3 +1,10 @@
 1.0.02b
 - Fixed images not loading
 - Fixed problem when clicking home on windows wouldnt work
+
+1.0.3b
+- Added saving/loading of all previously generated accounts for all sites
+- Fixed problem when clicking home on windows wouldnt work (2nd Try)
+- Added account creation delay
+- Fixed address jigger
+- If you notice any account creators do not seem to be working, please tell me, cause i cant test all of them

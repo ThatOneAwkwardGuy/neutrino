@@ -427,6 +427,10 @@ canvas {
   border-right: none !important;
 }
 
+.topBarLogoCol {
+  -webkit-app-region: no-drag !important;
+}
+
 .topbarOptionsCol {
   background-color: #222222;
   display: flex;

@@ -75,10 +75,10 @@ export default class Header extends Component {
   render() {
     return (
       <Row className="topbar" style={this.props.headerType !== 'Login' ? { borderLeft: 'solid 5px #2745fb' } : {}}>
-        <Col xs="6" className="topBarLogoCol text-center d-flex align-items-center">
+        <Col xs="3" className="topBarLogoCol text-center d-flex align-items-center">
           {this.props.headerType !== 'Login' ? (
             <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-              <Dropdown isOpen={this.state.dropdown} toggle={this.toggleDropdown} style={{ position: 'absolute', zIndex: '2' }}>
+              <Dropdown isOpen={this.state.dropdown} toggle={this.toggleDropdown} style={{ position: 'absolute', zIndex: '100' }}>
                 <DropdownToggle id="menuDropDownToggle">{this.returnCurrentPageSymbol()}</DropdownToggle>
                 <DropdownMenu id="menuDropDown">{this.returnDropDownOptions()}</DropdownMenu>
               </Dropdown>
@@ -87,7 +87,7 @@ export default class Header extends Component {
             ''
           )}
         </Col>
-        <Col xs="4" className="topbarMiddle" />
+        <Col xs="7" className="topbarMiddle" />
         <Col xs="1" className="text-right topbarOptionsCol">
           <a
             className="windowButton"

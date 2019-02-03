@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { connect } from 'react-redux';
 import { updateSettings } from '../actions/settings';
+import { createAccount, removeAccount, removeAllAccounts } from '../actions/accounts';
 import ProxyCreater from '../components/ProxyCreator';
 import ProxyTester from '../components/ProxyTester';
 import FrontPage from '../components/FrontPage';
@@ -30,7 +31,14 @@ class Home extends Component {
       case 'ProxyTester':
         return <ProxyTester />;
       case 'AccountCreator':
-        return <AccountCreator />;
+        return (
+          <AccountCreator
+            onCreateAccount={this.props.onCreateAccount}
+            onRemoveAccount={this.props.onRemoveAccount}
+            onRemoveAllAccounts={this.props.onRemoveAllAccounts}
+            accounts={this.props.accounts}
+          />
+        );
       case 'AddressJigger':
         return <AddressJigger />;
       case 'ProfileTaskConverter':
@@ -58,15 +66,22 @@ class Home extends Component {
 }
 
 const mapStateToProps = state => ({
-  tasks: state.taskReducer.tasks,
-  profiles: state.profileReducer.profiles,
-  proxies: state.proxyReducer.proxies,
-  settings: state.settingsReducer
+  settings: state.neutrinoSettingsReducer,
+  accounts: state.neutrinoAccountsReducer
 });
 
 const mapActionsToProps = dispatch => ({
   onUpdateSettings: content => {
     dispatch(updateSettings(content));
+  },
+  onCreateAccount: content => {
+    dispatch(createAccount(content));
+  },
+  onRemoveAccount: content => {
+    dispatch(removeAccount(content));
+  },
+  onRemoveAllAccounts: content => {
+    dispatch(removeAllAccounts(content));
   }
 });
 
