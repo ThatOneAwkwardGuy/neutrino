@@ -5,10 +5,12 @@ import Footer from '../components/Footer';
 import { connect } from 'react-redux';
 import { updateSettings } from '../actions/settings';
 import { createAccount, removeAccount, removeAllAccounts } from '../actions/accounts';
+import { createActivity, removeActivity, removeAllActivities, updateActivity } from '../actions/activity';
 import ProxyCreater from '../components/ProxyCreator';
 import ProxyTester from '../components/ProxyTester';
 import FrontPage from '../components/FrontPage';
 import AccountCreator from '../components/AccountCreator';
+import ActivityGenerator from '../components/ActivityGenerator';
 import AddressJigger from '../components/AddressJigger';
 import ProfileTaskConverter from '../components/ProfileTaskConverter';
 import RaffleBot from '../components/RaffleBot';
@@ -17,8 +19,10 @@ import Settings from '../components/Settings';
 class Home extends Component {
   constructor(props) {
     super(props);
+    this.activityWindows = {};
     this.state = {
-      activeWindow: 'FrontPage'
+      activeWindow: 'FrontPage',
+      activityGeneratorAccountsClases: []
     };
   }
 
@@ -43,11 +47,27 @@ class Home extends Component {
         return <AddressJigger />;
       case 'ProfileTaskConverter':
         return <ProfileTaskConverter />;
+      case 'ActivityGenerator':
+        return (
+          <ActivityGenerator
+            onCreateActivity={this.props.onCreateActivity}
+            onRemoveActivity={this.props.onRemoveActivity}
+            onRemoveAllActivities={this.props.onRemoveAllActivities}
+            onUpdateActivity={this.props.onUpdateActivity}
+            activities={this.props.activities.activities}
+            setActivityWindow={this.setActivityWindow}
+            activityWindows={this.activityWindows}
+          />
+        );
       case 'RaffleBot':
         return <RaffleBot />;
       case 'Settings':
         return <Settings settings={this.props.settings} onUpdateSettings={this.props.onUpdateSettings} />;
     }
+  };
+
+  setActivityWindow = (token, activityWindow) => {
+    this.activityWindows[token] = activityWindow;
   };
 
   changeActiveComponent = activeComponent => {
@@ -67,7 +87,8 @@ class Home extends Component {
 
 const mapStateToProps = state => ({
   settings: state.neutrinoSettingsReducer,
-  accounts: state.neutrinoAccountsReducer
+  accounts: state.neutrinoAccountsReducer,
+  activities: state.neutrinoActivityReducer
 });
 
 const mapActionsToProps = dispatch => ({
@@ -82,6 +103,18 @@ const mapActionsToProps = dispatch => ({
   },
   onRemoveAllAccounts: content => {
     dispatch(removeAllAccounts(content));
+  },
+  onCreateActivity: content => {
+    dispatch(createActivity(content));
+  },
+  onRemoveActivity: content => {
+    dispatch(removeActivity(content));
+  },
+  onRemoveAllActivities: content => {
+    dispatch(removeAllActivities(content));
+  },
+  onUpdateActivity: content => {
+    dispatch(updateActivity(content));
   }
 });
 

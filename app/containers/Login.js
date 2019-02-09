@@ -14,6 +14,8 @@ class Login extends Component {
       this.props.history.push('/waiting');
     } else if (location.hash === '#captcha') {
       this.props.history.push('/captcha');
+    } else if (location.hash === '#activity') {
+      this.props.history.push('/activity');
     } else {
       this.checkLoggedIn();
     }
