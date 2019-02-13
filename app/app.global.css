@@ -740,3 +740,15 @@ canvas {
   position: absolute !important;
   bottom: 0px;
 }
+
+.progress-bar {
+  background-color: #2b4df7;
+}
+
+.progress {
+  height: 0.5rem;
+}
+
+.activityRow td {
+  vertical-align: middle;
+}

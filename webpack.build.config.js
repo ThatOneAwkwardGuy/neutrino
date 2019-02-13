@@ -1,10 +1,8 @@
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const JavaScriptObfuscator = require('webpack-obfuscator');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
-
 const path = require('path');
+
 const mainConfig = {
   mode: 'production',
   target: 'electron-main',
@@ -148,4 +146,104 @@ const appConfig = {
   }
 };
 
-module.exports = [mainConfig, appConfig];
+const captchaPreloadConfig = {
+  mode: 'production',
+  target: 'electron-renderer',
+  entry: path.normalize(path.resolve(__dirname, 'app', 'utils', 'captchaPreload.js')),
+  output: {
+    path: path.normalize(path.join(path.resolve(__dirname, 'webpack-pack'), '/')),
+    filename: 'captchaPreload.js'
+  },
+  node: {
+    __dirname: true
+  },
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          mangle: true,
+          sourceMap: false,
+          toplevel: true,
+          output: {
+            comments: false
+          }
+        }
+      })
+    ]
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env', '@babel/preset-react'],
+          plugins: [
+            '@babel/plugin-proposal-function-bind',
+            ['@babel/plugin-proposal-decorators', { legacy: true }],
+            '@babel/plugin-transform-runtime',
+            '@babel/plugin-proposal-class-properties',
+            '@babel/plugin-proposal-export-namespace-from',
+            '@babel/plugin-syntax-dynamic-import'
+          ]
+        },
+        exclude: /node_modules/
+      }
+    ]
+  },
+  resolve: {
+    extensions: ['.js', '.json', '.jsx']
+  }
+};
+
+const activityPreloadConfig = {
+  mode: 'production',
+  target: 'electron-renderer',
+  entry: path.normalize(path.resolve(__dirname, 'app', 'utils', 'activityPreload.js')),
+  output: {
+    path: path.normalize(path.join(path.resolve(__dirname, 'webpack-pack'), '/')),
+    filename: 'activityPreload.js'
+  },
+  node: {
+    __dirname: true
+  },
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          mangle: true,
+          sourceMap: false,
+          toplevel: true,
+          output: {
+            comments: false
+          }
+        }
+      })
+    ]
+  },
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        options: {
+          presets: ['@babel/preset-env', '@babel/preset-react'],
+          plugins: [
+            '@babel/plugin-proposal-function-bind',
+            ['@babel/plugin-proposal-decorators', { legacy: true }],
+            '@babel/plugin-transform-runtime',
+            '@babel/plugin-proposal-class-properties',
+            '@babel/plugin-proposal-export-namespace-from',
+            '@babel/plugin-syntax-dynamic-import'
+          ]
+        },
+        exclude: /node_modules/
+      }
+    ]
+  },
+  resolve: {
+    extensions: ['.js', '.json', '.jsx']
+  }
+};
+
+module.exports = [mainConfig, appConfig, captchaPreloadConfig, activityPreloadConfig];
