@@ -221,14 +221,11 @@ table thead th {
   border: none !important;
 }
 
-.primaryButton:hover {
-  background-color: #11a9bd;
-}
-
 button {
   color: white;
   font-weight: 700 !important;
   border: none !important;
+  border-radius: 0px !important;
 }
 
 .taskButton.btn.btn-secondary {
@@ -243,7 +240,7 @@ button {
 .primaryButton:hover,
 .btn.btn-secondary:hover {
   background-color: #2745fb;
-  box-shadow: 0 5px 15px rgba(3, 169, 244, 1);
+  box-shadow: 0 5px 15px #3750f0;
 }
 
 .green {
@@ -513,10 +510,6 @@ canvas {
 
 .card-body {
   border-left: solid 5px #2745fb;
-}
-
-.card-body:hover {
-  /* box-shadow: 0 5px 15px rgba(3, 169, 244, 1); */
 }
 
 .releaseCard .card-body {

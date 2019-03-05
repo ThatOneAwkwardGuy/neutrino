@@ -15,6 +15,8 @@ import AddressJigger from '../components/AddressJigger';
 import ProfileTaskConverter from '../components/ProfileTaskConverter';
 import RaffleBot from '../components/RaffleBot';
 import Settings from '../components/Settings';
+const remote = require('electron').remote;
+const windowManager = remote.require('electron-window-manager');
 
 class Home extends Component {
   constructor(props) {
@@ -57,6 +59,7 @@ class Home extends Component {
             activities={this.props.activities.activities}
             setActivityWindow={this.setActivityWindow}
             activityWindows={this.activityWindows}
+            settings={this.props.settings}
           />
         );
       case 'RaffleBot':
@@ -73,6 +76,13 @@ class Home extends Component {
   changeActiveComponent = activeComponent => {
     this.setState({ activeWindow: activeComponent });
   };
+
+  // componentDidMount() {
+  //   console.log(windowManager.windows);
+  //   for (const window in windowManager.windows) {
+  //     windowManager.windows[window].close();
+  //   }
+  // }
 
   render() {
     return (

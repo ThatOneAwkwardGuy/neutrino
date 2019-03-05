@@ -7,15 +7,15 @@ import { remote } from 'electron';
 import { CSSTransition } from 'react-transition-group';
 
 const componentToNameMapping = {
-  FrontPage: 'home',
-  ProxyCreator: 'proxy creator',
-  ProxyTester: 'proxy tester',
-  AccountCreator: 'account creator',
-  AddressJigger: 'address jigger',
-  ProfileTaskConverter: 'profile/task converter',
-  ActivityGenerator: 'activity generator',
+  FrontPage: 'Home',
+  ProxyCreator: 'Proxy Creator',
+  ProxyTester: 'Proxy Tester',
+  AccountCreator: 'Account Creator',
+  AddressJigger: 'Address Jigger',
+  ProfileTaskConverter: 'Profile/Task Converter',
+  ActivityGenerator: 'Activity Generator',
   // RaffleBot: 'raffles',
-  Settings: 'settings'
+  Settings: 'Settings'
 };
 
 const nameToSymbolMapping = {

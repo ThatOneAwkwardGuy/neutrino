@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
-import { Row, Col, Dropdown, DropdownToggle, DropdownMenu, Button, Form, FormGroup, Input, Container } from 'reactstrap';
+import { Row, Col, Button, Form, FormGroup, Input, Container, Label } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
+import Toggle from 'react-toggle';
 const { dialog } = require('electron').remote;
 
 export default class Settings extends Component {
@@ -13,7 +14,8 @@ export default class Settings extends Component {
         awsAccessKey: '',
         awsSecretKey: '',
         vultrAPIKey: '',
-        digitalOceanAPIKey: ''
+        digitalOceanAPIKey: '',
+        showAcitivtyWindows: false
       }
     };
   }
@@ -56,11 +58,23 @@ export default class Settings extends Component {
     );
   };
 
+  toggleButton = e => {
+    this.setState({
+      settings: {
+        ...this.state.settings,
+        [e.target.name]: !this.state.settings[e.target.name]
+      }
+    });
+  };
+
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
         <Container fluid className="activeWindow">
           <Form>
+            <h6>
+              <strong>Proxy Creator</strong>
+            </h6>
             <FormGroup row>
               <Col xs="4">
                 <label>Google Cloud Credentials File (json)</label>
@@ -71,7 +85,7 @@ export default class Settings extends Component {
                     this.importFile('Google Cloud Credentials', 'googleCredentialsPath');
                   }}
                 >
-                  browse
+                  Browse
                 </Button>
               </Col>
               <Col xs="6">
@@ -122,8 +136,6 @@ export default class Settings extends Component {
                   }}
                 />
               </Col>
-            </FormGroup>
-            <FormGroup row>
               <Col xs="6">
                 <label>DigitalOcean API Key</label>
                 <Input
@@ -136,6 +148,19 @@ export default class Settings extends Component {
                 />
               </Col>
             </FormGroup>
+            <h6>
+              <strong>Activity Generator</strong>
+            </h6>
+            <FormGroup row>
+              <Col xs="2">
+                <Label>
+                  <span>Show Activity Windows</span>
+                  <div style={{ marginTop: '15px' }}>
+                    <Toggle name="showAcitivtyWindows" checked={this.state.settings.showAcitivtyWindows} onChange={this.toggleButton} />
+                  </div>
+                </Label>
+              </Col>
+            </FormGroup>
             <FormGroup row>
               <Col xs="2" className="ml-auto">
                 <Button
@@ -143,7 +168,7 @@ export default class Settings extends Component {
                     this.props.onUpdateSettings(this.state.settings);
                   }}
                 >
-                  save
+                  Save
                 </Button>
               </Col>
             </FormGroup>

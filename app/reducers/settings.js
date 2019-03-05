@@ -6,7 +6,8 @@ const initialState = {
   awsAccessKey: '',
   awsSecretKey: '',
   vultrAPIKey: '',
-  digitalOceanAPIKey: ''
+  digitalOceanAPIKey: '',
+  showAcitivtyWindows: false
 };
 
 export default function settingsReducer(state = initialState, action) {

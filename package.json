@@ -1,6 +1,6 @@
 {
   "name": "Neutrino",
-  "version": "1.0.3b",
+  "version": "1.0.4b",
   "description": "Neutrino AIO Bot",
   "main": "./webpack-pack/main.js",
   "author": {
@@ -36,17 +36,16 @@
       ]
     },
     "files": [
-      "webpack-pack/",
-      "./app/utils/captchaPreload.js"
+      "webpack-pack/"
     ],
     "extraResources": [
       {
         "from": "webpack-pack/captchaPreload.js",
-        "to": "./"
+        "to": "webpack-pack/captchaPreload.js"
       },
       {
         "from": "webpack-pack/activityPreload.js",
-        "to": "./"
+        "to": "webpack-pack/activityPreload.js"
       }
     ],
     "publish": {

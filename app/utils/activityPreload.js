@@ -230,10 +230,10 @@ randomGoogleSearch = () => {
   const changeURL = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(question)}`);
     webview.removeEventListener('dom-ready', changeURL);
+    activity.searches += 1;
+    updateFunction({ index: name.split('-')[1], activity });
   };
   webview.addEventListener('dom-ready', changeURL);
-  activity.searches += 1;
-  updateFunction({ index: name.split('-')[1], activity });
 };
 
 randomGoogleShoppingSearch = () => {
@@ -241,10 +241,10 @@ randomGoogleShoppingSearch = () => {
   const changeURL = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=shop`);
     webview.removeEventListener('dom-ready', changeURL);
+    activity.shopping += 1;
+    updateFunction({ index: name.split('-')[1], activity });
   };
   webview.addEventListener('dom-ready', changeURL);
-  activity.shopping += 1;
-  updateFunction({ index: name.split('-')[1], activity });
 };
 
 randomGoogleNewsSearch = () => {
@@ -252,10 +252,10 @@ randomGoogleNewsSearch = () => {
   const changeURL = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=nws`);
     webview.removeEventListener('dom-ready', changeURL);
+    activity.news += 1;
+    updateFunction({ index: name.split('-')[1], activity });
   };
   webview.addEventListener('dom-ready', changeURL);
-  activity.news += 1;
-  updateFunction({ index: name.split('-')[1], activity });
 };
 
 randomTrendingYoutubeVideo = async () => {
@@ -277,10 +277,10 @@ randomTrendingYoutubeVideo = async () => {
   const changeURL = () => {
     webview.loadURL(`http://youtube.com${chosenVideo.attribs.href}/?autoplay=1&mute=1`);
     webview.removeEventListener('dom-ready', changeURL);
+    activity.youtube += 1;
+    updateFunction({ index: name.split('-')[1], activity });
   };
   webview.addEventListener('dom-ready', changeURL);
-  activity.youtube += 1;
-  updateFunction({ index: name.split('-')[1], activity });
 };
 
 const functionsArray = [randomGoogleSearch, randomGoogleShoppingSearch, randomGoogleNewsSearch, randomTrendingYoutubeVideo];

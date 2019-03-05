@@ -75,7 +75,10 @@ export default class ActivityGenerator extends Component {
 
   startWindow = async (activity, index) => {
     const activityLocation = url.format({
-      pathname: path.resolve(__dirname, '..', '..', 'webpack-pack', 'index.html'),
+      pathname:
+        process.env.NODE_ENV === 'development'
+          ? path.resolve(__dirname, '..', '..', 'webpack-pack', 'index.html')
+          : path.resolve(__dirname, 'webpack-pack', 'index.html'),
       protocol: 'file:',
       slashes: true,
       hash: 'activity'
@@ -90,23 +93,20 @@ export default class ActivityGenerator extends Component {
     this.props.onUpdateActivity(index, this.props.activities[index]);
     this.props.setActivityWindow(
       index,
-      windowManager.open(
+      windowManager.createNew(
         `window-${index}`,
         `window-${index}`,
         activityLocation,
         false,
         {
-          menu: null,
-          modal: true,
-          minWidth: 200,
-          minHeight: 300,
-          width: 500,
-          height: 650,
-          frame: true,
+          width: this.props.settings.showAcitivtyWindows ? 500 : 0,
+          height: this.props.settings.showAcitivtyWindows ? 650 : 0,
+          frame: false,
           resizable: true,
-          focusable: true,
+          focusable: this.props.settings.showAcitivtyWindows ? true : false,
           minimizable: true,
           closable: true,
+          ...(!this.props.settings.showAcitivtyWindows && { show: false }),
           allowRunningInsecureContent: true,
           webPreferences: {
             contextIsolation: false,
@@ -116,7 +116,7 @@ export default class ActivityGenerator extends Component {
             preload: path.resolve(__dirname, '..', 'utils', 'activityPreload.js')
           }
         },
-        true
+        false
       )
     );
     windowManager.sharedData.set(`window-${index}`, {
@@ -125,6 +125,12 @@ export default class ActivityGenerator extends Component {
       url: 'google.com',
       cookies: this.cookieJar._jar.store.idx
     });
+    this.props.activityWindows[index].create();
+    if (this.props.settings.showAcitivtyWindows) {
+      console.log('Opening');
+      // windowManager.get(`window-${index}`).setURL(activityLocation);
+      windowManager.get(`window-${index}`).object.show();
+    }
   };
 
   stopWindow = index => {
@@ -139,10 +145,6 @@ export default class ActivityGenerator extends Component {
     this.props.onRemoveActivity(activity);
     this.props.activityWindows[index].close();
   };
-
-  componentDidMount() {
-    windowManager.closeAll();
-  }
 
   addActivity = () => {
     this.props.onCreateActivity({
