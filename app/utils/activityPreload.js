@@ -227,35 +227,38 @@ randomGoogleSearch = () => {
   const question = `${randomFromArray(questionWordList)} ${randomFromArray(auxiliaryVerbList)} ${randomFromArray(subjectList)} ${randomFromArray(
     actionVerbList
   )}`;
-  const changeURL = () => {
+  const changeURLGoogleSearch = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(question)}`);
-    webview.removeEventListener('dom-ready', changeURL);
+    webview.removeEventListener('dom-ready', changeURLGoogleSearch);
     activity.searches += 1;
     updateFunction({ index: name.split('-')[1], activity });
   };
-  webview.addEventListener('dom-ready', changeURL);
+  // webview.addEventListener('dom-ready', changeURLGoogleSearch);
+  changeURLGoogleSearch();
 };
 
 randomGoogleShoppingSearch = () => {
   const chosenQuery = `buy ${randomFromArray(brands)}`;
-  const changeURL = () => {
+  const changeURLShoppingSearch = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=shop`);
-    webview.removeEventListener('dom-ready', changeURL);
+    webview.removeEventListener('dom-ready', changeURLShoppingSearch);
     activity.shopping += 1;
     updateFunction({ index: name.split('-')[1], activity });
   };
-  webview.addEventListener('dom-ready', changeURL);
+  // webview.addEventListener('dom-ready', changeURLShoppingSearch);
+  changeURLShoppingSearch();
 };
 
 randomGoogleNewsSearch = () => {
   const chosenQuery = randomFromArray(brands);
-  const changeURL = () => {
+  const changeURLNewsSearch = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=nws`);
-    webview.removeEventListener('dom-ready', changeURL);
+    webview.removeEventListener('dom-ready', changeURLNewsSearch);
     activity.news += 1;
     updateFunction({ index: name.split('-')[1], activity });
   };
-  webview.addEventListener('dom-ready', changeURL);
+  // webview.addEventListener('dom-ready', changeURLNewsSearch);
+  changeURLNewsSearch();
 };
 
 randomTrendingYoutubeVideo = async () => {
@@ -274,27 +277,37 @@ randomTrendingYoutubeVideo = async () => {
   const $ = cheerio.load(response);
   const thumbnailLinksArray = $('.yt-uix-sessionlink').toArray();
   const chosenVideo = thumbnailLinksArray[Math.floor(Math.random() * thumbnailLinksArray.length)];
-  const changeURL = () => {
+  const changeURLYoutubeVideo = () => {
     webview.loadURL(`http://youtube.com${chosenVideo.attribs.href}/?autoplay=1&mute=1`);
-    webview.removeEventListener('dom-ready', changeURL);
+    webview.removeEventListener('dom-ready', changeURLYoutubeVideo);
     activity.youtube += 1;
     updateFunction({ index: name.split('-')[1], activity });
   };
-  webview.addEventListener('dom-ready', changeURL);
+  // webview.addEventListener('dom-ready', changeURLYoutubeVideo);
+  changeURLYoutubeVideo();
 };
 
 const functionsArray = [randomGoogleSearch, randomGoogleShoppingSearch, randomGoogleNewsSearch, randomTrendingYoutubeVideo];
 
-loop = () => {
-  const rand = Math.round(Math.random() * (15000 - 9000)) + 9000;
+// loop = () => {
+//   const rand = Math.round(Math.random() * (15000 - 9000)) + 9000;
+//   const chosenFunction = functionsArray[Math.floor(Math.random() * functionsArray.length)];
+//   chosenFunction();
+//   setTimeout(function() {
+//     const chosenFunction = functionsArray[Math.floor(Math.random() * functionsArray.length)];
+//     chosenFunction();
+//     loop();
+//   }, rand);
+// };
+
+loop = async () => {
+  webview.removeEventListener('dom-ready', loop);
+  const rand = Math.round(Math.random() * (data.activityDelayMax - data.activityDelayMin)) + data.activityDelayMin;
+  console.log(rand);
   const chosenFunction = functionsArray[Math.floor(Math.random() * functionsArray.length)];
   chosenFunction();
-  randomGoogleSearch();
-  setTimeout(function() {
-    const chosenFunction = functionsArray[Math.floor(Math.random() * functionsArray.length)];
-    chosenFunction();
-    loop();
-  }, rand);
+  await sleep(rand);
+  loop();
 };
 
 setCookieAndRunLoop = () => {
@@ -318,7 +331,7 @@ setCookieAndRunLoop = () => {
       });
     }
   }
-  loop();
+  webview.addEventListener('dom-ready', loop);
 };
 
 currentWindow.object.on('close', e => {

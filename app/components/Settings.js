@@ -9,6 +9,8 @@ export default class Settings extends Component {
     super(props);
     this.state = {
       settings: {
+        activityDelayMin: 60000,
+        activityDelayMax: 120000,
         googleCredentialsPath: '',
         googleCredentialsPojectID: '',
         awsAccessKey: '',
@@ -22,6 +24,16 @@ export default class Settings extends Component {
   componentDidMount() {
     this.initialize();
   }
+
+  save = () => {
+    if (this.state.settings.activityDelayMin > this.state.settings.activityDelayMax) {
+      this.setState({ settings: { ...this.state.settings, activityDelayMax: this.state.settings.activityDelayMin + 1 } }, () => {
+        this.props.onUpdateSettings(this.state.settings);
+      });
+    } else {
+      this.props.onUpdateSettings(this.state.settings);
+    }
+  };
 
   initialize() {
     this.setState({
@@ -160,16 +172,42 @@ export default class Settings extends Component {
                   </div>
                 </Label>
               </Col>
+              <Col xs="2">
+                <Label>
+                  <span>Activity Delay Min (ms)</span>
+                  <div style={{ marginTop: '15px' }}>
+                    <Input
+                      type="number"
+                      name="activityDelayMin"
+                      value={this.state.settings.activityDelayMin}
+                      onChange={e => {
+                        this.handleChange(e);
+                      }}
+                    />
+                    {/* <Toggle name="showAcitivtyWindows" checked={this.state.settings.showAcitivtyWindows} onChange={this.toggleButton} /> */}
+                  </div>
+                </Label>
+              </Col>
+              <Col xs="2">
+                <Label>
+                  <span>Activity Delay Max (ms)</span>
+                  <div style={{ marginTop: '15px' }}>
+                    <Input
+                      type="number"
+                      name="activityDelayMax"
+                      value={this.state.settings.activityDelayMax}
+                      onChange={e => {
+                        this.handleChange(e);
+                      }}
+                    />
+                    {/* <Toggle name="showAcitivtyWindows" checked={this.state.settings.showAcitivtyWindows} onChange={this.toggleButton} /> */}
+                  </div>
+                </Label>
+              </Col>
             </FormGroup>
             <FormGroup row>
               <Col xs="2" className="ml-auto">
-                <Button
-                  onClick={() => {
-                    this.props.onUpdateSettings(this.state.settings);
-                  }}
-                >
-                  Save
-                </Button>
+                <Button onClick={this.save}>Save</Button>
               </Col>
             </FormGroup>
           </Form>

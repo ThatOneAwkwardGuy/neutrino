@@ -27,23 +27,23 @@ export default class ActivityGenerator extends Component {
   returnActivitiesRow = (activity, index) => {
     const total = activity.youtube + activity.searches + activity.shopping + activity.news;
     return (
-      <tr key={`Activity-${index}`} className="activityRow">
-        <td>{index + 1}</td>
-        <td>{activity.status}</td>
-        <td>{activity.activityEmail}</td>
-        <td>
+      <tr key={`Activity-${index}`} className="activityRow d-flex align-items-center">
+        <td className="col-1">{index + 1}</td>
+        <td className="col">{activity.status}</td>
+        <td className="col">{activity.activityEmail}</td>
+        <td className="col">
           <Progress value={activity.youtube} max={total} />
         </td>
-        <td>
+        <td className="col">
           <Progress value={activity.searches} max={total} />
         </td>
-        <td>
+        <td className="col">
           <Progress value={activity.shopping} max={total} />
         </td>
-        <td>
+        <td className="col">
           <Progress value={activity.news} max={total} />
         </td>
-        <td>
+        <td className="col">
           <FontAwesome
             onClick={() => {
               this.startWindow(activity, index);
@@ -99,14 +99,18 @@ export default class ActivityGenerator extends Component {
         activityLocation,
         false,
         {
+          // width: 500,
+          // height: 650,
+          // show: this.props.settings.showAcitivtyWindows ? true : false,
           width: this.props.settings.showAcitivtyWindows ? 500 : 0,
           height: this.props.settings.showAcitivtyWindows ? 650 : 0,
+          show: true,
           frame: false,
           resizable: true,
-          focusable: this.props.settings.showAcitivtyWindows ? true : false,
+          focusable: true,
           minimizable: true,
           closable: true,
-          ...(!this.props.settings.showAcitivtyWindows && { show: false }),
+          // ...(!this.props.settings.showAcitivtyWindows && { show: false }),
           allowRunningInsecureContent: true,
           webPreferences: {
             contextIsolation: false,
@@ -120,11 +124,14 @@ export default class ActivityGenerator extends Component {
       )
     );
     windowManager.sharedData.set(`window-${index}`, {
+      activityDelayMin: this.props.settings.activityDelayMin,
+      activityDelayMax: this.props.settings.activityDelayMax,
       data: this.props.activities[index],
       update: this.props.onUpdateActivity,
       url: 'google.com',
       cookies: this.cookieJar._jar.store.idx
     });
+    console.log(this.props.activityWindows);
     this.props.activityWindows[index].create();
     if (this.props.settings.showAcitivtyWindows) {
       console.log('Opening');
@@ -251,15 +258,15 @@ export default class ActivityGenerator extends Component {
               <Col xs="12" style={{ overflowY: 'scroll', marginBottom: '30px' }}>
                 <Table responsive hover className="text-center">
                   <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>status</th>
-                      <th>account</th>
-                      <th>youtube</th>
-                      <th>searches</th>
-                      <th>shopping</th>
-                      <th>news</th>
-                      <th />
+                    <tr className="d-flex">
+                      <th className="col-1">#</th>
+                      <th className="col">status</th>
+                      <th className="col">account</th>
+                      <th className="col">youtube</th>
+                      <th className="col">searches</th>
+                      <th className="col">shopping</th>
+                      <th className="col">news</th>
+                      <th className="col" />
                     </tr>
                   </thead>
                   <tbody>{this.props.activities.map(this.returnActivitiesRow)}</tbody>

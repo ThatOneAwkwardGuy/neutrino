@@ -1,6 +1,8 @@
 import { UPDATE_SETTINGS } from '../actions/settings';
 
 const initialState = {
+  activityDelayMin: 60000,
+  activityDelayMax: 120000,
   googleCredentialsPath: '',
   googleCredentialsPojectID: '',
   awsAccessKey: '',
