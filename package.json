@@ -1,6 +1,6 @@
 {
   "name": "Neutrino",
-  "version": "1.0.4b",
+  "version": "1.0.5b",
   "description": "Neutrino AIO Bot",
   "main": "./webpack-pack/main.js",
   "author": {
@@ -197,6 +197,7 @@
     "private:serve": "babel-node scripts/serve.js",
     "private:watch": "npm run private:compile -- --source-maps true --watch --skip-initial-build",
     "test": "electron-mocha --renderer -R spec --require babel-core/register test/**/*.spec.js",
+    "webpack:build:dev": "run-s webpack:prod:clean webpack:dev:pack webpack:dev:build",
     "webpack:build": "run-s webpack:prod:clean webpack:prod:pack webpack:prod:build",
     "webpack:build:mac": "run-s webpack:prod:clean webpack:prod:pack webpack:prod:build:mac",
     "webpack:build:win": "run-s webpack:prod:clean webpack:prod:pack webpack:prod:build:win",
@@ -211,6 +212,7 @@
     "webpack:dist": "run-s webpack:prod:clean webpack:prod:pack webpack:prod:dist",
     "webpack:prod": "run-s webpack:prod:clean webpack:prod:pack",
     "webpack:prod:build": "cross-env NODE_ENV=production electron-builder -mw --x64 --ia32",
+    "webpack:dev:build": "cross-env NODE_ENV=development electron-builder -mw --x64 --ia32",
     "webpack:prod:build:mac": "cross-env NODE_ENV=production electron-builder -m --x64",
     "webpack:prod:build:win": "cross-env NODE_ENV=production electron-builder -w --x64",
     "webpack:prod:clean": "rimraf webpack-pack dist",

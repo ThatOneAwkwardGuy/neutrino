@@ -13,6 +13,7 @@ import AccountCreator from '../components/AccountCreator';
 import ActivityGenerator from '../components/ActivityGenerator';
 import AddressJigger from '../components/AddressJigger';
 import ProfileTaskConverter from '../components/ProfileTaskConverter';
+import ProfileGenerator from '../components/ProfileGenerator';
 import RaffleBot from '../components/RaffleBot';
 import Settings from '../components/Settings';
 const remote = require('electron').remote;
@@ -64,6 +65,8 @@ class Home extends Component {
         );
       case 'RaffleBot':
         return <RaffleBot />;
+      case 'ProfileGenerator':
+        return <ProfileGenerator />;
       case 'Settings':
         return <Settings settings={this.props.settings} onUpdateSettings={this.props.onUpdateSettings} />;
     }

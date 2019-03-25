@@ -12,7 +12,8 @@ const componentToNameMapping = {
   ProxyTester: 'Proxy Tester',
   AccountCreator: 'Account Creator',
   AddressJigger: 'Address Jigger',
-  ProfileTaskConverter: 'Profile/Task Converter',
+  ProfileGenerator: 'Profile Generator',
+  // ProfileTaskConverter: 'Profile/Task Converter',
   ActivityGenerator: 'Activity Generator',
   // RaffleBot: 'raffles',
   Settings: 'Settings'
@@ -27,7 +28,8 @@ const nameToSymbolMapping = {
   ProfileTaskConverter: <FontAwesome name="retweet" />,
   RaffleBot: <FontAwesome name="ticket" />,
   Settings: <FontAwesome name="cogs" />,
-  ActivityGenerator: <FontAwesome name="google" />
+  ActivityGenerator: <FontAwesome name="google" />,
+  ProfileGenerator: <FontAwesome name="id-card" />
 };
 
 export default class Header extends Component {

@@ -9,6 +9,8 @@ class Activity extends Component {
   }
 
   render() {
+    console.log(__dirname);
+    console.log(path.resolve(process.resourcesPath, 'webpack-pack', 'activityPreload.js'));
     return (
       <Container fluid>
         <CaptchaTopbar />
@@ -16,8 +18,6 @@ class Activity extends Component {
           id="activityWebview"
           src="http://google.com"
           webpreferences="allowRunningInsecureContent, javascript=yes"
-          preload="../../webpack-pack/activityPreload.js"
-          // preload={path.normalize(path.resolve(__dirname, '..', '..', 'webpack-pack', 'activityPreload.js'))}
           style={{
             width: '100%',
             height: '100%'

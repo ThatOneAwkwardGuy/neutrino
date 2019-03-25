@@ -32,16 +32,18 @@ export default class ActivityGenerator extends Component {
         <td className="col">{activity.status}</td>
         <td className="col">{activity.activityEmail}</td>
         <td className="col">
-          <Progress value={activity.youtube} max={total} />
+          <Progress className="progressBar" value={activity.youtube} max={total}>
+            {`${((activity.youtube * 100) / total).toFixed(1)}%`}
+          </Progress>
         </td>
         <td className="col">
-          <Progress value={activity.searches} max={total} />
+          <Progress className="progressBar" value={activity.searches} max={total} />
         </td>
         <td className="col">
-          <Progress value={activity.shopping} max={total} />
+          <Progress className="progressBar" value={activity.shopping} max={total} />
         </td>
         <td className="col">
-          <Progress value={activity.news} max={total} />
+          <Progress className="progressBar" value={activity.news} max={total} />
         </td>
         <td className="col">
           <FontAwesome
@@ -74,20 +76,19 @@ export default class ActivityGenerator extends Component {
   };
 
   startWindow = async (activity, index) => {
+    console.log(process);
     const activityLocation = url.format({
-      pathname:
-        process.env.NODE_ENV === 'development'
-          ? path.resolve(__dirname, '..', '..', 'webpack-pack', 'index.html')
-          : path.resolve(__dirname, 'webpack-pack', 'index.html'),
+      pathname: process.mainModule.filename,
       protocol: 'file:',
       slashes: true,
       hash: 'activity'
     });
+    console.log(activityLocation);
     this.props.activities[index].status = 'Logging In';
     this.props.onUpdateActivity(index, this.props.activities[index]);
     if (this.cookieJar === '') {
       this.cookieJar = rp.jar();
-      await this.loginToGoogle(activity.activityEmail, activity.activityPassword, this.cookieJar);
+      await this.loginToGoogle(activity.activityEmail, activity.activityPassword, this.cookieJar, index);
     }
     this.props.activities[index].status = 'Logged In';
     this.props.onUpdateActivity(index, this.props.activities[index]);
@@ -117,7 +118,11 @@ export default class ActivityGenerator extends Component {
             allowRunningInsecureContent: true,
             nodeIntegration: true,
             webSecurity: false,
-            preload: path.resolve(__dirname, '..', 'utils', 'activityPreload.js')
+            preload:
+              process.env.NODE_ENV === 'development'
+                ? path.resolve(__dirname, '..', '..', 'webpack-pack', 'activityPreload.js')
+                : path.resolve(process.resourcesPath, 'webpack-pack', 'activityPreload.js')
+            // preload: path.resolve(process.resourcesPath, 'webpack-pack', 'activityPreload.js')
           }
         },
         false
@@ -184,7 +189,7 @@ export default class ActivityGenerator extends Component {
     });
   };
 
-  loginToGoogle = async (email, password, cookieJar) => {
+  loginToGoogle = async (email, password, cookieJar, index) => {
     try {
       const response1 = await rp({
         headers: {
@@ -212,8 +217,7 @@ export default class ActivityGenerator extends Component {
         jar: cookieJar,
         uri: 'https://accounts.google.com/_/signin/sl/challenge?hl=en&_reqid=759031&rt=j',
         resolveWithFullResponse: true,
-        body:
-          'hl=en&continue=https%3A%2F%2Faccounts.google.com%2FManageAccount&f.req=%5B%22AEThLlyK91TD-rkBVKF4sH88l4Z-VO53n2pey9LG4FeYpMecpUzI0xQdv2JtKahyXdt9sG37NoUOoHC9-fwsnI1RA5JeTzeBebHy29pkmCoai3cczysvtyLs7a0yyjQwBTd72QUWm7h88VnTITr0gbD2t0qiqmUh7CeheOQVLnW7NANZyHZ4f7RMRFpYgbADeJtbT26f5CDoUmTRvpSBXAMuRIkbaPId8zcuns94R4orvUowGiv83FK3C7NVbi0o-gu4Q1e6LqJqSPdEYL5c1dUZNhuuDmmIGR_dgzWwsKiEAqrVi23-Udafv3Rit-p08VDEwy7TIf_OK0Tyb_1_KGxQYQq0ca1Pbhgv8I5oj9svxZxr1eF_6Wq5K6_Ke8rrw1NQDSOREGX9iY4k7KKs8MXq1aZwtTpAA5sMcdaQj-IziLEGp1dvVuzBEUfNLVs1QMQxYe138Q9P6dPON6xI30YF2KrG332dkhl_VbsJlPb3ca9MoJ0FTeZpYxlyQcbRKKobnOmbiSozWT4s4i9IUfd9jKn11oa6QJIKIbw_YipHC-9CJTuu60Uo37YkmjaJIWjzPhgKvJjghWs01tzrtuSfz0hbzO0Tggw-k0KMyn8PYs2wExfK-cUAI0B7tOSmSue3jF04y3VhNMCTG4fqux_XcKmZbGHydSZl46yVAovPcG5FEE9DnYk54xgUrxTSXW6jgy4IcQL2NnNx8M-Kjns-zvfAF2bB-kG1aKZwqkLH15v6TTuTji7qU2no1WRZlalhPSTX-aOoWt72PfDGvck7XomqNkkBIAQ24AL0Ypoe4pJuyMZLempLgu9-Xv3UTMrIpGEp11EfV3LE2HqS3tP_KhNNICWXMC6fjVtvRFhwswyqgwLtpEISPIYiGFrEyDvv6VKtgJ8JrUts1V0-xL3V82YEqpCaL1MU7t4Aqgz2qYWMl-gNqDKjcKSO5Xd_VHMCVmiA7fmdQ5nMXGgO9vdcL4YSmgqcWXjc04tNPaf-k5mmD9ykEmdr4DqDwS2MKKkMybMGwT-U3HBBaIethpp7wxwix09z4QPG2pkvof4vH31ldXQonV4%22%2Cnull%2C1%2Cnull%2C%5B1%2Cnull%2Cnull%2Cnull%2C%5B%22Sekinat123%22%2Cnull%2Ctrue%5D%5D%2C%5Bnull%2Cnull%2C%5B2%2C1%2Cnull%2C1%2C%22https%3A%2F%2Faccounts.google.com%2FServiceLogin%3Fhl%3Den%22%2Cnull%2C%5B%5D%2C4%2C%5B%5D%2C%22GlifWebSignIn%22%5D%2C1%2C%5Bnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2C%5B%5D%2C%5B%5D%5D%2Cnull%2Cnull%2Cnull%2Ctrue%5D%5D&bgRequest=%5B%22identifier%22%2C%22!j4yljK1CMPKYchcs8K9Eg0qnjuQqLG4CAAAAxlIAAAAHmQFgEEgI-v5dh3ZE2KHow7386WNYjo09e193vxbzAP21ArJotoVEanUg-G4zmOiW9JLKwFsNrtLl8azqjIgVlC2PKhtNKStc7k5MnPr8q1K0OjtAkI59MA7hNBwo6qyJa46aQo-oRFAEOGio7iCa6dkF74yTRra5XJ99Bt14riBrKYHjVmNLHEoQmTY1nXF0_87swWdILbvRfsqrouZ9dg7eMgbT5k8f01H2MvcgWf9s74-QtEDkupjOvDiKr_qEw2tOgWOg0SIBy4995TMBRgQYVIpS77MlmhpPqJ6jDF0Q7FDOLDBZjQ0QbmcGu25SVgfd5HYJsYhWxOhC1Z6Kma1-QhLe-uhfH3TTJvSZ7rt1f5_mQgNbrAkTODWtJvx_OxOaYPzLlllOTtq3kHh5pGIUk87ZhNAhGWYLceZh_2rWAY5ybVo6HhUKRIeZqT_2TDKSGbf4iBJE8v71OPmyb3cBOw%22%5D&bghash=Eurz7aKF8IqumVYzQ1OPWaVioMwtTQQaPV_ttiabKqw&azt=AFoagUVgjnkngoyWpBQKIDlda1Qv-JFKSQ%3A1549815774884&deviceinfo=%5Bnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2C%22GB%22%2Cnull%2Cnull%2C%5B%5D%2C%22GlifWebSignIn%22%2Cnull%2C%5Bnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2C%5B%5D%2C%5B%5D%5D%5D&gmscoreversion=undefined&checkConnection=youtube%3A1069%3A1&checkedDomains=youtube&pstMsg=1&',
+        body: `hl=en&continue=https%3A%2F%2Faccounts.google.com%2FManageAccount&f.req=%5B%22AEThLlyK91TD-rkBVKF4sH88l4Z-VO53n2pey9LG4FeYpMecpUzI0xQdv2JtKahyXdt9sG37NoUOoHC9-fwsnI1RA5JeTzeBebHy29pkmCoai3cczysvtyLs7a0yyjQwBTd72QUWm7h88VnTITr0gbD2t0qiqmUh7CeheOQVLnW7NANZyHZ4f7RMRFpYgbADeJtbT26f5CDoUmTRvpSBXAMuRIkbaPId8zcuns94R4orvUowGiv83FK3C7NVbi0o-gu4Q1e6LqJqSPdEYL5c1dUZNhuuDmmIGR_dgzWwsKiEAqrVi23-Udafv3Rit-p08VDEwy7TIf_OK0Tyb_1_KGxQYQq0ca1Pbhgv8I5oj9svxZxr1eF_6Wq5K6_Ke8rrw1NQDSOREGX9iY4k7KKs8MXq1aZwtTpAA5sMcdaQj-IziLEGp1dvVuzBEUfNLVs1QMQxYe138Q9P6dPON6xI30YF2KrG332dkhl_VbsJlPb3ca9MoJ0FTeZpYxlyQcbRKKobnOmbiSozWT4s4i9IUfd9jKn11oa6QJIKIbw_YipHC-9CJTuu60Uo37YkmjaJIWjzPhgKvJjghWs01tzrtuSfz0hbzO0Tggw-k0KMyn8PYs2wExfK-cUAI0B7tOSmSue3jF04y3VhNMCTG4fqux_XcKmZbGHydSZl46yVAovPcG5FEE9DnYk54xgUrxTSXW6jgy4IcQL2NnNx8M-Kjns-zvfAF2bB-kG1aKZwqkLH15v6TTuTji7qU2no1WRZlalhPSTX-aOoWt72PfDGvck7XomqNkkBIAQ24AL0Ypoe4pJuyMZLempLgu9-Xv3UTMrIpGEp11EfV3LE2HqS3tP_KhNNICWXMC6fjVtvRFhwswyqgwLtpEISPIYiGFrEyDvv6VKtgJ8JrUts1V0-xL3V82YEqpCaL1MU7t4Aqgz2qYWMl-gNqDKjcKSO5Xd_VHMCVmiA7fmdQ5nMXGgO9vdcL4YSmgqcWXjc04tNPaf-k5mmD9ykEmdr4DqDwS2MKKkMybMGwT-U3HBBaIethpp7wxwix09z4QPG2pkvof4vH31ldXQonV4%22%2Cnull%2C1%2Cnull%2C%5B1%2Cnull%2Cnull%2Cnull%2C%5B%22${password}%22%2Cnull%2Ctrue%5D%5D%2C%5Bnull%2Cnull%2C%5B2%2C1%2Cnull%2C1%2C%22https%3A%2F%2Faccounts.google.com%2FServiceLogin%3Fhl%3Den%22%2Cnull%2C%5B%5D%2C4%2C%5B%5D%2C%22GlifWebSignIn%22%5D%2C1%2C%5Bnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2C%5B%5D%2C%5B%5D%5D%2Cnull%2Cnull%2Cnull%2Ctrue%5D%5D&bgRequest=%5B%22identifier%22%2C%22!j4yljK1CMPKYchcs8K9Eg0qnjuQqLG4CAAAAxlIAAAAHmQFgEEgI-v5dh3ZE2KHow7386WNYjo09e193vxbzAP21ArJotoVEanUg-G4zmOiW9JLKwFsNrtLl8azqjIgVlC2PKhtNKStc7k5MnPr8q1K0OjtAkI59MA7hNBwo6qyJa46aQo-oRFAEOGio7iCa6dkF74yTRra5XJ99Bt14riBrKYHjVmNLHEoQmTY1nXF0_87swWdILbvRfsqrouZ9dg7eMgbT5k8f01H2MvcgWf9s74-QtEDkupjOvDiKr_qEw2tOgWOg0SIBy4995TMBRgQYVIpS77MlmhpPqJ6jDF0Q7FDOLDBZjQ0QbmcGu25SVgfd5HYJsYhWxOhC1Z6Kma1-QhLe-uhfH3TTJvSZ7rt1f5_mQgNbrAkTODWtJvx_OxOaYPzLlllOTtq3kHh5pGIUk87ZhNAhGWYLceZh_2rWAY5ybVo6HhUKRIeZqT_2TDKSGbf4iBJE8v71OPmyb3cBOw%22%5D&bghash=Eurz7aKF8IqumVYzQ1OPWaVioMwtTQQaPV_ttiabKqw&azt=AFoagUVgjnkngoyWpBQKIDlda1Qv-JFKSQ%3A1549815774884&deviceinfo=%5Bnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2C%22GB%22%2Cnull%2Cnull%2C%5B%5D%2C%22GlifWebSignIn%22%2Cnull%2C%5Bnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2C%5B%5D%2C%5B%5D%5D%5D&gmscoreversion=undefined&checkConnection=youtube%3A1069%3A1&checkedDomains=youtube&pstMsg=1&`,
         headers: {
           Accept: '*/*',
           'Cache-Control': 'no-cache',
@@ -245,6 +249,8 @@ export default class ActivityGenerator extends Component {
       console.log(response3);
       console.log(cookieJar);
     } catch (e) {
+      this.props.activities[index].status = 'Error Logging Into Google Account';
+      this.props.onUpdateActivity(index, this.props.activities[index]);
       console.log(e);
     }
   };

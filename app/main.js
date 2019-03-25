@@ -87,9 +87,9 @@ app.on('ready', async () => {
   createMenu();
 
   mainWindow = new BrowserWindow({
-    height: 450,
-    width: 700,
-    minHeight: 700,
+    height: 650,
+    width: 1000,
+    minHeight: 325,
     minWidth: 450,
     frame: false,
     resizable: true

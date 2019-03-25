@@ -5,7 +5,6 @@ const name = currentWindow.name;
 const data = windowManager.sharedData.fetch(currentWindow.name);
 const updateFunction = data.update;
 const activity = data.data;
-let webview = document.querySelector('webview');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const brands = [
@@ -178,27 +177,28 @@ const actionVerbList = [
   'Write',
   'Yell'
 ];
+let webview;
 
-setActivityToRunning = () => {
+const setActivityToRunning = () => {
   activity.status = 'Started';
   updateFunction({ index: name.split('-')[1], activity });
 };
 
-sleep = ms => {
+const sleep = ms => {
   return new Promise(resolve => setTimeout(resolve, ms));
 };
 
-getWebview = async () => {
+const getWebview = async () => {
   const webview = document.querySelector('webview');
-  if (webview === null) {
+  if (webview === null || webview === undefined) {
     await sleep(3000);
-    getWebview;
+    getWebview();
   } else {
     return webview;
   }
 };
 
-convertCookieString = (baseURL, cookieString) => {
+const convertCookieString = (baseURL, cookieString) => {
   if (cookieString.length > 0) {
     const cookieArray = cookieString.split(';');
     let formattedCookieArray = [];
@@ -219,11 +219,11 @@ convertCookieString = (baseURL, cookieString) => {
   }
 };
 
-randomFromArray = providedArray => {
+const randomFromArray = providedArray => {
   return providedArray[Math.floor(Math.random() * providedArray.length)];
 };
 
-randomGoogleSearch = () => {
+const randomGoogleSearch = () => {
   const question = `${randomFromArray(questionWordList)} ${randomFromArray(auxiliaryVerbList)} ${randomFromArray(subjectList)} ${randomFromArray(
     actionVerbList
   )}`;
@@ -231,37 +231,37 @@ randomGoogleSearch = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(question)}`);
     webview.removeEventListener('dom-ready', changeURLGoogleSearch);
     activity.searches += 1;
+    activity.status = `Google Search - ${question}`;
     updateFunction({ index: name.split('-')[1], activity });
   };
-  // webview.addEventListener('dom-ready', changeURLGoogleSearch);
   changeURLGoogleSearch();
 };
 
-randomGoogleShoppingSearch = () => {
+const randomGoogleShoppingSearch = () => {
   const chosenQuery = `buy ${randomFromArray(brands)}`;
   const changeURLShoppingSearch = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=shop`);
     webview.removeEventListener('dom-ready', changeURLShoppingSearch);
     activity.shopping += 1;
+    activity.status = `Google Shopping Search - ${chosenQuery}`;
     updateFunction({ index: name.split('-')[1], activity });
   };
-  // webview.addEventListener('dom-ready', changeURLShoppingSearch);
   changeURLShoppingSearch();
 };
 
-randomGoogleNewsSearch = () => {
+const randomGoogleNewsSearch = () => {
   const chosenQuery = randomFromArray(brands);
   const changeURLNewsSearch = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=nws`);
     webview.removeEventListener('dom-ready', changeURLNewsSearch);
     activity.news += 1;
+    activity.status = `Google News Search - ${chosenQuery}`;
     updateFunction({ index: name.split('-')[1], activity });
   };
-  // webview.addEventListener('dom-ready', changeURLNewsSearch);
   changeURLNewsSearch();
 };
 
-randomTrendingYoutubeVideo = async () => {
+const randomTrendingYoutubeVideo = async () => {
   const response = await rp({
     method: 'GET',
     uri: 'https://www.youtube.com/feed/trending',
@@ -276,31 +276,21 @@ randomTrendingYoutubeVideo = async () => {
   });
   const $ = cheerio.load(response);
   const thumbnailLinksArray = $('.yt-uix-sessionlink').toArray();
+  console.log(thumbnailLinksArray);
   const chosenVideo = thumbnailLinksArray[Math.floor(Math.random() * thumbnailLinksArray.length)];
   const changeURLYoutubeVideo = () => {
     webview.loadURL(`http://youtube.com${chosenVideo.attribs.href}/?autoplay=1&mute=1`);
     webview.removeEventListener('dom-ready', changeURLYoutubeVideo);
     activity.youtube += 1;
+    activity.status = `Watching Youtube Video - ${chosenVideo.attribs.title}`;
     updateFunction({ index: name.split('-')[1], activity });
   };
-  // webview.addEventListener('dom-ready', changeURLYoutubeVideo);
   changeURLYoutubeVideo();
 };
 
 const functionsArray = [randomGoogleSearch, randomGoogleShoppingSearch, randomGoogleNewsSearch, randomTrendingYoutubeVideo];
 
-// loop = () => {
-//   const rand = Math.round(Math.random() * (15000 - 9000)) + 9000;
-//   const chosenFunction = functionsArray[Math.floor(Math.random() * functionsArray.length)];
-//   chosenFunction();
-//   setTimeout(function() {
-//     const chosenFunction = functionsArray[Math.floor(Math.random() * functionsArray.length)];
-//     chosenFunction();
-//     loop();
-//   }, rand);
-// };
-
-loop = async () => {
+const loop = async () => {
   webview.removeEventListener('dom-ready', loop);
   const rand = Math.round(Math.random() * (data.activityDelayMax - data.activityDelayMin)) + data.activityDelayMin;
   console.log(rand);
@@ -310,11 +300,12 @@ loop = async () => {
   loop();
 };
 
-setCookieAndRunLoop = () => {
-  webview = document.querySelector('webview');
+const setCookieAndRunLoop = async () => {
+  // webview = document.querySelector('webview');
+  webview = await getWebview();
   setActivityToRunning();
   const cookies = data.cookies;
-  for (cookieSite in cookies) {
+  for (const cookieSite in cookies) {
     const cookiesCookieSite = cookies[cookieSite]['/'];
     for (const actualCookie in cookiesCookieSite) {
       const formattedCookie = {
