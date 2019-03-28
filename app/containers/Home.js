@@ -6,6 +6,7 @@ import { connect } from 'react-redux';
 import { updateSettings } from '../actions/settings';
 import { createAccount, removeAccount, removeAllAccounts } from '../actions/accounts';
 import { createActivity, removeActivity, removeAllActivities, updateActivity } from '../actions/activity';
+import { addProfile, removeProfile } from '../actions/profile';
 import ProxyCreater from '../components/ProxyCreator';
 import ProxyTester from '../components/ProxyTester';
 import FrontPage from '../components/FrontPage';
@@ -66,7 +67,7 @@ class Home extends Component {
       case 'RaffleBot':
         return <RaffleBot />;
       case 'ProfileGenerator':
-        return <ProfileGenerator />;
+        return <ProfileGenerator profiles={this.props.profiles} onAddProfile={this.props.onAddProfile} />;
       case 'Settings':
         return <Settings settings={this.props.settings} onUpdateSettings={this.props.onUpdateSettings} />;
     }
@@ -101,7 +102,8 @@ class Home extends Component {
 const mapStateToProps = state => ({
   settings: state.neutrinoSettingsReducer,
   accounts: state.neutrinoAccountsReducer,
-  activities: state.neutrinoActivityReducer
+  activities: state.neutrinoActivityReducer,
+  profiles: state.neutrinoProfileReducer
 });
 
 const mapActionsToProps = dispatch => ({
@@ -128,6 +130,12 @@ const mapActionsToProps = dispatch => ({
   },
   onUpdateActivity: content => {
     dispatch(updateActivity(content));
+  },
+  onAddProfile: content => {
+    dispatch(addProfile(content));
+  },
+  onRemoveProfile: content => {
+    dispatch(removeProfile(content));
   }
 });
 
