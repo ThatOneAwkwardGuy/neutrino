@@ -319,7 +319,7 @@ export default class ProfileTaskConverter extends Component {
         }
         const profileOBJ = JSON.parse(data);
         const items = [];
-        for(const profile in profileOBJ) {
+        for (const profile in profileOBJ) {
           items.push(profileOBJ[profile]);
         }
         this.appendToItems(items);

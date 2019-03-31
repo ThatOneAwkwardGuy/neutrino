@@ -304,7 +304,9 @@ const setCookieAndRunLoop = async () => {
   // webview = document.querySelector('webview');
   webview = await getWebview();
   setActivityToRunning();
+  console.log(data.cookies);
   const cookies = data.cookies;
+  console.log(currentWindow.object.webContents.session);
   for (const cookieSite in cookies) {
     const cookiesCookieSite = cookies[cookieSite]['/'];
     for (const actualCookie in cookiesCookieSite) {
@@ -319,6 +321,7 @@ const setCookieAndRunLoop = async () => {
         if (error !== null) {
           console.log(error);
         }
+        console.log(formattedCookie);
       });
     }
   }

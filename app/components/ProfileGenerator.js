@@ -1,8 +1,11 @@
 import React, { Component } from 'react';
 import { Button, Container, Row, Col, Input, Label, Table, Modal, ModalHeader, ModalBody, ModalFooter, Form, FormGroup } from 'reactstrap';
+import Toggle from 'react-toggle';
 import { CSSTransition } from 'react-transition-group';
 import Countries from '../store/countries';
 import FontAwesome from 'react-fontawesome';
+const fs = require('fs');
+const { dialog } = require('electron').remote;
 const TRANSLATIONS = [
   ['street', 'st.', 'st', 'streett', 'steet', 'sreet'],
   ['drive', 'dr.', 'dr', 'drivee', 'driv', 'drv'],
@@ -57,18 +60,14 @@ export default class ProfileGenerator extends Component {
       cardExpiryYear: '',
       cardCVV: '',
       botType: bots[0],
-      deliveryAddress: '',
-      deliveryAptorSuite: '',
-      deliveryCity: '',
-      deliveryCountry: '',
-      deliveryProvince: '',
-      deliveryZip: '',
       massCards: '',
       massCardModal: false,
       profileModal: false,
       regionArrayShipping: [],
       regionArrayBilling: [],
-      cards: []
+      cards: [],
+      jigAddresses: true,
+      fourCharPrefix: false
     };
   }
 
@@ -77,7 +76,6 @@ export default class ProfileGenerator extends Component {
   };
 
   addCard = (cardNumber, cardType, cardExpiryMonth, cardExpiryYear, cardCVV) => {
-    console.log('triggered');
     this.setState({
       cards: [
         ...this.state.cards,
@@ -245,6 +243,7 @@ export default class ProfileGenerator extends Component {
         }
       });
     }
+    console.log(jigs);
     return jigs;
   };
 
@@ -260,44 +259,9 @@ export default class ProfileGenerator extends Component {
     });
   };
 
-  generateAddresses = () => {
-    const addressString = `${this.state.formdata.deliveryCountry}
-${this.state.formdata.deliveryAddress}
-${this.state.formdata.deliveryCity}
-${this.state.formdata.deliveryFirstName}
-${this.state.formdata.deliveryLastName}
-${this.state.formdata.deliveryProvince}
-${this.state.formdata.deliveryZip}
-${this.state.formdata.deliveryAptorSuite}`;
-    console.log(addressString);
-    const jigsSet = this.jigAddress(addressString);
-    const jigs = Array.from(jigsSet).map(text => {
-      return text
-        .toLowerCase()
-        .split(' ')
-        .map(s => s.charAt(0).toUpperCase() + s.substring(1))
-        .join(' ');
-    });
-    let jiggedAddress;
-    if (jigs.length <= this.state.cards.length) {
-      jiggedAddress = jigs;
-      // this.setState({ jiggedAddress: jigs });
-    } else {
-      jiggedAddress = jigs.slice(0, this.state.cards.length);
-      // this.setState({ jiggedAddress: jigs.slice(0, parseInt(this.state.numberOfAddresses)) });
-    }
-    jiggedAddress.forEach(address => {
-      console.log(address);
-      const [
-        deliveryCountry,
-        deliveryAddress,
-        deliveryCity,
-        deliveryFirstName,
-        deliveryLastName,
-        deliveryProvince,
-        deliveryZip,
-        deliveryAptorSuite
-      ] = address.split(/\n/);
+  toggleButton = e => {
+    this.setState({
+      [e.target.name]: !this.state[e.target.name]
     });
   };
 
@@ -327,11 +291,20 @@ ${this.state.formdata.deliveryAptorSuite}`;
     );
   };
 
+  makeid = length => {
+    var text = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (var i = 0; i < length; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text;
+  };
+
   exportAddressesAndCards = () => {
-    const addressString = `${this.state.formdata.deliveryAddress}!@£${this.state.formdata.deliveryAptorSuite}!@£${this.state.formdata.deliveryCity}!@£${
-      this.state.formdata.deliveryProvince
-    }!@£${this.state.formdata.deliveryZip}!@£${this.state.formdata.deliveryCountry}`;
-    const jigsSet = Array.from(this.jigAddress(addressString));
+    const addressString = `${this.state.fourCharPrefix ? this.makeid(4).toUpperCase() + ' ' : ''}${this.state.formdata.deliveryAddress} | ${
+      this.state.formdata.deliveryAptorSuite
+    } | ${this.state.formdata.deliveryCity} | ${this.state.formdata.deliveryProvince} | ${this.state.formdata.deliveryZip} | ${
+      this.state.formdata.deliveryCountry
+    }`;
+    const jigsSet = this.state.jigAddresses ? Array.from(this.jigAddress(addressString)) : Array(this.state.cards.length).fill(addressString);
     const profiles = {};
     let jiggedAddress;
     if (jigsSet.length <= this.state.cards.length) {
@@ -340,44 +313,43 @@ ${this.state.formdata.deliveryAptorSuite}`;
       jiggedAddress = jigsSet.slice(0, this.state.cards.length);
     }
     jiggedAddress.forEach((address, index) => {
-      const [deliveryAddress, deliveryAptorSuite, deliveryCity, deliveryProvince, deliveryZip, deliveryCountry] = address.split('!@£');
-      const card = this.state.card[index];
+      const [deliveryAddress, deliveryAptorSuite, deliveryCity, deliveryProvince, deliveryZip, deliveryCountry] = address.split(' | ');
       switch (this.state.botType) {
         case 'Cybersole':
-          profiles[`Profile - Card ${this.state.cards[index].cardNumber.slice(-4)}`] = {
-            name: `Profile - Card ${this.state.cards[index].cardNumber.slice(-4)}`,
+          profiles[`Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`] = {
+            name: `Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`,
             payment: {
-              email: 'test@gmail.com',
-              phone: 'testnumber',
+              email: this.state.formdata.paymentEmail,
+              phone: this.state.formdata.phoneNumber,
               card: {
-                name: 'Mike Hunt',
-                number: '4242 4242 4242 4242',
-                exp_month: '01',
-                exp_year: '2021',
-                cvv: '123'
+                name: this.state.formdata.paymentCardholdersName,
+                number: this.state.formdata.paymentCardnumber.match(/.{1,4}/g),
+                exp_month: this.state.formdata.paymentCardExpiryMonth,
+                exp_year: this.state.formdata.paymentCardExpiryYear,
+                cvv: this.state.formdata.paymentCVV
               }
             },
             delivery: {
-              first_name: 'Mike',
-              last_name: 'Hunt',
-              addr1: deliveryAddress,
+              first_name: this.state.formdata.deliveryFirstName,
+              last_name: this.state.formdata.deliveryLastName,
+              addr1: `${deliveryAddress} ${deliveryAptorSuite}`,
               addr2: '',
               zip: deliveryZip,
               city: deliveryCity,
               country: deliveryCountry,
               state: deliveryProvince,
-              same_as_del: true
+              same_as_del: false
             },
             billing: {
-              first_name: 'Mike',
-              last_name: 'Hunt',
-              addr1: '123 Main Street',
+              first_name: this.state.formdata.billingFirstName,
+              last_name: this.state.formdata.billingLastName,
+              addr1: `${this.state.formdata.billingAddress} ${this.state.formdata.billingAptorSuite}`,
               addr2: '',
-              zip: '90002',
-              city: 'San Francisco',
-              country: 'United States',
-              state: 'California',
-              same_as_del: true
+              zip: this.state.formdata.billingZip,
+              city: this.state.formdata.billingCity,
+              country: this.state.formdata.billingCountry,
+              state: this.state.formdata.billingProvince,
+              same_as_del: false
             },
             one_checkout: false,
             favourite: false
@@ -387,6 +359,32 @@ ${this.state.formdata.deliveryAptorSuite}`;
           break;
       }
     });
+    const name = `${this.state.botType} - Profiles`;
+    const extension = 'json';
+    const file = JSON.stringify(profiles);
+    dialog.showSaveDialog(
+      {
+        title: 'name',
+        defaultPath: `~/${name}.${extension}`,
+        filters: [{ name: `${name} Files`, extensions: [extension] }]
+      },
+      fileName => {
+        if (fileName === undefined) {
+          return;
+        }
+        fs.writeFile(fileName, file, err => {
+          if (err) {
+            // this.setState({
+            //   profileExportFailure: true
+            // });
+            return;
+          }
+          // this.setState({
+          //   profileExportSuccess: true
+          // });
+        });
+      }
+    );
   };
 
   saveProfile = () => {
@@ -467,51 +465,24 @@ ${this.state.formdata.deliveryAptorSuite}`;
                 </Button>
               </Col>
             </Row>
-            {/* <Row className="my-3">
-              <Col xs="3">
-                <Label>address</Label>
-                <Input type="text" name="deliveryAddress" value={this.state.deliveryAddress} onChange={this.handleChange} />
-              </Col>
-              <Col xs="1">
-                <Label>apt,suite</Label>
-                <Input type="text" name="deliveryAptorSuite" value={this.state.deliveryAptorSuite} onChange={this.handleChange} />
-              </Col>
-              <Col xs="2">
-                <Label>city</Label>
-                <Input type="text" name="deliveryCity" value={this.state.deliveryCity} onChange={this.handleChange} />
-              </Col>
-              <Col xs="2">
-                <Label>country</Label>
-                <Input
-                  type="select"
-                  name="deliveryCountry"
-                  value={this.state.deliveryCountry}
-                  onChange={event => {
-                    this.setRegionArrayShipping(event.target.value);
-                    this.handleChange(event);
-                  }}
-                >
-                  <option value="" />
-                  {this.countryNames.map(this.returnCountry)}
-                </Input>
-              </Col>
-              <Col xs="2">
-                <Label>region</Label>
-                <Input type="select" name="deliveryProvince" value={this.state.deliveryProvince} onChange={this.handleChange}>
-                  {this.state.regionArrayShipping !== null ? this.state.regionArrayShipping.map(this.returnCountry) : null}
-                </Input>
-              </Col>
-              <Col xs="2">
-                <Label>zip code</Label>
-                <Input type="text" name="deliveryZip" value={this.state.deliveryZip} onChange={this.handleChange} />
-              </Col>
-            </Row> */}
             <Row className="my-3">
               <Col xs="2">
                 <Label>bot</Label>
                 <Input type="select" name="botType" onChange={this.handleChange}>
                   {bots.map(this.returnOption)}
                 </Input>
+              </Col>
+              <Col xs="2">
+                <Label style={{ marginBottom: '1rem' }}>Jig Addresses</Label>
+                <div>
+                  <Toggle name="jigAddresses" checked={this.state.jigAddresses} onChange={this.toggleButton} />
+                </div>
+              </Col>
+              <Col xs="3">
+                <Label style={{ marginBottom: '1rem' }}>Prefix With 4 Random Characters</Label>
+                <div>
+                  <Toggle name="fourCharPrefix" checked={this.state.fourCharPrefix} onChange={this.toggleButton} />
+                </div>
               </Col>
               <Col xs="2" className="d-flex flex-column justify-content-end">
                 <Button onClick={this.exportAddressesAndCards}>export</Button>
@@ -537,6 +508,28 @@ ${this.state.formdata.deliveryAptorSuite}`;
             <Modal size="lg" isOpen={this.state.profileModal} toggle={this.toggleProfileModal} centered={true}>
               <ModalHeader style={{ borderBottom: 'none' }}>Profile</ModalHeader>
               <ModalBody>
+                <Row>
+                  <Col>
+                    <Label for="store">payment email</Label>
+                    <Input
+                      type="text"
+                      name="paymentEmail"
+                      id="paymentEmail"
+                      value={this.state.formdata.paymentEmail}
+                      onChange={this.handleChangeShippingOrBilling}
+                    />
+                  </Col>
+                  <Col>
+                    <Label for="store">phone number</Label>
+                    <Input
+                      type="text"
+                      name="phoneNumber"
+                      id="phoneNumber"
+                      value={this.state.formdata.phoneNumber}
+                      onChange={this.handleChangeShippingOrBilling}
+                    />
+                  </Col>
+                </Row>
                 <Row className="activeContainerInner">
                   <Col xs="6">
                     <h6 style={{ fontWeight: 600 }}>delivery address</h6>
@@ -549,9 +542,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="deliveryFirstName"
                             id="deliveryFirstName"
                             value={this.state.formdata.deliveryFirstName}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                         <Col xs="6">
@@ -561,9 +552,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="deliveryLastName"
                             id="deliveryLastName"
                             value={this.state.formdata.deliveryLastName}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                       </FormGroup>
@@ -575,9 +564,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="deliveryAddress"
                             id="deliveryAddress"
                             value={this.state.formdata.deliveryAddress}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                         <Col xs="3">
@@ -587,9 +574,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="deliveryAptorSuite"
                             id="deliveryAptorSuite"
                             value={this.state.formdata.deliveryAptorSuite}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                       </FormGroup>
@@ -601,9 +586,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="deliveryCity"
                             id="deliveryCity"
                             value={this.state.formdata.deliveryCity}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                       </FormGroup>
@@ -631,9 +614,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="deliveryProvince"
                             id="deliveryProvince"
                             value={this.state.formdata.deliveryProvince}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           >
                             {/* {this.state.regionArrayShipping !== null && this.state.regionArrayShipping !== [] ? (
                         this.state.formdata.deliveryProvince !== null && this.state.formdata.deliveryProvince !== '' ? (
@@ -652,9 +633,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="deliveryZip"
                             id="deliveryZip"
                             value={this.state.formdata.deliveryZip}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                       </FormGroup>
@@ -671,9 +650,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="billingFirstName"
                             id="billingFirstName"
                             value={this.state.formdata.billingFirstName}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                         <Col xs="6">
@@ -683,9 +660,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="billingLastName"
                             id="billingLastName"
                             value={this.state.formdata.billingLastName}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                       </FormGroup>
@@ -697,9 +672,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="billingAddress"
                             id="billingAddress"
                             value={this.state.formdata.billingAddress}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                         <Col xs="3">
@@ -709,9 +682,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="billingAptorSuite"
                             id="billingAptorSuite"
                             value={this.state.formdata.billingAptorSuite}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                       </FormGroup>
@@ -723,9 +694,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="billingCity"
                             id="billingCity"
                             value={this.state.formdata.billingCity}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                       </FormGroup>
@@ -753,9 +722,7 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="billingProvince"
                             id="billingProvince"
                             value={this.state.formdata.billingProvince}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           >
                             {this.state.regionArrayBilling !== null ? this.state.regionArrayBilling.map(this.returnCountry) : null}
                           </Input>
@@ -767,22 +734,14 @@ ${this.state.formdata.deliveryAptorSuite}`;
                             name="billingZip"
                             id="billingZip"
                             value={this.state.formdata.billingZip}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                            }}
+                            onChange={this.handleChangeShippingOrBilling}
                           />
                         </Col>
                       </FormGroup>
                       <FormGroup row>
                         <Col xs="12">
                           <Label for="store">
-                            <Button
-                              onClick={() => {
-                                this.setDeliveryToBilling();
-                              }}
-                            >
-                              copy delivery
-                            </Button>
+                            <Button onClick={this.setDeliveryToBilling}>copy delivery</Button>
                             {/* <Input
                       type="checkbox"
                       name="sameDeliveryBilling"

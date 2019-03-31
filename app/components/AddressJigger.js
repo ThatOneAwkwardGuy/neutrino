@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Row, Col, Button, Table, Container, Input, Label, FormGroup, Form } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
 import Countries from '../store/countries';
+import Toggle from 'react-toggle';
 const { clipboard } = require('electron');
 const TRANSLATIONS = [
   ['street', 'st.', 'st', 'streett', 'steet', 'sreet'],
@@ -32,7 +33,9 @@ export default class AddressJigger extends Component {
       deliveryAptorSuite: '',
       numberOfAddresses: '1',
       jiggedAddress: [],
-      regionArrayShipping: []
+      regionArrayShipping: [],
+      jigAddresses: true,
+      fourCharPrefix: false
     };
   }
 
@@ -125,6 +128,12 @@ export default class AddressJigger extends Component {
     return jigs;
   };
 
+  toggleButton = e => {
+    this.setState({
+      [e.target.name]: !this.state[e.target.name]
+    });
+  };
+
   copyToClipboard = () => {
     let string = '';
     this.state.jiggedAddress.forEach(elem => {
@@ -133,20 +142,28 @@ export default class AddressJigger extends Component {
     clipboard.writeText(string, 'selection');
   };
 
+  makeid = length => {
+    var text = '';
+    var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (var i = 0; i < length; i++) text += possible.charAt(Math.floor(Math.random() * possible.length));
+    return text.toUpperCase();
+  };
+
   generateAddresses = () => {
     const addressString = `${this.state.deliveryAddress} ${this.state.deliveryAptorSuite}
     ${this.state.deliveryCity}, ${this.state.deliveryProvince}
     ${this.state.deliveryZip}
     ${this.state.deliveryCountry}`;
-
-    const jigsSet = this.jigAddress(addressString);
+    const jigsSet = this.state.jigAddresses ? this.jigAddress(addressString) : Array(parseInt(this.state.numberOfAddresses)).fill(addressString);
     const jigs = Array.from(jigsSet).map(text => {
-      return text
+      const modifiedText = text
         .toLowerCase()
         .split(' ')
         .map(s => s.charAt(0).toUpperCase() + s.substring(1))
         .join(' ');
+      return `${this.state.fourCharPrefix ? this.makeid(4).toUpperCase() + ' ' : ''}${modifiedText}`;
     });
+
     console.log(jigs);
     if (jigs.length < parseInt(this.state.numberOfAddresses)) {
       this.setState({ jiggedAddress: jigs });
@@ -262,6 +279,18 @@ export default class AddressJigger extends Component {
                 type="number"
               />
             </Col>
+            <Col xs="2">
+              <Label style={{ marginBottom: '1rem' }}>Jig Addresses</Label>
+              <div>
+                <Toggle name="jigAddresses" checked={this.state.jigAddresses} onChange={this.toggleButton} />
+              </div>
+            </Col>
+            <Col xs="3">
+              <Label style={{ marginBottom: '1rem' }}>Prefix With 4 Random Characters</Label>
+              <div>
+                <Toggle name="fourCharPrefix" checked={this.state.fourCharPrefix} onChange={this.toggleButton} />
+              </div>
+            </Col>
             <Col xs="2" className="d-flex flex-row justify-content-end align-items-end">
               <Button
                 className="nButton"
@@ -272,7 +301,7 @@ export default class AddressJigger extends Component {
                 generate
               </Button>
             </Col>
-            <Col xs="2" className="d-flex flex-row justify-content-end align-items-end">
+            <Col xs="1" className="d-flex flex-row justify-content-end align-items-end">
               <Button
                 className="nButton"
                 onClick={() => {

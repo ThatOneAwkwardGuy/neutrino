@@ -16,3 +16,5 @@
 1.0.5b
 - Fix for activity generator gooogle login
 - Fixed initial size of program window
+- Added Profile Generator (Currently Supports Cybersole)
+- Improved Address Jigger To Support Random 4 Character Prefix
