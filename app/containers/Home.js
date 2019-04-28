@@ -7,6 +7,7 @@ import { updateSettings } from '../actions/settings';
 import { createAccount, removeAccount, removeAllAccounts } from '../actions/accounts';
 import { createActivity, removeActivity, removeAllActivities, updateActivity } from '../actions/activity';
 import { addProfile, removeProfile } from '../actions/profile';
+import { checkIfUserMachineIDMatches } from '../api/firebase/firestore';
 import ProxyCreater from '../components/ProxyCreator';
 import ProxyTester from '../components/ProxyTester';
 import FrontPage from '../components/FrontPage';
@@ -17,6 +18,7 @@ import ProfileTaskConverter from '../components/ProfileTaskConverter';
 import ProfileGenerator from '../components/ProfileGenerator';
 import RaffleBot from '../components/RaffleBot';
 import Settings from '../components/Settings';
+import { firestore, auth } from '../api/firebase/firebase';
 const remote = require('electron').remote;
 const windowManager = remote.require('electron-window-manager');
 
@@ -69,7 +71,7 @@ class Home extends Component {
       case 'ProfileGenerator':
         return <ProfileGenerator profiles={this.props.profiles} onAddProfile={this.props.onAddProfile} />;
       case 'Settings':
-        return <Settings settings={this.props.settings} onUpdateSettings={this.props.onUpdateSettings} />;
+        return <Settings history={this.props.history} settings={this.props.settings} onUpdateSettings={this.props.onUpdateSettings} />;
     }
   };
 
@@ -77,8 +79,29 @@ class Home extends Component {
     this.activityWindows[token] = activityWindow;
   };
 
-  changeActiveComponent = activeComponent => {
+  changeActiveComponent = async activeComponent => {
+    // const user = auth.currentUser;
+    // const userStillActive = await checkIfUserMachineIDMatches(user.uid);
+    // if (userStillActive) {
+    //   this.setState({ activeWindow: activeComponent });
+    // } else {
+    //   this.props.history.push('/');
+    // }
     this.setState({ activeWindow: activeComponent });
+  };
+
+  watchForActiveStatus = () => {
+    const user = auth.currentUser;
+    firestore
+      .collection('users')
+      .doc(user.uid)
+      .onSnapshot(snapshot => {
+        const data = snapshot.data();
+        if (data.status !== 'active') {
+          auth.signOut();
+          this.props.history.push('/');
+        }
+      });
   };
 
   // componentDidMount() {
@@ -87,6 +110,12 @@ class Home extends Component {
   //     windowManager.windows[window].close();
   //   }
   // }
+
+  componentDidMount() {
+    if (process.env.NODE_ENV !== 'development') {
+      this.watchForActiveStatus();
+    }
+  }
 
   render() {
     return (

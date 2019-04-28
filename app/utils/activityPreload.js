@@ -198,27 +198,6 @@ const getWebview = async () => {
   }
 };
 
-const convertCookieString = (baseURL, cookieString) => {
-  if (cookieString.length > 0) {
-    const cookieArray = cookieString.split(';');
-    let formattedCookieArray = [];
-    for (const cookie of cookieArray) {
-      console.log(cookie);
-      const nameValuePair = cookie.replace(/\s+/g, '').split(/=(.+)/);
-      formattedCookieArray.push({
-        url: baseURL.includes('supreme') ? `https://www.${baseURL.split('//')[1].split('/')[0]}` : `https://${baseURL}/`,
-        value: nameValuePair[1],
-        domain: '.' + baseURL,
-        path: '/',
-        name: nameValuePair[0]
-      });
-    }
-    return formattedCookieArray;
-  } else {
-    return [];
-  }
-};
-
 const randomFromArray = providedArray => {
   return providedArray[Math.floor(Math.random() * providedArray.length)];
 };
@@ -231,7 +210,8 @@ const randomGoogleSearch = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(question)}`);
     webview.removeEventListener('dom-ready', changeURLGoogleSearch);
     activity.searches += 1;
-    activity.status = `Google Search - ${question}`;
+    // activity.status = `Google Search - ${question}`;
+    activity.status = `Google Search`;
     updateFunction({ index: name.split('-')[1], activity });
   };
   changeURLGoogleSearch();
@@ -243,7 +223,8 @@ const randomGoogleShoppingSearch = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=shop`);
     webview.removeEventListener('dom-ready', changeURLShoppingSearch);
     activity.shopping += 1;
-    activity.status = `Google Shopping Search - ${chosenQuery}`;
+    // activity.status = `Google Shopping Search - ${chosenQuery}`;
+    activity.status = `Google Shopping Search`;
     updateFunction({ index: name.split('-')[1], activity });
   };
   changeURLShoppingSearch();
@@ -255,7 +236,8 @@ const randomGoogleNewsSearch = () => {
     webview.loadURL(`https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=nws`);
     webview.removeEventListener('dom-ready', changeURLNewsSearch);
     activity.news += 1;
-    activity.status = `Google News Search - ${chosenQuery}`;
+    // activity.status = `Google News Search - ${chosenQuery}`;
+    activity.status = `Google News Search`;
     updateFunction({ index: name.split('-')[1], activity });
   };
   changeURLNewsSearch();
@@ -282,7 +264,8 @@ const randomTrendingYoutubeVideo = async () => {
     webview.loadURL(`http://youtube.com${chosenVideo.attribs.href}/?autoplay=1&mute=1`);
     webview.removeEventListener('dom-ready', changeURLYoutubeVideo);
     activity.youtube += 1;
-    activity.status = `Watching Youtube Video - ${chosenVideo.attribs.title}`;
+    // activity.status = `Watching Youtube Video - ${chosenVideo.attribs.title}`;
+    activity.status = `Watching Youtube Video`;
     updateFunction({ index: name.split('-')[1], activity });
   };
   changeURLYoutubeVideo();

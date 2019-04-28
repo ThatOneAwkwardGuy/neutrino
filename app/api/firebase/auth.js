@@ -9,4 +9,12 @@ export const doSignInWithEmailAndPassword = async (email, password) => {
   }
 };
 
+export const signOut = async () => {
+  try {
+    const response = await auth.signOut();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export const authorise = auth;

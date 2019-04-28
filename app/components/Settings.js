@@ -3,6 +3,9 @@ import { Row, Col, Button, Form, FormGroup, Input, Container, Label } from 'reac
 import { CSSTransition } from 'react-transition-group';
 import Toggle from 'react-toggle';
 const { dialog } = require('electron').remote;
+import FontAwesome from 'react-fontawesome';
+var shell = require('electron').shell;
+import { auth } from '../api/firebase';
 
 export default class Settings extends Component {
   constructor(props) {
@@ -33,6 +36,11 @@ export default class Settings extends Component {
     } else {
       this.props.onUpdateSettings(this.state.settings);
     }
+  };
+
+  signOut = () => {
+    auth.signOut();
+    this.props.history.push('/');
   };
 
   initialize() {
@@ -83,13 +91,22 @@ export default class Settings extends Component {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
         <Container fluid className="activeWindow">
-          <Form>
+          <Form style={{ marginTop: '20px' }}>
             <h6>
               <strong>Proxy Creator</strong>
             </h6>
             <FormGroup row>
               <Col xs="4">
-                <label>Google Cloud Credentials File (json)</label>
+                <label>
+                  Google Cloud Credentials File (json){' '}
+                  <a
+                    onClick={() => {
+                      shell.openExternal('https://cloud.google.com/video-intelligence/docs/common/auth');
+                    }}
+                  >
+                    <FontAwesome name="question" className="twitterLogoFooter logoFooter" />
+                  </a>
+                </label>
                 <Button
                   style={{ display: 'block' }}
                   className="nButton"
@@ -206,7 +223,12 @@ export default class Settings extends Component {
               </Col>
             </FormGroup>
             <FormGroup row>
-              <Col xs="2" className="ml-auto">
+              <Col xs="2">
+                <Button color="danger" onClick={this.signOut}>
+                  Sign Out
+                </Button>
+              </Col>
+              <Col xs="2" className="ml-auto text-right">
                 <Button onClick={this.save}>Save</Button>
               </Col>
             </FormGroup>

@@ -25,25 +25,25 @@ export default class ActivityGenerator extends Component {
   returnActivitiesRow = (activity, index) => {
     const total = activity.youtube + activity.searches + activity.shopping + activity.news;
     return (
-      <tr key={`Activity-${index}`} className="activityRow d-flex align-items-center">
-        <td className="col-1">{index + 1}</td>
-        <td className="col">{activity.status}</td>
-        <td className="col">{activity.activityEmail}</td>
-        <td className="col">
+      <tr key={`Activity-${index}`} className="activityRow">
+        <td>{index + 1}</td>
+        <td>{activity.status}</td>
+        <td>{activity.activityEmail}</td>
+        <td>
           <Progress className="progressBar" value={activity.youtube} max={total}>
-            {`${((activity.youtube * 100) / total).toFixed(1)}%`}
+            {/* {`${((activity.youtube * 100) / total).toFixed(1)}%`} */}
           </Progress>
         </td>
-        <td className="col">
+        <td>
           <Progress className="progressBar" value={activity.searches} max={total} />
         </td>
-        <td className="col">
+        <td>
           <Progress className="progressBar" value={activity.shopping} max={total} />
         </td>
-        <td className="col">
+        <td>
           <Progress className="progressBar" value={activity.news} max={total} />
         </td>
-        <td className="col">
+        <td>
           <FontAwesome
             onClick={() => {
               this.startWindow(activity, index);
@@ -428,15 +428,15 @@ export default class ActivityGenerator extends Component {
               <Col xs="12" style={{ overflowY: 'scroll', marginBottom: '30px' }}>
                 <Table responsive hover className="text-center">
                   <thead>
-                    <tr className="d-flex">
-                      <th className="col-1">#</th>
-                      <th className="col">status</th>
-                      <th className="col">account</th>
-                      <th className="col">youtube</th>
-                      <th className="col">searches</th>
-                      <th className="col">shopping</th>
-                      <th className="col">news</th>
-                      <th className="col" />
+                    <tr>
+                      <th>#</th>
+                      <th>status</th>
+                      <th>account</th>
+                      <th>youtube</th>
+                      <th>searches</th>
+                      <th>shopping</th>
+                      <th>news</th>
+                      <th />
                     </tr>
                   </thead>
                   <tbody>{this.props.activities.map(this.returnActivitiesRow)}</tbody>
@@ -456,7 +456,7 @@ export default class ActivityGenerator extends Component {
                 <Label>proxy</Label>
                 <Input name="activityProxy" onChange={this.handleChange} type="text" />
               </Col>
-              <Col xs="1" className="d-flex flex-column justify-content-end">
+              <Col xs="2" className="d-flex flex-column justify-content-end">
                 <Button onClick={this.addActivity}>Add</Button>
               </Col>
               {/* Maybe Add Max Youtube Watch Time .etc */}

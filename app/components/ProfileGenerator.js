@@ -5,6 +5,7 @@ import { CSSTransition } from 'react-transition-group';
 import Countries from '../store/countries';
 import FontAwesome from 'react-fontawesome';
 const fs = require('fs');
+const converter = require('json-2-csv');
 const { dialog } = require('electron').remote;
 const TRANSLATIONS = [
   ['street', 'st.', 'st', 'streett', 'steet', 'sreet'],
@@ -22,7 +23,7 @@ const TRANSLATIONS = [
   ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace']
 ];
 const cardTypes = ['visa', 'mastercard'];
-const bots = ['Cybersole'];
+const bots = ['Cybersole', 'Project Destroyer', 'Ghost', 'EVE AIO', 'Phantom', 'Dashe', 'Hastey', 'CSV'];
 export default class ProfileGenerator extends Component {
   constructor() {
     super();
@@ -291,6 +292,13 @@ export default class ProfileGenerator extends Component {
     );
   };
 
+  string_chop = (str, size) => {
+    if (str == null) return [];
+    str = String(str);
+    size = ~~size;
+    return size > 0 ? str.match(new RegExp('.{1,' + size + '}', 'g')) : [str];
+  };
+
   makeid = length => {
     var text = '';
     var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -298,7 +306,17 @@ export default class ProfileGenerator extends Component {
     return text;
   };
 
-  exportAddressesAndCards = () => {
+  getCardType = number => {
+    var re = new RegExp('^4');
+    if (number.match(re) != null) return 'visa';
+    if (/^(5[1-5][0-9]{14}|2(22[1-9][0-9]{12}|2[3-9][0-9]{13}|[3-6][0-9]{14}|7[0-1][0-9]{13}|720[0-9]{12}))$/.test(number)) return 'master';
+    re = new RegExp('^3[47]');
+    if (number.match(re) != null) return 'american_express';
+    re = new RegExp('^(6011|622(12[6-9]|1[3-9][0-9]|[2-8][0-9]{2}|9[0-1][0-9]|92[0-5]|64[4-9])|65)');
+    return '';
+  };
+
+  exportAddressesAndCards = async () => {
     const addressString = `${this.state.fourCharPrefix ? this.makeid(4).toUpperCase() + ' ' : ''}${this.state.formdata.deliveryAddress} | ${
       this.state.formdata.deliveryAptorSuite
     } | ${this.state.formdata.deliveryCity} | ${this.state.formdata.deliveryProvince} | ${this.state.formdata.deliveryZip} | ${
@@ -322,18 +340,18 @@ export default class ProfileGenerator extends Component {
               email: this.state.formdata.paymentEmail,
               phone: this.state.formdata.phoneNumber,
               card: {
-                name: this.state.formdata.paymentCardholdersName,
-                number: this.state.formdata.paymentCardnumber.match(/.{1,4}/g),
-                exp_month: this.state.formdata.paymentCardExpiryMonth,
-                exp_year: this.state.formdata.paymentCardExpiryYear,
-                cvv: this.state.formdata.paymentCVV
+                name: `${this.state.formdata.deliveryFirstName} ${this.state.formdata.deliveryLastName}`,
+                number: this.state.cards[index].cardNumber.match(/.{1,4}/g).join(' '),
+                exp_month: this.state.cards[index].cardExpiryMonth,
+                exp_year: this.state.cards[index].cardExpiryYear,
+                cvv: this.state.cards[index].cardCVV
               }
             },
             delivery: {
               first_name: this.state.formdata.deliveryFirstName,
               last_name: this.state.formdata.deliveryLastName,
-              addr1: `${deliveryAddress} ${deliveryAptorSuite}`,
-              addr2: '',
+              addr1: deliveryAddress,
+              addr2: deliveryAptorSuite,
               zip: deliveryZip,
               city: deliveryCity,
               country: deliveryCountry,
@@ -343,8 +361,8 @@ export default class ProfileGenerator extends Component {
             billing: {
               first_name: this.state.formdata.billingFirstName,
               last_name: this.state.formdata.billingLastName,
-              addr1: `${this.state.formdata.billingAddress} ${this.state.formdata.billingAptorSuite}`,
-              addr2: '',
+              addr1: this.state.formdata.billingAddress,
+              addr2: this.state.formdata.billingAptorSuite,
               zip: this.state.formdata.billingZip,
               city: this.state.formdata.billingCity,
               country: this.state.formdata.billingCountry,
@@ -355,18 +373,265 @@ export default class ProfileGenerator extends Component {
             favourite: false
           };
           break;
+        case 'Project Destroyer':
+          profiles[`Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`] = {
+            billing: {
+              address1: this.state.formdata.billingAddress,
+              address2: this.state.formdata.billingAptorSuite,
+              city: this.state.formdata.billingCity,
+              country: this.state.formdata.billingCountry,
+              firstName: this.state.formdata.billingFirstName,
+              lastName: this.state.formdata.billingLastName,
+              phone: this.state.formdata.phoneNumber,
+              state: this.state.formdata.billingProvince,
+              zipcode: this.state.formdata.billingZip
+            },
+            card: {
+              code: this.state.cards[index].cardCVV,
+              expire: this.state.cards[index].cardExpiryMonth + ' / ' + this.state.cards[index].cardExpiryYear,
+              name: `${this.state.formdata.deliveryFirstName} ${this.state.formdata.deliveryLastName}`,
+              number: this.state.cards[index].cardNumber
+            },
+            email: this.state.formdata.paymentEmail,
+            id: Math.random()
+              .toString(36)
+              .substring(2, 10),
+            limit: true,
+            match: false,
+            shipping: {
+              address1: deliveryAddress,
+              address2: deliveryAptorSuite,
+              city: deliveryCity,
+              country: deliveryCountry,
+              firstName: this.state.formdata.deliveryFirstName,
+              lastName: this.state.formdata.deliveryLastName,
+              phone: this.state.formdata.phoneNumber,
+              state: deliveryProvince,
+              zipcode: deliveryZip
+            },
+            title: `Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`
+          };
+          break;
+        case 'Ghost':
+          profiles[`Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`] = {
+            CCNumber: this.state.cards[index].cardNumber,
+            CVV: this.state.cards[index].cardCVV,
+            ExpMonth: this.state.cards[index].cardExpiryMonth,
+            ExpYear: this.state.cards[index].cardExpiryYear,
+            CardType: this.getCardType(this.state.cards[index].cardNumber),
+            Same: false,
+            Shipping: {
+              FirstName: this.state.formdata.deliveryFirstName,
+              LastName: this.state.formdata.deliveryLastName,
+              Address: deliveryAddress,
+              Apt: deliveryAptorSuite,
+              City: deliveryCity,
+              State: deliveryProvince,
+              Zip: deliveryZip
+            },
+            Billing: {
+              FirstName: this.state.formdata.billingFirstName,
+              LastName: this.state.formdata.billingLastName,
+              Address: this.state.formdata.billingAddress,
+              Apt: this.state.formdata.billingAptorSuite,
+              City: this.state.formdata.billingCity,
+              State: this.state.formdata.billingProvince,
+              Zip: this.state.formdata.billingZip
+            },
+            Phone: this.state.formdata.phoneNumber,
+            Name: `${this.state.formdata.deliveryFirstName} ${this.state.formdata.deliveryLastName}`,
+            Country: deliveryCountry
+          };
+          break;
+        case 'EVE AIO':
+          profiles[`Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`] = {
+            ProfileName: `Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`,
+            BillingFirstName: this.state.formdata.billingFirstName,
+            BillingLastName: this.state.formdata.billingLastName,
+            BillingAddressLine1: this.state.formdata.billingAddress,
+            BillingAddressLine2: this.state.formdata.billingAptorSuite,
+            BillingCity: this.state.formdata.billingCity,
+            BillingState: this.state.formdata.billingProvince,
+            BillingCountryCode: Countries[this.state.formdata.deliveryCountry].code,
+            BillingZip: this.state.formdata.billingZip,
+            BillingPhone: this.state.formdata.phoneNumber,
+            BillingEmail: this.state.formdata.paymentEmail,
+            ShippingFirstName: this.state.formdata.deliveryFirstName,
+            ShippingLastName: this.state.formdata.deliveryLastName,
+            ShippingAddressLine1: deliveryAddress,
+            ShippingAddressLine2: deliveryAptorSuite,
+            ShippingCity: deliveryCity,
+            ShippingState: deliveryProvince,
+            ShippingCountryCode: deliveryCountry,
+            ShippingZip: deliveryZip,
+            ShippingPhone: this.state.formdata.phoneNumber,
+            ShippingEmail: this.state.formdata.paymentEmail,
+            NameOnCard: this.state.formdata.billingFirstName + ' ' + this.state.formdata.billingLastName,
+            CreditCardNumber: this.state.cards[index].cardNumber,
+            ExpirationMonth: this.state.cards[index].cardExpiryMonth,
+            ExpirationYear: this.state.cards[index].cardExpiryYear,
+            Cvv: this.state.cards[index].cardCVV,
+            CardType: this.getCardType(this.state.cards[index].cardNumber),
+            OneCheckoutPerWebsite: false,
+            SameBillingShipping: false,
+            BirthDay: '',
+            BirthMonth: '',
+            BirthYear: ''
+          };
+          break;
+        case 'Phantom':
+          profiles[`Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`] = {
+            Billing: {
+              Address: this.state.formdata.billingAddress,
+              Apt: this.state.formdata.billingAptorSuite,
+              City: this.state.formdata.billingCity,
+              FirstName: this.state.formdata.billingFirstName,
+              LastName: this.state.formdata.billingLastName,
+              State: this.state.formdata.billingProvince,
+              Zipcode: this.state.formdata.billingZip
+            },
+            CCNumber: this.state.cards[index].cardNumber,
+            CVV: this.state.cards[index].cardCVV,
+            CardType: this.getCardType(this.state.cards[index].cardNumber),
+            Country: deliveryCountry,
+            Email: this.state.formdata.paymentEmail,
+            ExpMonth: this.state.cards[index].cardExpiryMonth,
+            ExpYear: this.state.cards[index].cardExpiryYear,
+            Name: this.state.formdata.deliveryFirstName + ' ' + this.state.formdata.deliveryLastName,
+            Phone: this.state.formdata.phoneNumber,
+            Same: false,
+            Shipping: {
+              Address: deliveryAddress,
+              Apt: deliveryAptorSuite,
+              City: deliveryCity,
+              FirstName: this.state.formdata.deliveryFirstName,
+              LastName: this.state.formdata.deliveryLastName,
+              State: deliveryProvince,
+              Zipcode: deliveryZip
+            }
+          };
+          break;
+        case 'Dashe':
+          profiles[`Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`] = {
+            billing: {
+              address1: this.state.formdata.billingAddress,
+              address2: this.state.formdata.billingAptorSuite,
+              city: this.state.formdata.billingCity,
+              country: this.state.formdata.billingCountry,
+              firstName: this.state.formdata.billingFirstName,
+              lastName: this.state.formdata.billingLastName,
+              phone: this.state.formdata.phoneNumber,
+              state: this.state.formdata.billingProvince,
+              zipcode: this.state.formdata.billingZip
+            },
+            billingMatch: false,
+            card: {
+              cvv: this.state.cards[index].cardCVV,
+              holder: this.state.formdata.deliveryFirstName + ' ' + this.state.formdata.deliveryLastName,
+              month: this.state.cards[index].cardExpiryMonth,
+              number: this.state.cards[index].cardNumber,
+              year: this.state.cards[index].cardExpiryYear
+            },
+            email: this.state.formdata.paymentEmail,
+            profileName: `Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`,
+            shipping: {
+              address: deliveryAddress,
+              apt: deliveryAptorSuite,
+              city: deliveryCity,
+              country: deliveryCountry,
+              firstName: this.state.formdata.deliveryFirstName,
+              lastName: this.state.formdata.deliveryLastName,
+              phoneNumber: this.state.formdata.phoneNumber,
+              state: deliveryProvince,
+              zipCode: deliveryZip
+            }
+          };
+          break;
+        case 'Hastey':
+          profiles[`Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`] = {
+            __profile__name: `Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`,
+            address: deliveryAddress,
+            address_2: deliveryAptorSuite,
+            cardType: this.getCardType(this.state.cards[index].cardNumber),
+            cc_cvv: this.state.cards[index].cardCVV,
+            cc_month: this.state.cards[index].cardExpiryMonth,
+            cc_number: this.state.cards[index].cardNumber,
+            cc_year: this.state.cards[index].cardExpiryYear,
+            city: this.state.formdata.deliveryCity,
+            country: this.state.formdata.deliveryCountry,
+            email: this.state.formdata.paymentEmail,
+            id:
+              Math.random()
+                .toString(36)
+                .substring(2, 10) +
+              '-' +
+              Math.random()
+                .toString(36)
+                .substring(2, 6) +
+              '-' +
+              Math.random()
+                .toString(36)
+                .substring(2, 6) +
+              '-' +
+              Math.random()
+                .toString(36)
+                .substring(2, 6) +
+              '-' +
+              Math.random()
+                .toString(36)
+                .substring(2, 14),
+            name: this.state.formdata.deliveryFirstName + ' ' + this.state.formdata.deliveryLastName,
+            state: this.state.formdata.deliveryProvince,
+            tel: this.state.formdata.phoneNumber,
+            zip: this.state.formdata.deliveryZip
+          };
+          break;
+        case 'CSV':
+          profiles[`Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`] = {
+            profileID: `Profile - Card Ending ${this.state.cards[index].cardNumber.slice(-4)}`,
+            deliveryCountry: deliveryCountry,
+            deliveryAddress: deliveryAddress,
+            deliveryCity: deliveryCity,
+            deliveryFirstName: this.state.formdata.deliveryFirstName,
+            deliveryLastName: this.state.formdata.deliveryLastName,
+            deliveryProvince: deliveryProvince,
+            deliveryZip: deliveryZip,
+            deliveryAptorSuite: deliveryAptorSuite,
+            billingZip: this.state.formdata.billingZip,
+            billingCountry: this.state.formdata.billingCountry,
+            billingAddress: this.state.formdata.billingAddress,
+            billingCity: this.state.formdata.billingCity,
+            billingFirstName: this.state.formdata.billingFirstName,
+            billingLastName: this.state.formdata.billingLastName,
+            billingProvince: this.state.formdata.billingProvince,
+            billingAptorSuite: this.state.formdata.billingAptorSuite,
+            phoneNumber: this.state.formdata.phoneNumber,
+            paymentEmail: this.state.formdata.paymentEmail,
+            paymentCardholdersName: this.state.formdata.paymentCardholdersName,
+            paymentCardnumber: this.state.cards[index].cardNumber,
+            paymentCardExpiryMonth: this.state.cards[index].cardExpiryMonth,
+            paymentCardExpiryYear: this.state.cards[index].cardExpiryYear,
+            paymentCVV: this.state.cards[index].cardCVV
+          };
+          break;
         default:
           break;
       }
     });
     const name = `${this.state.botType} - Profiles`;
-    const extension = 'json';
-    const file = JSON.stringify(profiles);
+    const extension = this.state.botType === 'CSV' ? 'csv' : 'json';
+    let file;
+    if (this.state.botType === 'CSV') {
+      console.log(profiles);
+      file = await converter.json2csvAsync(this.convertProfiles(profiles));
+    } else {
+      file = JSON.stringify(this.convertProfiles(profiles));
+    }
+    console.log(file);
     dialog.showSaveDialog(
       {
         title: 'name',
-        defaultPath: `~/${name}.${extension}`,
-        filters: [{ name: `${name} Files`, extensions: [extension] }]
+        defaultPath: `~/${name}.${extension}`
       },
       fileName => {
         if (fileName === undefined) {
@@ -387,6 +652,14 @@ export default class ProfileGenerator extends Component {
     );
   };
 
+  convertProfiles = profiles => {
+    if (['Project Destroyer', 'Hastey', 'EVE AIO', 'Phantom', 'CSV'].includes(this.state.botType)) {
+      return Object.values(profiles);
+    } else {
+      return profiles;
+    }
+  };
+
   saveProfile = () => {
     const profile = { ...this.state.formdata, profileID: 'ProfileGeneratorProfile' };
     this.props.onAddProfile(profile);
@@ -395,7 +668,10 @@ export default class ProfileGenerator extends Component {
 
   componentDidMount() {
     if (this.props.profiles.profiles.ProfileGeneratorProfile) {
-      this.setState({ formdata: this.props.profiles.profiles.ProfileGeneratorProfile });
+      this.setState({ formdata: this.props.profiles.profiles.ProfileGeneratorProfile }, () => {
+        this.setRegionArrayShipping(this.state.formdata.deliveryCountry);
+        this.setRegionArrayBilling(this.state.formdata.billingCountry);
+      });
     }
   }
 
@@ -479,7 +755,7 @@ export default class ProfileGenerator extends Component {
                 </div>
               </Col>
               <Col xs="3">
-                <Label style={{ marginBottom: '1rem' }}>Prefix With 4 Random Characters</Label>
+                <Label style={{ marginBottom: '1rem' }}>Prefix 4 Random Characters</Label>
                 <div>
                   <Toggle name="fourCharPrefix" checked={this.state.fourCharPrefix} onChange={this.toggleButton} />
                 </div>
@@ -616,13 +892,6 @@ export default class ProfileGenerator extends Component {
                             value={this.state.formdata.deliveryProvince}
                             onChange={this.handleChangeShippingOrBilling}
                           >
-                            {/* {this.state.regionArrayShipping !== null && this.state.regionArrayShipping !== [] ? (
-                        this.state.formdata.deliveryProvince !== null && this.state.formdata.deliveryProvince !== '' ? (
-                          <option key="country-load">{this.state.formdata.deliveryProvince}</option>
-                        ) : (
-                          this.state.regionArrayShipping.map(this.returnCountry)
-                        )
-                      ) : null} */}
                             {this.state.regionArrayShipping !== null ? this.state.regionArrayShipping.map(this.returnCountry) : null}
                           </Input>
                         </Col>

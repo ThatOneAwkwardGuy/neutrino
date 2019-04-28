@@ -1,6 +1,6 @@
 {
   "name": "Neutrino",
-  "version": "1.0.5b",
+  "version": "1.0.2",
   "description": "Neutrino AIO Bot",
   "main": "./webpack-pack/main.js",
   "author": {
@@ -74,6 +74,7 @@
     "grpc": "^1.12.2",
     "history": "^4.6.3",
     "jquery": "^3.3.1",
+    "json-2-csv": "^3.5.2",
     "lodash": "^4.17.10",
     "moment": "^2.22.2",
     "node-machine-id": "^1.1.10",

@@ -63,9 +63,10 @@ export const checkIfUserMachineIDMatches = async UID => {
     .collection(`users`)
     .doc(UID)
     .get();
-  const machineID = response.data().machineID;
+  const data = response.data();
+  const machineID = data.machineID;
   const id = machineIdSync();
-  if (id === machineID) {
+  if (id === machineID && data.status === 'active') {
     return true;
   } else {
     return false;

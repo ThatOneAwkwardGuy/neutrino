@@ -10,15 +10,6 @@ import { BounceLoader } from 'react-spinners';
 class Login extends Component {
   constructor(props) {
     super(props);
-    if (location.hash === '#waiting') {
-      this.props.history.push('/waiting');
-    } else if (location.hash === '#captcha') {
-      this.props.history.push('/captcha');
-    } else if (location.hash === '#activity') {
-      this.props.history.push('/activity');
-    } else {
-      this.checkLoggedIn();
-    }
     this.state = {
       loginEmail: '',
       loginPassword: '',
@@ -29,13 +20,13 @@ class Login extends Component {
     this.handleLogin = this.handleLogin.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
-    window.onbeforeunload = e => {
-      auth.authorise.onAuthStateChanged(user => {
-        if (user) {
-          setUserToCurrentlyInactive(user.uid);
-        }
-      });
-    };
+    // window.onbeforeunload = e => {
+    //   auth.authorise.onAuthStateChanged(user => {
+    //     if (user) {
+    //       setUserToCurrentlyInactive(user.uid);
+    //     }
+    //   });
+    // };
   }
 
   handleChange(e) {
@@ -50,26 +41,54 @@ class Login extends Component {
     });
   }
 
+  componentDidMount() {
+    if (location.hash === '#waiting') {
+      this.props.history.push('/waiting');
+    } else if (location.hash === '#captcha') {
+      this.props.history.push('/captcha');
+    } else if (location.hash === '#activity') {
+      this.props.history.push('/activity');
+    } else {
+      try {
+        this.checkLoggedIn();
+      } catch (error) {
+        console.log(error);
+        this.setState({
+          loginError: true,
+          currentlyLoggingIn: false
+        });
+      }
+    }
+  }
+
   checkLoggedIn = async () => {
     if (process.env.NODE_ENV !== 'development') {
-      await auth.authorise.onAuthStateChanged(async user => {
-        if (user !== null) {
-          console.log(user);
-          this.setState({
-            currentlyLoggingIn: true
-          });
-          await setUserMachineIDOnFirstLoad(user.uid);
-          const machineIDStatus = await checkIfUserMachineIDMatches(user.uid);
-          if (user && machineIDStatus) {
-            this.props.history.push('/bot');
-          } else {
+      try {
+        await auth.authorise.onAuthStateChanged(async user => {
+          if (user !== null) {
+            console.log(user);
             this.setState({
-              loginError: true,
-              currentlyLoggingIn: false
+              currentlyLoggingIn: true
             });
+            await setUserMachineIDOnFirstLoad(user.uid);
+            const machineIDStatus = await checkIfUserMachineIDMatches(user.uid);
+            if (machineIDStatus) {
+              this.props.history.push('/bot');
+            } else {
+              this.setState({
+                loginError: true,
+                currentlyLoggingIn: false
+              });
+            }
           }
-        }
-      });
+        });
+      } catch (error) {
+        console.log(error);
+        this.setState({
+          loginError: true,
+          currentlyLoggingIn: false
+        });
+      }
     } else {
       this.props.history.push('/bot');
     }
@@ -81,8 +100,9 @@ class Login extends Component {
         currentlyLoggingIn: true
       });
       await auth.doSignInWithEmailAndPassword(this.state.loginEmail, this.state.loginPassword);
-      await checkLoggedIn();
+      await this.checkLoggedIn();
     } catch (e) {
+      console.log(e);
       this.setState({
         formError: true,
         currentlyLoggingIn: false
@@ -93,80 +113,6 @@ class Login extends Component {
   render() {
     return (
       <div>
-        {/* <Particles
-          className="frontPageParticles"
-          params={{
-            particles: {
-              number: {
-                value: 80,
-                density: {
-                  enable: true,
-                  value_area: 800
-                }
-              },
-              color: {
-                value: '#ffffff'
-              },
-              shape: {
-                type: 'circle',
-                stroke: {
-                  width: 0,
-                  color: '#000000'
-                },
-                polygon: {
-                  nb_sides: 5
-                },
-                image: {
-                  src: 'img/github.svg',
-                  width: 100,
-                  height: 100
-                }
-              },
-              opacity: {
-                value: 0.5,
-                random: false,
-                anim: {
-                  enable: false,
-                  speed: 1,
-                  opacity_min: 0.1,
-                  sync: false
-                }
-              },
-              size: {
-                value: 3,
-                random: true,
-                anim: {
-                  enable: false,
-                  speed: 40,
-                  size_min: 0.1,
-                  sync: false
-                }
-              },
-              line_linked: {
-                enable: true,
-                distance: 150,
-                color: '#2745fb',
-                opacity: 0.9,
-                width: 1
-              },
-              move: {
-                enable: true,
-                speed: 6,
-                direction: 'none',
-                random: false,
-                straight: false,
-                out_mode: 'out',
-                bounce: false,
-                attract: {
-                  enable: false,
-                  rotateX: 600,
-                  rotateY: 1200
-                }
-              }
-            },
-            retina_detect: true
-          }}
-        /> */}
         <Container fluid>
           <div className="loginTopBar">
             <Header headerType="Login" />

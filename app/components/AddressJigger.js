@@ -286,7 +286,7 @@ export default class AddressJigger extends Component {
               </div>
             </Col>
             <Col xs="3">
-              <Label style={{ marginBottom: '1rem' }}>Prefix With 4 Random Characters</Label>
+              <Label style={{ marginBottom: '1rem' }}>Prefix 4 Random Characters</Label>
               <div>
                 <Toggle name="fourCharPrefix" checked={this.state.fourCharPrefix} onChange={this.toggleButton} />
               </div>
