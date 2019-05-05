@@ -23,3 +23,20 @@
 - Added Support for Project Destroyer, Ghost, EVE AIO, Phantom, Dashe and Hastey Profile Generation.
 
 1.0.2
+- Added https://www.ittaherlcurated.com/ and https://valenciabyenrica.com/ to Account creator
+- Added Same Delivery and Billing Option to Profile Generator
+- Added Limit To 1 Checkout Option to Profile Generator
+
+1.0.3
+- Fixed profile naming to allow for multiple profiles for same card
+- Added Random Names to Profile Gen
+- Added Catchall Email to Profile Gen
+- Added Random Phone Number to Profile Gen
+
+4242424242424242:Visa:03:2020:123
+4242424242424243:Visa:03:2020:123
+4242424242424244:Visa:03:2020:123
+4242424242424245:Visa:03:2020:123
+4242424242424246:Visa:03:2020:123
+4242424242424247:Visa:03:2020:123
+4242424242424248:Visa:03:2020:123

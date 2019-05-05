@@ -134,7 +134,9 @@ const sites = {
   westnyc: 'https://www.westnyc.com',
   wishatl: 'https://wishatl.com',
   worldofhombre: 'https://www.worldofhombre.com',
-  xhibition: 'https://www.xhibition.co'
+  xhibition: 'https://www.xhibition.co',
+  valenciabyenrica: 'https://valenciabyenrica.com',
+  ittaherlcurated: 'https://www.ittaherlcurated.com'
 };
 
 const captcha = {};
@@ -235,6 +237,7 @@ export default class AccountCreator extends Component {
         followRedirect: true,
         jar: true,
         proxy: this.state.useProxies ? this.getRandomProxy() : '',
+        resolveWithFullResponse: true,
         followAllRedirects: true,
         headers: {
           'cache-control': 'no-cache',
@@ -242,6 +245,7 @@ export default class AccountCreator extends Component {
         },
         form: payload
       });
+      console.log(response);
       if (captcha[this.state.site]) {
       } else {
         this.props.onCreateAccount({
