@@ -8,6 +8,7 @@ import {
   OPEN_CAPTCHA_WINDOW,
   RESET_CAPTCHA_WINDOW,
   SET_GLOBAL_ID_VARIABLE,
+  SET_DISCORD_RPC_STATE,
   ALERT_UPDATE_AVAILABLE,
   RESET_CAPTCHA_TOKENS_ARRAY,
   RECEIVE_RESET_CAPTCHA_TOKENS_ARRAY,
@@ -17,12 +18,17 @@ import {
   MAIN_PROCESS_CLEAR_RECEIVE_CAPTCHA_TOKEN_LISTENERS
 } from './utils/constants';
 const ipcMain = require('electron').ipcMain;
-
+const DiscordRPC = require('discord-rpc');
 const isDevelopment = process.env.NODE_ENV === 'development';
-
+const clientId = '575360564767752194';
+const rpc = new DiscordRPC.Client({ transport: 'ipc' });
+const startTimestamp = new Date();
 let mainWindow = null;
 let captchaWindow = null;
 let forceQuit = false;
+let discordRPCState = '';
+
+DiscordRPC.register(clientId);
 
 let initialiseCaptchaWindow = () => {
   captchaWindow = new BrowserWindow({
@@ -65,13 +71,6 @@ const installExtensions = async () => {
   }
 };
 
-// crashReporter.start({
-//   productName: 'YourName',
-//   companyName: 'YourCompany',
-//   submitURL: 'https://your-domain.com/url-to-submit',
-//   uploadToServer: false
-// });
-
 app.on('window-all-closed', () => {
   // On OS X it is common for applications and their menu bar
   // to stay active until the user quits explicitly with Cmd + Q
@@ -105,7 +104,6 @@ app.on('ready', async () => {
 
   initialiseCaptchaWindow();
 
-  // show window once on first load
   mainWindow.webContents.once('did-finish-load', () => {
     mainWindow.show();
   });
@@ -182,6 +180,11 @@ app.on('ready', async () => {
     event.returnValue = true;
   });
 
+  ipcMain.on(SET_DISCORD_RPC_STATE, (event, arg) => {
+    discordRPCState = arg.state;
+    event.returnValue = true;
+  });
+
   ipcMain.on(SEND_CAPTCHA_TOKEN, (event, arg) => {
     mainWindow.send(RECEIVE_CAPTCHA_TOKEN, arg);
     console.log(arg.id);
@@ -205,7 +208,27 @@ app.on('ready', async () => {
   autoUpdater.on('update-downloaded', info => {
     mainWindow.send(ALERT_UPDATE_AVAILABLE, info);
   });
+
+  rpc.on('ready', () => {
+    // activity can only be set every 15 seconds
+    setInterval(() => {
+      setActivity();
+    }, 60e3);
+  });
+
+  rpc.login({ clientId }).catch(console.error);
 });
+
+function setActivity() {
+  rpc.setActivity({
+    details: `Version - 1.0.4`,
+    state: discordRPCState,
+    startTimestamp,
+    largeImageKey: 'logo_small',
+    smallImageKey: 'logo_small',
+    instance: false
+  });
+}
 
 function createMenu() {
   const application = {

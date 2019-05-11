@@ -56,7 +56,6 @@ class Captcha extends Component {
 
   convertCookieString = (baseURL, cookieString) => {
     const cookieArray = cookieString.split(';');
-    console.log(cookieArray);
     let formattedCookieArray = [];
     for (const cookie of cookieArray) {
       const nameValuePair = cookie.replace(/\s+/g, '').split('=');
@@ -75,11 +74,21 @@ class Captcha extends Component {
     this.active = true;
     const webview = document.querySelector('webview');
     const win = remote.getCurrentWindow();
+
+    win.webContents.session.cookies.get({ url: args.baseURL }, (error, cookiesArray) => {
+      console.log(args.baseURL);
+      console.log(cookiesArray);
+      cookiesArray.forEach(cookie => {
+        cookies.remove(args.baseURL, cookie.name, removeResponse => {
+          console.log(removeResponse);
+        });
+      });
+    });
+
     const formattedCookies = this.convertCookieString(args.checkoutURL, args.cookies);
     for (const cookie of formattedCookies) {
       win.webContents.session.cookies.set(cookie, error => {
         if (error !== null) {
-          console.log(error);
         }
       });
     }
@@ -90,7 +99,6 @@ class Captcha extends Component {
     }
 
     const sendGlobalVariable = ipcRenderer.sendSync(SET_GLOBAL_ID_VARIABLE, args);
-    console.log(args);
     webview.loadURL(args.checkoutURL);
     ipcRenderer.once(FINISH_SENDING_CAPTCHA_TOKEN, (event, arg) => {
       if (this.jobsQueue.length > 0) {
@@ -98,14 +106,12 @@ class Captcha extends Component {
       } else {
         this.setState({ waiting: true });
         this.active = false;
-        webview.loadURL('https://accounts.google.com/Login');
+        webview.loadURL('https://google.com');
         ipcRenderer.removeAllListeners(RECEIVE_CAPTCHA_TOKEN);
         ipcRenderer.send(MAIN_PROCESS_CLEAR_RECEIVE_CAPTCHA_TOKEN_LISTENERS);
       }
     });
   };
-
-  resetCaptchaWindow = () => {};
 
   awaitCookiesAndCaptchaURL = () => {
     ipcRenderer.on(CAPTCHA_RECEIVE_COOKIES_AND_CAPTCHA_PAGE, (event, args) => {
@@ -133,7 +139,7 @@ class Captcha extends Component {
           id="captchaWebview"
           src="http://google.com"
           webpreferences="allowRunningInsecureContent, javascript=yes"
-          preload="../../webpack-pack/captchaPreload.js"
+          preload={process.env.NODE_ENV === 'development' ? '../webpack-pack/captchaPreload.js' : '../../webpack-pack/captchaPreload.js'}
           // preload={path.normalize(path.resolve(__dirname, '..', '..', 'webpack-pack', 'captchaPreload.js'))}
           style={{
             width: '100%',

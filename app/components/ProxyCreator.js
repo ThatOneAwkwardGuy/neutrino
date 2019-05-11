@@ -49,36 +49,12 @@ export default class ProxyCreator extends Component {
       projectId: this.props.settings.googleCredentialsPojectID,
       keyFilename: this.props.settings.googleCredentialsPath
     });
-    this.compute.getZones({}, (err, regions) => {
-      if (err) {
-        return err;
-      }
-      const regionsArray = regions.map(elem => elem.id);
-      this.setState({ cloudRegions: regionsArray, region: regionsArray[0] });
-      this.compute.getMachineTypes({ filter: `zone eq ${regionsArray[0]}` }, (err, machineTypes) => {
-        if (err) {
-          return err;
-        }
-        const machineTypesArray = machineTypes.map(elem => elem.id);
-        this.setState({ machineTypes: machineTypesArray, machine: machineTypesArray[0] });
-      });
-    });
-  };
-
-  initializeAmazonAWS = () => {
-    this.compute = new AWS.EC2({
-      accessKeyId: this.props.settings.awsAccessKey,
-      secretAccessKey: this.props.settings.awsSecretKey,
-      region: 'us-west-1',
-      apiVersion: '2016-11-15'
-    });
-    this.compute.describeRegions({}, function(err, data) {
-      if (err) {
-        console.log('Error', err);
-      } else {
-        console.log('Regions: ', data.Regions);
-      }
-    });
+    const [regions] = await this.compute.getZones();
+    const regionsArray = regions.map(elem => ({ name: elem.name, id: elem.id }));
+    this.setState({ cloudRegions: regionsArray, region: regionsArray[0].id });
+    const [machineTypes] = await this.compute.getMachineTypes({ filter: `zone eq ${regionsArray[0].id}` });
+    const machineTypesArray = machineTypes.map(elem => ({ name: elem.name, id: elem.id, price: `N/A` }));
+    this.setState({ machineTypes: machineTypesArray, machine: machineTypesArray[0] });
   };
 
   initializeVultr = async () => {
@@ -97,75 +73,146 @@ export default class ProxyCreator extends Component {
       uri: `https://api.vultr.com/v1/plans/list`,
       json: true
     });
-
     const regionsArray = [];
     const plansArray = [];
     for (const key in regions) {
-      regionsArray.push(`${regions[key].name}-${regions[key].DCID}`);
+      regionsArray.push({ name: regions[key].name, id: regions[key].DCID });
     }
     for (const key of plansIDS) {
       if (plans[key] !== undefined) {
-        plansArray.push(`${plans[key].name}-${plans[key].VPSPLANID}-$${plans[key].price_per_month}p/m`);
+        plansArray.push({ name: plans[key].name, id: plans[key].VPSPLANID, price: `$${plans[key].price_per_month}/month` });
       }
     }
-    this.setState({ cloudRegions: regionsArray, region: regionsArray[0], machineTypes: plansArray, machine: plansArray[0] });
+    this.setState({ cloudRegions: regionsArray, region: regionsArray[0].id, machineTypes: plansArray, machine: plansArray[0] });
   };
 
   initializeDigitalOcean = async () => {
     this.compute = new DigitalOcean(this.props.settings.digitalOceanAPIKey, 10);
     const regions = await this.compute.regionsGetAll();
-    const regionsArray = regions.body.regions.map(elem => `${elem.name}-${elem.slug}`);
+    const regionsArray = regions.body.regions.map(elem => ({ name: elem.name, id: elem.slug }));
+    const sizesArray = await this.compute.sizesGetAll();
+    const sizes = sizesArray.body.sizes.map(elem => ({ id: elem.slug, name: elem.slug, price: `$${elem.price_hourly.toFixed(2)}/hr` }));
     this.setState({
       cloudRegions: regionsArray,
-      machineTypes: regions.body.regions[1].sizes,
-      region: regionsArray[0],
+      machineTypes: sizes,
+      region: regionsArray[0].id,
       machine: regions.body.regions[1].sizes[0]
     });
   };
 
-  intializeCloudLibrary = name => {
+  intializeCloudLibrary = async name => {
+    this.props.setLoading(`Loading ${name} API`, true);
     this.setState({
       cloudRegions: [],
       machineTypes: []
     });
-    switch (name) {
-      case 'Google Cloud':
-        this.initializeGoogleCloud();
-        break;
-      case 'Amazon AWS':
-        this.initializeAmazonAWS();
-        break;
-      case 'Vultr':
-        this.initializeVultr();
-        break;
-      case 'DigitalOcean':
-        this.initializeDigitalOcean();
-        break;
-      default:
-        break;
+    try {
+      switch (name) {
+        case 'Google Cloud':
+          await this.initializeGoogleCloud();
+          break;
+        case 'Amazon AWS':
+          await this.initializeAmazonAWS();
+          break;
+        case 'Vultr':
+          await this.initializeVultr();
+          break;
+        case 'DigitalOcean':
+          await this.initializeDigitalOcean();
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.log(error);
+      this.props.changeInfoModal(true, `Error Loading ${name} API`, error.message, '');
+    } finally {
+      this.props.setLoading('', false);
     }
   };
 
-  createInstance = async name => {
-    switch (name) {
-      case 'Google Cloud':
-        Array.from(Array(parseInt(this.state.quantity))).forEach((x, i) => {
-          this.createGoogleCloudInstance(i);
-        });
-        break;
-      case 'Vultr':
-        for (let i = 0; i < this.state.quantity; i++) {
-          this.createVultrInstance(i);
-          await new Promise(r => setTimeout(r, 1500));
-        }
-        break;
-      case 'DigitalOcean':
-        Array.from(Array(parseInt(this.state.quantity))).forEach((x, i) => {
-          this.createDigitalOceanInstance(i);
-        });
+  sleep = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
 
-      default:
-        break;
+  createInstance = async name => {
+    try {
+      this.props.setLoading(`Creating Proxies On ${name}`, true);
+      let instances = [];
+      switch (name) {
+        case 'Google Cloud':
+          instances = Array.from(Array(parseInt(this.state.quantity))).map((x, i) => {
+            return this.createGoogleCloudInstance(i).catch(e => e);
+          });
+          break;
+        case 'Vultr':
+          instances = Array.from(Array(parseInt(this.state.quantity))).map((x, i) => {
+            return new Promise(r => setTimeout(r(this.createVultrInstance(i).catch(e => e)), 1500 * i));
+          });
+          // for (let i = 0; i < this.state.quantity; i++) {
+          //   this.createVultrInstance(i);
+          //   await new Promise(r => setTimeout(r, 1500));
+          // }
+          break;
+        case 'DigitalOcean':
+          instances = Array.from(Array(parseInt(this.state.quantity))).map((x, i) => {
+            return this.createDigitalOceanInstance(i).catch(e => e);
+          });
+        default:
+          break;
+      }
+      const resolvedInstances = await Promise.all(instances);
+      const invalidResults = resolvedInstances.filter(result => result !== undefined);
+      console.log(invalidResults);
+      if (invalidResults.length > 0) {
+        this.props.changeInfoModal(
+          true,
+          `Error Creating Proxies On ${name}`,
+          <Table>
+            <thead>
+              <tr>
+                <th>Error Name</th>
+                <th>Error Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invalidResults.map((error, index) => {
+                if (error.constructor.name === 'ApiError') {
+                  return (
+                    <tr key={`error-${index}`}>
+                      <td>{error.errors[0].reason}</td>
+                      <td>{error.errors[0].message}</td>
+                    </tr>
+                  );
+                } else if (error instanceof Error) {
+                  return (
+                    <tr key={`error-${index}`}>
+                      <td>{error.name}</td>
+                      <td>{error.error}</td>
+                    </tr>
+                  );
+                } else {
+                  return (
+                    <tr key={`error-${index}`}>
+                      <td>{error.id}</td>
+                      <td>{error.message}</td>
+                    </tr>
+                  );
+                }
+              })}
+            </tbody>
+          </Table>
+        );
+      }
+    } catch (error) {
+      this.props.changeInfoModal(
+        true,
+        `Error Creating Proxies On ${name}`,
+        `There was an error creating the proxies on ${name}, please check you internet connection, try again or ocntact support.`,
+        ''
+      );
+    } finally {
+      this.props.setLoading('', false);
     }
   };
 
@@ -217,6 +264,7 @@ export default class ProxyCreator extends Component {
       http: true,
       https: true,
       machineType: this.state.machineType,
+      canIpForward: true,
       metadata: {
         items: [
           {
@@ -236,17 +284,19 @@ export default class ProxyCreator extends Component {
     };
     const vm = zone.vm(`${this.state.instanceName}-${index + 1}`);
     const [, operation] = await vm.create(config);
+    console.log(operation);
     await operation.promise();
     const [metadata] = await vm.getMetadata();
+    console.log(metadata);
     const ip = metadata.networkInterfaces[0].accessConfigs[0].natIP;
-    await this.pingVM(ip, vm, `${this.state.instanceName}-${index + 1}`);
-    console.log(`created succesfully`);
+    console.log(ip);
+    return this.pingVM(ip, vm, `${this.state.instanceName}-${index + 1}`);
   };
 
   createDigitalOceanInstance = async index => {
     const response = await this.compute.dropletsCreate({
       name: `${this.state.instanceName}-${index}`,
-      region: this.state.region.split('-')[1],
+      region: this.state.region,
       size: this.state.machine,
       image: 'centos-7-x64',
       user_data: `#!/bin/bash\nyum install squid wget httpd-tools openssl openssl-devel -y &&\ntouch /etc/squid/passwd &&\nhtpasswd -b /etc/squid/passwd ${
@@ -255,47 +305,43 @@ export default class ProxyCreator extends Component {
         this.state.proxyPassword
       } &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
     });
-    await this.pollDigitalOceanInstance(response.body.droplet.id);
+    return this.pollDigitalOceanInstance(response.body.droplet.id);
   };
 
   createVultrInstance = async index => {
-    try {
-      const startUpScriptResponse = await rp({
-        method: 'POST',
-        uri: 'https://api.vultr.com/v1/startupscript/create',
-        headers: {
-          'API-Key': this.props.settings.vultrAPIKey
-        },
-        json: true,
-        form: {
-          name: index,
-          script: `#!/bin/bash\nyum install squid wget httpd-tools openssl openssl-devel -y &&\ntouch /etc/squid/passwd &&\nhtpasswd -b /etc/squid/passwd ${
-            this.state.proxyUser
-          } ${
-            this.state.proxyPassword
-          } &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
-        }
-      });
-      const instanceCreateResponse = await rp({
-        method: 'POST',
-        uri: 'https://api.vultr.com/v1/server/create',
-        headers: {
-          'API-Key': this.props.settings.vultrAPIKey
-        },
-        json: true,
-        form: {
-          DCID: parseInt(this.state.region.split('-')[1]),
-          VPSPLANID: parseInt(this.state.machine.split('-')[1]),
-          OSID: 167,
-          SCRIPTID: startUpScriptResponse.SCRIPTID,
-          hostname: `${this.state.instanceName}-${index}`,
-          label: `${this.state.instanceName}-${index}`
-        }
-      });
-      await this.pollVultrInstance(instanceCreateResponse.SUBID, startUpScriptResponse.SCRIPTID);
-    } catch (error) {
-      console.log(error);
-    }
+    const startUpScriptResponse = await rp({
+      method: 'POST',
+      uri: 'https://api.vultr.com/v1/startupscript/create',
+      headers: {
+        'API-Key': this.props.settings.vultrAPIKey
+      },
+      json: true,
+      form: {
+        name: index,
+        script: `#!/bin/bash\nyum install squid wget httpd-tools openssl openssl-devel -y &&\ntouch /etc/squid/passwd &&\nhtpasswd -b /etc/squid/passwd ${
+          this.state.proxyUser
+        } ${
+          this.state.proxyPassword
+        } &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
+      }
+    });
+    const instanceCreateResponse = await rp({
+      method: 'POST',
+      uri: 'https://api.vultr.com/v1/server/create',
+      headers: {
+        'API-Key': this.props.settings.vultrAPIKey
+      },
+      json: true,
+      form: {
+        DCID: parseInt(this.state.region.split('-')[1]),
+        VPSPLANID: parseInt(this.state.machine.split('-')[1]),
+        OSID: 167,
+        SCRIPTID: startUpScriptResponse.SCRIPTID,
+        hostname: `${this.state.instanceName}-${index}`,
+        label: `${this.state.instanceName}-${index}`
+      }
+    });
+    return this.pollVultrInstance(instanceCreateResponse.SUBID, startUpScriptResponse.SCRIPTID);
   };
 
   pollVultrInstance = async (SUBID, SCRIPTID) => {
@@ -416,20 +462,16 @@ export default class ProxyCreator extends Component {
     return false;
   };
 
-  updateGoogleCloudMachineTypes = () => {
-    this.compute.getMachineTypes({ filter: `zone eq ${this.state.region}` }, (err, machineTypes) => {
-      if (err) {
-        return err;
-      }
-      const machineTypesArray = machineTypes.map(elem => elem.id);
-      this.setState({ machineTypes: machineTypesArray, machine: machineTypesArray[0] });
-    });
+  updateGoogleCloudMachineTypes = async () => {
+    const [machineTypes] = await this.compute.getMachineTypes({ filter: `zone eq ${this.state.region}` });
+    const machineTypesArray = machineTypes.map(elem => ({ id: elem.id, name: elem.name, price: 'N/A' }));
+    this.setState({ machineTypes: machineTypesArray, machine: machineTypesArray[0] });
   };
 
   updateVultrMachineType = async () => {
     const plansIDS = await rp({
       method: 'GET',
-      uri: `https://api.vultr.com/v1/regions/availability?DCID=${this.state.region.split('-')[1]}`,
+      uri: `https://api.vultr.com/v1/regions/availability?DCID=${this.state.region}`,
       json: true
     });
     const plans = await rp({
@@ -440,38 +482,61 @@ export default class ProxyCreator extends Component {
     const plansArray = [];
     for (const key of plansIDS) {
       if (plans[key] !== undefined) {
-        plansArray.push(`${plans[key].name}-${plans[key].VPSPLANID}-$${plans[key].price_per_month}p/m`);
+        plansArray.push({ name: plans[key].name, id: plans[key].VPSPLANID, price: `$${plans[key].price_per_month}/month` });
       }
     }
     this.setState({ machineTypes: plansArray, machine: plansArray[0] });
   };
 
   updateDigitalOceanMachineType = async () => {
-    const region = this.state.region.split('-');
-    const regionsResponse = await this.compute.regionsGetAll();
-    const machineTypesArray = regionsResponse.body.regions.filter(elem => elem.name === this.state.region.split('-')[0])[0].sizes;
+    const regions = await this.compute.regionsGetAll();
+    const regionsArray = regions.body.regions.map(elem => ({ name: elem.name, id: elem.slug }));
+    const sizesArray = await this.compute.sizesGetAll();
+    const sizes = sizesArray.body.sizes.map(elem => ({ id: elem.slug, name: elem.slug, price: `$${elem.price_hourly.toFixed(2)}/hr` }));
     this.setState({
-      machineTypes: machineTypesArray,
-      machine: machineTypesArray[0]
+      cloudRegions: regionsArray,
+      machineTypes: sizes,
+      region: regionsArray[0].id,
+      machine: regions.body.regions[1].sizes[0]
     });
   };
 
-  updateMachineTypes = () => {
-    switch (this.state.cloud) {
-      case 'Google Cloud':
-        this.updateGoogleCloudMachineTypes();
-        break;
-      case 'Vultr':
-        this.updateVultrMachineType();
-        break;
-      case 'DigitalOcean':
-        this.updateDigitalOceanMachineType();
-        break;
+  updateMachineTypes = async () => {
+    try {
+      this.props.setLoading(`Loading ${this.state.cloud} Machines`, true);
+      switch (this.state.cloud) {
+        case 'Google Cloud':
+          await this.updateGoogleCloudMachineTypes();
+          break;
+        case 'Vultr':
+          await this.updateVultrMachineType();
+          break;
+        case 'DigitalOcean':
+          await this.updateDigitalOceanMachineType();
+          break;
+      }
+    } catch (error) {
+      console.log(error);
+      this.props.changeInfoModal(true, `Error Loading ${name} Machines`, error.message, '');
+    } finally {
+      this.props.setLoading('', false);
     }
   };
 
-  returnOptions = array => {
-    return array.map((elem, index) => <option key={`region-${index}`}>{elem}</option>);
+  returnOptions = (name, array) => {
+    if (name === 'region') {
+      return array.map((elem, index) => (
+        <option value={elem.id} key={`region-${index}`}>
+          {elem.name}
+        </option>
+      ));
+    } else if (name === 'machine') {
+      return array.map((elem, index) => (
+        <option value={elem.id} key={`region-${index}`}>
+          {elem.name} - {elem.price}
+        </option>
+      ));
+    }
   };
 
   copyToClipboard = () => {
@@ -563,7 +628,7 @@ export default class ProxyCreator extends Component {
                 }}
                 type="select"
               >
-                {this.returnOptions(this.state.cloudRegions)}
+                {this.returnOptions('region', this.state.cloudRegions)}
               </Input>
             </Col>
             <Col xs="3">
@@ -575,7 +640,7 @@ export default class ProxyCreator extends Component {
                 }}
                 type="select"
               >
-                {this.returnOptions(this.state.machineTypes)}
+                {this.returnOptions('machine', this.state.machineTypes)}
               </Input>
             </Col>
           </FormGroup>

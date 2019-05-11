@@ -11,6 +11,7 @@ import './fonts/stylesheet.css';
 import './app.global.css';
 import './react-datetime.css';
 import 'react-toggle/style.css';
+import 'react-table/react-table.css';
 
 const syncHistoryWithStore = (store, history) => {
   const { routing } = store.getState();

@@ -139,8 +139,6 @@ const sites = {
   ittaherlcurated: 'https://www.ittaherlcurated.com'
 };
 
-const captcha = {};
-
 export default class AccountCreator extends Component {
   constructor(props) {
     super(props);
@@ -150,7 +148,7 @@ export default class AccountCreator extends Component {
       randomFirstLast: true,
       useProxies: false,
       advancedSettings: false,
-      accountCreationDelay: false,
+      accountCreationDelay: true,
       createdAccount: [],
       site: Object.keys(sites)[0],
       quantity: '1',
@@ -158,17 +156,20 @@ export default class AccountCreator extends Component {
       password: '',
       firstName: '',
       lastName: '',
-      accountCreationDelayAmount: ''
+      accountCreationDelayAmount: 5000
     };
-    this.tokenID = uuidv4();
-    this.cookieJar = request.jar();
+    this.tokenIDs = [];
+    this.cookieJars = {};
     this.rp = request.defaults({
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
-      },
-      jar: this.cookieJar
+      }
     });
   }
+
+  componentDidMount = () => {
+    this.awaitShopifyAccountChallenge();
+  };
 
   returnOptions = (optionsArray, name) => {
     return optionsArray.map((elem, index) => <option key={`option-${name}-${index}`}>{elem}</option>);
@@ -215,12 +216,57 @@ export default class AccountCreator extends Component {
     return proxies[Math.floor(Math.random() * proxies.length)];
   };
 
+  awaitShopifyAccountChallenge = () => {
+    ipcRenderer.on(RECEIVE_CAPTCHA_TOKEN, async (event, captchaToken) => {
+      if (this.tokenIDs.includes(captchaToken.id) && captchaToken.type === 'shopify') {
+        this.removeTokenFromTokenIDs(captchaToken.id);
+        ipcRenderer.send(FINISH_SENDING_CAPTCHA_TOKEN, {});
+        const payloadChallenge = {
+          utf8: '✓',
+          authenticity_token: captchaToken.authToken,
+          'g-recaptcha-response': captchaToken.captchaResponse
+        };
+        const responseChallenge = await this.rp({
+          method: 'POST',
+          url: `${sites[this.state.site]}/account`,
+          followRedirect: true,
+          proxy: this.state.useProxies ? this.getRandomProxy() : '',
+          resolveWithFullResponse: true,
+          followAllRedirects: true,
+          headers: {
+            accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+            'accept-language': 'en-US,en;q=0.9',
+            'cache-control': 'no-cache',
+            'content-type': 'application/x-www-form-urlencoded',
+            pragma: 'no-cache',
+            referrer: `${sites[this.state.site]}/challenge`,
+            referrerPolicy: 'no-referrer-when-downgrade',
+            'upgrade-insecure-requests': '1',
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+          },
+          jar: this.cookieJars[captchaToken.id],
+          form: payloadChallenge
+        });
+        console.log(responseChallenge);
+        if (!responseChallenge.request.href.includes('register'))
+          this.props.onCreateAccount({
+            email: captchaToken.email,
+            site: captchaToken.site,
+            pass: captchaToken.pass,
+            status: 'created'
+          });
+      }
+    });
+  };
+
   createShopifyAccount = async () => {
     const email = randomEmail({ domain: this.state.catchall });
     const pass = this.state.randomPassword ? randomize('a', 10) : this.state.password;
     const firstName = this.state.randomFirstLast ? random.first() : this.state.firstName;
     const lastName = this.state.randomFirstLast ? random.last() : this.state.lastName;
-
+    const tokenID = uuidv4();
+    this.tokenIDs.push(tokenID);
+    this.cookieJars[tokenID] = request.jar();
     const payload = {
       form_type: ' create_customer',
       utf8: ' ✓',
@@ -229,119 +275,63 @@ export default class AccountCreator extends Component {
       'customer[email]': email,
       'customer[password]': pass
     };
-
     try {
       const response = await this.rp({
         method: 'POST',
         url: `${sites[this.state.site]}/account`,
         followRedirect: true,
-        jar: true,
         proxy: this.state.useProxies ? this.getRandomProxy() : '',
         resolveWithFullResponse: true,
         followAllRedirects: true,
+        jar: this.cookieJars[tokenID],
         headers: {
+          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+          'accept-language': 'en-US,en;q=0.9',
           'cache-control': 'no-cache',
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+          'content-type': 'application/x-www-form-urlencoded',
+          pragma: 'no-cache',
+          'upgrade-insecure-requests': '1',
+          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+          referrer: `${sites[this.state.site]}/account/register`,
+          referrerPolicy: 'no-referrer-when-downgrade'
         },
         form: payload
       });
-      console.log(response);
-      if (captcha[this.state.site]) {
-      } else {
-        this.props.onCreateAccount({
+      if (response.request.href && response.request.href.includes('challenge')) {
+        ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
+        ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
+          cookies: this.cookieJars[tokenID].getCookieString(sites[this.state.site]),
+          checkoutURL: response.request.href,
+          id: tokenID,
+          type: 'shopify',
+          proxy: this.state.useProxies ? this.getRandomProxy() : '',
+          baseURL: sites[this.state.site],
           email: email,
           site: this.state.site,
           pass: pass
         });
+      } else {
+        if (!responseChallenge.request.href.includes('register')) {
+          this.props.onCreateAccount({
+            email: email,
+            site: this.state.site,
+            pass: pass,
+            status: 'created'
+          });
+        }
       }
     } catch (error) {
       console.log(error);
     }
   };
 
-  getSotoStoreToken = async captchaToken => {
-    try {
-      await this.rp({
-        method: 'GET',
-        url: 'https://www.sotostore.com/en/auth/view?op=register',
-        headers: {
-          Cookie: this.cookieJar.getCookieString('https://www.sotostore.com')
-        }
-      });
-    } catch (error) {
-      const $ = cheerio.load(error.error);
-      const s = $('input[name="s"]').attr('value');
-      const id = '4a280b22e8aa3572';
-      const response = await this.rp({
-        method: 'GET',
-        resolveWithFullResponse: true,
-        url: `https://www.sotostore.com/cdn-cgi/l/chk_captcha?s=${s}id=${id}&g-recaptcha-response=${captchaToken}`
-      });
-      for (const cookie in response.headers['set-cookie']) {
-        if (cookie.includes('AntiCsrfToken')) {
-          return cookie.split('=')[1];
-        }
-      }
-      console.log(response);
-    }
-  };
-
-  createSotoStoreAccount = async () => {
-    ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
-    ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
-      cookies: '',
-      checkoutURL: 'https://www.sotostore.com/en/auth/view',
-      id: this.tokenID,
-      proxy: this.state.useProxies ? this.getRandomProxy() : '',
-      baseURL: 'https://www.sotostore.com/en/auth/view'
-    });
-    ipcRenderer.once(RECEIVE_CAPTCHA_TOKEN, async (event, captchaToken) => {
-      ipcRenderer.send(FINISH_SENDING_CAPTCHA_TOKEN, {});
-      captchaToken.cookies.split(';').forEach(cookiePair => {
-        const splitCookie = cookiePair.split('=');
-        let cart1Cookie = new tough.Cookie({
-          key: splitCookie[0],
-          value: splitCookie[1],
-          domain: '.sotostore.com',
-          path: '/'
-        });
-        this.cookieJar.setCookie(cart1Cookie.toString(), 'https://www.sotostore.com');
-      });
-
-      const antiCsrfToken = await this.getSotoStoreToken(captchaToken);
-      const email = randomEmail({ domain: this.state.catchall });
-      const pass = this.state.randomPassword ? randomize('a', 10) : this.state.password;
-      const firstName = this.state.randomFirstLast ? random.first() : this.state.firstName;
-      const lastName = this.state.randomFirstLast ? random.last() : this.state.lastName;
-      const payload = {
-        _AntiCsrfToken: antiCsrfToken,
-        firstName: firstName,
-        email: email,
-        password: pass,
-        'g-recaptcha-response': captchaToken.captchaResponse,
-        action: 'register'
-      };
-      try {
-        const response = await this.rp({
-          method: 'POST',
-          url: `${sites[this.state.site]}/account`,
-          followRedirect: true,
-          jar: true,
-          proxy: this.state.useProxies ? this.getRandomProxy() : '',
-          followAllRedirects: true,
-          headers: {
-            'cache-control': 'no-cache',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
-          },
-          form: payload
-        });
-      } catch (error) {
-        console.log(error);
-      }
-    });
+  removeTokenFromTokenIDs = tokenID => {
+    this.tokenIDs = this.tokenIDs.filter(token => token !== tokenID);
   };
 
   start = async () => {
+    this.tokenIDs = [];
+    this.cookieJars = {};
     if (Object.keys(sites).includes(this.state.site)) {
       for (let i = 0; i < parseInt(this.state.quantity); i++) {
         switch (this.state.site) {
@@ -351,7 +341,7 @@ export default class AccountCreator extends Component {
           default:
             await this.createShopifyAccount();
             if (this.state.accountCreationDelay) {
-              this.sleep(parseInt(this.state.accountCreationDelayAmount));
+              await this.sleep(this.state.accountCreationDelayAmount);
             }
             break;
         }
@@ -368,9 +358,96 @@ export default class AccountCreator extends Component {
   };
 
   sleep = ms => {
-    console.log(`[${moment().format('HH:mm:ss:SSS')}] - Sleeping For ${ms}ms`);
     return new Promise(resolve => setTimeout(resolve, ms));
   };
+
+  // getSotoStoreToken = async captchaToken => {
+  //   try {
+  //     await this.rp({
+  //       method: 'GET',
+  //       url: 'https://www.sotostore.com/en/auth/view?op=register',
+  //       headers: {
+  //         Cookie: this.cookieJar.getCookieString('https://www.sotostore.com')
+  //       },
+  //       jar: this.cookieJar
+  //     });
+  //   } catch (error) {
+  //     const $ = cheerio.load(error.error);
+  //     const s = $('input[name="s"]').attr('value');
+  //     const id = '4a280b22e8aa3572';
+  //     const response = await this.rp({
+  //       method: 'GET',
+  //       resolveWithFullResponse: true,
+  //       jar: this.cookieJar,
+  //       url: `https://www.sotostore.com/cdn-cgi/l/chk_captcha?s=${s}id=${id}&g-recaptcha-response=${captchaToken}`
+  //     });
+  //     for (const cookie in response.headers['set-cookie']) {
+  //       if (cookie.includes('AntiCsrfToken')) {
+  //         return cookie.split('=')[1];
+  //       }
+  //     }
+  //     console.log(response);
+  //   }
+  // };
+
+  // createSotoStoreAccount = async () => {
+  //   const tokenID = uuidv4();
+  //   this.tokenIDs.push(tokenID);
+  //   ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
+  //   ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
+  //     cookies: '',
+  //     checkoutURL: 'https://www.sotostore.com/en/auth/view',
+  //     id: tokenID,
+  //     proxy: this.state.useProxies ? this.getRandomProxy() : '',
+  //     baseURL: 'https://www.sotostore.com/en/auth/view'
+  //   });
+  //   ipcRenderer.once(RECEIVE_CAPTCHA_TOKEN, async (event, captchaToken) => {
+  //     if (captchaToken.id === tokenID) {
+  //       ipcRenderer.send(FINISH_SENDING_CAPTCHA_TOKEN, {});
+  //       captchaToken.cookies.split(';').forEach(cookiePair => {
+  //         const splitCookie = cookiePair.split('=');
+  //         let cart1Cookie = new tough.Cookie({
+  //           key: splitCookie[0],
+  //           value: splitCookie[1],
+  //           domain: '.sotostore.com',
+  //           path: '/'
+  //         });
+  //         this.cookieJar.setCookie(cart1Cookie.toString(), 'https://www.sotostore.com');
+  //       });
+
+  //       const antiCsrfToken = await this.getSotoStoreToken(captchaToken);
+  //       const email = randomEmail({ domain: this.state.catchall });
+  //       const pass = this.state.randomPassword ? randomize('a', 10) : this.state.password;
+  //       const firstName = this.state.randomFirstLast ? random.first() : this.state.firstName;
+  //       const lastName = this.state.randomFirstLast ? random.last() : this.state.lastName;
+  //       const payload = {
+  //         _AntiCsrfToken: antiCsrfToken,
+  //         firstName: firstName,
+  //         email: email,
+  //         password: pass,
+  //         'g-recaptcha-response': captchaToken.captchaResponse,
+  //         action: 'register'
+  //       };
+  //       try {
+  //         const response = await this.rp({
+  //           method: 'POST',
+  //           url: `${sites[this.state.site]}/account`,
+  //           followRedirect: true,
+  //           jar: this.cookieJar,
+  //           proxy: this.state.useProxies ? this.getRandomProxy() : '',
+  //           followAllRedirects: true,
+  //           headers: {
+  //             'cache-control': 'no-cache',
+  //             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+  //           },
+  //           form: payload
+  //         });
+  //       } catch (error) {
+  //         console.log(error);
+  //       }
+  //     }
+  //   });
+  // };
 
   render() {
     return (
@@ -389,7 +466,7 @@ export default class AccountCreator extends Component {
                       <th>action</th>
                     </tr>
                   </thead>
-                  <tbody>{this.state.createdAccount.map(this.returnAccountRow)}</tbody>
+                  <tbody>{this.props.accounts.accounts.map(this.returnAccountRow)}</tbody>
                 </Table>
               </Col>
             </Row>
@@ -493,7 +570,6 @@ export default class AccountCreator extends Component {
                   color="danger"
                   style={{ margin: '5px' }}
                   onClick={() => {
-                    console.log('reset');
                     ipcRenderer.send(RESET_CAPTCHA_WINDOW, 'reset');
                   }}
                 >
@@ -581,6 +657,7 @@ export default class AccountCreator extends Component {
                       <Label>Delay Amount (ms)</Label>
                       <Input
                         name="accountCreationDelayAmount"
+                        value={this.state.accountCreationDelayAmount}
                         onChange={e => {
                           this.handleChange(e);
                         }}

@@ -3,7 +3,6 @@ const path = require('path');
 var LiveReloadPlugin = require('webpack-livereload-plugin');
 
 const mainConfig = {
-  externals: ['ws'],
   mode: 'development',
   devtool: 'source-map',
   target: 'electron-main',
@@ -19,7 +18,7 @@ const mainConfig = {
   node: {
     __dirname: false,
     __filename: false,
-    ws: 'empty'
+    global: true
   },
   module: {
     rules: [
@@ -47,7 +46,6 @@ const mainConfig = {
 };
 
 const appConfig = {
-  externals: ['ws'],
   mode: 'development',
   devtool: 'source-map',
   target: 'electron-renderer',
@@ -59,7 +57,7 @@ const appConfig = {
   },
   node: {
     __dirname: true,
-    ws: 'empty'
+    global: true
   },
   devServer: {
     hot: true

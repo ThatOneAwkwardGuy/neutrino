@@ -174,7 +174,7 @@ export default class AddressJigger extends Component {
 
   returnJiggedAddresses = addressArray => {
     return addressArray.map((elem, index) => (
-      <Col key={index} xs="3" style={{ padding: '25px', border: 'solid 5px #222222' }}>
+      <Col key={index} xs="3" style={{ padding: '20px', border: 'solid 5px #222222', background: '#2745fb' }}>
         {elem}
       </Col>
     ));
@@ -184,7 +184,7 @@ export default class AddressJigger extends Component {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
         <Container fluid className="activeWindow d-flex flex-column">
-          <Row className="flex-grow-1" style={{ overflowX: 'scroll', padding: '25px', maxHeight: '75%' }}>
+          <Row className="flex-grow-1" style={{ overflowX: 'scroll', padding: '20px', maxHeight: '75%' }}>
             {this.returnJiggedAddresses(this.state.jiggedAddress)}
           </Row>
           <FormGroup row>
@@ -269,7 +269,7 @@ export default class AddressJigger extends Component {
               />
             </Col>
             <Col xs="2">
-              <Label for="numberOfAddresses">number</Label>
+              <Label for="numberOfAddresses">quantity</Label>
               <Input
                 name="numberOfAddresses"
                 value={this.state.numberOfAddresses}

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container, Row } from 'reactstrap';
+import { Container, Row, Button, Modal, ModalBody, ModalHeader, ModalFooter } from 'reactstrap';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { connect } from 'react-redux';
@@ -7,7 +7,6 @@ import { updateSettings } from '../actions/settings';
 import { createAccount, removeAccount, removeAllAccounts } from '../actions/accounts';
 import { createActivity, removeActivity, removeAllActivities, updateActivity } from '../actions/activity';
 import { addProfile, removeProfile } from '../actions/profile';
-import { checkIfUserMachineIDMatches } from '../api/firebase/firestore';
 import ProxyCreater from '../components/ProxyCreator';
 import ProxyTester from '../components/ProxyTester';
 import FrontPage from '../components/FrontPage';
@@ -19,27 +18,87 @@ import ProfileGenerator from '../components/ProfileGenerator';
 import RaffleBot from '../components/RaffleBot';
 import Settings from '../components/Settings';
 import { firestore, auth } from '../api/firebase/firebase';
-const remote = require('electron').remote;
-const windowManager = remote.require('electron-window-manager');
+import { BarLoader } from 'react-spinners';
+import { SET_DISCORD_RPC_STATE } from '../utils/constants';
+const ipcRenderer = require('electron').ipcRenderer;
 
 class Home extends Component {
   constructor(props) {
     super(props);
     this.activityWindows = {};
     this.state = {
+      loading: false,
+      loadingMessage: '',
       activeWindow: 'FrontPage',
-      activityGeneratorAccountsClases: []
+      activityGeneratorAccountsClases: [],
+      infoModal: false,
+      infoModalHeader: '',
+      infoModalBody: '',
+      infoModalFooter: ''
     };
   }
 
+  changeLoading = (text, bool) => {
+    this.setState({
+      loadingMessage: text,
+      loading: bool
+    });
+  };
+
+  changeInfoModal = (infoModal, infoModalHeader, infoModalBody, infoModalFooter) => {
+    this.setState({
+      infoModal,
+      infoModalHeader,
+      infoModalBody,
+      infoModalFooter
+    });
+  };
+
+  toggleInfoModal = () => {
+    this.setState({
+      infoModal: !this.state.infoModal
+    });
+  };
+
+  currentWindowToText = currentWindow => {
+    switch (currentWindow) {
+      case 'FrontPage':
+        return 'On The Homepage';
+      case 'ProxyCreator':
+        return 'Creating Proxies';
+      case 'ProxyTester':
+        return 'Testing Proxies';
+      case 'AccountCreator':
+        return 'Creating Accounts';
+      case 'AddressJigger':
+        return 'Jigging Addresses';
+      case 'ProfileTaskConverter':
+        return 'Converting Profiles/Tasks';
+      case 'ActivityGenerator':
+        return 'Generating One Clicks';
+      case 'RaffleBot':
+        return 'Entering Raffles';
+      case 'ProfileGenerator':
+        return 'Generating Bot Profiles';
+      case 'Settings':
+        return 'Changing Settings';
+    }
+  };
+
+  setDiscordRichPresence = currentWindow => {
+    const state = this.currentWindowToText(currentWindow);
+    ipcRenderer.send(SET_DISCORD_RPC_STATE, { state });
+  };
+
   returnActiveComponent = activeComponent => {
+    this.setDiscordRichPresence(activeComponent);
     switch (activeComponent) {
       case 'FrontPage':
         return <FrontPage />;
       case 'ProxyCreator':
-        return <ProxyCreater settings={this.props.settings} />;
+        return <ProxyCreater settings={this.props.settings} setLoading={this.changeLoading} changeInfoModal={this.changeInfoModal} />;
       case 'ProxyTester':
-        return <ProxyTester />;
+        return <ProxyTester setLoading={this.changeLoading} changeInfoModal={this.changeInfoModal} />;
       case 'AccountCreator':
         return (
           <AccountCreator
@@ -47,12 +106,14 @@ class Home extends Component {
             onRemoveAccount={this.props.onRemoveAccount}
             onRemoveAllAccounts={this.props.onRemoveAllAccounts}
             accounts={this.props.accounts}
+            setLoading={this.changeLoading}
+            changeInfoModal={this.changeInfoModal}
           />
         );
       case 'AddressJigger':
-        return <AddressJigger />;
+        return <AddressJigger changeInfoModal={this.changeInfoModal} />;
       case 'ProfileTaskConverter':
-        return <ProfileTaskConverter />;
+        return <ProfileTaskConverter changeInfoModal={this.changeInfoModal} />;
       case 'ActivityGenerator':
         return (
           <ActivityGenerator
@@ -64,14 +125,23 @@ class Home extends Component {
             setActivityWindow={this.setActivityWindow}
             activityWindows={this.activityWindows}
             settings={this.props.settings}
+            setLoading={this.changeLoading}
+            changeInfoModal={this.changeInfoModal}
           />
         );
       case 'RaffleBot':
         return <RaffleBot />;
       case 'ProfileGenerator':
-        return <ProfileGenerator profiles={this.props.profiles} onAddProfile={this.props.onAddProfile} />;
+        return <ProfileGenerator profiles={this.props.profiles} onAddProfile={this.props.onAddProfile} changeInfoModal={this.changeInfoModal} />;
       case 'Settings':
-        return <Settings history={this.props.history} settings={this.props.settings} onUpdateSettings={this.props.onUpdateSettings} />;
+        return (
+          <Settings
+            history={this.props.history}
+            settings={this.props.settings}
+            onUpdateSettings={this.props.onUpdateSettings}
+            changeInfoModal={this.changeInfoModal}
+          />
+        );
     }
   };
 
@@ -80,13 +150,6 @@ class Home extends Component {
   };
 
   changeActiveComponent = async activeComponent => {
-    // const user = auth.currentUser;
-    // const userStillActive = await checkIfUserMachineIDMatches(user.uid);
-    // if (userStillActive) {
-    //   this.setState({ activeWindow: activeComponent });
-    // } else {
-    //   this.props.history.push('/');
-    // }
     this.setState({ activeWindow: activeComponent });
   };
 
@@ -104,13 +167,6 @@ class Home extends Component {
       });
   };
 
-  // componentDidMount() {
-  //   console.log(windowManager.windows);
-  //   for (const window in windowManager.windows) {
-  //     windowManager.windows[window].close();
-  //   }
-  // }
-
   componentDidMount() {
     if (process.env.NODE_ENV !== 'development') {
       this.watchForActiveStatus();
@@ -123,6 +179,19 @@ class Home extends Component {
         <Header changeActiveComponent={this.changeActiveComponent} activeWindow={this.state.activeWindow} />
         <Row className="homeContainer">{this.returnActiveComponent(this.state.activeWindow)}</Row>
         <Footer type="homepage" />
+        <Modal isOpen={this.state.loading} size="sm" centered className="text-center">
+          <BarLoader width={100} widthUnit="%" color="#2745fb" />
+          {this.state.loadingMessage ? <p className="p-3">{this.state.loadingMessage}</p> : null}
+        </Modal>
+        <Modal isOpen={this.state.infoModal} size="md" centered toggle={this.toggleInfoModal}>
+          <ModalHeader style={{ border: 'none' }}>{this.state.infoModalHeader}</ModalHeader>
+          <ModalBody>{this.state.infoModalBody}</ModalBody>
+          <ModalFooter>
+            <Button color="danger" onClick={this.toggleInfoModal}>
+              Close
+            </Button>
+          </ModalFooter>
+        </Modal>
       </Container>
     );
   }

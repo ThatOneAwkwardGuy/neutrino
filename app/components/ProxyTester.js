@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
-import { Row, Col, Button, Table, Container, Input, Label, FormGroup } from 'reactstrap';
+import { Row, Col, Button, Table, Container, Input, Label, FormGroup, Form } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
+import ReactTable from 'react-table';
 const rp = require('request-promise');
+const { clipboard } = require('electron');
 
 export default class ProxyTester extends Component {
   constructor(props) {
@@ -9,20 +11,11 @@ export default class ProxyTester extends Component {
     this.state = {
       proxyInput: '',
       proxyPings: [],
-      proxySite: 'http://google.com'
+      proxySite: 'http://google.com',
+      minPing: 0,
+      maxPing: 100
     };
   }
-
-  returnProxyRow = (proxy, index) => (
-    <tr key={`proxy-${index}`}>
-      <td>{index + 1}</td>
-      <td>{proxy.ip}</td>
-      <td>{proxy.port}</td>
-      <td>{proxy.user}</td>
-      <td>{proxy.pass}</td>
-      <td>{proxy.ping}</td>
-    </tr>
-  );
 
   handleChange = e => {
     this.setState({
@@ -50,80 +43,104 @@ export default class ProxyTester extends Component {
     });
   };
 
+  copyWorkingProxies = () => {
+    let proxies = [...this.state.proxyPings];
+    proxies = proxies.filter(proxy => proxy.ping >= this.state.minPing && proxy.ping <= this.state.maxPing);
+    const proxyString = proxies
+      .map(proxy => {
+        if (proxy.user !== 'none' && proxy.pass !== 'none') {
+          return `${proxy.user}:${proxy.pass}:${proxy.ip}:${proxy.port}`;
+        } else {
+          return `${proxy.ip}:${proxy.port}`;
+        }
+      })
+      .join('\n');
+    clipboard.writeText(proxyString, 'selection');
+  };
+
   async handleProxies() {
     if (this.state.proxyInput !== '') {
-      const splitProxies = this.state.proxyInput.split('\n');
-      this.setState({
-        proxyPings: []
-      });
-      splitProxies.forEach(async proxyItem => {
-        const split = proxyItem.split(':');
-        try {
-          const responsePing = await rp({
-            method: 'GET',
-            time: true,
-            resolveWithFullResponse: true,
-            uri: this.state.proxySite,
-            proxy: split.length === 4 ? `http://${split[0]}:${split[1]}@${split[2]}:${split[3]}` : split.length === 2 ? `http://${split[0]}:${split[1]}` : ''
-          });
-          if (split.length === 4) {
-            this.setState({
-              proxyPings: [
-                ...this.state.proxyPings,
-                {
-                  user: split[0],
-                  pass: split[1],
-                  ip: split[2],
-                  port: split[3],
-                  ping: Math.round(responsePing.timings.response)
-                }
-              ]
+      try {
+        this.props.setLoading('Testing Proxies', true);
+        const splitProxies = this.state.proxyInput.split('\n');
+        this.setState({
+          proxyPings: []
+        });
+        const proxiesPromises = splitProxies.map(async proxyItem => {
+          const split = proxyItem.split(':');
+          try {
+            const responsePing = await rp({
+              method: 'GET',
+              time: true,
+              resolveWithFullResponse: true,
+              uri: this.state.proxySite,
+              proxy: split.length === 4 ? `http://${split[0]}:${split[1]}@${split[2]}:${split[3]}` : split.length === 2 ? `http://${split[0]}:${split[1]}` : ''
             });
-          } else if (split.length === 2) {
-            this.setState({
-              proxyPings: [
-                ...this.state.proxyPings,
-                {
-                  user: 'none',
-                  pass: 'none',
-                  ip: split[0],
-                  port: split[1],
-                  ping: Math.round(responsePing.timings.response)
-                }
-              ]
-            });
+            console.log(responsePing);
+            if (split.length === 4) {
+              this.setState({
+                proxyPings: [
+                  ...this.state.proxyPings,
+                  {
+                    user: split[0],
+                    pass: split[1],
+                    ip: split[2],
+                    port: split[3],
+                    ping: Math.round(responsePing.timings.response)
+                  }
+                ]
+              });
+            } else if (split.length === 2) {
+              this.setState({
+                proxyPings: [
+                  ...this.state.proxyPings,
+                  {
+                    user: 'none',
+                    pass: 'none',
+                    ip: split[0],
+                    port: split[1],
+                    ping: Math.round(responsePing.timings.response)
+                  }
+                ]
+              });
+            }
+          } catch (e) {
+            console.log(e);
+            if (split.length === 4) {
+              this.setState({
+                proxyPings: [
+                  ...this.state.proxyPings,
+                  {
+                    user: split[0],
+                    pass: split[1],
+                    ip: split[2],
+                    port: split[3],
+                    ping: -1
+                  }
+                ]
+              });
+            } else if (split.length === 2) {
+              this.setState({
+                proxyPings: [
+                  ...this.state.proxyPings,
+                  {
+                    user: 'none',
+                    pass: 'none',
+                    ip: split[0],
+                    port: split[1],
+                    ping: -1
+                  }
+                ]
+              });
+            }
           }
-        } catch (e) {
-          console.log(e);
-          if (split.length === 4) {
-            this.setState({
-              proxyPings: [
-                ...this.state.proxyPings,
-                {
-                  user: split[0],
-                  pass: split[1],
-                  ip: split[2],
-                  port: split[3],
-                  ping: 'error'
-                }
-              ]
-            });
-          } else if (split.length === 2) {
-            this.setState({
-              proxyPings: [
-                ...this.state.proxyPings,
-                {
-                  user: 'none',
-                  pass: 'none',
-                  ip: split[0],
-                  port: split[1],
-                  ping: 'error'
-                }
-              ]
-            });
-          }
-        }
-      });
+        });
+        await Promise.all(proxiesPromises);
+      } catch (error) {
+        this.props.changeInfoModal(true, `Error Checking Proxies`, 'There was an error checking the proxies you entered', '');
+      } finally {
+        this.props.setLoading('', false);
+      }
     }
   }
 
@@ -131,59 +148,37 @@ export default class ProxyTester extends Component {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
         <Col className="activeWindow d-flex flex-column">
-          <Table responsive hover className="text-center">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>ip</th>
-                <th>port</th>
-                <th>user</th>
-                <th>pass</th>
-                <th>ping</th>
-              </tr>
-            </thead>
-            <tbody>{this.state.proxyPings.map(this.returnProxyRow)}</tbody>
-          </Table>
-          <Row>
-            <Col xs="6">
-              <FormGroup>
-                <Label>proxies</Label>
-                <Input
-                  name="proxyInput"
-                  type="textarea"
-                  id="proxyInput"
-                  placeholder="user:pass:ip:port or ip:port"
-                  value={this.state.proxyInput}
-                  onChange={event => {
-                    this.handleChange(event);
-                  }}
-                />
-              </FormGroup>
-              <FormGroup row>
-                <div className="col-sm-4 text-center">
-                  <Button
-                    className="nButton"
-                    onClick={() => {
-                      this.handleProxies();
-                    }}
-                  >
-                    test proxies
-                  </Button>
-                </div>
-                <div className="col-sm-4 text-center">
-                  <Button
-                    className="nButton"
-                    onClick={async () => {
-                      this.clearProxyPings();
-                    }}
-                  >
-                    clear proxies
-                  </Button>
-                </div>
-              </FormGroup>
-            </Col>
-            <Col xs="6">
-              <FormGroup>
+          <ReactTable
+            showPagination={false}
+            showPageSizeOptions={false}
+            noDataText="no proxies added"
+            data={this.state.proxyPings}
+            columns={[
+              {
+                Header: 'ip',
+                accessor: 'ip'
+              },
+              {
+                Header: 'port',
+                accessor: 'port'
+              },
+              {
+                Header: 'user',
+                accessor: 'user'
+              },
+              {
+                Header: 'pass',
+                accessor: 'pass'
+              },
+              {
+                Header: 'ping (ms)',
+                accessor: 'ping'
+              }
+            ]}
+          />
+          <Form>
+            <FormGroup row>
+              <Col xs="6">
                 <Label>site</Label>
                 <Input
                   name="proxySite"
@@ -195,9 +190,83 @@ export default class ProxyTester extends Component {
                     this.handleChange(event);
                   }}
                 />
-              </FormGroup>
-            </Col>
-          </Row>
+              </Col>
+              {/* <Col xs="2">
+                <Label>min ping (ms)</Label>
+                <Input
+                  name="minPing"
+                  min="0"
+                  type="number"
+                  id="minPing"
+                  value={this.state.minPing}
+                  placeholder="0"
+                  onChange={event => {
+                    this.handleChange(event);
+                  }}
+                />
+              </Col> */}
+              <Col xs="2">
+                <Label>max ping (ms)</Label>
+                <Input
+                  name="maxPing"
+                  min="0"
+                  type="number"
+                  id="maxPing"
+                  value={this.state.maxPing}
+                  placeholder="20"
+                  onChange={event => {
+                    this.handleChange(event);
+                  }}
+                />
+              </Col>
+              <Col xs="2" className="text-center d-flex flex-column justify-content-end">
+                <Label />
+                <Button
+                  className="nButton"
+                  onClick={async () => {
+                    this.copyWorkingProxies();
+                  }}
+                >
+                  copy proxies
+                </Button>
+              </Col>
+            </FormGroup>
+            <FormGroup row>
+              <Col xs="6">
+                <Label>proxies</Label>
+                <Input
+                  name="proxyInput"
+                  type="textarea"
+                  id="proxyInput"
+                  placeholder="user:pass:ip:port or ip:port (new line per proxy)"
+                  value={this.state.proxyInput}
+                  onChange={event => {
+                    this.handleChange(event);
+                  }}
+                />
+              </Col>
+              <Col xs="3" className="text-center d-flex flex-column justify-content-end">
+                <Button
+                  className="nButton"
+                  onClick={() => {
+                    this.handleProxies();
+                  }}
+                >
+                  test proxies
+                </Button>
+              </Col>
+              <Col xs="3" className="text-center d-flex flex-column justify-content-end">
+                <Button
+                  className="nButton"
+                  onClick={async () => {
+                    this.clearProxyPings();
+                  }}
+                >
+                  clear proxies
+                </Button>
+              </Col>
+            </FormGroup>
+          </Form>
         </Col>
       </CSSTransition>
     );

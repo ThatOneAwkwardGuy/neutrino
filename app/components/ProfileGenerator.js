@@ -793,413 +793,411 @@ export default class ProfileGenerator extends Component {
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-        <Col className="activeWindow">
-          <Container fluid className="d-flex flex-column">
-            <Row className="d-flex flex-grow-1" style={{ maxHeight: '100%' }}>
-              <Col xs="12" style={{ overflowY: 'scroll', marginBottom: '30px' }}>
-                <Table responsive hover className="text-center">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>card number</th>
-                      <th>card type</th>
-                      <th>expiry month</th>
-                      <th>expiry year</th>
-                      <th>cvv</th>
-                      <th />
-                    </tr>
-                  </thead>
-                  <tbody>{this.state.cards.map(this.returnCard)}</tbody>
-                </Table>
-              </Col>
-            </Row>
-            <Row className="my-3">
-              <Col xs="2">
-                <Label>card number</Label>
-                <Input type="text" name="cardNumber" onChange={this.handleChange} />
-              </Col>
-              <Col xs="2">
-                <Label>card type</Label>
-                <Input type="select" name="cardType" onChange={this.handleChange}>
-                  {cardTypes.map(this.returnOption)}
-                </Input>
-              </Col>
-              <Col xs="2">
-                <Label>expiry month (mm)</Label>
-                <Input type="text" name="cardExpiryMonth" onChange={this.handleChange} />
-              </Col>
-              <Col xs="2">
-                <Label>expiry year (yyyy)</Label>
-                <Input type="text" name="cardExpiryYear" onChange={this.handleChange} />
-              </Col>
-              <Col xs="1">
-                <Label>cvv</Label>
-                <Input type="text" name="cardCVV" onChange={this.handleChange} />
-              </Col>
-              <Col xs="1" className="d-flex flex-column justify-content-end">
-                <Button
-                  onClick={() => {
-                    this.addCard(this.state.cardNumber, this.state.cardType, this.state.cardExpiryMonth, this.state.cardExpiryYear, this.state.cardCVV);
-                  }}
-                >
-                  <FontAwesome name="plus" />
-                </Button>
-              </Col>
-              <Col xs="1" className="d-flex flex-column justify-content-end">
-                <Button onClick={this.toggleProfileModal}>
-                  <FontAwesome name="id-badge" />
-                </Button>
-              </Col>
-              <Col xs="1" className="d-flex flex-column justify-content-end">
-                <Button onClick={this.toggleMassCardModal}>
-                  <FontAwesome name="clipboard" />
-                </Button>
-              </Col>
-            </Row>
-            <Row className="my-3">
-              <Col xs="2">
-                <Label>bot</Label>
-                <Input type="select" name="botType" onChange={this.handleChange}>
-                  {bots.map(this.returnOption)}
-                </Input>
-              </Col>
-              <Col xs="2">
-                <Label style={{ marginBottom: '1rem' }}>Jig Addresses</Label>
-                <div>
-                  <Toggle name="jigAddresses" checked={this.state.jigAddresses} onChange={this.toggleButton} />
-                </div>
-              </Col>
-              <Col xs="3">
-                <Label style={{ marginBottom: '1rem' }}>Prefix 4 Random Characters</Label>
-                <div>
-                  <Toggle name="fourCharPrefix" checked={this.state.fourCharPrefix} onChange={this.toggleButton} />
-                </div>
-              </Col>
-              <Col xs="2" className="d-flex flex-column justify-content-end">
-                <Button onClick={this.exportAddressesAndCards}>export</Button>
-              </Col>
-            </Row>
-            <Modal size="lg" isOpen={this.state.massCardModal} toggle={this.toggleMassCardModal} centered={true}>
-              <ModalHeader style={{ borderBottom: 'none' }}>Mass Card Add</ModalHeader>
-              <ModalBody>
-                <Input
-                  type="textarea"
-                  name="massCards"
-                  rows="20"
-                  onChange={this.handleChange}
-                  placeholder="cardNumber:cardType:cardExpiryMonth:cardExpiryYear:cardCVV&#10;4111111111111111:Visa:03:2020:123&#x0a;4242424242424242:Mastercard:03:2020:123"
-                />
-              </ModalBody>
-              <ModalFooter>
-                <Button className="nButton" onClick={this.addMassCards}>
-                  Add
-                </Button>
-              </ModalFooter>
-            </Modal>
-            <Modal size="lg" isOpen={this.state.profileModal} toggle={this.toggleProfileModal} centered={true}>
-              <ModalHeader style={{ borderBottom: 'none' }}>Profile</ModalHeader>
-              <ModalBody>
-                <Row>
-                  {!this.state.formdata.useCatchallEmail ? (
-                    <Col>
-                      <Label for="store">payment email</Label>
-                      <Input
-                        type="text"
-                        name="paymentEmail"
-                        id="paymentEmail"
-                        value={this.state.formdata.paymentEmail}
-                        onChange={this.handleChangeShippingOrBilling}
-                      />
-                    </Col>
-                  ) : (
-                    <Col>
-                      <Label for="store">catchall email</Label>
-                      <Input
-                        type="text"
-                        name="catchallEmail"
-                        id="catchallEmail"
-                        placeholder="example.com"
-                        value={this.state.formdata.catchallEmail}
-                        onChange={this.handleChangeShippingOrBilling}
-                      />
-                    </Col>
-                  )}
-
-                  {!this.state.formdata.randomPhoneNumber ? (
-                    <Col>
-                      <Label for="store">phone number</Label>
-                      <Input
-                        type="text"
-                        name="phoneNumber"
-                        id="phoneNumber"
-                        value={this.state.formdata.phoneNumber}
-                        onChange={this.handleChangeShippingOrBilling}
-                      />
-                    </Col>
-                  ) : (
-                    <Col>
-                      <Label for="store">phone number template</Label>
-                      <Input
-                        type="text"
-                        name="randomPhoneNumberTemplate"
-                        id="randomPhoneNumberTemplate"
-                        placeholder="+44######### #->random number"
-                        value={this.state.formdata.randomPhoneNumberTemplate}
-                        onChange={this.handleChangeShippingOrBilling}
-                      />
-                    </Col>
-                  )}
-                </Row>
-                <Row className="activeContainerInner">
-                  <Col xs="6">
-                    <h6 style={{ fontWeight: 600 }}>delivery address</h6>
-                    <Form>
-                      <FormGroup row>
-                        <Col xs="6">
-                          <Label for="store">first name</Label>
-                          <Input
-                            type="text"
-                            name="deliveryFirstName"
-                            id="deliveryFirstName"
-                            value={this.state.formdata.deliveryFirstName}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                        <Col xs="6">
-                          <Label for="store">last name</Label>
-                          <Input
-                            type="text"
-                            name="deliveryLastName"
-                            id="deliveryLastName"
-                            value={this.state.formdata.deliveryLastName}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                      </FormGroup>
-                      <FormGroup row>
-                        <Col xs="9">
-                          <Label for="store">address</Label>
-                          <Input
-                            type="text"
-                            name="deliveryAddress"
-                            id="deliveryAddress"
-                            value={this.state.formdata.deliveryAddress}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                        <Col xs="3">
-                          <Label for="store">apt,suite</Label>
-                          <Input
-                            type="text"
-                            name="deliveryAptorSuite"
-                            id="deliveryAptorSuite"
-                            value={this.state.formdata.deliveryAptorSuite}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                      </FormGroup>
-                      <FormGroup row>
-                        <Col xs="12">
-                          <Label for="store">city</Label>
-                          <Input
-                            type="text"
-                            name="deliveryCity"
-                            id="deliveryCity"
-                            value={this.state.formdata.deliveryCity}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                      </FormGroup>
-                      <FormGroup row>
-                        <Col xs="4">
-                          <Label for="store">country</Label>
-                          <Input
-                            type="select"
-                            name="deliveryCountry"
-                            id="deliveryCountry"
-                            value={this.state.formdata.deliveryCountry}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                              this.setRegionArrayShipping(event.target.value);
-                            }}
-                          >
-                            <option value="" />
-                            {this.countryNames.map(this.returnCountry)}
-                          </Input>
-                        </Col>
-                        <Col xs="4">
-                          <Label for="store">region</Label>
-                          <Input
-                            type="select"
-                            name="deliveryProvince"
-                            id="deliveryProvince"
-                            value={this.state.formdata.deliveryProvince}
-                            onChange={this.handleChangeShippingOrBilling}
-                          >
-                            {this.state.regionArrayShipping !== null ? this.state.regionArrayShipping.map(this.returnCountry) : null}
-                          </Input>
-                        </Col>
-                        <Col xs="4">
-                          <Label for="store">zip code</Label>
-                          <Input
-                            type="text"
-                            name="deliveryZip"
-                            id="deliveryZip"
-                            value={this.state.formdata.deliveryZip}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                      </FormGroup>
-                    </Form>
+        <Container fluid className="activeWindow d-flex flex-column">
+          <Row className="d-flex flex-grow-1" style={{ maxHeight: '100%' }}>
+            <Col xs="12" style={{ overflowY: 'scroll', marginBottom: '30px' }}>
+              <Table responsive hover className="text-center">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>card number</th>
+                    <th>card type</th>
+                    <th>expiry month</th>
+                    <th>expiry year</th>
+                    <th>cvv</th>
+                    <th />
+                  </tr>
+                </thead>
+                <tbody>{this.state.cards.map(this.returnCard)}</tbody>
+              </Table>
+            </Col>
+          </Row>
+          <Row className="my-3">
+            <Col xs="2">
+              <Label>card number</Label>
+              <Input type="text" name="cardNumber" onChange={this.handleChange} />
+            </Col>
+            <Col xs="2">
+              <Label>card type</Label>
+              <Input type="select" name="cardType" onChange={this.handleChange}>
+                {cardTypes.map(this.returnOption)}
+              </Input>
+            </Col>
+            <Col xs="2">
+              <Label>expiry month (mm)</Label>
+              <Input type="text" name="cardExpiryMonth" onChange={this.handleChange} />
+            </Col>
+            <Col xs="2">
+              <Label>expiry year (yyyy)</Label>
+              <Input type="text" name="cardExpiryYear" onChange={this.handleChange} />
+            </Col>
+            <Col xs="1">
+              <Label>cvv</Label>
+              <Input type="text" name="cardCVV" onChange={this.handleChange} />
+            </Col>
+            <Col xs="1" className="d-flex flex-column justify-content-end">
+              <Button
+                onClick={() => {
+                  this.addCard(this.state.cardNumber, this.state.cardType, this.state.cardExpiryMonth, this.state.cardExpiryYear, this.state.cardCVV);
+                }}
+              >
+                <FontAwesome name="plus" />
+              </Button>
+            </Col>
+            <Col xs="1" className="d-flex flex-column justify-content-end">
+              <Button onClick={this.toggleProfileModal}>
+                <FontAwesome name="id-badge" />
+              </Button>
+            </Col>
+            <Col xs="1" className="d-flex flex-column justify-content-end">
+              <Button onClick={this.toggleMassCardModal}>
+                <FontAwesome name="clipboard" />
+              </Button>
+            </Col>
+          </Row>
+          <Row className="my-3">
+            <Col xs="2">
+              <Label>bot</Label>
+              <Input type="select" name="botType" onChange={this.handleChange}>
+                {bots.map(this.returnOption)}
+              </Input>
+            </Col>
+            <Col xs="2">
+              <Label style={{ marginBottom: '1rem' }}>Jig Addresses</Label>
+              <div>
+                <Toggle name="jigAddresses" checked={this.state.jigAddresses} onChange={this.toggleButton} />
+              </div>
+            </Col>
+            <Col xs="3">
+              <Label style={{ marginBottom: '1rem' }}>Prefix 4 Random Characters</Label>
+              <div>
+                <Toggle name="fourCharPrefix" checked={this.state.fourCharPrefix} onChange={this.toggleButton} />
+              </div>
+            </Col>
+            <Col xs="2" className="d-flex flex-column justify-content-end">
+              <Button onClick={this.exportAddressesAndCards}>export</Button>
+            </Col>
+          </Row>
+          <Modal size="lg" isOpen={this.state.massCardModal} toggle={this.toggleMassCardModal} centered={true}>
+            <ModalHeader style={{ borderBottom: 'none' }}>Mass Card Add</ModalHeader>
+            <ModalBody>
+              <Input
+                type="textarea"
+                name="massCards"
+                rows="20"
+                onChange={this.handleChange}
+                placeholder="cardNumber:cardType:cardExpiryMonth:cardExpiryYear:cardCVV&#10;4111111111111111:Visa:03:2020:123&#x0a;4242424242424242:Mastercard:03:2020:123"
+              />
+            </ModalBody>
+            <ModalFooter>
+              <Button className="nButton" onClick={this.addMassCards}>
+                Add
+              </Button>
+            </ModalFooter>
+          </Modal>
+          <Modal size="lg" isOpen={this.state.profileModal} toggle={this.toggleProfileModal} centered={true}>
+            <ModalHeader style={{ borderBottom: 'none' }}>Profile</ModalHeader>
+            <ModalBody>
+              <Row>
+                {!this.state.formdata.useCatchallEmail ? (
+                  <Col>
+                    <Label for="store">payment email</Label>
+                    <Input
+                      type="text"
+                      name="paymentEmail"
+                      id="paymentEmail"
+                      value={this.state.formdata.paymentEmail}
+                      onChange={this.handleChangeShippingOrBilling}
+                    />
                   </Col>
-                  <Col xs="6">
-                    <h6 style={{ fontWeight: 600 }}>billing address</h6>
-                    <Form>
-                      <FormGroup row>
-                        <Col xs="6">
-                          <Label for="store">first name</Label>
-                          <Input
-                            type="text"
-                            name="billingFirstName"
-                            id="billingFirstName"
-                            value={this.state.formdata.billingFirstName}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                        <Col xs="6">
-                          <Label for="store">last name</Label>
-                          <Input
-                            type="text"
-                            name="billingLastName"
-                            id="billingLastName"
-                            value={this.state.formdata.billingLastName}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                      </FormGroup>
-                      <FormGroup row>
-                        <Col xs="9">
-                          <Label for="store">address</Label>
-                          <Input
-                            type="text"
-                            name="billingAddress"
-                            id="billingAddress"
-                            value={this.state.formdata.billingAddress}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                        <Col xs="3">
-                          <Label for="store">apt,suite</Label>
-                          <Input
-                            type="text"
-                            name="billingAptorSuite"
-                            id="billingAptorSuite"
-                            value={this.state.formdata.billingAptorSuite}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                      </FormGroup>
-                      <FormGroup row>
-                        <Col xs="12">
-                          <Label for="store">city</Label>
-                          <Input
-                            type="text"
-                            name="billingCity"
-                            id="billingCity"
-                            value={this.state.formdata.billingCity}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                      </FormGroup>
-                      <FormGroup row>
-                        <Col xs="4">
-                          <Label for="store">country</Label>
-                          <Input
-                            type="select"
-                            name="billingCountry"
-                            id="billingCountry"
-                            value={this.state.formdata.billingCountry}
-                            onChange={event => {
-                              this.handleChangeShippingOrBilling(event);
-                              this.setRegionArrayBilling(event.target.value);
-                            }}
-                          >
-                            <option value="" />
-                            {this.countryNames.map(this.returnCountry)}
-                          </Input>
-                        </Col>
-                        <Col xs="4">
-                          <Label for="store">region</Label>
-                          <Input
-                            type="select"
-                            name="billingProvince"
-                            id="billingProvince"
-                            value={this.state.formdata.billingProvince}
-                            onChange={this.handleChangeShippingOrBilling}
-                          >
-                            {this.state.regionArrayBilling !== null ? this.state.regionArrayBilling.map(this.returnCountry) : null}
-                          </Input>
-                        </Col>
-                        <Col xs="4">
-                          <Label for="store">zip code</Label>
-                          <Input
-                            type="text"
-                            name="billingZip"
-                            id="billingZip"
-                            value={this.state.formdata.billingZip}
-                            onChange={this.handleChangeShippingOrBilling}
-                          />
-                        </Col>
-                      </FormGroup>
-                      <FormGroup row>
-                        <Col xs="12">
-                          <Label for="store">
-                            <Button onClick={this.setDeliveryToBilling}>copy delivery</Button>
-                            {/* <Input
+                ) : (
+                  <Col>
+                    <Label for="store">catchall email</Label>
+                    <Input
+                      type="text"
+                      name="catchallEmail"
+                      id="catchallEmail"
+                      placeholder="example.com"
+                      value={this.state.formdata.catchallEmail}
+                      onChange={this.handleChangeShippingOrBilling}
+                    />
+                  </Col>
+                )}
+
+                {!this.state.formdata.randomPhoneNumber ? (
+                  <Col>
+                    <Label for="store">phone number</Label>
+                    <Input
+                      type="text"
+                      name="phoneNumber"
+                      id="phoneNumber"
+                      value={this.state.formdata.phoneNumber}
+                      onChange={this.handleChangeShippingOrBilling}
+                    />
+                  </Col>
+                ) : (
+                  <Col>
+                    <Label for="store">phone number template</Label>
+                    <Input
+                      type="text"
+                      name="randomPhoneNumberTemplate"
+                      id="randomPhoneNumberTemplate"
+                      placeholder="+44######### #->random number"
+                      value={this.state.formdata.randomPhoneNumberTemplate}
+                      onChange={this.handleChangeShippingOrBilling}
+                    />
+                  </Col>
+                )}
+              </Row>
+              <Row className="activeContainerInner">
+                <Col xs="6">
+                  <h6 style={{ fontWeight: 600 }}>delivery address</h6>
+                  <Form>
+                    <FormGroup row>
+                      <Col xs="6">
+                        <Label for="store">first name</Label>
+                        <Input
+                          type="text"
+                          name="deliveryFirstName"
+                          id="deliveryFirstName"
+                          value={this.state.formdata.deliveryFirstName}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                      <Col xs="6">
+                        <Label for="store">last name</Label>
+                        <Input
+                          type="text"
+                          name="deliveryLastName"
+                          id="deliveryLastName"
+                          value={this.state.formdata.deliveryLastName}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Col xs="9">
+                        <Label for="store">address</Label>
+                        <Input
+                          type="text"
+                          name="deliveryAddress"
+                          id="deliveryAddress"
+                          value={this.state.formdata.deliveryAddress}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                      <Col xs="3">
+                        <Label for="store">apt,suite</Label>
+                        <Input
+                          type="text"
+                          name="deliveryAptorSuite"
+                          id="deliveryAptorSuite"
+                          value={this.state.formdata.deliveryAptorSuite}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Col xs="12">
+                        <Label for="store">city</Label>
+                        <Input
+                          type="text"
+                          name="deliveryCity"
+                          id="deliveryCity"
+                          value={this.state.formdata.deliveryCity}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Col xs="4">
+                        <Label for="store">country</Label>
+                        <Input
+                          type="select"
+                          name="deliveryCountry"
+                          id="deliveryCountry"
+                          value={this.state.formdata.deliveryCountry}
+                          onChange={event => {
+                            this.handleChangeShippingOrBilling(event);
+                            this.setRegionArrayShipping(event.target.value);
+                          }}
+                        >
+                          <option value="" />
+                          {this.countryNames.map(this.returnCountry)}
+                        </Input>
+                      </Col>
+                      <Col xs="4">
+                        <Label for="store">region</Label>
+                        <Input
+                          type="select"
+                          name="deliveryProvince"
+                          id="deliveryProvince"
+                          value={this.state.formdata.deliveryProvince}
+                          onChange={this.handleChangeShippingOrBilling}
+                        >
+                          {this.state.regionArrayShipping !== null ? this.state.regionArrayShipping.map(this.returnCountry) : null}
+                        </Input>
+                      </Col>
+                      <Col xs="4">
+                        <Label for="store">zip code</Label>
+                        <Input
+                          type="text"
+                          name="deliveryZip"
+                          id="deliveryZip"
+                          value={this.state.formdata.deliveryZip}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                    </FormGroup>
+                  </Form>
+                </Col>
+                <Col xs="6">
+                  <h6 style={{ fontWeight: 600 }}>billing address</h6>
+                  <Form>
+                    <FormGroup row>
+                      <Col xs="6">
+                        <Label for="store">first name</Label>
+                        <Input
+                          type="text"
+                          name="billingFirstName"
+                          id="billingFirstName"
+                          value={this.state.formdata.billingFirstName}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                      <Col xs="6">
+                        <Label for="store">last name</Label>
+                        <Input
+                          type="text"
+                          name="billingLastName"
+                          id="billingLastName"
+                          value={this.state.formdata.billingLastName}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Col xs="9">
+                        <Label for="store">address</Label>
+                        <Input
+                          type="text"
+                          name="billingAddress"
+                          id="billingAddress"
+                          value={this.state.formdata.billingAddress}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                      <Col xs="3">
+                        <Label for="store">apt,suite</Label>
+                        <Input
+                          type="text"
+                          name="billingAptorSuite"
+                          id="billingAptorSuite"
+                          value={this.state.formdata.billingAptorSuite}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Col xs="12">
+                        <Label for="store">city</Label>
+                        <Input
+                          type="text"
+                          name="billingCity"
+                          id="billingCity"
+                          value={this.state.formdata.billingCity}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Col xs="4">
+                        <Label for="store">country</Label>
+                        <Input
+                          type="select"
+                          name="billingCountry"
+                          id="billingCountry"
+                          value={this.state.formdata.billingCountry}
+                          onChange={event => {
+                            this.handleChangeShippingOrBilling(event);
+                            this.setRegionArrayBilling(event.target.value);
+                          }}
+                        >
+                          <option value="" />
+                          {this.countryNames.map(this.returnCountry)}
+                        </Input>
+                      </Col>
+                      <Col xs="4">
+                        <Label for="store">region</Label>
+                        <Input
+                          type="select"
+                          name="billingProvince"
+                          id="billingProvince"
+                          value={this.state.formdata.billingProvince}
+                          onChange={this.handleChangeShippingOrBilling}
+                        >
+                          {this.state.regionArrayBilling !== null ? this.state.regionArrayBilling.map(this.returnCountry) : null}
+                        </Input>
+                      </Col>
+                      <Col xs="4">
+                        <Label for="store">zip code</Label>
+                        <Input
+                          type="text"
+                          name="billingZip"
+                          id="billingZip"
+                          value={this.state.formdata.billingZip}
+                          onChange={this.handleChangeShippingOrBilling}
+                        />
+                      </Col>
+                    </FormGroup>
+                    <FormGroup row>
+                      <Col xs="12">
+                        <Label for="store">
+                          <Button onClick={this.setDeliveryToBilling}>copy delivery</Button>
+                          {/* <Input
                       type="checkbox"
                       name="sameDeliveryBilling"
                       id="sameDeliveryBilling"
                       onChange={}
                     /> */}
-                          </Label>
-                        </Col>
-                      </FormGroup>
-                    </Form>
-                  </Col>
-                </Row>
-                <FormGroup row>
-                  <Col xs="4" className="text-center">
-                    <Label for="store">Same Delivery/Billing</Label>
-                    <Toggle name="sameAsDelivery" checked={this.state.formdata.sameAsDelivery} onChange={this.toggleFormDataButton} />
-                  </Col>
-                  <Col xs="4" className="text-center">
-                    <Label for="store">One Checkout</Label>
-                    <Toggle name="oneCheckout" checked={this.state.formdata.oneCheckout} onChange={this.toggleFormDataButton} />
-                  </Col>
-                  <Col xs="4" className="text-center">
-                    <Label for="store">Random Name</Label>
-                    <Toggle name="randomName" checked={this.state.formdata.randomName} onChange={this.toggleFormDataButton} />
-                  </Col>
-                </FormGroup>
-                <FormGroup row>
-                  <Col xs="6" className="text-center">
-                    <Label for="store">Random Phone Number</Label>
-                    <Toggle name="randomPhoneNumber" checked={this.state.formdata.randomPhoneNumber} onChange={this.toggleFormDataButton} />
-                  </Col>
-                  <Col xs="6" className="text-center">
-                    <Label for="store">Use Catchall Email</Label>
-                    <Toggle name="useCatchallEmail" checked={this.state.formdata.useCatchallEmail} onChange={this.toggleFormDataButton} />
-                  </Col>
-                </FormGroup>
-              </ModalBody>
-              <ModalFooter>
-                <Button className="nButton" onClick={this.saveProfile}>
-                  Save
-                </Button>
-              </ModalFooter>
-            </Modal>
-          </Container>
-        </Col>
+                        </Label>
+                      </Col>
+                    </FormGroup>
+                  </Form>
+                </Col>
+              </Row>
+              <FormGroup row>
+                <Col xs="4" className="text-center">
+                  <Label for="store">Same Delivery/Billing</Label>
+                  <Toggle name="sameAsDelivery" checked={this.state.formdata.sameAsDelivery} onChange={this.toggleFormDataButton} />
+                </Col>
+                <Col xs="4" className="text-center">
+                  <Label for="store">One Checkout</Label>
+                  <Toggle name="oneCheckout" checked={this.state.formdata.oneCheckout} onChange={this.toggleFormDataButton} />
+                </Col>
+                <Col xs="4" className="text-center">
+                  <Label for="store">Random Name</Label>
+                  <Toggle name="randomName" checked={this.state.formdata.randomName} onChange={this.toggleFormDataButton} />
+                </Col>
+              </FormGroup>
+              <FormGroup row>
+                <Col xs="6" className="text-center">
+                  <Label for="store">Random Phone Number</Label>
+                  <Toggle name="randomPhoneNumber" checked={this.state.formdata.randomPhoneNumber} onChange={this.toggleFormDataButton} />
+                </Col>
+                <Col xs="6" className="text-center">
+                  <Label for="store">Use Catchall Email</Label>
+                  <Toggle name="useCatchallEmail" checked={this.state.formdata.useCatchallEmail} onChange={this.toggleFormDataButton} />
+                </Col>
+              </FormGroup>
+            </ModalBody>
+            <ModalFooter>
+              <Button className="nButton" onClick={this.saveProfile}>
+                Save
+              </Button>
+            </ModalFooter>
+          </Modal>
+        </Container>
       </CSSTransition>
     );
   }

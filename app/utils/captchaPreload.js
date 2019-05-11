@@ -4,21 +4,9 @@ let captchaChecker = null;
 let authToken;
 let oldCookies;
 
-pressChar = (input, string) => {
-  try {
-    var changeEvent = new Event('input', {
-      bubbles: true,
-      cancelable: true
-    });
-    string.split('').forEach((elem, index, array) => {
-      input.value = array.slice(index).join('');
-      input.dispatchEvent(pressEvent);
-    });
-  } catch (e) {}
-};
-
-checkCaptcha = () => {
-  const tokenID = remote.getGlobal('captcaTokenID').id;
+const checkCaptcha = () => {
+  const args = remote.getGlobal('captcaTokenID');
+  const tokenID = args.id;
 
   let captchaResponse;
   let invisibleCaptcha;
@@ -47,10 +35,11 @@ checkCaptcha = () => {
       if (captchaResponse3 !== '') {
         clearInterval(captchaChecker);
         ipcRenderer.send('send-captcha-token', {
+          ...args,
           checkoutURL: document.location.href,
           captchaResponse: captchaResponse3,
           id: tokenID,
-          supremeAuthToken: authToken,
+          authToken,
           cookies: document.cookie,
           oldCookies2: oldCookies
         });
@@ -59,10 +48,11 @@ checkCaptcha = () => {
   } else if (captchaResponse !== '' && captchaResponse !== undefined) {
     clearInterval(captchaChecker);
     ipcRenderer.send('send-captcha-token', {
+      ...args,
       checkoutURL: document.location.href,
-      captchaResponse: captchaResponse,
+      captchaResponse,
       id: tokenID,
-      supremeAuthToken: authToken,
+      authToken,
       cookies: document.cookie,
       oldCookies2: oldCookies
     });
@@ -71,7 +61,10 @@ checkCaptcha = () => {
 
 if (!document.location.href.includes('google.com') && !document.location.href.includes('youtube.com')) {
   document.addEventListener('DOMContentLoaded', function() {
-    const bodySiteKey = body.match(/.sitekey: "(.*)"/)[1];
+    const bodySiteKey = document.body.innerHTML.match(/.sitekey: "(.*)"/)[1];
+    if (document.location.href.includes('/challenge')) {
+      authToken = document.querySelector('input[name="authenticity_token"]').value;
+    }
     document.documentElement.innerHTML = `<!DOCTYPE html>
     <html>
     <head>

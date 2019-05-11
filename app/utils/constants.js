@@ -20,3 +20,5 @@ export const MAIN_PROCESS_CLEAR_RECEIVE_CAPTCHA_TOKEN_LISTENERS = 'main-process-
 
 export const RESET_CAPTCHA_TOKENS_ARRAY = 'reset-captcha-tokens-array';
 export const RECEIVE_RESET_CAPTCHA_TOKENS_ARRAY = 'receive-reset-captcha-tokens-array';
+
+export const SET_DISCORD_RPC_STATE = 'set-discord-rpc-state';

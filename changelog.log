@@ -32,6 +32,14 @@
 - Added Random Names to Profile Gen
 - Added Catchall Email to Profile Gen
 - Added Random Phone Number to Profile Gen
+- Added Max ping for Proxy Tester
+- Added sorting for tested proxies in Proxy Tester
+- Added Account Creator captcha support (If any sites dont work, tell me and i'll fix it)
+
+1.0.4
+- Fixed Google Proxy creation
+- Added better loading and error indicators throughout
+
 
 4242424242424242:Visa:03:2020:123
 4242424242424243:Visa:03:2020:123
@@ -40,3 +48,24 @@
 4242424242424246:Visa:03:2020:123
 4242424242424247:Visa:03:2020:123
 4242424242424248:Visa:03:2020:123
+
+188.129.161.55:36631
+178.252.166.122:32769
+190.12.55.210:46078
+103.95.41.107:63141
+62.74.99.97:8080
+117.58.243.244:52636
+217.182.120.166:1080
+125.16.128.118:3128
+113.53.230.167:80
+94.177.216.154:8080
+186.64.120.107:8080
+80.211.181.248:3128
+31.170.169.4:53281
+167.99.72.197:8080
+206.189.163.84:80
+94.177.250.112:8080
+114.30.75.218:60265
+157.230.149.189:80
+206.81.11.75:80
+35.247.152.119:3128

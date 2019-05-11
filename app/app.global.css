@@ -668,7 +668,7 @@ canvas {
 }
 
 .activeWindow {
-  padding: 20px !important;
+  padding: 40px !important;
 }
 
 .dropdown-menu.show {
@@ -749,4 +749,29 @@ canvas {
 .progressBar {
   border-radius: 50px;
   height: 10px;
+}
+
+.ReactTable .rt-thead.-header,
+.ReactTable .rt-tbody .rt-tr-group,
+.ReactTable {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+.ReactTable .rt-thead.-header {
+  font-weight: 700;
+}
+
+.ReactTable {
+  text-align: center !important;
+}
+
+.rt-noData {
+  background-color: #2b4df7 !important;
+  color: white !important;
+  font-weight: 700;
+}
+
+._loading_overlay_wrapper {
+  height: 100%;
 }
