@@ -53,13 +53,14 @@ export default class Header extends Component {
   };
 
   returnDropDownOptions = () => {
-    const dropDownNames = Object.keys(componentToNameMapping).filter(elem => elem !== this.props.activeWindow);
+    const dropDownNames = Object.keys(componentToNameMapping);
     return dropDownNames.map((elem, index) => (
       <DropdownItem
         key={`dropdown-${index}`}
         onClick={() => {
           this.props.changeActiveComponent(elem);
         }}
+        className={`headerDropdown ${this.props.activeWindow === elem ? 'activeDropdown' : ''}`}
       >
         {nameToSymbolMapping[elem]}
         {componentToNameMapping[elem]}

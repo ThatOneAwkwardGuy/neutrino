@@ -151,7 +151,7 @@ export default class AccountCreator extends Component {
       accountCreationDelay: true,
       createdAccount: [],
       site: Object.keys(sites)[0],
-      quantity: '1',
+      quantity: 1,
       catchall: '',
       password: '',
       firstName: '',
@@ -275,53 +275,49 @@ export default class AccountCreator extends Component {
       'customer[email]': email,
       'customer[password]': pass
     };
-    try {
-      const response = await this.rp({
-        method: 'POST',
-        url: `${sites[this.state.site]}/account`,
-        followRedirect: true,
+    const response = await this.rp({
+      method: 'POST',
+      url: `${sites[this.state.site]}/account`,
+      followRedirect: true,
+      proxy: this.state.useProxies ? this.getRandomProxy() : '',
+      resolveWithFullResponse: true,
+      followAllRedirects: true,
+      jar: this.cookieJars[tokenID],
+      headers: {
+        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'no-cache',
+        'content-type': 'application/x-www-form-urlencoded',
+        pragma: 'no-cache',
+        'upgrade-insecure-requests': '1',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+        referrer: `${sites[this.state.site]}/account/register`,
+        referrerPolicy: 'no-referrer-when-downgrade'
+      },
+      form: payload
+    });
+    if (response.request.href && response.request.href.includes('challenge')) {
+      ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
+      ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
+        cookies: this.cookieJars[tokenID].getCookieString(sites[this.state.site]),
+        checkoutURL: response.request.href,
+        id: tokenID,
+        type: 'shopify',
         proxy: this.state.useProxies ? this.getRandomProxy() : '',
-        resolveWithFullResponse: true,
-        followAllRedirects: true,
-        jar: this.cookieJars[tokenID],
-        headers: {
-          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-          'accept-language': 'en-US,en;q=0.9',
-          'cache-control': 'no-cache',
-          'content-type': 'application/x-www-form-urlencoded',
-          pragma: 'no-cache',
-          'upgrade-insecure-requests': '1',
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
-          referrer: `${sites[this.state.site]}/account/register`,
-          referrerPolicy: 'no-referrer-when-downgrade'
-        },
-        form: payload
+        baseURL: sites[this.state.site],
+        email: email,
+        site: this.state.site,
+        pass: pass
       });
-      if (response.request.href && response.request.href.includes('challenge')) {
-        ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
-        ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
-          cookies: this.cookieJars[tokenID].getCookieString(sites[this.state.site]),
-          checkoutURL: response.request.href,
-          id: tokenID,
-          type: 'shopify',
-          proxy: this.state.useProxies ? this.getRandomProxy() : '',
-          baseURL: sites[this.state.site],
+    } else {
+      if (!responseChallenge.request.href.includes('register')) {
+        this.props.onCreateAccount({
           email: email,
           site: this.state.site,
-          pass: pass
+          pass: pass,
+          status: 'created'
         });
-      } else {
-        if (!responseChallenge.request.href.includes('register')) {
-          this.props.onCreateAccount({
-            email: email,
-            site: this.state.site,
-            pass: pass,
-            status: 'created'
-          });
-        }
       }
-    } catch (error) {
-      console.log(error);
     }
   };
 
@@ -330,23 +326,85 @@ export default class AccountCreator extends Component {
   };
 
   start = async () => {
-    this.tokenIDs = [];
-    this.cookieJars = {};
-    if (Object.keys(sites).includes(this.state.site)) {
-      for (let i = 0; i < parseInt(this.state.quantity); i++) {
+    try {
+      this.props.setLoading('Creating Accounts', true);
+      this.tokenIDs = [];
+      this.cookieJars = {};
+      const accountPromises = Array.from(Array(parseInt(this.state.quantity))).map((x, i) => {
         switch (this.state.site) {
           case 'sotostore':
-            this.createSotoStoreAccount();
-            break;
+            return this.createSotoStoreAccount();
           default:
-            await this.createShopifyAccount();
-            if (this.state.accountCreationDelay) {
-              await this.sleep(this.state.accountCreationDelayAmount);
-            }
-            break;
+            const delay = this.state.accountCreationDelay ? this.state.accountCreationDelayAmount : 0;
+            return Promise.resolve(this.sleep(delay)).then(() => this.createShopifyAccount().catch(e => e));
         }
+      });
+      await Promise.all(accountPromises);
+      const invalidResults = accountPromises.filter(result => result instanceof Error);
+      if (invalidResults.length > 0) {
+        this.props.changeInfoModal(
+          true,
+          `Error Creating Proxies On ${name}`,
+          <Table>
+            <thead>
+              <tr>
+                <th>Error Name</th>
+                <th>Error Message</th>
+              </tr>
+            </thead>
+            <tbody>
+              {invalidResults.map((error, index) => {
+                if (error.constructor.name === 'ApiError') {
+                  return (
+                    <tr key={`error-${index}`}>
+                      <td>{error.errors[0].reason}</td>
+                      <td>{error.errors[0].message}</td>
+                    </tr>
+                  );
+                } else if (error instanceof Error) {
+                  return (
+                    <tr key={`error-${index}`}>
+                      <td>{error.name}</td>
+                      <td>{error.error ? error.error : error.message}</td>
+                    </tr>
+                  );
+                } else {
+                  return (
+                    <tr key={`error-${index}`}>
+                      <td>{error.id}</td>
+                      <td>{error.message}</td>
+                    </tr>
+                  );
+                }
+              })}
+            </tbody>
+          </Table>
+        );
       }
+    } catch (error) {
+      console.log(error);
+      this.props.changeInfoModal(
+        true,
+        'Error Creating Accounts',
+        'There was an error creating the accounts you selected, you could try again or ask for support on the discord.',
+        ''
+      );
+    } finally {
+      this.props.setLoading('', false);
     }
+    // for (let i = 0; i < parseInt(this.state.quantity); i++) {
+    //   switch (this.state.site) {
+    //     case 'sotostore':
+    //       this.createSotoStoreAccount();
+    //       break;
+    //     default:
+    //       await this.createShopifyAccount();
+    //       if (this.state.accountCreationDelay) {
+    //         await this.sleep(this.state.accountCreationDelayAmount);
+    //       }
+    //       break;
+    //   }
+    // }
   };
 
   copyToClipboard = () => {
@@ -493,6 +551,8 @@ export default class AccountCreator extends Component {
                   value={this.state.quantity}
                   name="quantity"
                   type="number"
+                  min="0"
+                  step="1"
                 />
               </Col>
               <Col xs="2">

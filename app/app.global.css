@@ -775,3 +775,16 @@ canvas {
 ._loading_overlay_wrapper {
   height: 100%;
 }
+
+.activeDropdown {
+  color: white;
+  background-color: #2b4df7;
+}
+
+.dropdown-menu {
+  padding: 0 !important;
+}
+
+.headerDropdown {
+  padding: 6px 20px;
+}

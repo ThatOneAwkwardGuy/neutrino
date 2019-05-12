@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Container } from 'reactstrap';
+import { Container, Row } from 'reactstrap';
 import CaptchaTopbar from '../components/CaptchaTopbar';
 const remote = require('electron').remote;
 const windowManager = remote.require('electron-window-manager');
@@ -20,9 +20,10 @@ class Activity extends Component {
           webpreferences="allowRunningInsecureContent, javascript=yes"
           style={{
             width: '100%',
-            height: '100%'
+            height: 'calc(100% - 80px)'
           }}
         />
+        <Row className="captchaFooter" />
       </Container>
     );
   }

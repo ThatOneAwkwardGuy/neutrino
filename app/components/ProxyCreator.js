@@ -147,7 +147,9 @@ export default class ProxyCreator extends Component {
           break;
         case 'Vultr':
           instances = Array.from(Array(parseInt(this.state.quantity))).map((x, i) => {
-            return new Promise(r => setTimeout(r(this.createVultrInstance(i).catch(e => e)), 1500 * i));
+            return Promise.resolve(this.sleep(1500 * i)).then(() => {
+              return this.createVultrInstance(i).catch(e => e);
+            });
           });
           // for (let i = 0; i < this.state.quantity; i++) {
           //   this.createVultrInstance(i);
@@ -188,7 +190,7 @@ export default class ProxyCreator extends Component {
                   return (
                     <tr key={`error-${index}`}>
                       <td>{error.name}</td>
-                      <td>{error.error}</td>
+                      <td>{error.error ? error.error : error.message}</td>
                     </tr>
                   );
                 } else {
@@ -333,8 +335,8 @@ export default class ProxyCreator extends Component {
       },
       json: true,
       form: {
-        DCID: parseInt(this.state.region.split('-')[1]),
-        VPSPLANID: parseInt(this.state.machine.split('-')[1]),
+        DCID: parseInt(this.state.region),
+        VPSPLANID: parseInt(this.state.machine),
         OSID: 167,
         SCRIPTID: startUpScriptResponse.SCRIPTID,
         hostname: `${this.state.instanceName}-${index}`,
@@ -485,7 +487,7 @@ export default class ProxyCreator extends Component {
         plansArray.push({ name: plans[key].name, id: plans[key].VPSPLANID, price: `$${plans[key].price_per_month}/month` });
       }
     }
-    this.setState({ machineTypes: plansArray, machine: plansArray[0] });
+    this.setState({ machineTypes: plansArray, machine: plansArray[0].id });
   };
 
   updateDigitalOceanMachineType = async () => {
