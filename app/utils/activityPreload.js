@@ -258,7 +258,6 @@ const randomTrendingYoutubeVideo = async () => {
   });
   const $ = cheerio.load(response);
   const thumbnailLinksArray = $('.yt-uix-sessionlink').toArray();
-  console.log(thumbnailLinksArray);
   const chosenVideo = thumbnailLinksArray[Math.floor(Math.random() * thumbnailLinksArray.length)];
   const changeURLYoutubeVideo = () => {
     webview.loadURL(`http://youtube.com${chosenVideo.attribs.href}/?autoplay=1&mute=1`);
@@ -276,7 +275,6 @@ const functionsArray = [randomGoogleSearch, randomGoogleShoppingSearch, randomGo
 const loop = async () => {
   webview.removeEventListener('dom-ready', loop);
   const rand = Math.round(Math.random() * (data.activityDelayMax - data.activityDelayMin)) + data.activityDelayMin;
-  console.log(rand);
   const chosenFunction = functionsArray[Math.floor(Math.random() * functionsArray.length)];
   chosenFunction();
   await sleep(rand);
@@ -284,30 +282,24 @@ const loop = async () => {
 };
 
 const setCookieAndRunLoop = async () => {
-  // webview = document.querySelector('webview');
   webview = await getWebview();
   setActivityToRunning();
-  console.log(data.cookies);
-  const cookies = data.cookies;
-  console.log(currentWindow.object.webContents.session);
-  for (const cookieSite in cookies) {
-    const cookiesCookieSite = cookies[cookieSite]['/'];
-    for (const actualCookie in cookiesCookieSite) {
-      const formattedCookie = {
-        url: `https://${cookieSite}/`,
-        value: cookiesCookieSite[actualCookie].value,
-        domain: cookiesCookieSite[actualCookie].domain,
-        path: cookiesCookieSite[actualCookie].path,
-        name: actualCookie
-      };
-      currentWindow.object.webContents.session.cookies.set(formattedCookie, error => {
-        if (error !== null) {
-          console.log(error);
-        }
-        console.log(formattedCookie);
-      });
-    }
-  }
+  // const cookies = data.cookies;
+  // for (const cookie of cookies) {
+  //   const formattedCookie = {
+  //     url: `http://${cookie.domain[0] === '.' ? cookie.domain.slice(1) : cookie.domain}`,
+  //     value: cookie.value,
+  //     domain: cookie.domain,
+  //     path: cookie.path,
+  //     name: cookie.name
+  //   };
+  //   currentWindow.object.webContents.session.cookies.set(formattedCookie, error => {
+  //     if (error !== null) {
+  //       console.log(error);
+  //     }
+  //     console.log(formattedCookie);
+  //   });
+  // }
   webview.addEventListener('dom-ready', loop);
 };
 

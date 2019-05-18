@@ -17,6 +17,7 @@ import {
   FINISH_SENDING_CAPTCHA_TOKEN,
   MAIN_PROCESS_CLEAR_RECEIVE_CAPTCHA_TOKEN_LISTENERS
 } from './utils/constants';
+const puppeteer = require('puppeteer-core');
 const ipcMain = require('electron').ipcMain;
 const DiscordRPC = require('discord-rpc');
 const isDevelopment = process.env.NODE_ENV === 'development';

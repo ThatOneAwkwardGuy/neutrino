@@ -578,9 +578,9 @@ export default class ProxyCreator extends Component {
                   this.handleChange(e);
                   this.intializeCloudLibrary(e.target.value);
                 }}
-                defaultValue="select a provider"
+                defaultValue="select provider"
               >
-                <option disabled>select a provider</option>
+                <option disabled>select provider</option>
                 {/* <option>Amazon AWS</option> */}
                 <option>Google Cloud</option>
                 <option>Vultr</option>
@@ -594,6 +594,7 @@ export default class ProxyCreator extends Component {
                 type="text"
                 value={this.state.instanceName}
                 onChange={e => {
+                  e.target.value = e.target.value.toLocaleLowerCase();
                   this.handleChange(e);
                 }}
               />

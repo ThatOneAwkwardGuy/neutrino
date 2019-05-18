@@ -24,7 +24,7 @@ const TRANSLATIONS = [
   ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace']
 ];
 const cardTypes = ['visa', 'mastercard'];
-const bots = ['Cybersole', 'Project Destroyer', 'Ghost', 'EVE AIO', 'Phantom', 'Dashe', 'Hastey', 'CSV'];
+const bots = ['Cybersole', 'Project Destroyer', 'Ghost', 'EVE AIO', 'Phantom', 'Dashe', 'Hastey', 'Kodai', 'CSV'];
 export default class ProfileGenerator extends Component {
   constructor() {
     super();
@@ -691,6 +691,41 @@ export default class ProfileGenerator extends Component {
               : this.state.formdata.phoneNumber,
             zip: this.state.formdata.deliveryZip
           };
+        case 'Kodai':
+          profiles[`Profile - ${index}`] = {
+            Dummy: {
+              billingAddress: {
+                address: this.state.formdata.billingAddress,
+                apt: this.state.formdata.billingAptorSuite,
+                city: this.state.formdata.billingCity,
+                firstName: this.state.formdata.billingFirstName,
+                lastName: this.state.formdata.billingLastName,
+                phoneNumber: this.state.formdata.phoneNumber,
+                state: this.state.formdata.billingProvince,
+                zipCode: this.state.formdata.billingZip
+              },
+              deliveryAddress: {
+                address: this.state.formdata.deliveryAddress,
+                apt: this.state.formdata.deliveryAptorSuite,
+                city: this.state.formdata.deliveryCity,
+                firstName: this.state.formdata.deliveryFirstName,
+                lastName: this.state.formdata.deliveryLastName,
+                phoneNumber: this.state.formdata.phoneNumber,
+                state: this.state.formdata.deliveryProvince,
+                zipCode: this.state.formdata.deliveryZip
+              },
+              miscellaneousInformation: { deliverySameAsBilling: this.state.formdata.sameAsDelivery },
+              paymentDetails: {
+                cardHolder: this.state.formdata.deliveryFirstName + ' ' + this.state.formdata.deliveryLastName,
+                cardNumber: this.state.cards[index].cardExpiryMonth,
+                cvv: this.state.cards[index].cardCVV,
+                emailAddress: this.state.formdata.paymentEmail,
+                expirationDate: `${this.state.cards[index].cardExpiryMonth}/${this.state.cards[index].cardExpiryYear.slice(-2)}`
+              },
+              profileName: `Profile - ${index}`,
+              region: this.state.formdata.deliveryCountry
+            }
+          };
           break;
         case 'CSV':
           profiles[`Profile - ${index}`] = {
@@ -734,7 +769,7 @@ export default class ProfileGenerator extends Component {
       }
     });
     const name = `${this.state.botType} - Profiles`;
-    const extension = this.state.botType === 'CSV' ? 'csv' : 'json';
+    const extension = this.returnFileExtension(this.state.botType);
     let file;
     if (this.state.botType === 'CSV') {
       console.log(profiles);
@@ -742,7 +777,6 @@ export default class ProfileGenerator extends Component {
     } else {
       file = JSON.stringify(this.convertProfiles(profiles));
     }
-    console.log(file);
     dialog.showSaveDialog(
       {
         title: 'name',
@@ -765,6 +799,17 @@ export default class ProfileGenerator extends Component {
         });
       }
     );
+  };
+
+  returnFileExtension = botName => {
+    switch (botName) {
+      case 'CSV':
+        return 'csv';
+      case 'Kodai':
+        return 'txt';
+      default:
+        return 'json';
+    }
   };
 
   convertProfiles = profiles => {

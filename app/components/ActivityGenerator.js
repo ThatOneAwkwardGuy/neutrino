@@ -1,16 +1,21 @@
 import React, { Component } from 'react';
-import { Button, Container, Row, Col, Input, Label, Table, Progress } from 'reactstrap';
+import { Button, Container, Row, Col, Input, Label, Table, Progress, Modal, ModalBody, ModalFooter, ModalHeader } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
 import FontAwesome from 'react-fontawesome';
 import url from 'url';
+import { reject } from 'q';
 const remote = require('electron').remote;
 const windowManager = remote.require('electron-window-manager');
+const { BrowserWindow } = require('electron').remote;
 const path = require('path');
+const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
 export default class ActivityGenerator extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      errors: [],
+      errorModal: false,
       status: 'Not Started',
       activityEmail: '',
       activityPassword: '',
@@ -21,6 +26,11 @@ export default class ActivityGenerator extends Component {
       news: 0
     };
   }
+
+  componentDidMount = () => {
+    windowManager.closeAll();
+    this.setAllAcitivities('Not Started');
+  };
 
   returnActivitiesRow = (activity, index) => {
     const total = activity.youtube + activity.searches + activity.shopping + activity.news;
@@ -46,7 +56,8 @@ export default class ActivityGenerator extends Component {
         <td>
           <FontAwesome
             onClick={() => {
-              this.startWindow(activity, index);
+              this.loginToGoogleWindow(activity, index);
+              // this.checkGoogleEmail('test@gmail.com');
             }}
             name="play"
             style={{ padding: '10px' }}
@@ -73,66 +84,214 @@ export default class ActivityGenerator extends Component {
     );
   };
 
-  startWindow = async (activity, index) => {
-    const activityLocation = url.format({
-      pathname: process.mainModule.filename,
-      protocol: 'file:',
-      slashes: true,
-      hash: 'activity'
+  sleep = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+
+  setAllAcitivities = status => {
+    this.props.activities.forEach((activity, index) => {
+      if (activity.status !== status) {
+        activity.status = status;
+        this.props.onUpdateActivity(index, activity);
+      }
     });
+  };
+
+  loginToGoogleWindow = async (activity, index) => {
+    this.props.activities[index].status = 'Checking Email Validity';
+    this.props.onUpdateActivity(index, this.props.activities[index]);
+    try {
+      await this.loginToGoogle(activity.activityEmail, activity.activityPassword, rp.jar(), index);
+    } catch (error) {
+      this.props.activities[index].status = 'Failed Logging In';
+      this.props.onUpdateActivity(index, this.props.activities[index]);
+      return;
+    }
     this.props.activities[index].status = 'Logging In';
     this.props.onUpdateActivity(index, this.props.activities[index]);
-    const cookieJar = rp.jar();
-    await this.loginToGoogle(activity.activityEmail, activity.activityPassword, cookieJar, index);
-    this.props.activities[index].status = 'Logged In';
-    this.props.onUpdateActivity(index, this.props.activities[index]);
-    console.log(remote.session);
-    this.props.setActivityWindow(
-      index,
-      windowManager.createNew(
-        `window-${index}`,
-        `window-${index}`,
-        activityLocation,
-        false,
-        {
-          width: this.props.settings.showAcitivtyWindows ? 500 : 0,
-          height: this.props.settings.showAcitivtyWindows ? 650 : 0,
-          show: true,
-          frame: false,
-          resizable: true,
-          focusable: true,
-          minimizable: true,
-          closable: true,
-          allowRunningInsecureContent: true,
-          webPreferences: {
-            allowRunningInsecureContent: true,
-            nodeIntegration: true,
-            webSecurity: false,
-            session: remote.session.fromPartition(`window-${index}`),
-            // partition: `window${index}`,
-            preload:
-              process.env.NODE_ENV === 'development'
-                ? path.resolve(__dirname, '..', '..', 'webpack-pack', 'activityPreload.js')
-                : path.resolve(process.resourcesPath, 'webpack-pack', 'activityPreload.js')
-          }
-        },
-        false
-      )
-    );
-    windowManager.sharedData.set(`window-${index}`, {
-      activityDelayMin: this.props.settings.activityDelayMin,
-      activityDelayMax: this.props.settings.activityDelayMax,
-      data: this.props.activities[index],
-      update: this.props.onUpdateActivity,
-      url: 'google.com',
-      cookies: cookieJar._jar.store.idx
+    const tokenID = uuidv4();
+    // windowManager.createNew(
+    //   `google-${tokenID}`,
+    //   `google-${tokenID}`,
+    //   'https://google.com',
+    //   false,
+    //   {
+    //     width: 500,
+    //     height: 650,
+    //     show: true,
+    //     frame: true,
+    //     resizable: true,
+    //     focusable: true,
+    //     minimizable: true,
+    //     closable: true,
+    //     allowRunningInsecureContent: true,
+    //     webPreferences: {
+    //       allowRunningInsecureContent: true,
+    //       nodeIntegration: true,
+    //       webSecurity: false,
+    //       session: remote.session.fromPartition(`google-${tokenID}`)
+    //     }
+    //   },
+    //   false
+    // );
+    // const loginWindow = windowManager.get(`google-${tokenID}`);
+    // loginWindow.create();
+    // loginWindow.object.show();
+    // loginWindow.object.webContents.once('did-navigate', () => {
+    //   loginWindow.object.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
+    //   loginWindow.object.webContents.once('did-navigate', () => {
+    //     loginWindow.object.webContents.executeJavaScript(`
+    //     document.getElementById("Email").value = "${activity.activityEmail}";
+    //     document.getElementById("next").click();
+    //     `);
+    //     loginWindow.object.webContents.once('did-navigate-in-page', () => {
+    //       loginWindow.object.webContents.executeJavaScript(`
+    //       var passwdObserver = new MutationObserver(function(mutations, me) {
+    //         var canvas = document.getElementById("Passwd");
+    //         if (canvas) {
+    //           canvas.value = "${activity.activityPassword}";
+    //           document.getElementById("signIn").click();
+    //           me.disconnect();
+    //           return;
+    //         }
+    //       });
+    //       passwdObserver.observe(document, {
+    //           childList: true,
+    //           attributes:true,
+    //           subtree: true,
+    //           characterData: true
+    //       })
+    //       `);
+    //       loginWindow.object.webContents.once('did-start-navigate', () => {
+    //         // loginWindow.object.loadURL('https://google.com');
+    //         loginWindow.object.webContents.loadURL('https://google.com');
+    //         loginWindow.object.webContents.session.cookies.get({}, (error, cookies) => {
+    //           if (error) {
+    //           } else {
+    //             // console.log(cookies);
+    //             this.startWindow(activity, index, cookies, tokenID);
+    //             // loginWindow.close();
+    //           }
+    //         });
+    //       });
+    //     });
+    //   });
+    // });
+    let win = new BrowserWindow({
+      width: 500,
+      height: 650,
+      show: true,
+      frame: true,
+      resizable: true,
+      focusable: true,
+      minimizable: true,
+      closable: true,
+      allowRunningInsecureContent: true,
+      webPreferences: {
+        allowRunningInsecureContent: true,
+        nodeIntegration: true,
+        webSecurity: false,
+        session: remote.session.fromPartition(`activity-${tokenID}`)
+      }
     });
-    console.log(this.props.activityWindows);
-    this.props.activityWindows[index].create();
-    if (this.props.settings.showAcitivtyWindows) {
-      console.log('Opening');
-      // windowManager.get(`window-${index}`).setURL(activityLocation);
-      windowManager.get(`window-${index}`).object.show();
+    win.loadURL('https://google.com');
+    win.webContents.once('did-finish-load', () => {
+      win.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
+      win.webContents.once('did-finish-load', () => {
+        win.webContents.executeJavaScript(`
+        document.getElementById("Email").value = "${activity.activityEmail}";
+        document.getElementById("next").click();
+        `);
+        win.webContents.once('did-navigate-in-page', () => {
+          win.webContents.executeJavaScript(`
+          var passwdObserver = new MutationObserver(function(mutations, me) {
+            var canvas = document.getElementById("Passwd");
+            if (canvas) {
+              canvas.value = "${activity.activityPassword}";
+              document.getElementById("signIn").click();
+              me.disconnect();
+              return;
+            }
+          });
+          passwdObserver.observe(document, {
+              childList: true,
+              attributes:true,
+              subtree: true,
+              characterData: true
+          })
+          `);
+          win.webContents.once('did-finish-load', () => {
+            win.webContents.session.cookies.get({}, (error, cookies) => {
+              if (error) {
+              } else {
+                this.startWindow(activity, index, cookies, tokenID);
+                win.close();
+              }
+            });
+          });
+        });
+      });
+    });
+  };
+
+  startWindow = async (activity, index, cookies, tokenID) => {
+    try {
+      const activityLocation = url.format({
+        pathname: process.mainModule.filename,
+        protocol: 'file:',
+        slashes: true,
+        hash: 'activity'
+      });
+      this.props.activities[index].status = 'Logged In';
+      this.props.onUpdateActivity(index, this.props.activities[index]);
+      this.props.setActivityWindow(
+        index,
+        windowManager.createNew(
+          `activity-${tokenID}`,
+          `activity-${tokenID}`,
+          activityLocation,
+          false,
+          {
+            width: this.props.settings.showAcitivtyWindows ? 500 : 0,
+            height: this.props.settings.showAcitivtyWindows ? 650 : 0,
+            show: true,
+            frame: false,
+            resizable: true,
+            focusable: true,
+            minimizable: true,
+            closable: true,
+            allowRunningInsecureContent: true,
+            webPreferences: {
+              allowRunningInsecureContent: true,
+              nodeIntegration: true,
+              webSecurity: false,
+              session: remote.session.fromPartition(`activity-${tokenID}`),
+              preload:
+                process.env.NODE_ENV === 'development'
+                  ? path.resolve(__dirname, '..', '..', 'webpack-pack', 'activityPreload.js')
+                  : path.resolve(process.resourcesPath, 'webpack-pack', 'activityPreload.js')
+            }
+          },
+          false
+        )
+      );
+      windowManager.sharedData.set(`activity-${index}`, {
+        activityDelayMin: this.props.settings.activityDelayMin,
+        activityDelayMax: this.props.settings.activityDelayMax,
+        data: this.props.activities[index],
+        update: this.props.onUpdateActivity,
+        url: 'google.com',
+        cookies
+      });
+      this.props.activityWindows[index].create();
+      if (this.props.settings.showAcitivtyWindows) {
+        windowManager.get(`activity-${tokenID}`).object.show();
+      } else {
+        windowManager.get(`activity-${index}`).object.minimize();
+      }
+    } catch (error) {
+      this.props.activities[index].status = error.message;
+      this.props.onUpdateActivity(index, this.props.activities[index]);
     }
   };
 
@@ -146,7 +305,9 @@ export default class ActivityGenerator extends Component {
 
   deleteWindow = (index, activity) => {
     this.props.onRemoveActivity(activity);
-    this.props.activityWindows[index].close();
+    if (this.props.activityWindows[index]) {
+      this.props.activityWindows[index].close();
+    }
   };
 
   addActivity = () => {
@@ -180,11 +341,18 @@ export default class ActivityGenerator extends Component {
     });
   };
 
+  toggleErrorModal = () => {
+    this.setState({
+      errorModal: !this.state.errorModal
+    });
+  };
+
   loginToGoogle = async (email, password, cookieJar, index) => {
     const getLoginBody = await rp({
       method: 'GET',
       jar: cookieJar,
-      uri: 'https://accounts.google.com/ServiceLogin?hl=en&passive=true&continue=https://www.google.com/',
+      uri:
+        'https://accounts.google.com/ServiceLogin?service=youtube&uilel=3&passive=true&continue=https%3A%2F%2Fwww.youtube.com%2Fsignin%3Faction_handle_signin%3Dtrue%26app%3Ddesktop%26hl%3Den%26next%3D%252F&hl=en',
       followRedirect: true,
       resolveWithFullResponse: true
     });
@@ -214,7 +382,7 @@ export default class ActivityGenerator extends Component {
       )}%22%5D&bgRequest=%5B%22identifier%22%2C%22!R0SlRGVCBNogPZe2FY1EgZLrBMxMIAECAAAAa1IAAAfPmQGWUbDP7zUTeTPaAjL7QIFSGE_U96gbmf8e5A1z7nZ_mXPBuWR55S1cWeBXUdzN81-H-ItOfJPAD1WziVmWEU9PTUwNl_UtsEjvZOosNKDKOJMQXdztncQq65E6BTw2ox0PLNLe4dAN5zZwMWd1IA9ovUC2fxf2guMAqzZak3Jf_3mFcCBt3ZcclO4YU8Tx_Cka7Hbs58250Dhgs9z9RkRQwvv-6VBSZYZkLM0a9PsO-pmbZ_mfNu_ShcAzHRGsSuckwvuX1PSzjISDogms6QQ13XYi36WP8yVNOUM6ZfdUfxA1t-S1IdjWxmywPwf7A7X2S6cqxoNHtWnWp63EY0knKaJcgQK4h55itUYbCkv6tMUFnVCL29fA9axFcra3_twxhDDOHtsi8dZGERbYrkdiYQopMFfCXy1xLAA03ld_Zgf3KDbexs7BBhZGHlbM9NWM95NxuoH_HyisCdjZ_s3ZOUZNLKsvryXnMZggKO2o8_y-rZOZHbptCJHJKSgugj6ggsipdIHo-4Ej5lJoC7W2VncuegJb_w%22%5D&azt=AFoagUVFbwXEzlk823d_NYQiekLDhnxJ9Q%3A1553959770855&cookiesDisabled=false&deviceinfo=%5Bnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2C%22GB%22%2Cnull%2Cnull%2C%5B%5D%2C%22GlifWebSignIn%22%2Cnull%2C%5Bnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5D%2Cnull%2Cnull%2Cnull%2C%5B%5D%2C%5B%5D%5D%5D&gmscoreversion=undefined&checkConnection=youtube%3A195%3A1&checkedDomains=youtube&pstMsg=1&`
     });
     const loginCode = emailLookUp.body.split(`"`)[3];
-    console.log(loginCode);
+
     const login = await rp({
       method: 'POST',
       uri: 'https://accounts.google.com/_/signin/sl/challenge?hl=en&_reqid=355835&rt=j',
@@ -237,120 +405,20 @@ export default class ActivityGenerator extends Component {
     });
 
     if (login.body.includes('INCORRECT_ANSWER_ENTERED')) {
-      this.props.activities[index].status = 'Wrong Password Entered';
-      this.props.onUpdateActivity(index, this.props.activities[index]);
       throw new Error('Wrong Password Entered');
     }
+  };
 
-    // const youtube = await rp({
-    //   followAllRedirects: true,
-    //   resolveWithFullResponse: true,
-    //   headers: {
-    //     accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-    //     'accept-language': 'en-US,en;q=0.9',
-    //     'cache-control': 'no-cache',
-    //     pragma: 'no-cache',
-    //     'upgrade-insecure-requests': '1',
-    //     'x-chrome-connected': 'mode=0,enable_account_consistency=false',
-    //     'x-chrome-id-consistency-request':
-    //       'version=1,client_id=77185425430.apps.googleusercontent.com,device_id=7a6aad61-5c71-4873-8562-5f7c8fe26d1d,sync_account_id=116241489796738701984,signin_mode=all_accounts,signout_mode=show_confirmation',
-    //     'x-client-data': 'CKu1yQEIkLbJAQiitskBCMS2yQEIqZ3KAQioo8oBCL+nygEI7KfKAQjiqMoBGIKYygEY+aXKAQ=='
-    //   },
-    //   jar: cookieJar,
-    //   uri: login.body.split('"').filter(elem => elem.includes('google'))[0],
-    //   method: 'GET'
-    // });
-    // console.log(youtube);
-
-    const get1 = await rp({
-      method: 'GET',
-      jar: cookieJar,
-      uri: `https://accounts.youtube.com/accounts/SetSIDFrame?ssdc=1&sidt=${encodeURIComponent(loginCode)}&pmpo=https%3A%2F%2Faccounts.google.com`,
-      followAllRedirects: true,
-      resolveWithFullResponse: true,
-      headers: {
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        pragma: 'no-cache',
-        'upgrade-insecure-requests': '1',
-        referrer:
-          'https://accounts.google.com/CheckCookie?hl=en&checkedDomains=youtube&checkConnection=youtube%3A195%3A1&pstMsg=1&chtml=LoginDoneHtml&continue=https%3A%2F%2Fwww.google.com%2F&gidl=EgIIAA',
-        referrerPolicy: 'no-referrer-when-downgrade'
-      }
+  startAll = () => {
+    this.props.activities.forEach((activity, index) => {
+      this.loginToGoogleWindow(activity, index);
     });
+  };
 
-    console.log(get1);
-
-    const get2 = await rp({
-      method: 'GET',
-      jar: cookieJar,
-      uri: `https://accounts.google.com/accounts/SetSIDFrame?ssdc=1&sidt=${encodeURIComponent(loginCode)}&pmpo=https%3A%2F%2Faccounts.google.com`,
-      followAllRedirects: true,
-      resolveWithFullResponse: true,
-      headers: {
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        pragma: 'no-cache',
-        'upgrade-insecure-requests': '1',
-        referrer:
-          'https://accounts.google.com/CheckCookie?hl=en&checkedDomains=youtube&checkConnection=youtube%3A195%3A1&pstMsg=1&chtml=LoginDoneHtml&continue=https%3A%2F%2Fwww.google.com%2F&gidl=EgIIAA',
-        referrerPolicy: 'no-referrer-when-downgrade'
-      }
+  stopAll = () => {
+    this.props.activities.forEach((activity, index) => {
+      this.stopWindow(index);
     });
-
-    const get3 = await rp({
-      method: 'GET',
-      followRedirect: true,
-      resolveWithFullResponse: true,
-      jar: cookieJar,
-      uri:
-        'https://accounts.google.com/CheckCookie?hl=en&checkedDomains=youtube&checkConnection=youtube%3A195%3A1&pstMsg=1&chtml=LoginDoneHtml&continue=https%3A%2F%2Fwww.google.com%2F&gidl=EgIIAA',
-      headers: {
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        pragma: 'no-cache',
-        'upgrade-insecure-requests': '1',
-        referrer:
-          'https://accounts.google.com/signin/v2/sl/pwd?hl=en&passive=true&continue=https%3A%2F%2Fwww.google.com%2F&flowName=GlifWebSignIn&flowEntry=ServiceLogin&cid=1&navigationDirection=forward',
-        referrerPolicy: 'no-referrer-when-downgrade'
-      }
-    });
-
-    const googleHomepage = await rp({
-      headers: {
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        pragma: 'no-cache',
-        'upgrade-insecure-requests': '1',
-        referrer:
-          'https://accounts.google.com/CheckCookie?hl=en&checkedDomains=youtube&checkConnection=youtube%3A195%3A1&pstMsg=1&chtml=LoginDoneHtml&continue=https%3A%2F%2Fwww.google.com%2F&gidl=EgIIAA',
-        referrerPolicy: 'no-referrer-when-downgrade'
-      },
-      jar: cookieJar,
-      uri: 'https://www.google.com/',
-      method: 'GET',
-      followRedirect: true,
-      resolveWithFullResponse: true
-    });
-
-    const youtubeHomepage = await rp({
-      method: 'GET',
-      jar: cookieJar,
-      uri: 'https://www.youtube.com/',
-      headers: {
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        pragma: 'no-cache',
-        'upgrade-insecure-requests': '1',
-        referrerPolicy: 'no-referrer-when-downgrade'
-      }
-    });
-    console.log(youtubeHomepage);
   };
 
   render() {
@@ -380,11 +448,11 @@ export default class ActivityGenerator extends Component {
             <Row>
               <Col xs="2">
                 <Label>email</Label>
-                <Input name="activityEmail" onChange={this.handleChange} type="email" />
+                <Input name="activityEmail" onChange={this.handleChange} type="email" value={this.state.activityEmail} />
               </Col>
               <Col xs="2">
                 <Label>pass</Label>
-                <Input name="activityPassword" onChange={this.handleChange} type="password" />
+                <Input name="activityPassword" onChange={this.handleChange} type="password" value={this.state.activityPassword} />
               </Col>
               <Col xs="2">
                 <Label>proxy</Label>
@@ -393,9 +461,38 @@ export default class ActivityGenerator extends Component {
               <Col xs="2" className="d-flex flex-column justify-content-end">
                 <Button onClick={this.addActivity}>Add</Button>
               </Col>
+              <Col xs="2" className="d-flex flex-column justify-content-end">
+                <Button onClick={this.startAll}>Start All</Button>
+              </Col>
+              <Col xs="2" className="d-flex flex-column justify-content-end">
+                <Button onClick={this.stopAll}>Stop All</Button>
+              </Col>
               {/* Maybe Add Max Youtube Watch Time .etc */}
             </Row>
           </Container>
+          <Modal isOpen={this.state.errorModal} toggle={this.toggleErrorModal} centered>
+            <ModalHeader>Errors</ModalHeader>
+            <ModalBody>
+              <Table>
+                <thead>
+                  <tr>
+                    <td>email</td>
+                    <td>error</td>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.state.errors.map((error, index) => {
+                    return (
+                      <tr key={`error-${index}`}>
+                        <td>{error.email}</td>
+                        <td>{error.message}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </Table>
+            </ModalBody>
+          </Modal>
         </Col>
       </CSSTransition>
     );

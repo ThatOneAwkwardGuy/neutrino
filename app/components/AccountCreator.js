@@ -268,34 +268,35 @@ export default class AccountCreator extends Component {
     this.tokenIDs.push(tokenID);
     this.cookieJars[tokenID] = request.jar();
     const payload = {
-      form_type: ' create_customer',
-      utf8: ' ✓',
+      form_type: 'create_customer',
+      utf8: '✓',
       'customer[first_name]': firstName,
       'customer[last_name]': lastName,
       'customer[email]': email,
       'customer[password]': pass
     };
+
     const response = await this.rp({
       method: 'POST',
       url: `${sites[this.state.site]}/account`,
       followRedirect: true,
-      proxy: this.state.useProxies ? this.getRandomProxy() : '',
+      // proxy: this.state.useProxies ? this.getRandomProxy() : '',
       resolveWithFullResponse: true,
       followAllRedirects: true,
       jar: this.cookieJars[tokenID],
       headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
         accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
         'accept-language': 'en-US,en;q=0.9',
         'cache-control': 'no-cache',
         'content-type': 'application/x-www-form-urlencoded',
         pragma: 'no-cache',
-        'upgrade-insecure-requests': '1',
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
-        referrer: `${sites[this.state.site]}/account/register`,
-        referrerPolicy: 'no-referrer-when-downgrade'
+        'upgrade-insecure-requests': '1'
       },
       form: payload
     });
+
+    console.log(response);
     if (response.request.href && response.request.href.includes('challenge')) {
       ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
       ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
@@ -340,6 +341,7 @@ export default class AccountCreator extends Component {
         }
       });
       await Promise.all(accountPromises);
+      console.log(accountPromises);
       const invalidResults = accountPromises.filter(result => result instanceof Error);
       if (invalidResults.length > 0) {
         this.props.changeInfoModal(
