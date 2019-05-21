@@ -125,7 +125,8 @@ class Login extends Component {
                     you may have entered the wrong details, please try again or contact us via the discord.
                   </Alert>
                   <Alert color="danger" isOpen={this.state.loginError}>
-                    it appears there was a problem logging you in, this maybe be due to incorrect account info or you may already be logged in somewhere else.
+                    it appears there was a problem logging you in, this maybe be due to incorrect account info or your account may be bound to another machine,
+                    if this is the case, you can login and unbind your account.
                   </Alert>
                   <Form>
                     <FormGroup row>

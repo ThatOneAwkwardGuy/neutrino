@@ -3,7 +3,6 @@ import { Button, Container, Row, Col, Input, Label, Table, Progress, Modal, Moda
 import { CSSTransition } from 'react-transition-group';
 import FontAwesome from 'react-fontawesome';
 import url from 'url';
-import { reject } from 'q';
 const remote = require('electron').remote;
 const windowManager = remote.require('electron-window-manager');
 const { BrowserWindow } = require('electron').remote;
@@ -98,7 +97,7 @@ export default class ActivityGenerator extends Component {
   };
 
   loginToGoogleWindow = async (activity, index) => {
-    this.props.activities[index].status = 'Checking Email Validity';
+    this.props.activities[index].status = 'Checking Email';
     this.props.onUpdateActivity(index, this.props.activities[index]);
     try {
       await this.loginToGoogle(activity.activityEmail, activity.activityPassword, rp.jar(), index);
@@ -110,73 +109,6 @@ export default class ActivityGenerator extends Component {
     this.props.activities[index].status = 'Logging In';
     this.props.onUpdateActivity(index, this.props.activities[index]);
     const tokenID = uuidv4();
-    // windowManager.createNew(
-    //   `google-${tokenID}`,
-    //   `google-${tokenID}`,
-    //   'https://google.com',
-    //   false,
-    //   {
-    //     width: 500,
-    //     height: 650,
-    //     show: true,
-    //     frame: true,
-    //     resizable: true,
-    //     focusable: true,
-    //     minimizable: true,
-    //     closable: true,
-    //     allowRunningInsecureContent: true,
-    //     webPreferences: {
-    //       allowRunningInsecureContent: true,
-    //       nodeIntegration: true,
-    //       webSecurity: false,
-    //       session: remote.session.fromPartition(`google-${tokenID}`)
-    //     }
-    //   },
-    //   false
-    // );
-    // const loginWindow = windowManager.get(`google-${tokenID}`);
-    // loginWindow.create();
-    // loginWindow.object.show();
-    // loginWindow.object.webContents.once('did-navigate', () => {
-    //   loginWindow.object.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
-    //   loginWindow.object.webContents.once('did-navigate', () => {
-    //     loginWindow.object.webContents.executeJavaScript(`
-    //     document.getElementById("Email").value = "${activity.activityEmail}";
-    //     document.getElementById("next").click();
-    //     `);
-    //     loginWindow.object.webContents.once('did-navigate-in-page', () => {
-    //       loginWindow.object.webContents.executeJavaScript(`
-    //       var passwdObserver = new MutationObserver(function(mutations, me) {
-    //         var canvas = document.getElementById("Passwd");
-    //         if (canvas) {
-    //           canvas.value = "${activity.activityPassword}";
-    //           document.getElementById("signIn").click();
-    //           me.disconnect();
-    //           return;
-    //         }
-    //       });
-    //       passwdObserver.observe(document, {
-    //           childList: true,
-    //           attributes:true,
-    //           subtree: true,
-    //           characterData: true
-    //       })
-    //       `);
-    //       loginWindow.object.webContents.once('did-start-navigate', () => {
-    //         // loginWindow.object.loadURL('https://google.com');
-    //         loginWindow.object.webContents.loadURL('https://google.com');
-    //         loginWindow.object.webContents.session.cookies.get({}, (error, cookies) => {
-    //           if (error) {
-    //           } else {
-    //             // console.log(cookies);
-    //             this.startWindow(activity, index, cookies, tokenID);
-    //             // loginWindow.close();
-    //           }
-    //         });
-    //       });
-    //     });
-    //   });
-    // });
     let win = new BrowserWindow({
       width: 500,
       height: 650,
@@ -275,7 +207,7 @@ export default class ActivityGenerator extends Component {
           false
         )
       );
-      windowManager.sharedData.set(`activity-${index}`, {
+      windowManager.sharedData.set(`activity-${tokenID}`, {
         activityDelayMin: this.props.settings.activityDelayMin,
         activityDelayMax: this.props.settings.activityDelayMax,
         data: this.props.activities[index],
@@ -287,7 +219,7 @@ export default class ActivityGenerator extends Component {
       if (this.props.settings.showAcitivtyWindows) {
         windowManager.get(`activity-${tokenID}`).object.show();
       } else {
-        windowManager.get(`activity-${index}`).object.minimize();
+        windowManager.get(`activity-${tokenID}`).object.minimize();
       }
     } catch (error) {
       this.props.activities[index].status = error.message;

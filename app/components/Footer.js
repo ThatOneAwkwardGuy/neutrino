@@ -42,6 +42,13 @@ export default class Footer extends Component {
           >
             <FontAwesome name="twitter" className="twitterLogoFooter logoFooter" />
           </a>
+          <a
+            onClick={() => {
+              shell.openExternal('https://www.instagram.com/neutrinotools/');
+            }}
+          >
+            <FontAwesome name="instagram" className="twitterLogoFooter logoFooter" />
+          </a>
         </Col>
         <Col xs="6" className="text-center footerCenterSection">
           Copyright © 2019 Neutrino - All Rights Reserved

@@ -15,6 +15,7 @@ import ActivityGenerator from '../components/ActivityGenerator';
 import AddressJigger from '../components/AddressJigger';
 import ProfileTaskConverter from '../components/ProfileTaskConverter';
 import ProfileGenerator from '../components/ProfileGenerator';
+import OneClickTester from '../components/OneClickTester';
 import RaffleBot from '../components/RaffleBot';
 import Settings from '../components/Settings';
 import { firestore, auth } from '../api/firebase/firebase';
@@ -80,6 +81,8 @@ class Home extends Component {
         return 'Entering Raffles';
       case 'ProfileGenerator':
         return 'Generating Bot Profiles';
+      case 'OneClickTester':
+        return 'One-click Tester';
       case 'Settings':
         return 'Changing Settings';
     }
@@ -133,6 +136,8 @@ class Home extends Component {
         return <RaffleBot />;
       case 'ProfileGenerator':
         return <ProfileGenerator profiles={this.props.profiles} onAddProfile={this.props.onAddProfile} changeInfoModal={this.changeInfoModal} />;
+      case 'OneClickTester':
+        return <OneClickTester />;
       case 'Settings':
         return (
           <Settings

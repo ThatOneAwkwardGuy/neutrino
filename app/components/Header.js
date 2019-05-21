@@ -16,6 +16,7 @@ const componentToNameMapping = {
   // ProfileTaskConverter: 'Profile/Task Converter',
   ActivityGenerator: 'Activity Generator',
   // RaffleBot: 'raffles',
+  OneClickTester: 'One-click Tester',
   Settings: 'Settings'
 };
 
@@ -29,7 +30,8 @@ const nameToSymbolMapping = {
   RaffleBot: <FontAwesome name="ticket" />,
   Settings: <FontAwesome name="cogs" />,
   ActivityGenerator: <FontAwesome name="google" />,
-  ProfileGenerator: <FontAwesome name="id-card" />
+  ProfileGenerator: <FontAwesome name="id-card" />,
+  OneClickTester: <FontAwesome name="check" />
 };
 
 export default class Header extends Component {
