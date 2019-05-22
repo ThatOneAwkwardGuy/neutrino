@@ -46,6 +46,7 @@
 - Changed Activity Generator Login, to login via headless window
 - Added support for Kodai in Profile Generator
 - Forced name field of Proxy Creator to be lowercase only to prevent proxy creation errors
+- Added One Click Captcha Tester (Beta Test needed)
 
 4242424242424242:Visa:03:2020:123
 4242424242424243:Visa:03:2020:123

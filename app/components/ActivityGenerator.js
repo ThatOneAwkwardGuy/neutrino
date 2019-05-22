@@ -99,13 +99,13 @@ export default class ActivityGenerator extends Component {
   loginToGoogleWindow = async (activity, index) => {
     this.props.activities[index].status = 'Checking Email';
     this.props.onUpdateActivity(index, this.props.activities[index]);
-    try {
-      await this.loginToGoogle(activity.activityEmail, activity.activityPassword, rp.jar(), index);
-    } catch (error) {
-      this.props.activities[index].status = 'Failed Logging In';
-      this.props.onUpdateActivity(index, this.props.activities[index]);
-      return;
-    }
+    // try {
+    //   await this.loginToGoogle(activity.activityEmail, activity.activityPassword, rp.jar(), index);
+    // } catch (error) {
+    //   this.props.activities[index].status = 'Failed Logging In';
+    //   this.props.onUpdateActivity(index, this.props.activities[index]);
+    //   return;
+    // }
     this.props.activities[index].status = 'Logging In';
     this.props.onUpdateActivity(index, this.props.activities[index]);
     const tokenID = uuidv4();
@@ -153,11 +153,19 @@ export default class ActivityGenerator extends Component {
           })
           `);
           win.webContents.once('did-finish-load', () => {
-            win.webContents.session.cookies.get({}, (error, cookies) => {
-              if (error) {
+            win.webContents.executeJavaScript(`window.location`, false, result => {
+              if (result.pathname === '/') {
+                win.webContents.session.cookies.get({}, (error, cookies) => {
+                  if (error) {
+                  } else {
+                    this.startWindow(activity, index, cookies, tokenID);
+                    win.close();
+                  }
+                });
               } else {
-                this.startWindow(activity, index, cookies, tokenID);
                 win.close();
+                this.props.activities[index].status = 'Failed Logging In';
+                this.props.onUpdateActivity(index, this.props.activities[index]);
               }
             });
           });

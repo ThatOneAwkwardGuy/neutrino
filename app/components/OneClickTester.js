@@ -6,6 +6,7 @@ const { BrowserWindow } = require('electron').remote;
 const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
 const remote = require('electron').remote;
+const path = require('path');
 
 export default class OneClickTester extends Component {
   constructor(props) {
@@ -145,7 +146,9 @@ export default class OneClickTester extends Component {
   };
 
   stopAccount = index => {
-    this.gooogleWindows[index].close();
+    if (this.gooogleWindows[index]) {
+      this.gooogleWindows[index].close();
+    }
     this.setAccountStatus(index, 'Not Started');
   };
 
@@ -164,40 +167,37 @@ export default class OneClickTester extends Component {
   };
 
   testAccount = async (index, account) => {
-    try {
-      this.setAccountStatus(index, 'Checking Email');
-      const cookieJar = rp.jar();
-      await this.loginToGoogle(account.email, account.pass, cookieJar, index);
-      this.setAccountStatus(index, 'Logging In');
-      const tokenID = uuidv4();
-      let win = new BrowserWindow({
-        width: 500,
-        height: 650,
-        show: true,
-        frame: true,
-        resizable: true,
-        focusable: true,
-        minimizable: true,
-        closable: true,
+    this.setAccountStatus(index, 'Checking Email');
+    this.setAccountStatus(index, 'Logging In');
+    const tokenID = uuidv4();
+    let win = new BrowserWindow({
+      width: 500,
+      height: 650,
+      show: true,
+      frame: true,
+      resizable: true,
+      focusable: true,
+      minimizable: true,
+      closable: true,
+      allowRunningInsecureContent: true,
+      webPreferences: {
         allowRunningInsecureContent: true,
-        webPreferences: {
-          allowRunningInsecureContent: true,
-          nodeIntegration: true,
-          webSecurity: false,
-          session: remote.session.fromPartition(`account-${tokenID}`)
-        }
-      });
-      this.gooogleWindows[index] = win;
-      win.loadURL('https://google.com');
+        nodeIntegration: true,
+        webSecurity: false,
+        session: remote.session.fromPartition(`account-${tokenID}`)
+      }
+    });
+    this.gooogleWindows[index] = win;
+    win.loadURL('https://google.com');
+    win.webContents.once('did-finish-load', () => {
+      win.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
       win.webContents.once('did-finish-load', () => {
-        win.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
-        win.webContents.once('did-finish-load', () => {
-          win.webContents.executeJavaScript(`
+        win.webContents.executeJavaScript(`
           document.getElementById("Email").value = "${account.email}";
           document.getElementById("next").click();
           `);
-          win.webContents.once('did-navigate-in-page', () => {
-            win.webContents.executeJavaScript(`
+        win.webContents.once('did-navigate-in-page', () => {
+          win.webContents.executeJavaScript(`
             var passwdObserver = new MutationObserver(function(mutations, me) {
               var canvas = document.getElementById("Passwd");
               if (canvas) {
@@ -214,25 +214,39 @@ export default class OneClickTester extends Component {
                 characterData: true
             })
             `);
-            win.webContents.once('did-finish-load', () => {
-              win.webContents.session.cookies.get({}, (error, cookies) => {
-                if (error) {
-                } else {
-                  win.loadURL('https://patrickhlauke.github.io/recaptcha/');
-                }
-              });
+          win.webContents.once('did-finish-load', () => {
+            win.webContents.executeJavaScript(`window.location`, false, result => {
+              if (result.pathname === '/') {
+                win.webContents.session.cookies.get({}, (error, cookies) => {
+                  if (error) {
+                  } else {
+                    // win.loadURL('http://demos.codexworld.com/google-invisible-recaptcha-with-php/');
+                    win.loadURL('https://neutrinotools.app/captcha');
+                    // win.webContents.executeJavaScript(`document.querySelector('html').style.display = 'none'`);
+                    win.webContents.once('dom-ready', () => {
+                      win.webContents.executeJavaScript(`grecaptcha.execute()`, false, result => {});
+                      win.webContents.once('did-navigate-in-page', () => {
+                        win.webContents.executeJavaScript(`window.location.hash`, false, result => {
+                          if (result === '#success') {
+                            this.setAccountStatus(index, 'One Click Success');
+                          } else {
+                            this.setAccountStatus(index, 'One Click Fail');
+                          }
+                          win.close();
+                        });
+                      });
+                    });
+                  }
+                });
+              } else {
+                win.close();
+                this.setAccountStatus(index, 'Failed To Login');
+              }
             });
           });
         });
       });
-    } catch (error) {
-      if (error.message === 'Wrong Password Entered') {
-        this.setAccountStatus(index, 'Wrong Password Entered');
-      } else {
-        console.log(error);
-        this.setAccountStatus(index, 'Failed To Test One Click');
-      }
-    }
+    });
   };
 
   render() {
