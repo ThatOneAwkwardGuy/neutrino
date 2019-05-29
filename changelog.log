@@ -48,6 +48,14 @@
 - Forced name field of Proxy Creator to be lowercase only to prevent proxy creation errors
 - Added One Click Captcha Tester (Beta Test needed)
 
+1.0.6
+- More error handling for proxy creation when creation takes too long.
+- Fixed deleting account in one click captcha tester
+- Fixed one click captcha tester endpoint
+
+1.0.7
+
+
 4242424242424242:Visa:03:2020:123
 4242424242424243:Visa:03:2020:123
 4242424242424244:Visa:03:2020:123

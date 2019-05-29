@@ -146,14 +146,14 @@ export default class OneClickTester extends Component {
   };
 
   stopAccount = index => {
-    if (this.gooogleWindows[index]) {
+    if (this.gooogleWindows[index] !== undefined && this.gooogleWindows[index]) {
       this.gooogleWindows[index].close();
     }
     this.setAccountStatus(index, 'Not Started');
   };
 
   deleteAccount = index => {
-    if (this.gooogleWindows[index]) {
+    if (this.gooogleWindows[index] !== undefined && this.gooogleWindows[index]) {
       this.gooogleWindows[index].close();
     }
     delete this.gooogleWindows[index];

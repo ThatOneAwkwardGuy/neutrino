@@ -222,7 +222,7 @@ app.on('ready', async () => {
 
 function setActivity() {
   rpc.setActivity({
-    details: `Version - 1.0.4`,
+    details: `Version - 1.0.6`,
     state: discordRPCState,
     startTimestamp,
     largeImageKey: 'logo_small',
@@ -330,7 +330,3 @@ function createMenu() {
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 }
-
-// app.on('login', (event, webContents, request, authInfo, callback) => {
-//   event.preventDefault();
-// });

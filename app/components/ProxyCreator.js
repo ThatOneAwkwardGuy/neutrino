@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
-import { Row, Col, Button, Table, Container, Input, Label, FormGroup, Form } from 'reactstrap';
+import { Row, Col, Button, Table, Container, Input, FormGroup, Modal, ModalHeader, ModalBody, ModalFooter } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
 const rp = require('request-promise');
 const Compute = require('@google-cloud/compute');
-const AWS = require('aws-sdk');
 const DigitalOcean = require('do-wrapper').default;
 const { clipboard } = require('electron');
+const numberOfTries = 50;
+const sleepTime = 2000;
 
 export default class ProxyCreator extends Component {
   constructor(props) {
@@ -23,9 +24,16 @@ export default class ProxyCreator extends Component {
       proxyUser: '',
       proxyPassword: '',
       website: 'http://google.com',
-      quantity: '1'
+      quantity: '1',
+      deleteAllmodal: false
     };
   }
+
+  toggleDeleteAllModal = () => {
+    this.setState({
+      deleteAllmodal: !this.state.deleteAllmodal
+    });
+  };
 
   returnProxyRow = (proxy, index) => (
     <tr key={`proxy-${index}`}>
@@ -207,6 +215,7 @@ export default class ProxyCreator extends Component {
         );
       }
     } catch (error) {
+      console.log(error);
       this.props.changeInfoModal(
         true,
         `Error Creating Proxies On ${name}`,
@@ -218,11 +227,12 @@ export default class ProxyCreator extends Component {
     }
   };
 
-  pingVM = async (ip, zone, instanceName) => {
+  pingVM = async (ip, vm, instanceName) => {
     let exit = false;
     let res;
-    while (!exit) {
-      await new Promise(r => setTimeout(r, 2000));
+    let count = 0;
+    while (!exit && count <= numberOfTries) {
+      count++;
       try {
         res = await rp({
           method: 'GET',
@@ -234,15 +244,24 @@ export default class ProxyCreator extends Component {
           proxy: `http://${this.state.proxyUser}:${this.state.proxyPassword}@${ip}:3128`,
           resolveWithFullResponse: true
         });
-        console.log(res);
         if (res.statusCode !== 200) {
-          zone.vm(instanceName).delete();
+          vm.delete();
           throw new Error(res.statusCode);
         }
         exit = true;
       } catch (err) {
         console.log(err);
+        if (err.error.code !== 'ECONNREFUSED') {
+          vm.delete();
+          exit = true;
+          throw new Error('The proxy that was made could not be connected to and was deleted.');
+        }
       }
+      await this.sleep(sleepTime);
+    }
+    if (count > numberOfTries) {
+      vm.delete();
+      throw new Error('After 20 attempts, the proxy that was made could not be connected to and was deleted.');
     }
     const split = [this.state.proxyUser, this.state.proxyPassword, ip, '3128'];
     this.setState({
@@ -350,7 +369,7 @@ export default class ProxyCreator extends Component {
     let tryNumber = 0;
     let exit = false;
     let ip = '';
-    while (tryNumber < 100 && !exit) {
+    while (!exit && tryNumber <= numberOfTries) {
       try {
         tryNumber++;
         const instanceResponse = await rp({
@@ -367,10 +386,25 @@ export default class ProxyCreator extends Component {
         }
       } catch (error) {
         console.log(error);
+        throw new Error('There was a problem creating your Vultr proxy instance, please check your account and delete it if it exists.');
       }
-      await new Promise(r => setTimeout(r, 2000));
+      await this.sleep(sleepTime);
     }
-    const getWebsite = await this.pollWebsiteWithIP(`http://${this.state.proxyUser}:${this.state.proxyPassword}@${ip}:3128`, SCRIPTID);
+    if (tryNumber > numberOfTries) {
+      rp({
+        method: 'POST',
+        uri: 'https://api.vultr.com/v1/startupscript/destroy',
+        headers: {
+          'API-Key': this.props.settings.vultrAPIKey
+        },
+        json: true,
+        form: {
+          SCRIPTID
+        }
+      });
+      throw new Error('After 20 attempts, the proxy that was made could not be connected to and was deleted.');
+    }
+    const getWebsite = await this.pollWebsiteWithIP(`http://${this.state.proxyUser}:${this.state.proxyPassword}@${ip}:3128`);
     if (getWebsite) {
       const split = [this.state.proxyUser, this.state.proxyPassword, ip, '3128'];
       this.setState({
@@ -385,6 +419,19 @@ export default class ProxyCreator extends Component {
           }
         ]
       });
+    } else {
+      rp({
+        method: 'POST',
+        uri: 'https://api.vultr.com/v1/startupscript/destroy',
+        headers: {
+          'API-Key': this.props.settings.vultrAPIKey
+        },
+        json: true,
+        form: {
+          SCRIPTID
+        }
+      });
+      throw new Error('There was an error creating the Vultr proxy and it has been destroyed. Please check your account to makesure it has been.');
     }
   };
 
@@ -392,7 +439,7 @@ export default class ProxyCreator extends Component {
     let tryNumber = 0;
     let exit = false;
     let ip = '';
-    while (tryNumber < 100 && !exit) {
+    while (!exit && tryNumber <= numberOfTries) {
       try {
         tryNumber++;
         const instanceResponse = await this.compute.dropletsGetById(id);
@@ -403,9 +450,12 @@ export default class ProxyCreator extends Component {
       } catch (error) {
         console.log(error);
       }
-      await new Promise(r => setTimeout(r, 2000));
+      await this.sleep(sleepTime);
     }
-    const getWebsite = await this.pollWebsiteWithIP(`http://${this.state.proxyUser}:${this.state.proxyPassword}@${ip}:3128`, '');
+    if (tryNumber > numberOfTries) {
+      throw new Error('There was an error creating a DigitalOcean proxy, check your account to makesure the instance is deleted');
+    }
+    const getWebsite = await this.pollWebsiteWithIP(`http://${this.state.proxyUser}:${this.state.proxyPassword}@${ip}:3128`);
     if (getWebsite) {
       const split = [this.state.proxyUser, this.state.proxyPassword, ip, '3128'];
       this.setState({
@@ -420,13 +470,16 @@ export default class ProxyCreator extends Component {
           }
         ]
       });
+    } else {
+      this.compute.dropletsDelete(id);
+      throw new Error('There was an error creating the DigitalOcean proxy and it has been destroyed. Please check your account to makesure it has been.');
     }
   };
 
-  pollWebsiteWithIP = async (ip, SCRIPTID) => {
+  pollWebsiteWithIP = async ip => {
     let tryNumber = 0;
     let exit = false;
-    while (tryNumber < 10 && !exit) {
+    while (!exit && tryNumber <= numberOfTries) {
       try {
         tryNumber++;
         const getWebsite = await rp({
@@ -441,25 +494,16 @@ export default class ProxyCreator extends Component {
         });
         if (getWebsite.statusCode === 200) {
           exit = true;
-          if (this.state.cloud === 'Vultr') {
-            await rp({
-              method: 'POST',
-              uri: 'https://api.vultr.com/v1/startupscript/destroy',
-              headers: {
-                'API-Key': this.props.settings.vultrAPIKey
-              },
-              json: true,
-              form: {
-                SCRIPTID: SCRIPTID
-              }
-            });
-          }
           return getWebsite;
         }
-      } catch (error) {
-        console.log(error);
+      } catch (err) {
+        console.log(err);
+        if (err.error.code !== 'ECONNREFUSED') {
+          exit = true;
+          return false;
+        }
       }
-      await new Promise(r => setTimeout(r, 5000));
+      await this.sleep(sleepTime);
     }
     return false;
   };
@@ -549,6 +593,91 @@ export default class ProxyCreator extends Component {
     clipboard.writeText(string, 'selection');
   };
 
+  deleteAllProxies = async () => {
+    let responses;
+    try {
+      this.toggleDeleteAllModal();
+      this.props.setLoading(`Deleting ${this.state.cloud} Proxies`, true);
+      switch (this.state.cloud) {
+        case 'Google Cloud':
+          responses = await this.deleteAllGoogleCloudProxies();
+          break;
+        case 'DigitalOcean':
+          responses = await this.deleteAllDigitalOceanProxies();
+          break;
+        case 'Vultr':
+          responses = await this.deleteAllVultrProxies();
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      this.props.setLoading('', false);
+      const errors = responses.filter(response => response instanceof Error);
+      if (errors.length > 0) {
+        this.props.changeInfoModal(
+          true,
+          'Error Deleting',
+          'There was an error deleting some proxies in your account, please check manually to make sure they were deleted',
+          ''
+        );
+      }
+      this.setState({ proxyPings: [] });
+    }
+  };
+
+  deleteAllDigitalOceanProxies = async () => {
+    const response = await this.compute.dropletsGetAll();
+    const droplets = response.body.droplets;
+    const dropletDeletePromises = [];
+    droplets.forEach(droplet => {
+      dropletDeletePromises.push(this.compute.dropletsDelete(droplet.id).catch(e => e));
+    });
+    return Promise.all(dropletDeletePromises);
+  };
+
+  deleteAllGoogleCloudProxies = async () => {
+    const vms = await this.compute.getVMs();
+    const vmsDeletePromises = [];
+    console.log(vms);
+    vms[0].forEach(vm => {
+      vmsDeletePromises.push(vm.delete().catch(e => e));
+    });
+    console.log(vmsDeletePromises);
+    return Promise.all(vmsDeletePromises);
+  };
+
+  deleteAllVultrProxies = async () => {
+    const response = await rp({
+      method: 'GET',
+      uri: 'https://api.vultr.com/v1/server/list',
+      headers: {
+        'API-Key': this.props.settings.vultrAPIKey
+      },
+      json: true
+    });
+    const SUBIDs = Object.keys(response);
+    const SUBIDsDeletePromises = [];
+    SUBIDs.forEach(SUBID => {
+      SUBIDsDeletePromises.push(
+        rp({
+          method: 'POST',
+          uri: 'https://api.vultr.com/v1/server/destroy',
+          headers: {
+            'API-Key': this.props.settings.vultrAPIKey
+          },
+          json: true,
+          body: {
+            SUBID
+          }
+        }).catch(e => e)
+      );
+    });
+    return Promise.all(SUBIDsDeletePromises);
+  };
+
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
@@ -562,7 +691,7 @@ export default class ProxyCreator extends Component {
                   <th>port</th>
                   <th>user</th>
                   <th>pass</th>
-                  <th>ping</th>
+                  <th>ping(ms)</th>
                 </tr>
               </thead>
               <tbody>{this.state.proxyPings.map(this.returnProxyRow)}</tbody>
@@ -570,7 +699,7 @@ export default class ProxyCreator extends Component {
           </Row>
           <FormGroup row>
             <Col xs="2">
-              <label>cloud service</label>
+              <label>Cloud Service</label>
               <Input
                 name="cloud"
                 type="select"
@@ -588,7 +717,7 @@ export default class ProxyCreator extends Component {
               </Input>
             </Col>
             <Col xs="2">
-              <label>name</label>
+              <label>Name</label>
               <Input
                 name="instanceName"
                 type="text"
@@ -600,7 +729,7 @@ export default class ProxyCreator extends Component {
               />
             </Col>
             <Col xs="2">
-              <label>quantity</label>
+              <label>Quantity</label>
               <Input
                 type="select"
                 name="quantity"
@@ -622,7 +751,7 @@ export default class ProxyCreator extends Component {
               </Input>
             </Col>
             <Col xs="3">
-              <label>region</label>
+              <label>Region</label>
               <Input
                 name="region"
                 onChange={e => {
@@ -635,7 +764,7 @@ export default class ProxyCreator extends Component {
               </Input>
             </Col>
             <Col xs="3">
-              <label>machine</label>
+              <label>Machine</label>
               <Input
                 name="machine"
                 onChange={e => {
@@ -649,7 +778,7 @@ export default class ProxyCreator extends Component {
           </FormGroup>
           <FormGroup row>
             <Col xs="2">
-              <label>proxy username</label>
+              <label>Proxy Username</label>
               <Input
                 name="proxyUser"
                 value={this.state.proxyUser}
@@ -659,7 +788,7 @@ export default class ProxyCreator extends Component {
               />
             </Col>
             <Col xs="2">
-              <label>proxy password</label>
+              <label>Proxy Password</label>
               <Input
                 name="proxyPassword"
                 value={this.state.proxyPassword}
@@ -668,8 +797,8 @@ export default class ProxyCreator extends Component {
                 }}
               />
             </Col>
-            <Col xs="3">
-              <label>website</label>
+            <Col xs="2">
+              <label>Website</label>
               <Input
                 name="website"
                 value={this.state.website}
@@ -685,20 +814,44 @@ export default class ProxyCreator extends Component {
                 }}
                 className="nButton"
               >
-                create
+                Create
               </Button>
             </Col>
-            <Col xs="3" className="d-flex flex-column justify-content-end">
+            <Col xs="2" className="d-flex flex-column justify-content-end">
               <Button
                 onClick={() => {
                   this.copyToClipboard();
                 }}
                 className="nButton"
               >
-                copy to clipboard
+                Copy All
+              </Button>
+            </Col>
+            <Col xs="2" className="d-flex flex-column justify-content-end">
+              <Button
+                color="danger"
+                onClick={() => {
+                  if (this.state.cloud !== '') {
+                    this.toggleDeleteAllModal();
+                  }
+                }}
+              >
+                Delete All
               </Button>
             </Col>
           </FormGroup>
+          <Modal isOpen={this.state.deleteAllmodal} toggle={this.toggleDeleteAllModal} centered>
+            <ModalHeader style={{ borderBottom: 'none' }}>Are You Sure?</ModalHeader>
+            <ModalBody>{`Are you sure you want to delete all proxies in your ${this.state.cloud} Account?`}</ModalBody>
+            <ModalFooter>
+              <Button className="nButton" onClick={this.toggleDeleteAllModal}>
+                Cancel
+              </Button>
+              <Button color="danger" onClick={this.deleteAllProxies}>
+                Delete All
+              </Button>
+            </ModalFooter>
+          </Modal>
         </Container>
       </CSSTransition>
     );

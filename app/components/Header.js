@@ -8,16 +8,16 @@ import { CSSTransition } from 'react-transition-group';
 
 const componentToNameMapping = {
   FrontPage: 'Home',
+  ActivityGenerator: 'One-click Generator',
+  OneClickTester: 'One-click Tester',
+  // RaffleBot: 'Raffle Bot',
+  ProfileGenerator: 'Profile Generator',
   ProxyCreator: 'Proxy Creator',
   ProxyTester: 'Proxy Tester',
   AccountCreator: 'Account Creator',
   AddressJigger: 'Address Jigger',
-  ProfileGenerator: 'Profile Generator',
-  // ProfileTaskConverter: 'Profile/Task Converter',
-  ActivityGenerator: 'Activity Generator',
-  // RaffleBot: 'raffles',
-  OneClickTester: 'One-click Tester',
   Settings: 'Settings'
+  // ProfileTaskConverter: 'Profile/Task Converter',
 };
 
 const nameToSymbolMapping = {

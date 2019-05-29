@@ -38,6 +38,7 @@ export default class ActivityGenerator extends Component {
         <td>{index + 1}</td>
         <td>{activity.status}</td>
         <td>{activity.activityEmail}</td>
+        <td>{activity.activityProxy}</td>
         <td>
           <Progress className="progressBar" value={activity.youtube} max={total}>
             {/* {`${((activity.youtube * 100) / total).toFixed(1)}%`} */}
@@ -97,45 +98,62 @@ export default class ActivityGenerator extends Component {
   };
 
   loginToGoogleWindow = async (activity, index) => {
-    this.props.activities[index].status = 'Checking Email';
-    this.props.onUpdateActivity(index, this.props.activities[index]);
-    // try {
-    //   await this.loginToGoogle(activity.activityEmail, activity.activityPassword, rp.jar(), index);
-    // } catch (error) {
-    //   this.props.activities[index].status = 'Failed Logging In';
-    //   this.props.onUpdateActivity(index, this.props.activities[index]);
-    //   return;
-    // }
-    this.props.activities[index].status = 'Logging In';
-    this.props.onUpdateActivity(index, this.props.activities[index]);
-    const tokenID = uuidv4();
-    let win = new BrowserWindow({
-      width: 500,
-      height: 650,
-      show: true,
-      frame: true,
-      resizable: true,
-      focusable: true,
-      minimizable: true,
-      closable: true,
-      allowRunningInsecureContent: true,
-      webPreferences: {
+    try {
+      this.props.activities[index].status = 'Checking Email';
+      this.props.onUpdateActivity(index, this.props.activities[index]);
+      // try {
+      //   await this.loginToGoogle(activity.activityEmail, activity.activityPassword, rp.jar(), index);
+      // } catch (error) {
+      //   this.props.activities[index].status = 'Failed Logging In';
+      //   this.props.onUpdateActivity(index, this.props.activities[index]);
+      //   return;
+      // }
+      this.props.activities[index].status = 'Logging In';
+      this.props.onUpdateActivity(index, this.props.activities[index]);
+      const tokenID = uuidv4();
+      let win = new BrowserWindow({
+        width: 500,
+        height: 650,
+        show: true,
+        frame: true,
+        resizable: true,
+        focusable: true,
+        minimizable: true,
+        closable: true,
         allowRunningInsecureContent: true,
-        nodeIntegration: true,
-        webSecurity: false,
-        session: remote.session.fromPartition(`activity-${tokenID}`)
+        webPreferences: {
+          allowRunningInsecureContent: true,
+          nodeIntegration: true,
+          webSecurity: false,
+          session: remote.session.fromPartition(`activity-${tokenID}`)
+        }
+      });
+
+      if (activity.activityProxy !== '') {
+        await new Promise((resolve, reject) => {
+          const proxyArray = activity.activityProxy.split(/@|:/);
+          if (proxyArray.length === 4) {
+            win.webContents.session.on('login', (event, webContents, request, authInfo, callback) => {
+              callback(proxyArray[0], proxyArray[1]);
+            });
+          }
+          const proxyIpAndPort = proxyArray.slice(-2);
+          win.webContents.session.setProxy({ proxyRules: `${proxyIpAndPort[0]}:${proxyIpAndPort[1]}` }, () => {
+            resolve();
+          });
+        });
       }
-    });
-    win.loadURL('https://google.com');
-    win.webContents.once('did-finish-load', () => {
-      win.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
+
+      win.loadURL('https://google.com');
       win.webContents.once('did-finish-load', () => {
-        win.webContents.executeJavaScript(`
+        win.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
+        win.webContents.once('did-finish-load', () => {
+          win.webContents.executeJavaScript(`
         document.getElementById("Email").value = "${activity.activityEmail}";
         document.getElementById("next").click();
         `);
-        win.webContents.once('did-navigate-in-page', () => {
-          win.webContents.executeJavaScript(`
+          win.webContents.once('did-navigate-in-page', () => {
+            win.webContents.executeJavaScript(`
           var passwdObserver = new MutationObserver(function(mutations, me) {
             var canvas = document.getElementById("Passwd");
             if (canvas) {
@@ -152,26 +170,29 @@ export default class ActivityGenerator extends Component {
               characterData: true
           })
           `);
-          win.webContents.once('did-finish-load', () => {
-            win.webContents.executeJavaScript(`window.location`, false, result => {
-              if (result.pathname === '/') {
-                win.webContents.session.cookies.get({}, (error, cookies) => {
-                  if (error) {
-                  } else {
-                    this.startWindow(activity, index, cookies, tokenID);
-                    win.close();
-                  }
-                });
-              } else {
-                win.close();
-                this.props.activities[index].status = 'Failed Logging In';
-                this.props.onUpdateActivity(index, this.props.activities[index]);
-              }
+            win.webContents.once('did-finish-load', () => {
+              win.webContents.executeJavaScript(`window.location`, false, result => {
+                if (result.pathname === '/') {
+                  win.webContents.session.cookies.get({}, (error, cookies) => {
+                    if (error) {
+                    } else {
+                      this.startWindow(activity, index, cookies, tokenID);
+                      win.close();
+                    }
+                  });
+                } else {
+                  win.close();
+                  this.props.activities[index].status = 'Failed Logging In';
+                  this.props.onUpdateActivity(index, this.props.activities[index]);
+                }
+              });
             });
           });
         });
       });
-    });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   startWindow = async (activity, index, cookies, tokenID) => {
@@ -224,6 +245,17 @@ export default class ActivityGenerator extends Component {
         cookies
       });
       this.props.activityWindows[index].create();
+      if (activity.activityProxy !== '') {
+        await new Promise((resolve, reject) => {
+          this.props.activityWindows[index].object.webContents.session.setProxy(
+            { proxyRules: `http=${activity.activityProxy};https=${activity.activityProxy}` },
+            () => {
+              resolve();
+            }
+          );
+        });
+      }
+      console.log(this.props.activityWindows[index]);
       if (this.props.settings.showAcitivtyWindows) {
         windowManager.get(`activity-${tokenID}`).object.show();
       } else {
@@ -374,6 +406,7 @@ export default class ActivityGenerator extends Component {
                       <th>#</th>
                       <th>status</th>
                       <th>account</th>
+                      <th>proxy</th>
                       <th>youtube</th>
                       <th>searches</th>
                       <th>shopping</th>
