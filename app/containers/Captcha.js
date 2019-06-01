@@ -78,18 +78,17 @@ class Captcha extends Component {
     win.webContents.session.cookies.get({ url: args.baseURL }, (error, cookiesArray) => {
       console.log(args.baseURL);
       console.log(cookiesArray);
-      cookiesArray.forEach(cookie => {
-        cookies.remove(args.baseURL, cookie.name, removeResponse => {
+      for (const cookie of cookiesArray) {
+        win.webContents.session.cookies.remove(args.baseURL, cookie.name, removeResponse => {
           console.log(removeResponse);
         });
-      });
+      }
     });
 
     const formattedCookies = this.convertCookieString(args.checkoutURL, args.cookies);
     for (const cookie of formattedCookies) {
       win.webContents.session.cookies.set(cookie, error => {
-        if (error !== null) {
-        }
+        console.log(error);
       });
     }
 
@@ -140,7 +139,6 @@ class Captcha extends Component {
           src="http://google.com"
           webpreferences="allowRunningInsecureContent, javascript=yes"
           preload={process.env.NODE_ENV === 'development' ? '../webpack-pack/captchaPreload.js' : '../../webpack-pack/captchaPreload.js'}
-          // preload={path.normalize(path.resolve(__dirname, '..', '..', 'webpack-pack', 'captchaPreload.js'))}
           style={{
             width: '100%',
             height: this.state.waiting ? '0px' : 'calc(100% - 90px)'

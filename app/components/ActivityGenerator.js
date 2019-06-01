@@ -99,15 +99,6 @@ export default class ActivityGenerator extends Component {
 
   loginToGoogleWindow = async (activity, index) => {
     try {
-      this.props.activities[index].status = 'Checking Email';
-      this.props.onUpdateActivity(index, this.props.activities[index]);
-      // try {
-      //   await this.loginToGoogle(activity.activityEmail, activity.activityPassword, rp.jar(), index);
-      // } catch (error) {
-      //   this.props.activities[index].status = 'Failed Logging In';
-      //   this.props.onUpdateActivity(index, this.props.activities[index]);
-      //   return;
-      // }
       this.props.activities[index].status = 'Logging In';
       this.props.onUpdateActivity(index, this.props.activities[index]);
       const tokenID = uuidv4();
@@ -120,7 +111,6 @@ export default class ActivityGenerator extends Component {
         focusable: true,
         minimizable: true,
         closable: true,
-        allowRunningInsecureContent: true,
         webPreferences: {
           allowRunningInsecureContent: true,
           nodeIntegration: true,
@@ -138,7 +128,8 @@ export default class ActivityGenerator extends Component {
             });
           }
           const proxyIpAndPort = proxyArray.slice(-2);
-          win.webContents.session.setProxy({ proxyRules: `${proxyIpAndPort[0]}:${proxyIpAndPort[1]}` }, () => {
+          console.log(proxyIpAndPort);
+          win.webContents.session.setProxy({ proxyRules: `http=http://${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` }, () => {
             resolve();
           });
         });
@@ -170,7 +161,7 @@ export default class ActivityGenerator extends Component {
               characterData: true
           })
           `);
-            win.webContents.once('did-finish-load', () => {
+            win.webContents.on('did-finish-load', () => {
               win.webContents.executeJavaScript(`window.location`, false, result => {
                 if (result.pathname === '/') {
                   win.webContents.session.cookies.get({}, (error, cookies) => {
@@ -181,8 +172,8 @@ export default class ActivityGenerator extends Component {
                     }
                   });
                 } else {
-                  win.close();
-                  this.props.activities[index].status = 'Failed Logging In';
+                  // win.close();
+                  this.props.activities[index].status = 'Stuck In Login';
                   this.props.onUpdateActivity(index, this.props.activities[index]);
                 }
               });
@@ -240,22 +231,35 @@ export default class ActivityGenerator extends Component {
         activityDelayMin: this.props.settings.activityDelayMin,
         activityDelayMax: this.props.settings.activityDelayMax,
         data: this.props.activities[index],
+        index,
         update: this.props.onUpdateActivity,
         url: 'google.com',
         cookies
       });
       this.props.activityWindows[index].create();
-      if (activity.activityProxy !== '') {
-        await new Promise((resolve, reject) => {
-          this.props.activityWindows[index].object.webContents.session.setProxy(
-            { proxyRules: `http=${activity.activityProxy};https=${activity.activityProxy}` },
-            () => {
-              resolve();
-            }
-          );
-        });
-      }
-      console.log(this.props.activityWindows[index]);
+      // if (activity.activityProxy !== '') {
+      //   const proxyArray = activity.activityProxy.split(/@|:/);
+      //   if (proxyArray.length === 4) {
+      //     this.props.activityWindows[index].object.webContents.session.on('login', (event, webContents, request, authInfo, callback) => {
+      //       callback(proxyArray[0], proxyArray[1]);
+      //     });
+      //   }
+      //   const proxyIpAndPort = proxyArray.slice(-2);
+      //   await new Promise((resolve, reject) => {
+      //     this.props.activityWindows[index].object.webContents.session.setProxy(
+      //       { proxyRules: `http=http://${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` },
+      //       () => {
+      //         resolve();
+      //       }
+      //     );
+      //   });
+
+      //   // await new Promise((resolve, reject) => {
+      //   //   this.props.activityWindows[index].object.webContents.session.setProxy({ proxyRules: `http=${activity.activityProxy},direct://` }, () => {
+      //   //     resolve();
+      //   //   });
+      //   // });
+      // }
       if (this.props.settings.showAcitivtyWindows) {
         windowManager.get(`activity-${tokenID}`).object.show();
       } else {
@@ -429,7 +433,7 @@ export default class ActivityGenerator extends Component {
               </Col>
               <Col xs="2">
                 <Label>proxy</Label>
-                <Input name="activityProxy" onChange={this.handleChange} type="text" />
+                <Input name="activityProxy" onChange={this.handleChange} placeholder="user:pass@ip:port or ip:port" type="text" />
               </Col>
               <Col xs="2" className="d-flex flex-column justify-content-end">
                 <Button onClick={this.addActivity}>Add</Button>

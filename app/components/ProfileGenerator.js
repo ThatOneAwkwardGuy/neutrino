@@ -24,7 +24,7 @@ const TRANSLATIONS = [
   ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace']
 ];
 const cardTypes = ['visa', 'mastercard'];
-const bots = ['Cybersole', 'Project Destroyer', 'Ghost', 'EVE AIO', 'Phantom', 'Dashe', 'Hastey', 'Kodai', 'CSV'];
+const bots = ['Cybersole', 'Project Destroyer', 'Ghost', 'EVE AIO', 'Phantom', 'Dashe', 'Hastey', 'Kodai', 'Neutrino Raffle', 'CSV'];
 export default class ProfileGenerator extends Component {
   constructor() {
     super();
@@ -724,6 +724,29 @@ export default class ProfileGenerator extends Component {
               },
               profileName: `Profile - ${index}`,
               region: this.state.formdata.deliveryCountry
+            }
+          };
+          break;
+        case 'Neutrino Raffle':
+          profiles[`Profile - ${index}`] = {
+            email: this.state.formdata.paymentEmail,
+            address: {
+              address: this.state.formdata.billingAddress,
+              apt: this.state.formdata.billingAptorSuite,
+              city: this.state.formdata.billingCity,
+              firstName: this.state.formdata.billingFirstName,
+              lastName: this.state.formdata.billingLastName,
+              phoneNumber: this.state.formdata.phoneNumber,
+              state: this.state.formdata.billingProvince,
+              zipCode: this.state.formdata.billingZip,
+              region: this.state.formdata.deliveryCountry
+            },
+            paymentDetails: {
+              cardHolder: this.state.formdata.deliveryFirstName + ' ' + this.state.formdata.deliveryLastName,
+              cardNumber: this.state.cards[index].cardExpiryMonth,
+              cvv: this.state.cards[index].cardCVV,
+              emailAddress: this.state.formdata.paymentEmail,
+              expirationDate: `${this.state.cards[index].cardExpiryMonth}/${this.state.cards[index].cardExpiryYear.slice(-2)}`
             }
           };
           break;

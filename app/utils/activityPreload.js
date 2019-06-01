@@ -1,7 +1,6 @@
 const remote = require('electron').remote;
 const windowManager = remote.require('electron-window-manager');
 const currentWindow = windowManager.getCurrent();
-const name = currentWindow.name;
 const data = windowManager.sharedData.fetch(currentWindow.name);
 const updateFunction = data.update;
 const activity = data.data;
@@ -179,9 +178,15 @@ const actionVerbList = [
 ];
 let webview;
 
+import { Plugin, passChomeTest } from '../utils/stealth';
+
+const plugin = new Plugin();
+plugin.mockPluginsAndMimeTypes();
+passChomeTest();
+
 const setActivityToRunning = () => {
   activity.status = 'Started';
-  updateFunction({ index: name.split('-')[1], activity });
+  updateFunction({ index: data.index, activity });
 };
 
 const sleep = ms => {
@@ -212,7 +217,7 @@ const randomGoogleSearch = () => {
     activity.searches += 1;
     // activity.status = `Google Search - ${question}`;
     activity.status = `Google Search`;
-    updateFunction({ index: name.split('-')[1], activity });
+    updateFunction({ index: data.index, activity });
   };
   changeURLGoogleSearch();
 };
@@ -225,7 +230,7 @@ const randomGoogleShoppingSearch = () => {
     activity.shopping += 1;
     // activity.status = `Google Shopping Search - ${chosenQuery}`;
     activity.status = `Google Shopping Search`;
-    updateFunction({ index: name.split('-')[1], activity });
+    updateFunction({ index: data.index, activity });
   };
   changeURLShoppingSearch();
 };
@@ -238,7 +243,7 @@ const randomGoogleNewsSearch = () => {
     activity.news += 1;
     // activity.status = `Google News Search - ${chosenQuery}`;
     activity.status = `Google News Search`;
-    updateFunction({ index: name.split('-')[1], activity });
+    updateFunction({ index: data.index, activity });
   };
   changeURLNewsSearch();
 };
@@ -260,12 +265,12 @@ const randomTrendingYoutubeVideo = async () => {
   const thumbnailLinksArray = $('.yt-uix-sessionlink').toArray();
   const chosenVideo = thumbnailLinksArray[Math.floor(Math.random() * thumbnailLinksArray.length)];
   const changeURLYoutubeVideo = () => {
-    webview.loadURL(`http://youtube.com${chosenVideo.attribs.href}/?autoplay=1&mute=1`);
+    webview.loadURL(`https://youtube.com${chosenVideo.attribs.href}/?autoplay=1&mute=1`);
     webview.removeEventListener('dom-ready', changeURLYoutubeVideo);
     activity.youtube += 1;
     // activity.status = `Watching Youtube Video - ${chosenVideo.attribs.title}`;
     activity.status = `Watching Youtube Video`;
-    updateFunction({ index: name.split('-')[1], activity });
+    updateFunction({ index: data.index, activity });
   };
   changeURLYoutubeVideo();
 };
@@ -284,33 +289,19 @@ const loop = async () => {
 const setCookieAndRunLoop = async () => {
   webview = await getWebview();
   setActivityToRunning();
-  // const cookies = data.cookies;
-  // for (const cookie of cookies) {
-  //   const formattedCookie = {
-  //     url: `http://${cookie.domain[0] === '.' ? cookie.domain.slice(1) : cookie.domain}`,
-  //     value: cookie.value,
-  //     domain: cookie.domain,
-  //     path: cookie.path,
-  //     name: cookie.name
-  //   };
-  //   currentWindow.object.webContents.session.cookies.set(formattedCookie, error => {
-  //     if (error !== null) {
-  //       console.log(error);
-  //     }
-  //     console.log(formattedCookie);
-  //   });
-  // }
   webview.addEventListener('dom-ready', loop);
 };
 
 currentWindow.object.on('close', e => {
   activity.status = 'Not Started';
-  updateFunction({ index: name.split('-')[1], activity });
+  updateFunction({ index: data.index, activity });
 });
-if (data.data.activityProxy !== '') {
-  currentWindow.object.webContents.session.setProxy({ proxyRules: data.proxy }, () => {
-    document.addEventListener('DOMContentLoaded', setCookieAndRunLoop, { once: true });
-  });
-} else {
-  document.addEventListener('DOMContentLoaded', setCookieAndRunLoop, { once: true });
-}
+document.addEventListener('DOMContentLoaded', setCookieAndRunLoop, { once: true });
+
+// if (data.data.activityProxy !== '') {
+//   currentWindow.object.webContents.session.setProxy({ proxyRules: data.proxy }, () => {
+//     document.addEventListener('DOMContentLoaded', setCookieAndRunLoop, { once: true });
+//   });
+// } else {
+//   document.addEventListener('DOMContentLoaded', setCookieAndRunLoop, { once: true });
+// }

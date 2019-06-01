@@ -6,7 +6,8 @@ const { dialog } = require('electron').remote;
 import FontAwesome from 'react-fontawesome';
 var shell = require('electron').shell;
 import { auth } from '../api/firebase';
-
+import { ipcRenderer } from 'electron';
+import { CHECK_FOR_UPDATES } from '../utils/constants';
 export default class Settings extends Component {
   constructor(props) {
     super(props);
@@ -87,11 +88,16 @@ export default class Settings extends Component {
     });
   };
 
+  checkForUpdate = () => {
+    this.props.setLoading('Checking For Updates', true);
+    ipcRenderer.send(CHECK_FOR_UPDATES);
+  };
+
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-        <Container fluid className="activeWindow">
-          <Form style={{ marginTop: '20px' }}>
+        <Container fluid className="activeWindow d-flex flex-column">
+          <Form style={{ marginTop: '20px' }} className="flex-grow-1">
             <h6>
               <strong>Proxy Creator</strong>
             </h6>
@@ -201,7 +207,6 @@ export default class Settings extends Component {
                         this.handleChange(e);
                       }}
                     />
-                    {/* <Toggle name="showAcitivtyWindows" checked={this.state.settings.showAcitivtyWindows} onChange={this.toggleButton} /> */}
                   </div>
                 </Label>
               </Col>
@@ -217,22 +222,34 @@ export default class Settings extends Component {
                         this.handleChange(e);
                       }}
                     />
-                    {/* <Toggle name="showAcitivtyWindows" checked={this.state.settings.showAcitivtyWindows} onChange={this.toggleButton} /> */}
                   </div>
                 </Label>
               </Col>
             </FormGroup>
+            <h6>
+              <strong>Updates</strong>
+            </h6>
             <FormGroup row>
-              <Col xs="2">
-                <Button color="danger" onClick={this.signOut}>
-                  Sign Out
-                </Button>
+              <Col>
+                {this.props.settings.update.status === 'N' ? `No updates as of ${new Date(this.props.settings.update.lastChecked).toUTCString()}` : null}
               </Col>
-              <Col xs="2" className="ml-auto text-right">
-                <Button onClick={this.save}>Save</Button>
+            </FormGroup>
+            <FormGroup row>
+              <Col>
+                <Button onClick={this.checkForUpdate}>Check For Updates</Button>
               </Col>
             </FormGroup>
           </Form>
+          <Row>
+            <Col xs="2">
+              <Button color="danger" onClick={this.signOut}>
+                Sign Out
+              </Button>
+            </Col>
+            <Col xs="2" className="ml-auto text-right">
+              <Button onClick={this.save}>Save</Button>
+            </Col>
+          </Row>
         </Container>
       </CSSTransition>
     );

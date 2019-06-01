@@ -9,7 +9,14 @@ const initialState = {
   awsSecretKey: '',
   vultrAPIKey: '',
   digitalOceanAPIKey: '',
-  showAcitivtyWindows: false
+  showAcitivtyWindows: false,
+  update: {
+    status: 'M',
+    releaseDate: '',
+    lastChecked: '',
+    changelog: '',
+    version: ''
+  }
 };
 
 export default function settingsReducer(state = initialState, action) {

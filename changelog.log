@@ -54,7 +54,16 @@
 - Fixed one click captcha tester endpoint
 
 1.0.7
+- Fixed account creator proxy input where only one proxy was allowed;
+- Made one click generator proxy input format more obvious
+- Fixed one click gen blank screen when using proxies
+- Fixed other one click gen bugs
 
+1.0.8
+- Fixed account creator error reporting
+- Added auto updating (NO MORE MANUALLY DOWNLOADING UPDATES!!!) (Testing needed though :/)
+- Changed activity gen logging in to allow user to enter verification codes instead of just failing and closing window
+- Changed proxy gen functionality to not delete proxy when it doesnt work with website, but to list it with a ping of -1
 
 4242424242424242:Visa:03:2020:123
 4242424242424243:Visa:03:2020:123

@@ -227,7 +227,7 @@ export default class ProxyCreator extends Component {
     }
   };
 
-  pingVM = async (ip, vm, instanceName) => {
+  pingVM = async (ip, vm) => {
     let exit = false;
     let res;
     let count = 0;
@@ -242,7 +242,8 @@ export default class ProxyCreator extends Component {
           uri: this.state.website,
           time: true,
           proxy: `http://${this.state.proxyUser}:${this.state.proxyPassword}@${ip}:3128`,
-          resolveWithFullResponse: true
+          resolveWithFullResponse: true,
+          followAllRedirects: true
         });
         if (res.statusCode !== 200) {
           vm.delete();
@@ -252,16 +253,28 @@ export default class ProxyCreator extends Component {
       } catch (err) {
         console.log(err);
         if (err.error.code !== 'ECONNREFUSED') {
-          vm.delete();
+          const split = [this.state.proxyUser, this.state.proxyPassword, ip, '3128'];
+          this.setState({
+            proxyPings: [
+              ...this.state.proxyPings,
+              {
+                user: split[0],
+                pass: split[1],
+                ip: split[2],
+                port: split[3],
+                ping: -1
+              }
+            ]
+          });
           exit = true;
-          throw new Error('The proxy that was made could not be connected to and was deleted.');
+          throw err;
         }
       }
       await this.sleep(sleepTime);
     }
     if (count > numberOfTries) {
       vm.delete();
-      throw new Error('After 20 attempts, the proxy that was made could not be connected to and was deleted.');
+      throw new Error(`After ${numberOfTries} attempts, the proxy that was made could not be connected to and was deleted.`);
     }
     const split = [this.state.proxyUser, this.state.proxyPassword, ip, '3128'];
     this.setState({
@@ -311,7 +324,7 @@ export default class ProxyCreator extends Component {
     console.log(metadata);
     const ip = metadata.networkInterfaces[0].accessConfigs[0].natIP;
     console.log(ip);
-    return this.pingVM(ip, vm, `${this.state.instanceName}-${index + 1}`);
+    return this.pingVM(ip, vm);
   };
 
   createDigitalOceanInstance = async index => {
@@ -498,7 +511,7 @@ export default class ProxyCreator extends Component {
         }
       } catch (err) {
         console.log(err);
-        if (err.error.code !== 'ECONNREFUSED') {
+        if (err.error.code !== 'ECONNREFUSED' && String(err.error.code)[0] !== 2 && String(err.error.code)[0] !== 3) {
           exit = true;
           return false;
         }

@@ -1,13 +1,13 @@
 {
   "name": "Neutrino",
-  "version": "1.0.6",
+  "version": "1.0.8",
   "description": "Neutrino AIO Bot",
   "main": "./webpack-pack/main.js",
   "author": {
     "name": "ThatOneAwkwardGuy",
     "email": "support@neutrino.app"
   },
-  "repository": "https://github.com/ThatOneAwkwardGuy/neutrino",
+  "repository": "https://github.com/ThatOneAwkwardGuy/Neutrino-Updates",
   "license": "SEE LICENSE IN LICENSE FILE",
   "resolutions": {
     "babel-core": "7.0.0-bridge.0"
@@ -47,8 +47,7 @@
     ],
     "publish": {
       "provider": "github",
-      "token": "912c34e85a9d67783b0edd1982f6e5d1bc6a124e",
-      "private": true
+      "private": false
     }
   },
   "dependencies": {
@@ -64,7 +63,6 @@
     "csvtojson": "^2.0.8",
     "discord-rpc": "^3.0.1",
     "do-wrapper": "^3.19.0",
-    "electron-store": "^2.0.0",
     "electron-updater": "^4.0.6",
     "electron-window-manager": "^1.0.6",
     "emotion": "^10.0.5",
@@ -109,8 +107,6 @@
     "redux": "^4.0.0",
     "redux-actions": "^2.4.0",
     "redux-localstorage": "^0.4.1",
-    "redux-persist": "^5.9.1",
-    "redux-persist-electron-storage": "^2.0.0",
     "redux-thunk": "^2.3.0",
     "register-scheme": "0.0.2",
     "request": "^2.87.0",
@@ -186,7 +182,7 @@
   },
   "scripts": {
     "develop": "npm run private:compile -- --source-maps true && run-p -r private:watch private:serve",
-    "dist": "cross-env GH_TOKEN=912c34e85a9d67783b0edd1982f6e5d1bc6a124e electron-builder -mw --x64 -p always",
+    "dist": "cross-env electron-builder -mw --x64 -p always",
     "lint": "eslint --no-ignore scripts app test *.js",
     "pack": "run-s private:clean private:compile private:build:all",
     "pack:linux": "run-s private:clean private:compile private:build:linux",
@@ -221,7 +217,7 @@
     "webpack:prod:build:mac": "cross-env NODE_ENV=production electron-builder -m --x64",
     "webpack:prod:build:win": "cross-env NODE_ENV=production electron-builder -w --x64",
     "webpack:prod:clean": "rimraf webpack-pack dist",
-    "webpack:prod:dist": "cross-env GH_TOKEN=912c34e85a9d67783b0edd1982f6e5d1bc6a124e NODE_ENV=production electron-builder -mw --x64 -p always",
+    "webpack:prod:dist": "cross-env NODE_ENV=production GH_TOKEN=22658cb28e268b0a1bbe49b10a86a1b1b9407490 electron-builder -mw --x64 --ia32 -p always",
     "webpack:prod:pack": "cross-env NODE_ENV=production webpack --mode production --config webpack.build.config.js"
   }
 }

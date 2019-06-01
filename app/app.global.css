@@ -788,3 +788,13 @@ canvas {
 .headerDropdown {
   padding: 6px 20px;
 }
+
+.table th,
+.table td {
+  border: none;
+}
+
+.updateChangelog {
+  padding: 10px;
+  background-color: #222222;
+}

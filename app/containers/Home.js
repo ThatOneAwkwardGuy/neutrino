@@ -20,7 +20,15 @@ import RaffleBot from '../components/RaffleBot';
 import Settings from '../components/Settings';
 import { firestore, auth } from '../api/firebase/firebase';
 import { BarLoader } from 'react-spinners';
-import { SET_DISCORD_RPC_STATE } from '../utils/constants';
+import {
+  SET_DISCORD_RPC_STATE,
+  UPDATE_AVAILABLE,
+  NO_UPDATE_AVAILABLE,
+  CHECK_FOR_UPDATES,
+  START_UPDATE,
+  UPDATE_DOWNLOADED,
+  START_INSTALL
+} from '../utils/constants';
 const ipcRenderer = require('electron').ipcRenderer;
 
 class Home extends Component {
@@ -33,6 +41,7 @@ class Home extends Component {
       activeWindow: 'FrontPage',
       activityGeneratorAccountsClases: [],
       infoModal: false,
+      updateModal: false,
       infoModalHeader: '',
       infoModalBody: '',
       infoModalFooter: ''
@@ -58,6 +67,18 @@ class Home extends Component {
   toggleInfoModal = () => {
     this.setState({
       infoModal: !this.state.infoModal
+    });
+  };
+
+  toggleUpdateModal = () => {
+    this.setState({
+      updateModal: !this.state.updateModal
+    });
+  };
+
+  toggleInstallModal = () => {
+    this.setState({
+      installModal: !this.state.installModal
     });
   };
 
@@ -133,7 +154,7 @@ class Home extends Component {
           />
         );
       case 'RaffleBot':
-        return <RaffleBot />;
+        return <RaffleBot setLoading={this.changeLoading} changeInfoModal={this.changeInfoModal} />;
       case 'ProfileGenerator':
         return <ProfileGenerator profiles={this.props.profiles} onAddProfile={this.props.onAddProfile} changeInfoModal={this.changeInfoModal} />;
       case 'OneClickTester':
@@ -141,6 +162,7 @@ class Home extends Component {
       case 'Settings':
         return (
           <Settings
+            setLoading={this.changeLoading}
             history={this.props.history}
             settings={this.props.settings}
             onUpdateSettings={this.props.onUpdateSettings}
@@ -158,6 +180,16 @@ class Home extends Component {
     this.setState({ activeWindow: activeComponent });
   };
 
+  triggerDownload = () => {
+    ipcRenderer.send(START_UPDATE);
+    this.toggleUpdateModal();
+  };
+
+  triggerInstall = () => {
+    ipcRenderer.send(START_INSTALL);
+    this.toggleInstallModal();
+  };
+
   watchForActiveStatus = () => {
     const user = auth.currentUser;
     firestore
@@ -172,10 +204,42 @@ class Home extends Component {
       });
   };
 
+  watchForUpdates = () => {
+    ipcRenderer.on(UPDATE_AVAILABLE, (event, arg) => {
+      const settings = { ...this.props.settings };
+      settings.update = { ...settings.update };
+      settings.update.status = 'Y';
+      settings.update.releaseDate = arg.releaseDate;
+      settings.update.lastChecked = new Date().getTime();
+      settings.update.changelog = arg.releaseNotes;
+      settings.update.version = arg.version;
+      this.props.onUpdateSettings(settings);
+      this.changeLoading('', false);
+      this.toggleUpdateModal();
+    });
+    ipcRenderer.on(NO_UPDATE_AVAILABLE, (event, arg) => {
+      const settings = { ...this.props.settings };
+      settings.update = { ...settings.update };
+      settings.update.status = 'N';
+      settings.update.releaseDate = arg.releaseDate;
+      settings.update.lastChecked = new Date().getTime();
+      settings.update.changelog = arg.releaseNotes;
+      settings.update.version = arg.version;
+      this.props.onUpdateSettings(settings);
+      this.changeLoading('', false);
+    });
+    ipcRenderer.on(UPDATE_DOWNLOADED, (event, arg) => {
+      console.log(arg);
+      this.toggleInstallModal();
+    });
+    ipcRenderer.send(CHECK_FOR_UPDATES);
+  };
+
   componentDidMount() {
     if (process.env.NODE_ENV !== 'development') {
       this.watchForActiveStatus();
     }
+    this.watchForUpdates();
   }
 
   render() {
@@ -194,6 +258,40 @@ class Home extends Component {
           <ModalFooter>
             <Button color="danger" onClick={this.toggleInfoModal}>
               Close
+            </Button>
+          </ModalFooter>
+        </Modal>
+        <Modal isOpen={this.state.updateModal} size="md" centered toggle={this.toggleUpdateModal}>
+          <ModalHeader style={{ border: 'none' }} toggle={this.toggleUpdateModal}>
+            Update Available
+          </ModalHeader>
+          <ModalBody>
+            <p>Neutrino version {this.props.settings.update.version} is now available</p>
+            <p className="updateChangelog">{this.props.settings.update.changelog}</p>
+            <small>The update will download in the background and alert you when you can install it.</small>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" onClick={this.toggleUpdateModal}>
+              Close
+            </Button>
+            <Button className="nButton" onClick={this.triggerDownload}>
+              Download
+            </Button>
+          </ModalFooter>
+        </Modal>
+        <Modal isOpen={this.state.installModal} size="md" centered toggle={this.toggleInstallModal}>
+          <ModalHeader style={{ border: 'none' }} toggle={this.toggleInstallModal}>
+            Update Ready
+          </ModalHeader>
+          <ModalBody className="text-center">
+            <p>The update is now ready to be installed.</p>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="danger" onClick={this.toggleInstallModal}>
+              Close
+            </Button>
+            <Button className="nButton" onClick={this.triggerInstall}>
+              Install
             </Button>
           </ModalFooter>
         </Modal>

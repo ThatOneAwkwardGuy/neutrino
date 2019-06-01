@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { Row, Col } from 'reactstrap';
 import FontAwesome from 'react-fontawesome';
 import Logo from '../img/svg/logo.svg';
-var shell = require('electron').shell;
-const ipcRenderer = require('electron').ipcRenderer;
 import { OPEN_CAPTCHA_WINDOW } from '../utils/constants';
+const shell = require('electron').shell;
+const ipcRenderer = require('electron').ipcRenderer;
+const remote = require('electron').remote;
 
 export default class Footer extends Component {
   constructor(props) {
@@ -53,7 +54,8 @@ export default class Footer extends Component {
         <Col xs="6" className="text-center footerCenterSection">
           Copyright © 2019 Neutrino - All Rights Reserved
         </Col>
-        <Col xs="3" className="text-right footerRightSection">
+        <Col xs="1">v{remote.app.getVersion()}</Col>
+        <Col xs="2" className="text-right footerRightSection">
           <img style={{ maxWidth: '100px' }} src={Logo} className="ml-auto" />
         </Col>
       </Row>

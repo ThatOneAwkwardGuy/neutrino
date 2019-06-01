@@ -121,7 +121,6 @@ const sites = {
   soleclassics: 'https://soleclassics.com',
   solefly: 'https://www.solefly.com',
   solestop: 'https://www.solestop.com',
-  // sotostore: 'https://www.sotostore.com',
   'suede-store': 'https://suede-store.com',
   super7: 'https://super7.com',
   sukamii: 'https://www.sukamii.com',
@@ -242,7 +241,7 @@ export default class AccountCreator extends Component {
             referrer: `${sites[this.state.site]}/challenge`,
             referrerPolicy: 'no-referrer-when-downgrade',
             'upgrade-insecure-requests': '1',
-            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36'
           },
           jar: this.cookieJars[captchaToken.id],
           form: payloadChallenge
@@ -276,20 +275,38 @@ export default class AccountCreator extends Component {
       'customer[password]': pass
     };
 
+    if (this.state.site === 'cncpts') {
+      await this.rp({
+        method: 'GET',
+        headers: {
+          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+          'accept-language': 'en-US,en;q=0.9',
+          'cache-control': 'no-cache',
+          pragma: 'no-cache',
+          'upgrade-insecure-requests': '1',
+          referrerPolicy: 'no-referrer-when-downgrade'
+        },
+        jar: this.cookieJars[tokenID],
+        url: sites[this.state.site]
+      });
+    }
+
     const response = await this.rp({
       method: 'POST',
       url: `${sites[this.state.site]}/account`,
       followRedirect: true,
-      // proxy: this.state.useProxies ? this.getRandomProxy() : '',
+      proxy: this.state.useProxies ? this.getRandomProxy() : '',
       resolveWithFullResponse: true,
       followAllRedirects: true,
       jar: this.cookieJars[tokenID],
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36',
+        origin: sites[this.state.site],
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
         accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
         'accept-language': 'en-US,en;q=0.9',
         'cache-control': 'no-cache',
         'content-type': 'application/x-www-form-urlencoded',
+        cookie: 'MCPopupClosed=yes',
         pragma: 'no-cache',
         'upgrade-insecure-requests': '1'
       },
@@ -311,7 +328,7 @@ export default class AccountCreator extends Component {
         pass: pass
       });
     } else {
-      if (!responseChallenge.request.href.includes('register')) {
+      if (!response.request.href.includes('register')) {
         this.props.onCreateAccount({
           email: email,
           site: this.state.site,
@@ -333,16 +350,15 @@ export default class AccountCreator extends Component {
       this.cookieJars = {};
       const accountPromises = Array.from(Array(parseInt(this.state.quantity))).map((x, i) => {
         switch (this.state.site) {
-          case 'sotostore':
-            return this.createSotoStoreAccount();
           default:
             const delay = this.state.accountCreationDelay ? this.state.accountCreationDelayAmount : 0;
-            return Promise.resolve(this.sleep(delay)).then(() => this.createShopifyAccount().catch(e => e));
+            return this.sleep(delay).then(() => this.createShopifyAccount().catch(e => e));
         }
       });
-      await Promise.all(accountPromises);
-      console.log(accountPromises);
-      const invalidResults = accountPromises.filter(result => result instanceof Error);
+      const resolvedPromises = await Promise.all(accountPromises);
+      console.log(resolvedPromises);
+      const invalidResults = resolvedPromises.filter(result => result instanceof Error);
+      console.log(invalidResults);
       if (invalidResults.length > 0) {
         this.props.changeInfoModal(
           true,
@@ -367,7 +383,7 @@ export default class AccountCreator extends Component {
                   return (
                     <tr key={`error-${index}`}>
                       <td>{error.name}</td>
-                      <td>{error.error ? error.error : error.message}</td>
+                      <td>{error.error ? (error.error.code ? error.error.code : 'Error') : error.message}</td>
                     </tr>
                   );
                 } else {
@@ -394,19 +410,6 @@ export default class AccountCreator extends Component {
     } finally {
       this.props.setLoading('', false);
     }
-    // for (let i = 0; i < parseInt(this.state.quantity); i++) {
-    //   switch (this.state.site) {
-    //     case 'sotostore':
-    //       this.createSotoStoreAccount();
-    //       break;
-    //     default:
-    //       await this.createShopifyAccount();
-    //       if (this.state.accountCreationDelay) {
-    //         await this.sleep(this.state.accountCreationDelayAmount);
-    //       }
-    //       break;
-    //   }
-    // }
   };
 
   copyToClipboard = () => {
@@ -420,94 +423,6 @@ export default class AccountCreator extends Component {
   sleep = ms => {
     return new Promise(resolve => setTimeout(resolve, ms));
   };
-
-  // getSotoStoreToken = async captchaToken => {
-  //   try {
-  //     await this.rp({
-  //       method: 'GET',
-  //       url: 'https://www.sotostore.com/en/auth/view?op=register',
-  //       headers: {
-  //         Cookie: this.cookieJar.getCookieString('https://www.sotostore.com')
-  //       },
-  //       jar: this.cookieJar
-  //     });
-  //   } catch (error) {
-  //     const $ = cheerio.load(error.error);
-  //     const s = $('input[name="s"]').attr('value');
-  //     const id = '4a280b22e8aa3572';
-  //     const response = await this.rp({
-  //       method: 'GET',
-  //       resolveWithFullResponse: true,
-  //       jar: this.cookieJar,
-  //       url: `https://www.sotostore.com/cdn-cgi/l/chk_captcha?s=${s}id=${id}&g-recaptcha-response=${captchaToken}`
-  //     });
-  //     for (const cookie in response.headers['set-cookie']) {
-  //       if (cookie.includes('AntiCsrfToken')) {
-  //         return cookie.split('=')[1];
-  //       }
-  //     }
-  //     console.log(response);
-  //   }
-  // };
-
-  // createSotoStoreAccount = async () => {
-  //   const tokenID = uuidv4();
-  //   this.tokenIDs.push(tokenID);
-  //   ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
-  //   ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
-  //     cookies: '',
-  //     checkoutURL: 'https://www.sotostore.com/en/auth/view',
-  //     id: tokenID,
-  //     proxy: this.state.useProxies ? this.getRandomProxy() : '',
-  //     baseURL: 'https://www.sotostore.com/en/auth/view'
-  //   });
-  //   ipcRenderer.once(RECEIVE_CAPTCHA_TOKEN, async (event, captchaToken) => {
-  //     if (captchaToken.id === tokenID) {
-  //       ipcRenderer.send(FINISH_SENDING_CAPTCHA_TOKEN, {});
-  //       captchaToken.cookies.split(';').forEach(cookiePair => {
-  //         const splitCookie = cookiePair.split('=');
-  //         let cart1Cookie = new tough.Cookie({
-  //           key: splitCookie[0],
-  //           value: splitCookie[1],
-  //           domain: '.sotostore.com',
-  //           path: '/'
-  //         });
-  //         this.cookieJar.setCookie(cart1Cookie.toString(), 'https://www.sotostore.com');
-  //       });
-
-  //       const antiCsrfToken = await this.getSotoStoreToken(captchaToken);
-  //       const email = randomEmail({ domain: this.state.catchall });
-  //       const pass = this.state.randomPassword ? randomize('a', 10) : this.state.password;
-  //       const firstName = this.state.randomFirstLast ? random.first() : this.state.firstName;
-  //       const lastName = this.state.randomFirstLast ? random.last() : this.state.lastName;
-  //       const payload = {
-  //         _AntiCsrfToken: antiCsrfToken,
-  //         firstName: firstName,
-  //         email: email,
-  //         password: pass,
-  //         'g-recaptcha-response': captchaToken.captchaResponse,
-  //         action: 'register'
-  //       };
-  //       try {
-  //         const response = await this.rp({
-  //           method: 'POST',
-  //           url: `${sites[this.state.site]}/account`,
-  //           followRedirect: true,
-  //           jar: this.cookieJar,
-  //           proxy: this.state.useProxies ? this.getRandomProxy() : '',
-  //           followAllRedirects: true,
-  //           headers: {
-  //             'cache-control': 'no-cache',
-  //             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
-  //           },
-  //           form: payload
-  //         });
-  //       } catch (error) {
-  //         console.log(error);
-  //       }
-  //     }
-  //   });
-  // };
 
   render() {
     return (
@@ -680,7 +595,7 @@ export default class AccountCreator extends Component {
                           this.handleChange(e);
                         }}
                         name="proxies"
-                        type="textbox"
+                        type="textarea"
                       />
                     </Col>
                   ) : (

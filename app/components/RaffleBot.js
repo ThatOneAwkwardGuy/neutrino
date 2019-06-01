@@ -1,21 +1,30 @@
 import React, { Component } from 'react';
-import { Row, Col, Table, FormGroup, Input, Label, Button } from 'reactstrap';
+import { Row, Col, Table, FormGroup, Input, Label, Button, Modal, ModalBody, ModalHeader, ModalFooter } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
+import FontAwesome from 'react-fontawesome';
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const remote = require('electron').remote;
 const { BrowserWindow } = require('electron').remote;
+const { dialog } = require('electron').remote;
+const fs = require('fs');
 
 export default class RaffleBot extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      raffleDetails: {},
+      profilesModal: false,
+      proxyModal: false,
+      profilesLoaded: '',
+      proxiesInput: '',
       site: '',
       raffleLink: '',
       sizes: [],
       styles: [],
-      entries: []
+      entries: [],
+      proxies: [],
+      raffleDetails: {},
+      neutrinoRafflesProfileJSON: {}
     };
   }
 
@@ -25,14 +34,89 @@ export default class RaffleBot extends Component {
     });
   };
 
+  toggleProfilesModal = () => {
+    this.setState({
+      profilesModal: !this.state.profilesModal
+    });
+  };
+
+  toggleProfilesModal = () => {
+    this.setState({
+      proxyModal: !this.state.proxyModal
+    });
+  };
+
+  loadProxies = () => {
+    this.toggleProxyModal();
+    const proxies = this.state.proxiesInput.split(/\n/);
+    const formattedProxies = [];
+    proxies.forEach(proxy => {
+      const splitProxy = proxy.split(/:|@/);
+      if (splitProxy.length === 2) {
+        formattedProxies.push({
+          ip: splitProxy[0],
+          port: splitProxy[1]
+        });
+      } else if (splitProxy.length === 4) {
+        formattedProxies.push({
+          user: splitProxy[0],
+          pass: splitProxy[1],
+          ip: splitProxy[2],
+          port: splitProxy[3]
+        });
+      }
+    });
+    this.setState({
+      proxies: formattedProxies
+    });
+  };
+
+  importFile = () => {
+    dialog.showOpenDialog(
+      {
+        filters: [{ name: 'Neutrino Raffle Profiles', extensions: ['json'] }]
+      },
+      fileNames => {
+        if (fileNames === undefined) {
+          return;
+        } else {
+          try {
+            var contents = fs.readFileSync(fileNames[0]);
+            var jsonContent = JSON.parse(contents);
+            this.setState({
+              neutrinoRafflesProfileJSON: jsonContent,
+              profilesLoaded: 'Success'
+            });
+          } catch (error) {
+            this.setState({
+              profilesLoaded: 'Failed'
+            });
+          }
+        }
+      }
+    );
+  };
+
+  loadEntries = () => {
+    console.log(this.state);
+  };
+
   loadRaffleInfo = async () => {
     if (this.state.raffleLink !== '') {
-      switch (this.state.site) {
-        case 'DSML':
-          await this.loadDSMLRaffleInfo(this.state.raffleLink);
-          break;
-        default:
-          break;
+      try {
+        this.props.setLoading(`Loading ${this.state.raffleLink} Raffle Details`);
+        switch (this.state.site) {
+          case 'DSML':
+            await this.loadDSMLRaffleInfo(this.state.raffleLink);
+            break;
+          case 'Footpatrol UK':
+            await this.loadFootpatrolUKRaffleInfo(this.state.raffleLink);
+            break;
+          default:
+            break;
+        }
+      } catch (error) {
+        console.log(error);
       }
     }
   };
@@ -82,6 +166,25 @@ export default class RaffleBot extends Component {
     });
   };
 
+  loadFootpatrolUKRaffleInfo = async link => {
+    const response = await rp.get(link);
+    const $ = cheerio.load(response);
+    const styles = $('select[name="shoeColor"] option:not([disabled])')
+      .map((index, style) => {
+        return { id: style.attribs.value, name: style.attribs.value };
+      })
+      .toArray();
+    const sizes = $('select[name="shoeSize"] option:not([disabled])')
+      .map((index, size) => {
+        return { id: size.attribs.value, name: size.attribs.value };
+      })
+      .toArray();
+    this.setState({
+      styles,
+      sizes
+    });
+  };
+
   returnEntryRow = (entry, index) => {
     <tr key={`entry-${index}`}>
       <td>{index + 1}</td>
@@ -121,7 +224,8 @@ export default class RaffleBot extends Component {
               <Label>Site</Label>
               <Input name="site" type="select" onChange={this.handleChange} defaultValue="select site">
                 <option disabled>select site</option>
-                <option>DSML</option>
+                {/* <option>DSML</option> */}
+                <option>Footpatrol UK</option>
               </Input>
             </Col>
             <Col xs="2">
@@ -134,21 +238,88 @@ export default class RaffleBot extends Component {
                 {this.returnOptions('style', this.state.styles)}
               </Input>
             </Col>
-            <Col xs="2">
+            <Col xs="1">
               <Label>Size</Label>
               <Input name="size" type="select">
                 {this.returnOptions('size', this.state.sizes)}
               </Input>
             </Col>
-            <Col xs="2">
-              <Button className="nButton w-100" onClick={this.loadRaffleInfo}>
+            <Col xs="1" className="d-flex">
+              <Button className="nButton w-100 align-self-end" onClick={this.loadRaffleInfo}>
                 Load
               </Button>
             </Col>
-            <Col xs="2">
-              <Button className="nButton w-100">Add Profiles</Button>
+            <Col xs="2" className="d-flex">
+              <Button className="nButton w-100 align-self-end" onClick={this.toggleProfilesModal}>
+                Add Profiles
+              </Button>
+            </Col>
+            <Col xs="2" className="d-flex">
+              <Button className="nButton w-100 align-self-end" onClick={this.toggleProfilesModal}>
+                Add Proxies
+              </Button>
             </Col>
           </FormGroup>
+          <Modal isOpen={this.state.profilesModal} toggle={this.toggleProfilesModal} size="xl" centered>
+            <ModalHeader style={{ borderBottom: 'none' }} toggle={this.toggleProfilesModal}>
+              Load Profiles
+            </ModalHeader>
+            <ModalBody>
+              <Row>
+                <Col xs="4" className="d-flex">
+                  <Button style={{ width: '100%' }} className="align-self-middle nButton">
+                    <FontAwesome name="upload" style={{ display: 'block', padding: '10px', width: '100%' }} size="2x" onClick={this.importFile} />
+                    Load Profiles
+                  </Button>
+                </Col>
+                <Col>
+                  <Label>Input Profiles</Label>
+                  <Input
+                    type="textarea"
+                    rows="6"
+                    placeholder="Input properly formatted neutrino raffle profiles or use the profile converter to convert profiles to neutrino raffle profiles"
+                  />
+                </Col>
+              </Row>
+              <Row>
+                <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
+                  <Col xs="4" className="py-3 text-center">
+                    {this.state.profilesLoaded === 'Success' ? 'Profiles Loaded' : this.state.profilesLoaded === 'Failed' ? 'Profiles Not Loaded' : ''}
+                  </Col>
+                </CSSTransition>
+              </Row>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={this.toggleProfilesModal} color="danger">
+                Cancel
+              </Button>
+              <Button onClick={this.loadEntries}>Apply</Button>
+            </ModalFooter>
+          </Modal>
+          <Modal isOpen={this.state.proxyModal} toggle={this.toggleProxyModal} size="xl" centered>
+            <ModalHeader style={{ borderBottom: 'none' }} toggle={this.toggleProfilesModal}>
+              Load Profiles
+            </ModalHeader>
+            <ModalBody>
+              <Row>
+                <Col>
+                  <Input
+                    type="textarea"
+                    rows="6"
+                    name="proxiesInput"
+                    onChange={this.handleChange}
+                    placeholder="Input line seperated proxies in the format user:pass@ip:port or up:port"
+                  />
+                </Col>
+              </Row>
+            </ModalBody>
+            <ModalFooter>
+              <Button onClick={this.toggleProfilesModal} color="danger">
+                Cancel
+              </Button>
+              <Button onClick={this.loadProxies}>Apply</Button>
+            </ModalFooter>
+          </Modal>
         </Col>
       </CSSTransition>
     );

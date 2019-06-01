@@ -9,13 +9,17 @@ import {
   RESET_CAPTCHA_WINDOW,
   SET_GLOBAL_ID_VARIABLE,
   SET_DISCORD_RPC_STATE,
-  ALERT_UPDATE_AVAILABLE,
   RESET_CAPTCHA_TOKENS_ARRAY,
   RECEIVE_RESET_CAPTCHA_TOKENS_ARRAY,
   SEND_CAPTCHA_TOKEN,
   RECEIVE_CAPTCHA_TOKEN,
   FINISH_SENDING_CAPTCHA_TOKEN,
-  MAIN_PROCESS_CLEAR_RECEIVE_CAPTCHA_TOKEN_LISTENERS
+  MAIN_PROCESS_CLEAR_RECEIVE_CAPTCHA_TOKEN_LISTENERS,
+  CHECK_FOR_UPDATES,
+  UPDATE_AVAILABLE,
+  NO_UPDATE_AVAILABLE,
+  UPDATE_DOWNLOADED,
+  START_INSTALL
 } from './utils/constants';
 const puppeteer = require('puppeteer-core');
 const ipcMain = require('electron').ipcMain;
@@ -83,6 +87,7 @@ app.on('window-all-closed', () => {
 app.on('ready', async () => {
   if (isDevelopment) {
     await installExtensions();
+    // autoUpdater.updateConfigPath = path.join(__dirname, '..', 'dev-app-update.yml');
   }
   createMenu();
 
@@ -206,8 +211,38 @@ app.on('ready', async () => {
     );
   });
 
+  autoUpdater.on('update-available', info => {
+    mainWindow.send(UPDATE_AVAILABLE, info);
+  });
+
+  autoUpdater.on('update-not-available', info => {
+    mainWindow.send(NO_UPDATE_AVAILABLE, info);
+  });
+
   autoUpdater.on('update-downloaded', info => {
-    mainWindow.send(ALERT_UPDATE_AVAILABLE, info);
+    mainWindow.send(UPDATE_DOWNLOADED, info);
+  });
+
+  ipcMain.on(START_INSTALL, () => {
+    const electron = require('electron');
+    const BrowserWindow = electron.BrowserWindow;
+    app.removeAllListeners('window-all-closed');
+    app.removeAllListeners('before-quit');
+    var browserWindows = BrowserWindow.getAllWindows();
+    browserWindows.forEach(function(browserWindow) {
+      browserWindow.removeAllListeners('close');
+      browserWindow.close();
+    });
+    mainWindow.destroy();
+    autoUpdater.quitAndInstall(false, true);
+  });
+
+  ipcMain.on(CHECK_FOR_UPDATES, () => {
+    autoUpdater.checkForUpdates();
+  });
+
+  ipcMain.on(START_UPDATE, () => {
+    autoUpdater.downloadUpdate();
   });
 
   rpc.on('ready', () => {
