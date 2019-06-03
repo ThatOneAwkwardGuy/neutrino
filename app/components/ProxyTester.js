@@ -61,7 +61,7 @@ export default class ProxyTester extends Component {
   async handleProxies() {
     if (this.state.proxyInput !== '') {
       try {
-        this.props.setLoading('Testing Proxies', true);
+        this.props.setLoading('Testing Proxies', true, false);
         const splitProxies = this.state.proxyInput.split('\n');
         this.setState({
           proxyPings: []
@@ -70,6 +70,9 @@ export default class ProxyTester extends Component {
           const split = proxyItem.split(':');
           try {
             const responsePing = await rp({
+              headers: {
+                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
+              },
               method: 'GET',
               time: true,
               resolveWithFullResponse: true,
@@ -139,7 +142,7 @@ export default class ProxyTester extends Component {
       } catch (error) {
         this.props.changeInfoModal(true, `Error Checking Proxies`, 'There was an error checking the proxies you entered', '');
       } finally {
-        this.props.setLoading('', false);
+        this.props.setLoading('', false, false);
       }
     }
   }

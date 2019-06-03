@@ -30,6 +30,8 @@ import {
   START_INSTALL
 } from '../utils/constants';
 const ipcRenderer = require('electron').ipcRenderer;
+const remote = require('electron').remote;
+const windowManager = remote.require('electron-window-manager');
 
 class Home extends Component {
   constructor(props) {
@@ -37,6 +39,7 @@ class Home extends Component {
     this.activityWindows = {};
     this.state = {
       loading: false,
+      loadingModalClosable: false,
       loadingMessage: '',
       activeWindow: 'FrontPage',
       activityGeneratorAccountsClases: [],
@@ -48,10 +51,11 @@ class Home extends Component {
     };
   }
 
-  changeLoading = (text, bool) => {
+  changeLoading = (text, bool, closable) => {
     this.setState({
       loadingMessage: text,
-      loading: bool
+      loading: bool,
+      loadingModalClosable: closable
     });
   };
 
@@ -82,6 +86,12 @@ class Home extends Component {
     });
   };
 
+  toggleLoading = () => {
+    this.setState({
+      loading: !this.state.loading
+    });
+  };
+
   currentWindowToText = currentWindow => {
     switch (currentWindow) {
       case 'FrontPage':
@@ -107,6 +117,15 @@ class Home extends Component {
       case 'Settings':
         return 'Changing Settings';
     }
+  };
+
+  setAllAcitivities = status => {
+    this.props.activities.activities.forEach((activity, index) => {
+      if (activity.status !== status) {
+        activity.status = status;
+        this.props.onUpdateActivity(index, activity);
+      }
+    });
   };
 
   setDiscordRichPresence = currentWindow => {
@@ -239,7 +258,9 @@ class Home extends Component {
     if (process.env.NODE_ENV !== 'development') {
       this.watchForActiveStatus();
     }
-    this.watchForUpdates();
+    // this.watchForUpdates();
+    windowManager.closeAll();
+    this.setAllAcitivities('Not Started');
   }
 
   render() {
@@ -249,6 +270,7 @@ class Home extends Component {
         <Row className="homeContainer">{this.returnActiveComponent(this.state.activeWindow)}</Row>
         <Footer type="homepage" />
         <Modal isOpen={this.state.loading} size="sm" centered className="text-center">
+          {this.state.loadingModalClosable ? <ModalHeader style={{ border: 'none' }} toggle={this.toggleLoading} /> : null}
           <BarLoader width={100} widthUnit="%" color="#2745fb" />
           {this.state.loadingMessage ? <p className="p-3">{this.state.loadingMessage}</p> : null}
         </Modal>

@@ -30,13 +30,15 @@ export default class Settings extends Component {
   }
 
   save = () => {
-    if (this.state.settings.activityDelayMin > this.state.settings.activityDelayMax) {
-      this.setState({ settings: { ...this.state.settings, activityDelayMax: this.state.settings.activityDelayMin + 1 } }, () => {
-        this.props.onUpdateSettings(this.state.settings);
-      });
-    } else {
-      this.props.onUpdateSettings(this.state.settings);
-    }
+    this.props.onUpdateSettings(this.state.settings);
+
+    // if (this.state.settings.activityDelayMin > this.state.settings.activityDelayMax) {
+    //   this.setState({ settings: { ...this.state.settings, activityDelayMax: this.state.settings.activityDelayMin + 1 } }, () => {
+    //     this.props.onUpdateSettings(this.state.settings);
+    //   });
+    // } else {
+    //   this.props.onUpdateSettings(this.state.settings);
+    // }
   };
 
   signOut = () => {
@@ -89,7 +91,7 @@ export default class Settings extends Component {
   };
 
   checkForUpdate = () => {
-    this.props.setLoading('Checking For Updates', true);
+    this.props.setLoading('Checking For Updates', true, true);
     ipcRenderer.send(CHECK_FOR_UPDATES);
   };
 
@@ -202,6 +204,8 @@ export default class Settings extends Component {
                     <Input
                       type="number"
                       name="activityDelayMin"
+                      min={0}
+                      max={parseInt(this.state.settings.activityDelayMax) - 1}
                       value={this.state.settings.activityDelayMin}
                       onChange={e => {
                         this.handleChange(e);
@@ -217,6 +221,7 @@ export default class Settings extends Component {
                     <Input
                       type="number"
                       name="activityDelayMax"
+                      min={parseInt(this.state.settings.activityDelayMin) + 1}
                       value={this.state.settings.activityDelayMax}
                       onChange={e => {
                         this.handleChange(e);
@@ -226,7 +231,7 @@ export default class Settings extends Component {
                 </Label>
               </Col>
             </FormGroup>
-            <h6>
+            {/* <h6>
               <strong>Updates</strong>
             </h6>
             <FormGroup row>
@@ -238,7 +243,7 @@ export default class Settings extends Component {
               <Col>
                 <Button onClick={this.checkForUpdate}>Check For Updates</Button>
               </Col>
-            </FormGroup>
+            </FormGroup> */}
           </Form>
           <Row>
             <Col xs="2">

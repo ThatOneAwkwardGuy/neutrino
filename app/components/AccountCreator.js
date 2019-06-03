@@ -22,7 +22,7 @@ import {
 } from '../utils/constants';
 
 const sites = {
-  cncpts: 'https://cncpts.com',
+  // cncpts: 'https://cncpts.com',
   bdgastore: 'https://bdgastore.com',
   '12amrun': 'https://www.12amrun.com',
   '18montrose': 'https://18montrose.com',
@@ -160,9 +160,9 @@ export default class AccountCreator extends Component {
     this.tokenIDs = [];
     this.cookieJars = {};
     this.rp = request.defaults({
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
-      }
+      // headers: {
+      //   'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+      // }
     });
   }
 
@@ -258,6 +258,12 @@ export default class AccountCreator extends Component {
     });
   };
 
+  getFormData = object => {
+    const formData = new FormData();
+    Object.keys(object).forEach(key => formData.append(key, object[key]));
+    return formData;
+  };
+
   createShopifyAccount = async () => {
     const email = randomEmail({ domain: this.state.catchall });
     const pass = this.state.randomPassword ? randomize('a', 10) : this.state.password;
@@ -275,21 +281,7 @@ export default class AccountCreator extends Component {
       'customer[password]': pass
     };
 
-    if (this.state.site === 'cncpts') {
-      await this.rp({
-        method: 'GET',
-        headers: {
-          accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-          'accept-language': 'en-US,en;q=0.9',
-          'cache-control': 'no-cache',
-          pragma: 'no-cache',
-          'upgrade-insecure-requests': '1',
-          referrerPolicy: 'no-referrer-when-downgrade'
-        },
-        jar: this.cookieJars[tokenID],
-        url: sites[this.state.site]
-      });
-    }
+    const queryString = new URLSearchParams(this.getFormData(payload)).toString();
 
     const response = await this.rp({
       method: 'POST',
@@ -300,17 +292,20 @@ export default class AccountCreator extends Component {
       followAllRedirects: true,
       jar: this.cookieJars[tokenID],
       headers: {
-        origin: sites[this.state.site],
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
-        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        'content-type': 'application/x-www-form-urlencoded',
-        cookie: 'MCPopupClosed=yes',
+        authority: 'cncpts.com',
         pragma: 'no-cache',
-        'upgrade-insecure-requests': '1'
+        'cache-control': 'no-cache',
+        origin: sites[this.state.site],
+        'upgrade-insecure-requests': '1',
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
+        accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+        referer: `${sites[this.state.site]}/account/login`,
+        'accept-encoding': 'gzip, deflate, br',
+        'accept-language': 'en-US,en;q=0.9'
       },
-      form: payload
+      body: queryString
+      // form: payload
     });
 
     console.log(response);
@@ -318,6 +313,7 @@ export default class AccountCreator extends Component {
       ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
       ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
         cookies: this.cookieJars[tokenID].getCookieString(sites[this.state.site]),
+        cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
         checkoutURL: response.request.href,
         id: tokenID,
         type: 'shopify',
@@ -345,7 +341,7 @@ export default class AccountCreator extends Component {
 
   start = async () => {
     try {
-      this.props.setLoading('Creating Accounts', true);
+      this.props.setLoading('Creating Accounts', true, false);
       this.tokenIDs = [];
       this.cookieJars = {};
       const accountPromises = Array.from(Array(parseInt(this.state.quantity))).map((x, i) => {
@@ -408,14 +404,14 @@ export default class AccountCreator extends Component {
         ''
       );
     } finally {
-      this.props.setLoading('', false);
+      this.props.setLoading('', false, false);
     }
   };
 
   copyToClipboard = () => {
     let string = '';
     this.props.accounts.accounts.forEach(elem => {
-      string += `${elem.email} ${elem.pass}\n`;
+      string += `${elem.email}:${elem.pass}\n`;
     });
     clipboard.writeText(string, 'selection');
   };
@@ -594,6 +590,7 @@ export default class AccountCreator extends Component {
                         onChange={e => {
                           this.handleChange(e);
                         }}
+                        placeholder="http://user:pass@ip:port or http://ip:port"
                         name="proxies"
                         type="textarea"
                       />

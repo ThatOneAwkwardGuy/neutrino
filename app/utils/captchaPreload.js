@@ -4,6 +4,12 @@ let captchaChecker = null;
 let authToken;
 let oldCookies;
 
+import { Plugin, passChomeTest } from '../utils/stealth';
+
+const plugin = new Plugin();
+plugin.mockPluginsAndMimeTypes();
+passChomeTest(window);
+
 const checkCaptcha = () => {
   const args = remote.getGlobal('captcaTokenID');
   const tokenID = args.id;
@@ -59,31 +65,31 @@ const checkCaptcha = () => {
   }
 };
 
-if (!document.location.href.includes('google.com') && !document.location.href.includes('youtube.com')) {
-  document.addEventListener('DOMContentLoaded', function() {
-    const bodySiteKey = document.body.innerHTML.match(/.sitekey: "(.*)"/)[1];
-    if (document.location.href.includes('/challenge')) {
-      authToken = document.querySelector('input[name="authenticity_token"]').value;
-    }
-    document.documentElement.innerHTML = `<!DOCTYPE html>
-    <html>
-    <head>
-    <title>Captcha Harvester</title>
-    </head>
-    <body>
-    <script type="text/javascript" src="https://www.recaptcha.net/recaptcha/api.js?onload=recaptchaCallback&amp;render=${bodySiteKey}&amp;hl=en"></script>
-    <script>
-    grecaptcha.render('g-recaptcha', {
-      sitekey: "${bodySiteKey}",
-      size: (window.innerWidth > 320) ? 'normal' : 'compact',
-      callback: 'onCaptchaSuccess',
-    });
-    </script>
-    <div id="g-recaptcha" class="g-recaptcha"></div>
-    </body>
-    </html>`;
-  });
-}
+// if (!document.location.href.includes('google.com') && !document.location.href.includes('youtube.com')) {
+//   document.addEventListener('DOMContentLoaded', function() {
+//     const bodySiteKey = document.body.innerHTML.match(/.sitekey: "(.*)"/)[1];
+//     if (document.location.href.includes('/challenge')) {
+//       authToken = document.querySelector('input[name="authenticity_token"]').value;
+//     }
+//     document.documentElement.innerHTML = `<!DOCTYPE html>
+//     <html>
+//     <head>
+//     <title>Captcha Harvester</title>
+//     </head>
+//     <body>
+//     <script type="text/javascript" src="https://www.recaptcha.net/recaptcha/api.js?render=${bodySiteKey}&hl=en"></script>
+//     <script>
+//     grecaptcha.render('g-recaptcha', {
+//       sitekey: "${bodySiteKey}",
+//       size: (window.innerWidth > 320) ? 'normal' : 'compact',
+//       callback: 'onCaptchaSuccess',
+//     });
+//     </script>
+//     <div id="g-recaptcha" class="g-recaptcha"></div>
+//     </body>
+//     </html>`;
+//   });
+// }
 
 if (!window.location.href.includes('google.com') && !window.location.href.includes('youtube.com')) {
   captchaChecker = setInterval(checkCaptcha, 300);

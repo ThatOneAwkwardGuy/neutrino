@@ -27,8 +27,8 @@ export default class ActivityGenerator extends Component {
   }
 
   componentDidMount = () => {
-    windowManager.closeAll();
-    this.setAllAcitivities('Not Started');
+    // windowManager.closeAll();
+    // this.setAllAcitivities('Not Started');
   };
 
   returnActivitiesRow = (activity, index) => {
@@ -118,7 +118,10 @@ export default class ActivityGenerator extends Component {
           session: remote.session.fromPartition(`activity-${tokenID}`)
         }
       });
-
+      win.webContents.once('close', () => {
+        this.props.activities[index].status = 'Not Started';
+        this.props.onUpdateActivity(index, this.props.activities[index]);
+      });
       if (activity.activityProxy !== '') {
         await new Promise((resolve, reject) => {
           const proxyArray = activity.activityProxy.split(/@|:/);
@@ -128,14 +131,12 @@ export default class ActivityGenerator extends Component {
             });
           }
           const proxyIpAndPort = proxyArray.slice(-2);
-          console.log(proxyIpAndPort);
-          win.webContents.session.setProxy({ proxyRules: `http=http://${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` }, () => {
+          win.webContents.session.setProxy({ proxyRules: `${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` }, () => {
             resolve();
           });
         });
       }
-
-      win.loadURL('https://google.com');
+      win.loadURL('http://google.com');
       win.webContents.once('did-finish-load', () => {
         win.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
         win.webContents.once('did-finish-load', () => {
@@ -164,11 +165,12 @@ export default class ActivityGenerator extends Component {
             win.webContents.on('did-finish-load', () => {
               win.webContents.executeJavaScript(`window.location`, false, result => {
                 if (result.pathname === '/') {
+                  win.webContents.removeAllListeners('close', (event, input) => {});
                   win.webContents.session.cookies.get({}, (error, cookies) => {
                     if (error) {
                     } else {
-                      this.startWindow(activity, index, cookies, tokenID);
                       win.close();
+                      this.startWindow(activity, index, cookies, tokenID);
                     }
                   });
                 } else {
@@ -237,29 +239,6 @@ export default class ActivityGenerator extends Component {
         cookies
       });
       this.props.activityWindows[index].create();
-      // if (activity.activityProxy !== '') {
-      //   const proxyArray = activity.activityProxy.split(/@|:/);
-      //   if (proxyArray.length === 4) {
-      //     this.props.activityWindows[index].object.webContents.session.on('login', (event, webContents, request, authInfo, callback) => {
-      //       callback(proxyArray[0], proxyArray[1]);
-      //     });
-      //   }
-      //   const proxyIpAndPort = proxyArray.slice(-2);
-      //   await new Promise((resolve, reject) => {
-      //     this.props.activityWindows[index].object.webContents.session.setProxy(
-      //       { proxyRules: `http=http://${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` },
-      //       () => {
-      //         resolve();
-      //       }
-      //     );
-      //   });
-
-      //   // await new Promise((resolve, reject) => {
-      //   //   this.props.activityWindows[index].object.webContents.session.setProxy({ proxyRules: `http=${activity.activityProxy},direct://` }, () => {
-      //   //     resolve();
-      //   //   });
-      //   // });
-      // }
       if (this.props.settings.showAcitivtyWindows) {
         windowManager.get(`activity-${tokenID}`).object.show();
       } else {
@@ -299,16 +278,21 @@ export default class ActivityGenerator extends Component {
       status: this.state.status
     });
     this.setState({
-      status: 'Not Started',
       activityEmail: '',
       activityPassword: '',
-      activityProxy: '',
-      youtube: 0,
-      searches: 0,
-      shopping: 0,
-      news: 0,
-      total: 0
+      activityProxy: ''
     });
+    // this.setState({
+    //   status: 'Not Started',
+    //   activityEmail: '',
+    //   activityPassword: '',
+    //   activityProxy: '',
+    //   youtube: 0,
+    //   searches: 0,
+    //   shopping: 0,
+    //   news: 0,
+    //   total: 0
+    // });
   };
 
   handleChange = e => {
@@ -433,7 +417,13 @@ export default class ActivityGenerator extends Component {
               </Col>
               <Col xs="2">
                 <Label>proxy</Label>
-                <Input name="activityProxy" onChange={this.handleChange} placeholder="user:pass@ip:port or ip:port" type="text" />
+                <Input
+                  name="activityProxy"
+                  onChange={this.handleChange}
+                  value={this.state.activityProxy}
+                  placeholder="user:pass@ip:port or ip:port"
+                  type="text"
+                />
               </Col>
               <Col xs="2" className="d-flex flex-column justify-content-end">
                 <Button onClick={this.addActivity}>Add</Button>

@@ -32,13 +32,15 @@ let mainWindow = null;
 let captchaWindow = null;
 let forceQuit = false;
 let discordRPCState = '';
-
+const version = app.getVersion();
 DiscordRPC.register(clientId);
 
 let initialiseCaptchaWindow = () => {
   captchaWindow = new BrowserWindow({
     webPreferences: {
-      contextIsolation: false
+      contextIsolation: false,
+      allowRunningInsecureContent: true,
+      webSecurity: false
     },
     modal: true,
     show: false,
@@ -50,8 +52,7 @@ let initialiseCaptchaWindow = () => {
     resizable: true,
     focusable: true,
     minimizable: true,
-    closable: true,
-    allowRunningInsecureContent: true
+    closable: true
   });
   captchaWindow.loadURL(
     url.format({
@@ -87,7 +88,7 @@ app.on('window-all-closed', () => {
 app.on('ready', async () => {
   if (isDevelopment) {
     await installExtensions();
-    // autoUpdater.updateConfigPath = path.join(__dirname, '..', 'dev-app-update.yml');
+    autoUpdater.updateConfigPath = path.join(__dirname, '..', 'dev-app-update.yml');
   }
   createMenu();
 
@@ -201,6 +202,10 @@ app.on('ready', async () => {
   });
 
   ipcMain.on(RESET_CAPTCHA_WINDOW, (event, arg) => {
+    if (captchaWindow.isDestroyed()) {
+      initialiseCaptchaWindow();
+      captchaWindow.show();
+    }
     captchaWindow.loadURL(
       url.format({
         pathname: path.join(__dirname, 'index.html'),
@@ -257,7 +262,7 @@ app.on('ready', async () => {
 
 function setActivity() {
   rpc.setActivity({
-    details: `Version - 1.0.6`,
+    details: `Version - ${version}`,
     state: discordRPCState,
     startTimestamp,
     largeImageKey: 'logo_small',

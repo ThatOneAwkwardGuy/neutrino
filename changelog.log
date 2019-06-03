@@ -61,9 +61,25 @@
 
 1.0.8
 - Fixed account creator error reporting
-- Added auto updating (NO MORE MANUALLY DOWNLOADING UPDATES!!!) (Testing needed though :/)
 - Changed activity gen logging in to allow user to enter verification codes instead of just failing and closing window
 - Changed proxy gen functionality to not delete proxy when it doesnt work with website, but to list it with a ping of -1
+- Fixed activity gen stuck on logged in (should have tested)
+- Added more keywords in address jigger
+- Fixed undefeated account generation
+- Added NSB and SOLE AIO to profile generator
+
+1.0.9
+- More updates to increase error handling and reliability of proxy creator
+- Fixed proxy tester sometimes showing -1 ping on sites it could connect to
+- Increased detail of error reporting in proxy creator for easier debugging
+
+1.0.10
+- Fixed proxy creator to support https
+- Fixed error where activity gen was stuck on logged in when proxies were being used
+
+
+- Added auto updating (NO MORE MANUALLY DOWNLOADING UPDATES!!!) (Testing needed though :/)
+
 
 4242424242424242:Visa:03:2020:123
 4242424242424243:Visa:03:2020:123

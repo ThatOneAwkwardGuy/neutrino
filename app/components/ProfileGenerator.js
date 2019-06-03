@@ -24,7 +24,7 @@ const TRANSLATIONS = [
   ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace']
 ];
 const cardTypes = ['visa', 'mastercard'];
-const bots = ['Cybersole', 'Project Destroyer', 'Ghost', 'EVE AIO', 'Phantom', 'Dashe', 'Hastey', 'Kodai', 'Neutrino Raffle', 'CSV'];
+const bots = ['Cybersole', 'Project Destroyer', 'Ghost', 'EVE AIO', 'Phantom', 'Dashe', 'Hastey', 'Kodai', 'NSB', 'SOLE AIO', 'Neutrino Raffle', 'CSV'];
 export default class ProfileGenerator extends Component {
   constructor() {
     super();
@@ -280,6 +280,11 @@ export default class ProfileGenerator extends Component {
     });
   };
 
+  capitalize = s => {
+    if (typeof s !== 'string') return '';
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
+
   returnCountry = (name, index) => <option key={`country-${index}`}>{name}</option>;
 
   returnOption = (name, index) => <option key={`${name} - ${index}}`}>{name.charAt(0).toUpperCase() + name.slice(1)}</option>;
@@ -340,6 +345,7 @@ export default class ProfileGenerator extends Component {
     } | ${this.state.formdata.deliveryCity} | ${this.state.formdata.deliveryProvince} | ${this.state.formdata.deliveryZip} | ${
       this.state.formdata.deliveryCountry
     }`;
+    console.log(addressString);
     const jigsSet = this.state.jigAddresses ? Array.from(this.jigAddress(addressString)) : Array(this.state.cards.length).fill(addressString);
     const profiles = {};
     let jiggedAddress;
@@ -349,7 +355,10 @@ export default class ProfileGenerator extends Component {
       jiggedAddress = jigsSet.slice(0, this.state.cards.length);
     }
     jiggedAddress.forEach((address, index) => {
-      const [deliveryAddress, deliveryAptorSuite, deliveryCity, deliveryProvince, deliveryZip, deliveryCountry] = address.split(' | ');
+      const [deliveryAddress, deliveryAptorSuite, deliveryCity, deliveryProvince, deliveryZip, deliveryCountry] = address
+        .replace('\n', ' ')
+        .split(' | ')
+        .map(element => element.trim());
       const randomFirstName = randomName.first();
       const randomLastName = randomName.last();
       switch (this.state.botType) {
@@ -388,8 +397,8 @@ export default class ProfileGenerator extends Component {
               same_as_del: this.state.formdata.sameAsDelivery
             },
             billing: {
-              first_name: this.state.formdata.randomName ? randomFirstName : this.state.formdata.billingFirstName,
-              last_name: this.state.formdata.randomName ? randomLastName : this.state.formdata.billingLastName,
+              first_name: this.state.formdata.billingFirstName,
+              last_name: this.state.formdata.billingLastName,
               addr1: this.state.formdata.billingAddress,
               addr2: this.state.formdata.billingAptorSuite,
               zip: this.state.formdata.billingZip,
@@ -409,7 +418,7 @@ export default class ProfileGenerator extends Component {
               address2: this.state.formdata.billingAptorSuite,
               city: this.state.formdata.billingCity,
               country: this.state.formdata.billingCountry,
-              firstName: this.state.formdata.randomName ? randomFirstName : this.state.formdata.billingFirstName,
+              firstName: this.state.formdata.billingFirstName,
               lastName: this.state.formdata.billingLastName,
               phone: this.state.formdata.randomPhoneNumber
                 ? this.state.formdata.randomPhoneNumberTemplate
@@ -475,8 +484,8 @@ export default class ProfileGenerator extends Component {
               Zip: deliveryZip
             },
             Billing: {
-              FirstName: this.state.formdata.randomName ? randomFirstName : this.state.formdata.billingFirstName,
-              LastName: this.state.formdata.randomName ? randomLastName : this.state.formdata.billingLastName,
+              FirstName: this.state.formdata.billingFirstName,
+              LastName: this.state.formdata.billingLastName,
               Address: this.state.formdata.billingAddress,
               Apt: this.state.formdata.billingAptorSuite,
               City: this.state.formdata.billingCity,
@@ -498,8 +507,8 @@ export default class ProfileGenerator extends Component {
         case 'EVE AIO':
           profiles[`Profile - ${index}`] = {
             ProfileName: `Profile - ${index}`,
-            BillingFirstName: this.state.formdata.randomName ? randomFirstName : this.state.formdata.billingFirstName,
-            BillingLastName: this.state.formdata.randomName ? randomLastName : this.state.formdata.billingLastName,
+            BillingFirstName: this.state.formdata.billingFirstName,
+            BillingLastName: this.state.formdata.billingLastName,
             BillingAddressLine1: this.state.formdata.billingAddress,
             BillingAddressLine2: this.state.formdata.billingAptorSuite,
             BillingCity: this.state.formdata.billingCity,
@@ -555,8 +564,8 @@ export default class ProfileGenerator extends Component {
               Address: this.state.formdata.billingAddress,
               Apt: this.state.formdata.billingAptorSuite,
               City: this.state.formdata.billingCity,
-              FirstName: this.state.formdata.randomName ? randomFirstName : this.state.formdata.billingFirstName,
-              LastName: this.state.formdata.randomName ? randomLastName : this.state.formdata.billingLastName,
+              FirstName: this.state.formdata.billingFirstName,
+              LastName: this.state.formdata.billingLastName,
               State: this.state.formdata.billingProvince,
               Zipcode: this.state.formdata.billingZip
             },
@@ -597,8 +606,8 @@ export default class ProfileGenerator extends Component {
               address2: this.state.formdata.billingAptorSuite,
               city: this.state.formdata.billingCity,
               country: this.state.formdata.billingCountry,
-              firstName: this.state.formdata.randomName ? randomFirstName : this.state.formdata.billingFirstName,
-              lastName: this.state.formdata.randomName ? randomLastName : this.state.formdata.billingLastName,
+              firstName: this.state.formdata.billingFirstName,
+              lastName: this.state.formdata.billingLastName,
               phone: this.state.formdata.randomPhoneNumber
                 ? this.state.formdata.randomPhoneNumberTemplate
                     .split('#')
@@ -765,8 +774,8 @@ export default class ProfileGenerator extends Component {
             billingCountry: this.state.formdata.billingCountry,
             billingAddress: this.state.formdata.billingAddress,
             billingCity: this.state.formdata.billingCity,
-            billingFirstName: this.state.formdata.randomName ? randomFirstName : this.state.formdata.billingFirstName,
-            billingLastName: this.state.formdata.randomName ? randomLastName : this.state.formdata.billingLastName,
+            billingFirstName: this.state.formdata.billingFirstName,
+            billingLastName: this.state.formdata.billingLastName,
             billingProvince: this.state.formdata.billingProvince,
             billingAptorSuite: this.state.formdata.billingAptorSuite,
             phoneNumber: this.state.formdata.randomPhoneNumber
@@ -785,6 +794,92 @@ export default class ProfileGenerator extends Component {
             paymentCardExpiryMonth: this.state.cards[index].cardExpiryMonth,
             paymentCardExpiryYear: this.state.cards[index].cardExpiryYear,
             paymentCVV: this.state.cards[index].cardCVV
+          };
+          break;
+        case 'NSB':
+          profiles[`Profile - ${index}`] = {
+            shipping: {
+              firstname: this.state.formdata.randomName ? randomFirstName : this.state.formdata.deliveryFirstName,
+              lastname: this.state.formdata.randomName ? randomLastName : this.state.formdata.deliveryLastName,
+              country: Countries[this.state.formdata.deliveryCountry].code,
+              city: deliveryCity,
+              address: deliveryAddress,
+              address2: deliveryAptorSuite,
+              state:
+                Countries[this.state.formdata.deliveryCountry].province_codes[deliveryCity] !== undefined
+                  ? Countries[this.state.formdata.deliveryCountry].province_codes[deliveryCity]
+                  : '',
+              zip: deliveryZip,
+              phone: this.state.formdata.randomPhoneNumber
+                ? this.state.formdata.randomPhoneNumberTemplate
+                    .split('#')
+                    .map(number => {
+                      return number === '' ? this.getRandomInt(9) : number;
+                    })
+                    .join('')
+                : this.state.formdata.phoneNumber
+            },
+            name: `Profile - ${index}`,
+            cc: {
+              number: this.state.cards[index].cardNumber.match(/.{1,4}/g).join(' '),
+              expiry: `${this.state.cards[index].cardExpiryMonth} / ${this.state.cards[index].cardExpiryYear.slice(-2)}`,
+              cvc: this.state.cards[index].cardCVV,
+              name: `${this.state.formdata.billingFirstName} ${this.state.formdata.billingLastName}`
+            },
+            email: this.state.formdata.useCatchallEmail
+              ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
+              : this.state.formdata.paymentEmail,
+            checkoutLimit: 0,
+            billingSame: this.state.formdata.sameAsDelivery,
+            date: +new Date(),
+            id: index
+          };
+          break;
+        case 'SOLE AIO':
+          profiles[`Profile - ${index}`] = {
+            ID: index,
+            ProfileName: `Profile - ${index}`,
+            Email: this.state.formdata.useCatchallEmail
+              ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
+              : this.state.formdata.paymentEmail,
+            Phone: this.state.formdata.randomPhoneNumber
+              ? this.state.formdata.randomPhoneNumberTemplate
+                  .split('#')
+                  .map(number => {
+                    return number === '' ? this.getRandomInt(9) : number;
+                  })
+                  .join('')
+              : this.state.formdata.phoneNumber,
+            ShippingFirstName: this.state.formdata.randomName ? randomFirstName : this.state.formdata.deliveryFirstName,
+            ShippingLastName: this.state.formdata.randomName ? randomLastName : this.state.formdata.deliveryLastName,
+            ShippingAddress1: deliveryAddress,
+            ShippingAddress2: deliveryAptorSuite,
+            ShippingCity: deliveryCity,
+            ShippingZip: deliveryZip,
+            ShippingCountry: this.state.formdata.deliveryCountry,
+            ShippingState:
+              Countries[this.state.formdata.deliveryCountry].province_codes[deliveryProvince] !== undefined
+                ? Countries[this.state.formdata.deliveryCountry].province_codes[deliveryProvince]
+                : '',
+            UseBilling: !this.state.formdata.sameAsDelivery,
+            BillingFirstName: this.state.formdata.billingFirstName,
+            BillingLastName: this.state.formdata.billingLastName,
+            BillingAddress1: this.state.formdata.billingAddress,
+            BillingAddress2: this.state.formdata.billingAptorSuite,
+            BillingCity: this.state.formdata.billingCity,
+            BillingZip: this.state.formdata.billingZip,
+            BillingCountry: this.state.formdata.billingCountry,
+            BillingState:
+              Countries[this.state.formdata.deliveryCountry].province_codes[this.state.formdata.billingProvince] !== undefined
+                ? Countries[this.state.formdata.deliveryCountry].province_codes[this.state.formdata.billingProvince]
+                : '',
+            CardNumber: this.state.cards[index].cardNumber,
+            CardName: `${this.state.formdata.billingFirstName} ${this.state.formdata.billingLastName}`,
+            CardCvv: this.state.cards[index].cardCVV,
+            CardExpiryMonth: this.state.cards[index].cardExpiryMonth,
+            CardExpiryYear: this.state.cards[index].cardExpiryYear.slice(-2),
+            CardType: this.capitalize(this.getCardType(this.state.cards[index].cardNumber)),
+            CheckoutLimit: 'No checkout limit'
           };
           break;
         default:
@@ -836,7 +931,7 @@ export default class ProfileGenerator extends Component {
   };
 
   convertProfiles = profiles => {
-    if (['Project Destroyer', 'Hastey', 'EVE AIO', 'Phantom', 'CSV'].includes(this.state.botType)) {
+    if (['Project Destroyer', 'Hastey', 'EVE AIO', 'Phantom', 'CSV', 'NSB', 'SOLE AIO'].includes(this.state.botType)) {
       return Object.values(profiles);
     } else {
       return profiles;

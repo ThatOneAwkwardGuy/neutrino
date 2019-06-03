@@ -182,7 +182,7 @@ import { Plugin, passChomeTest } from '../utils/stealth';
 
 const plugin = new Plugin();
 plugin.mockPluginsAndMimeTypes();
-passChomeTest();
+passChomeTest(window);
 
 const setActivityToRunning = () => {
   activity.status = 'Started';
@@ -296,10 +296,23 @@ currentWindow.object.on('close', e => {
   activity.status = 'Not Started';
   updateFunction({ index: data.index, activity });
 });
+// document.addEventListener('DOMContentLoaded', setCookieAndRunLoop, { once: true });
+
 document.addEventListener('DOMContentLoaded', setCookieAndRunLoop, { once: true });
 
 // if (data.data.activityProxy !== '') {
-//   currentWindow.object.webContents.session.setProxy({ proxyRules: data.proxy }, () => {
+//   // const proxyArray = data.data.activityProxy.split(/@|:/);
+//   // if (proxyArray.length === 4) {
+//   //   win.webContents.session.on('login', (event, webContents, request, authInfo, callback) => {
+//   //     callback(proxyArray[0], proxyArray[1]);
+//   //   });
+//   // }
+//   // const proxyIpAndPort = proxyArray.slice(-2);
+//   // win.webContents.session.setProxy({ proxyRules: `http=${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` }, () => {
+//   //   document.addEventListener('DOMContentLoaded', setCookieAndRunLoop, { once: true });
+//   // });
+
+//   currentWindow.object.webContents.session.setProxy({ proxyRules: `http=${data.data.activityProxy},direct://` }, () => {
 //     document.addEventListener('DOMContentLoaded', setCookieAndRunLoop, { once: true });
 //   });
 // } else {

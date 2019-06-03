@@ -1,6 +1,6 @@
 {
   "name": "Neutrino",
-  "version": "1.0.8",
+  "version": "1.0.10",
   "description": "Neutrino AIO Bot",
   "main": "./webpack-pack/main.js",
   "author": {
@@ -18,7 +18,8 @@
     "directories": {},
     "mac": {
       "category": "com.neutrino.bot",
-      "icon": "./webpack-pack/icon.png"
+      "icon": "./webpack-pack/icon.png",
+      "hardenedRuntime": true
     },
     "win": {
       "icon": "./webpack-pack/icon.png",
@@ -212,12 +213,12 @@
     "webpack:dev:windows": "run-p webpack:dev:server webpack:dev:start",
     "webpack:dist": "run-s webpack:prod:clean webpack:prod:pack webpack:prod:dist",
     "webpack:prod": "run-s webpack:prod:clean webpack:prod:pack",
-    "webpack:prod:build": "cross-env NODE_ENV=production electron-builder -mw --x64 --ia32",
+    "webpack:prod:build": "cross-env NODE_ENV=production CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -mw --x64 --ia32",
     "webpack:dev:build": "cross-env NODE_ENV=development electron-builder -mw --x64 --ia32",
     "webpack:prod:build:mac": "cross-env NODE_ENV=production electron-builder -m --x64",
     "webpack:prod:build:win": "cross-env NODE_ENV=production electron-builder -w --x64",
     "webpack:prod:clean": "rimraf webpack-pack dist",
-    "webpack:prod:dist": "cross-env NODE_ENV=production GH_TOKEN=22658cb28e268b0a1bbe49b10a86a1b1b9407490 electron-builder -mw --x64 --ia32 -p always",
+    "webpack:prod:dist": "cross-env NODE_ENV=production CSC_IDENTITY_AUTO_DISCOVERY=false GH_TOKEN=22658cb28e268b0a1bbe49b10a86a1b1b9407490 electron-builder -mw --x64 --ia32 -p always",
     "webpack:prod:pack": "cross-env NODE_ENV=production webpack --mode production --config webpack.build.config.js"
   }
 }

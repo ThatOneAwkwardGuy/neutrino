@@ -104,7 +104,7 @@ export default class RaffleBot extends Component {
   loadRaffleInfo = async () => {
     if (this.state.raffleLink !== '') {
       try {
-        this.props.setLoading(`Loading ${this.state.raffleLink} Raffle Details`);
+        this.props.setLoading(`Loading ${this.state.raffleLink} Raffle Details`, true);
         switch (this.state.site) {
           case 'DSML':
             await this.loadDSMLRaffleInfo(this.state.raffleLink);

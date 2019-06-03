@@ -62,12 +62,33 @@ class Captcha extends Component {
       formattedCookieArray.push({
         url: baseURL.includes('supreme') ? `https://www.${baseURL.split('//')[1].split('/')[0]}` : baseURL,
         value: nameValuePair[1],
-        domain: baseURL.includes('supreme') ? 'www.' + baseURL.split('//')[1].split('/')[0] : baseURL.split('//')[1].split('/')[0],
+        domain: `.${baseURL.split('//')[1].split('/')[0]}`,
         path: '/',
         name: nameValuePair[0]
       });
     }
+    console.log(formattedCookieArray);
     return formattedCookieArray;
+  };
+
+  setCookiesInWindow = (currentWindow, cookies) => {
+    for (const cookieSite in cookies) {
+      const cookiesCookieSite = cookies[cookieSite]['/'];
+      for (const actualCookie in cookiesCookieSite) {
+        const formattedCookie = {
+          url: `https://${cookieSite}`,
+          value: cookiesCookieSite[actualCookie].value,
+          domain: cookiesCookieSite[actualCookie].domain,
+          path: cookiesCookieSite[actualCookie].path,
+          name: actualCookie
+        };
+        currentWindow.webContents.session.cookies.set(formattedCookie, error => {
+          if (error !== null) {
+            console.log(formattedCookie);
+          }
+        });
+      }
+    }
   };
 
   processCaptcha = args => {
@@ -75,9 +96,7 @@ class Captcha extends Component {
     const webview = document.querySelector('webview');
     const win = remote.getCurrentWindow();
 
-    win.webContents.session.cookies.get({ url: args.baseURL }, (error, cookiesArray) => {
-      console.log(args.baseURL);
-      console.log(cookiesArray);
+    win.webContents.session.cookies.get({ url: args.checkoutURL }, (error, cookiesArray) => {
       for (const cookie of cookiesArray) {
         win.webContents.session.cookies.remove(args.baseURL, cookie.name, removeResponse => {
           console.log(removeResponse);
@@ -85,12 +104,14 @@ class Captcha extends Component {
       }
     });
 
-    const formattedCookies = this.convertCookieString(args.checkoutURL, args.cookies);
-    for (const cookie of formattedCookies) {
-      win.webContents.session.cookies.set(cookie, error => {
-        console.log(error);
-      });
-    }
+    // const formattedCookies = this.convertCookieString(args.checkoutURL, args.cookies);
+    // for (const cookie of formattedCookies) {
+    //   win.webContents.session.cookies.set(cookie, error => {
+    //     console.log(error);
+    //   });
+    // }
+
+    this.setCookiesInWindow(win, args.cookiesObject);
 
     if (process.env.NODE_ENV === 'development') {
       win.openDevTools();

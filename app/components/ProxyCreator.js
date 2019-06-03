@@ -109,7 +109,7 @@ export default class ProxyCreator extends Component {
   };
 
   intializeCloudLibrary = async name => {
-    this.props.setLoading(`Loading ${name} API`, true);
+    this.props.setLoading(`Loading ${name} API`, true, false);
     this.setState({
       cloudRegions: [],
       machineTypes: []
@@ -135,7 +135,7 @@ export default class ProxyCreator extends Component {
       console.log(error);
       this.props.changeInfoModal(true, `Error Loading ${name} API`, error.message, '');
     } finally {
-      this.props.setLoading('', false);
+      this.props.setLoading('', false, false);
     }
   };
 
@@ -145,7 +145,7 @@ export default class ProxyCreator extends Component {
 
   createInstance = async name => {
     try {
-      this.props.setLoading(`Creating Proxies On ${name}`, true);
+      this.props.setLoading(`Creating Proxies On ${name}`, true, false);
       let instances = [];
       switch (name) {
         case 'Google Cloud':
@@ -187,28 +187,35 @@ export default class ProxyCreator extends Component {
             </thead>
             <tbody>
               {invalidResults.map((error, index) => {
-                if (error.constructor.name === 'ApiError') {
-                  return (
-                    <tr key={`error-${index}`}>
-                      <td>{error.errors[0].reason}</td>
-                      <td>{error.errors[0].message}</td>
-                    </tr>
-                  );
-                } else if (error instanceof Error) {
-                  return (
-                    <tr key={`error-${index}`}>
-                      <td>{error.name}</td>
-                      <td>{error.error ? error.error : error.message}</td>
-                    </tr>
-                  );
-                } else {
-                  return (
-                    <tr key={`error-${index}`}>
-                      <td>{error.id}</td>
-                      <td>{error.message}</td>
-                    </tr>
-                  );
-                }
+                return (
+                  <tr key={`error-${index}`}>
+                    <td>{'Error'}</td>
+                    <td>{JSON.stringify(error)}</td>
+                  </tr>
+                );
+
+                // if (error.constructor.name === 'ApiError') {
+                //   return (
+                //     <tr key={`error-${index}`}>
+                //       <td>{error.errors[0].reason}</td>
+                //       <td>{error.errors[0].message}</td>
+                //     </tr>
+                //   );
+                // } else if (error instanceof Error) {
+                //   return (
+                //     <tr key={`error-${index}`}>
+                //       <td>{error.name}</td>
+                //       <td>{error.error ? error.error : error.message}</td>
+                //     </tr>
+                //   );
+                // } else {
+                //   return (
+                //     <tr key={`error-${index}`}>
+                //       <td>{error.id}</td>
+                //       <td>{error.message}</td>
+                //     </tr>
+                //   );
+                // }
               })}
             </tbody>
           </Table>
@@ -223,7 +230,7 @@ export default class ProxyCreator extends Component {
         ''
       );
     } finally {
-      this.props.setLoading('', false);
+      this.props.setLoading('', false, false);
     }
   };
 
@@ -237,7 +244,7 @@ export default class ProxyCreator extends Component {
         res = await rp({
           method: 'GET',
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
           },
           uri: this.state.website,
           time: true,
@@ -245,7 +252,8 @@ export default class ProxyCreator extends Component {
           resolveWithFullResponse: true,
           followAllRedirects: true
         });
-        if (res.statusCode !== 200) {
+        const stringStatusCode = String(res.statusCode);
+        if (stringStatusCode.slice(0, 1) !== '2' && stringStatusCode.slice(0, 1) !== '3') {
           vm.delete();
           throw new Error(res.statusCode);
         }
@@ -498,7 +506,7 @@ export default class ProxyCreator extends Component {
         const getWebsite = await rp({
           method: 'GET',
           headers: {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
           },
           uri: this.state.website,
           time: true,
@@ -562,7 +570,7 @@ export default class ProxyCreator extends Component {
 
   updateMachineTypes = async () => {
     try {
-      this.props.setLoading(`Loading ${this.state.cloud} Machines`, true);
+      this.props.setLoading(`Loading ${this.state.cloud} Machines`, true, false);
       switch (this.state.cloud) {
         case 'Google Cloud':
           await this.updateGoogleCloudMachineTypes();
@@ -578,7 +586,7 @@ export default class ProxyCreator extends Component {
       console.log(error);
       this.props.changeInfoModal(true, `Error Loading ${name} Machines`, error.message, '');
     } finally {
-      this.props.setLoading('', false);
+      this.props.setLoading('', false, false);
     }
   };
 
@@ -601,7 +609,7 @@ export default class ProxyCreator extends Component {
   copyToClipboard = () => {
     let string = '';
     this.state.proxyPings.forEach(elem => {
-      string += `${elem.user}:${elem.pass}@${elem.ip}:${elem.port}\n`;
+      string += `${elem.user}:${elem.pass}:${elem.ip}:${elem.port}\n`;
     });
     clipboard.writeText(string, 'selection');
   };
@@ -610,7 +618,7 @@ export default class ProxyCreator extends Component {
     let responses;
     try {
       this.toggleDeleteAllModal();
-      this.props.setLoading(`Deleting ${this.state.cloud} Proxies`, true);
+      this.props.setLoading(`Deleting ${this.state.cloud} Proxies`, true, false);
       switch (this.state.cloud) {
         case 'Google Cloud':
           responses = await this.deleteAllGoogleCloudProxies();
@@ -627,7 +635,7 @@ export default class ProxyCreator extends Component {
     } catch (error) {
       console.log(error);
     } finally {
-      this.props.setLoading('', false);
+      this.props.setLoading('', false, false);
       const errors = responses.filter(response => response instanceof Error);
       if (errors.length > 0) {
         this.props.changeInfoModal(
@@ -712,7 +720,7 @@ export default class ProxyCreator extends Component {
           </Row>
           <FormGroup row>
             <Col xs="2">
-              <label>Cloud Service</label>
+              <label>Cloud Service*</label>
               <Input
                 name="cloud"
                 type="select"
@@ -730,19 +738,19 @@ export default class ProxyCreator extends Component {
               </Input>
             </Col>
             <Col xs="2">
-              <label>Name</label>
+              <label>Name*</label>
               <Input
                 name="instanceName"
                 type="text"
                 value={this.state.instanceName}
                 onChange={e => {
-                  e.target.value = e.target.value.toLocaleLowerCase();
+                  e.target.value = e.target.value.toLocaleLowerCase().replace(' ', '-');
                   this.handleChange(e);
                 }}
               />
             </Col>
             <Col xs="2">
-              <label>Quantity</label>
+              <label>Quantity*</label>
               <Input
                 type="select"
                 name="quantity"
@@ -764,7 +772,7 @@ export default class ProxyCreator extends Component {
               </Input>
             </Col>
             <Col xs="3">
-              <label>Region</label>
+              <label>Region*</label>
               <Input
                 name="region"
                 onChange={e => {
@@ -777,7 +785,7 @@ export default class ProxyCreator extends Component {
               </Input>
             </Col>
             <Col xs="3">
-              <label>Machine</label>
+              <label>Machine*</label>
               <Input
                 name="machine"
                 onChange={e => {
@@ -791,7 +799,7 @@ export default class ProxyCreator extends Component {
           </FormGroup>
           <FormGroup row>
             <Col xs="2">
-              <label>Proxy Username</label>
+              <label>Proxy Username*</label>
               <Input
                 name="proxyUser"
                 value={this.state.proxyUser}
@@ -801,7 +809,7 @@ export default class ProxyCreator extends Component {
               />
             </Col>
             <Col xs="2">
-              <label>Proxy Password</label>
+              <label>Proxy Password*</label>
               <Input
                 name="proxyPassword"
                 value={this.state.proxyPassword}
@@ -811,7 +819,7 @@ export default class ProxyCreator extends Component {
               />
             </Col>
             <Col xs="2">
-              <label>Website</label>
+              <label>Website*</label>
               <Input
                 name="website"
                 value={this.state.website}

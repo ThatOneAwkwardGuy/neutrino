@@ -5,6 +5,16 @@ import Countries from '../store/countries';
 import Toggle from 'react-toggle';
 const { clipboard } = require('electron');
 const TRANSLATIONS = [
+  ['alley', 'allee', 'aly', 'alley', 'ally', 'aly'],
+  ['anex', 'anex', 'anx', 'annex', 'annx', 'anx'],
+  ['arcade', 'arc', 'arc', 'arcade'],
+  ['avenue', 'av', 'ave', 'ave', 'aven', 'avenu', 'avenue', 'avn', 'avnue'],
+  ['bayou', 'bayoo', 'byu', 'bayou'],
+  ['beach', 'bch', 'bch', 'beach'],
+  ['bend', 'bnd'],
+  ['bluff', 'blf', 'bluf', 'bluffs', 'blfs'],
+  ['bottom', 'bot', 'btm', 'bottm'],
+  ['boulevard', 'blvd', 'boul', 'boulv'],
   ['street', 'st.', 'st', 'streett', 'steet', 'sreet'],
   ['drive', 'dr.', 'dr', 'drivee', 'driv', 'drv'],
   ['lane', 'ln.', 'ln'],
@@ -17,7 +27,8 @@ const TRANSLATIONS = [
   ['boulevard', 'blvd', 'blvd.'],
   ['mountain', 'mtn.', 'mtn'],
   ['road', 'rd', 'raod', 'roaad', 'rooad'],
-  ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace']
+  ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace'],
+  ['circle', 'cirkle', 'circl', 'cirkle']
 ];
 
 export default class AddressJigger extends Component {
