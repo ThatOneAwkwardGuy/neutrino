@@ -76,7 +76,7 @@
 1.0.10
 - Fixed proxy creator to support https
 - Fixed error where activity gen was stuck on logged in when proxies were being used
-
+- Proxy format fixes
 
 - Added auto updating (NO MORE MANUALLY DOWNLOADING UPDATES!!!) (Testing needed though :/)
 

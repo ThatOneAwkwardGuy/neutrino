@@ -228,19 +228,19 @@ app.on('ready', async () => {
     mainWindow.send(UPDATE_DOWNLOADED, info);
   });
 
-  ipcMain.on(START_INSTALL, () => {
-    const electron = require('electron');
-    const BrowserWindow = electron.BrowserWindow;
-    app.removeAllListeners('window-all-closed');
-    app.removeAllListeners('before-quit');
-    var browserWindows = BrowserWindow.getAllWindows();
-    browserWindows.forEach(function(browserWindow) {
-      browserWindow.removeAllListeners('close');
-      browserWindow.close();
-    });
-    mainWindow.destroy();
-    autoUpdater.quitAndInstall(false, true);
-  });
+  // ipcMain.on(START_INSTALL, () => {
+  //   const electron = require('electron');
+  //   const BrowserWindow = electron.BrowserWindow;
+  //   app.removeAllListeners('window-all-closed');
+  //   app.removeAllListeners('before-quit');
+  //   var browserWindows = BrowserWindow.getAllWindows();
+  //   browserWindows.forEach(function(browserWindow) {
+  //     browserWindow.removeAllListeners('close');
+  //     browserWindow.close();
+  //   });
+  //   mainWindow.destroy();
+  //   autoUpdater.quitAndInstall(false, true);
+  // });
 
   ipcMain.on(CHECK_FOR_UPDATES, () => {
     autoUpdater.checkForUpdates();
