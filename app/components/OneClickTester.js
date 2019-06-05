@@ -166,6 +166,12 @@ export default class OneClickTester extends Component {
     this.testAccount(index, account);
   };
 
+  testAllAccounts = () => {
+    this.state.googleAccounts.forEach((account, index) => {
+      this.testAccount(index, account);
+    });
+  };
+
   testAccount = async (index, account) => {
     this.setAccountStatus(index, 'Checking Email');
     this.setAccountStatus(index, 'Logging In');
@@ -287,7 +293,9 @@ export default class OneClickTester extends Component {
                 </Button>
               </Col>
               <Col className="d-flex flex-column justify-content-end">
-                <Button className="nButton">Test</Button>
+                <Button className="nButton" onClick={this.testAllAccounts}>
+                  Test
+                </Button>
               </Col>
               <Col className="d-flex flex-column justify-content-end">
                 <Button className="nButton" onClick={this.clearAccounts}>

@@ -266,6 +266,7 @@ const randomTrendingYoutubeVideo = async () => {
   const chosenVideo = thumbnailLinksArray[Math.floor(Math.random() * thumbnailLinksArray.length)];
   const changeURLYoutubeVideo = () => {
     webview.loadURL(`https://youtube.com${chosenVideo.attribs.href}?autoplay=1&mute=1`);
+    webview.setAudioMuted(true);
     webview.removeEventListener('dom-ready', changeURLYoutubeVideo);
     activity.youtube += 1;
     // activity.status = `Watching Youtube Video - ${chosenVideo.attribs.title}`;
@@ -279,7 +280,8 @@ const functionsArray = [randomGoogleSearch, randomGoogleShoppingSearch, randomGo
 
 const loop = async () => {
   webview.removeEventListener('dom-ready', loop);
-  const rand = Math.round(Math.random() * (data.activityDelayMax - data.activityDelayMin)) + data.activityDelayMin;
+  console.log(data);
+  const rand = Math.round(Math.random() * (parseInt(data.activityDelayMax) - parseInt(data.activityDelayMin))) + parseInt(data.activityDelayMin);
   const chosenFunction = functionsArray[Math.floor(Math.random() * functionsArray.length)];
   chosenFunction();
   await sleep(rand);

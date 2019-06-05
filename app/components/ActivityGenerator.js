@@ -9,6 +9,8 @@ const { BrowserWindow } = require('electron').remote;
 const path = require('path');
 const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
+const isWin = process.platform === 'win32';
+
 export default class ActivityGenerator extends Component {
   constructor(props) {
     super(props);
@@ -27,6 +29,7 @@ export default class ActivityGenerator extends Component {
   }
 
   componentDidMount = () => {
+    console.log(process);
     // windowManager.closeAll();
     // this.setAllAcitivities('Not Started');
   };
@@ -207,8 +210,8 @@ export default class ActivityGenerator extends Component {
           activityLocation,
           false,
           {
-            width: this.props.settings.showAcitivtyWindows ? 500 : 0,
-            height: this.props.settings.showAcitivtyWindows ? 650 : 0,
+            width: this.props.settings.showAcitivtyWindows || isWin ? 500 : 0,
+            height: this.props.settings.showAcitivtyWindows || isWin ? 650 : 0,
             show: true,
             frame: false,
             resizable: true,
