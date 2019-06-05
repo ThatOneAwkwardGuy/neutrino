@@ -28,7 +28,8 @@ const TRANSLATIONS = [
   ['mountain', 'mtn.', 'mtn'],
   ['road', 'rd', 'raod', 'roaad', 'rooad'],
   ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace'],
-  ['circle', 'cirkle', 'circl', 'cirkle']
+  ['circle', 'cirkle', 'circl', 'cirkle'],
+  ['via', 'vvia', 'viia', 'viaa', 'vviiaa', 'viiaa', 'vviaa', 'vviia']
 ];
 
 export default class AddressJigger extends Component {

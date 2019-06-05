@@ -1,6 +1,6 @@
 {
   "name": "Neutrino",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "description": "Neutrino AIO Bot",
   "main": "./webpack-pack/main.js",
   "author": {

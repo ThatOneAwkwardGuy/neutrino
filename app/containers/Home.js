@@ -251,7 +251,7 @@ class Home extends Component {
       console.log(arg);
       this.toggleInstallModal();
     });
-    ipcRenderer.send(CHECK_FOR_UPDATES);
+    // ipcRenderer.send(CHECK_FOR_UPDATES);
   };
 
   componentDidMount() {

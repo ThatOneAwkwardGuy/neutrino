@@ -190,7 +190,7 @@ export default class ProxyCreator extends Component {
                 return (
                   <tr key={`error-${index}`}>
                     <td>{'Error'}</td>
-                    <td>{JSON.stringify(error)}</td>
+                    <td style={{ wordBreak: 'break-word' }}>{error.message ? error.message : JSON.stringify(error)}</td>
                   </tr>
                 );
 
