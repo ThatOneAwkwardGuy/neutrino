@@ -133,6 +133,7 @@ export default class RaffleBot extends Component {
       closable: true,
       allowRunningInsecureContent: true,
       webPreferences: {
+        webviewTag: true,
         allowRunningInsecureContent: true,
         nodeIntegration: true,
         webSecurity: false

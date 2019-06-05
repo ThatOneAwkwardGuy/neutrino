@@ -181,6 +181,7 @@ export default class OneClickTester extends Component {
       closable: true,
       allowRunningInsecureContent: true,
       webPreferences: {
+        webviewTag: true,
         allowRunningInsecureContent: true,
         nodeIntegration: true,
         webSecurity: false,
@@ -239,8 +240,8 @@ export default class OneClickTester extends Component {
                   }
                 });
               } else {
-                win.close();
-                this.setAccountStatus(index, 'Failed To Login');
+                // win.close();
+                this.setAccountStatus(index, 'Stuck In Login');
               }
             });
           });

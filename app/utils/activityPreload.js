@@ -265,7 +265,7 @@ const randomTrendingYoutubeVideo = async () => {
   const thumbnailLinksArray = $('.yt-uix-sessionlink').toArray();
   const chosenVideo = thumbnailLinksArray[Math.floor(Math.random() * thumbnailLinksArray.length)];
   const changeURLYoutubeVideo = () => {
-    webview.loadURL(`https://youtube.com${chosenVideo.attribs.href}/?autoplay=1&mute=1`);
+    webview.loadURL(`https://youtube.com${chosenVideo.attribs.href}?autoplay=1&mute=1`);
     webview.removeEventListener('dom-ready', changeURLYoutubeVideo);
     activity.youtube += 1;
     // activity.status = `Watching Youtube Video - ${chosenVideo.attribs.title}`;

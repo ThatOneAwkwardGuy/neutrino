@@ -322,12 +322,14 @@ class Home extends Component {
   }
 }
 
-const mapStateToProps = state => ({
-  settings: state.neutrinoSettingsReducer,
-  accounts: state.neutrinoAccountsReducer,
-  activities: state.neutrinoActivityReducer,
-  profiles: state.neutrinoProfileReducer
-});
+const mapStateToProps = state => {
+  return {
+    settings: state.neutrinoSettingsReducer,
+    accounts: state.neutrinoAccountsReducer,
+    activities: state.neutrinoActivityReducer,
+    profiles: state.neutrinoProfileReducer
+  };
+};
 
 const mapActionsToProps = dispatch => ({
   onUpdateSettings: content => {

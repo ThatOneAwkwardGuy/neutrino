@@ -21,7 +21,6 @@ import {
   UPDATE_DOWNLOADED,
   START_INSTALL
 } from './utils/constants';
-const puppeteer = require('puppeteer-core');
 const ipcMain = require('electron').ipcMain;
 const DiscordRPC = require('discord-rpc');
 const isDevelopment = process.env.NODE_ENV === 'development';
@@ -38,9 +37,11 @@ DiscordRPC.register(clientId);
 let initialiseCaptchaWindow = () => {
   captchaWindow = new BrowserWindow({
     webPreferences: {
+      webviewTag: true,
       contextIsolation: false,
       allowRunningInsecureContent: true,
-      webSecurity: false
+      webSecurity: false,
+      nodeIntegration: true
     },
     modal: true,
     show: false,
@@ -98,7 +99,11 @@ app.on('ready', async () => {
     minHeight: 325,
     minWidth: 450,
     frame: false,
-    resizable: true
+    resizable: true,
+    webPreferences: {
+      webviewTag: true,
+      nodeIntegration: true
+    }
   });
 
   mainWindow.loadURL(
@@ -208,7 +213,7 @@ app.on('ready', async () => {
     }
     captchaWindow.loadURL(
       url.format({
-        pathname: path.join(__dirname, 'index.html'),
+        pathname: path.join(__dirname, 'index.html', '/'),
         protocol: 'file:',
         slashes: true,
         hash: 'captcha'

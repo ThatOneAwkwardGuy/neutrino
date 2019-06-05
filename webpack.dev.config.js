@@ -14,6 +14,7 @@ const mainConfig = {
     path: path.normalize(path.join(path.resolve(__dirname, 'webpack-pack'), '/')),
     filename: '[name].js'
     // publicPath: path.normalize(path.join(path.resolve(__dirname, 'webpack-pack'), '/'))
+    // publicPath: '/'
   },
   node: {
     __dirname: false,
@@ -54,6 +55,7 @@ const appConfig = {
     path: path.normalize(path.join(path.resolve(__dirname, 'webpack-pack'), '/')),
     filename: 'app.js'
     // publicPath: path.normalize(path.join(path.resolve(__dirname, 'webpack-pack'), '/'))
+    // publicPath: '/'
   },
   node: {
     __dirname: true,

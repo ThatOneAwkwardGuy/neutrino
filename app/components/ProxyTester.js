@@ -150,51 +150,53 @@ export default class ProxyTester extends Component {
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-        <Col className="activeWindow d-flex flex-column">
-          <ReactTable
-            showPagination={false}
-            showPageSizeOptions={false}
-            noDataText="no proxies added"
-            data={this.state.proxyPings}
-            columns={[
-              {
-                Header: 'ip',
-                accessor: 'ip'
-              },
-              {
-                Header: 'port',
-                accessor: 'port'
-              },
-              {
-                Header: 'user',
-                accessor: 'user'
-              },
-              {
-                Header: 'pass',
-                accessor: 'pass'
-              },
-              {
-                Header: 'ping (ms)',
-                accessor: 'ping'
-              }
-            ]}
-          />
-          <Form>
-            <FormGroup row>
-              <Col xs="6">
-                <Label>site</Label>
-                <Input
-                  name="proxySite"
-                  type="text"
-                  id="proxySite"
-                  value={this.state.proxySite}
-                  placeholder="http://google.com"
-                  onChange={event => {
-                    this.handleChange(event);
-                  }}
-                />
-              </Col>
-              {/* <Col xs="2">
+        <Container fluid className="activeWindow d-flex flex-column">
+          <Row className="flex-grow-1">
+            <ReactTable
+              className="proxyTesterTable"
+              showPagination={false}
+              showPageSizeOptions={false}
+              noDataText="no proxies added"
+              data={this.state.proxyPings}
+              columns={[
+                {
+                  Header: 'ip',
+                  accessor: 'ip'
+                },
+                {
+                  Header: 'port',
+                  accessor: 'port'
+                },
+                {
+                  Header: 'user',
+                  accessor: 'user'
+                },
+                {
+                  Header: 'pass',
+                  accessor: 'pass'
+                },
+                {
+                  Header: 'ping (ms)',
+                  accessor: 'ping'
+                }
+              ]}
+            />
+          </Row>
+          <FormGroup row>
+            <Col xs="6">
+              <Label>site</Label>
+              <Input
+                name="proxySite"
+                type="text"
+                id="proxySite"
+                value={this.state.proxySite}
+                placeholder="http://google.com"
+                onChange={event => {
+                  this.handleChange(event);
+                }}
+              />
+            </Col>
+            {/* <Col xs="2">
                 <Label>min ping (ms)</Label>
                 <Input
                   name="minPing"
@@ -208,69 +210,68 @@ export default class ProxyTester extends Component {
                   }}
                 />
               </Col> */}
-              <Col xs="2">
-                <Label>max ping (ms)</Label>
-                <Input
-                  name="maxPing"
-                  min="0"
-                  type="number"
-                  id="maxPing"
-                  value={this.state.maxPing}
-                  placeholder="20"
-                  onChange={event => {
-                    this.handleChange(event);
-                  }}
-                />
-              </Col>
-              <Col xs="2" className="text-center d-flex flex-column justify-content-end">
-                <Label />
-                <Button
-                  className="nButton"
-                  onClick={async () => {
-                    this.copyWorkingProxies();
-                  }}
-                >
-                  copy proxies
-                </Button>
-              </Col>
-            </FormGroup>
-            <FormGroup row>
-              <Col xs="6">
-                <Label>proxies</Label>
-                <Input
-                  name="proxyInput"
-                  type="textarea"
-                  id="proxyInput"
-                  placeholder="user:pass:ip:port or ip:port (new line per proxy)"
-                  value={this.state.proxyInput}
-                  onChange={event => {
-                    this.handleChange(event);
-                  }}
-                />
-              </Col>
-              <Col xs="3" className="text-center d-flex flex-column justify-content-end">
-                <Button
-                  className="nButton"
-                  onClick={() => {
-                    this.handleProxies();
-                  }}
-                >
-                  test proxies
-                </Button>
-              </Col>
-              <Col xs="3" className="text-center d-flex flex-column justify-content-end">
-                <Button
-                  className="nButton"
-                  onClick={async () => {
-                    this.clearProxyPings();
-                  }}
-                >
-                  clear proxies
-                </Button>
-              </Col>
-            </FormGroup>
-          </Form>
-        </Col>
+            <Col xs="2">
+              <Label>max ping (ms)</Label>
+              <Input
+                name="maxPing"
+                min="0"
+                type="number"
+                id="maxPing"
+                value={this.state.maxPing}
+                placeholder="20"
+                onChange={event => {
+                  this.handleChange(event);
+                }}
+              />
+            </Col>
+            <Col xs="2" className="text-center d-flex flex-column justify-content-end">
+              <Label />
+              <Button
+                className="nButton"
+                onClick={async () => {
+                  this.copyWorkingProxies();
+                }}
+              >
+                copy proxies
+              </Button>
+            </Col>
+          </FormGroup>
+          <FormGroup row>
+            <Col xs="6">
+              <Label>proxies</Label>
+              <Input
+                name="proxyInput"
+                type="textarea"
+                id="proxyInput"
+                placeholder="user:pass:ip:port or ip:port (new line per proxy)"
+                value={this.state.proxyInput}
+                onChange={event => {
+                  this.handleChange(event);
+                }}
+              />
+            </Col>
+            <Col xs="3" className="text-center d-flex flex-column justify-content-end">
+              <Button
+                className="nButton"
+                onClick={() => {
+                  this.handleProxies();
+                }}
+              >
+                test proxies
+              </Button>
+            </Col>
+            <Col xs="3" className="text-center d-flex flex-column justify-content-end">
+              <Button
+                className="nButton"
+                onClick={async () => {
+                  this.clearProxyPings();
+                }}
+              >
+                clear proxies
+              </Button>
+            </Col>
+          </FormGroup>
+        </Container>
       </CSSTransition>
     );
   }

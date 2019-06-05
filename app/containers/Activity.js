@@ -17,7 +17,7 @@ class Activity extends Component {
           id="activityWebview"
           src="http://google.com"
           partition={windowManager.getCurrent().name}
-          webpreferences="allowRunningInsecureContent, javascript=yes"
+          webpreferences="allowRunningInsecureContent, javascript=yes, nodeIntegration"
           style={{
             width: '100%',
             height: 'calc(100% - 80px)'

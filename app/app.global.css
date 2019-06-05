@@ -19,11 +19,6 @@ html {
   background-color: #222222;
 }
 
-.activeContainerOuter {
-  overflow-y: scroll;
-  overflow-x: hidden;
-}
-
 .rootContainer {
   display: flex;
   flex-direction: column;
@@ -263,6 +258,7 @@ td,
 tr,
 table {
   background-color: #222222 !important;
+  color: white;
 }
 
 td {
@@ -669,6 +665,7 @@ canvas {
 
 .activeWindow {
   padding: 40px !important;
+  overflow-y: scroll;
 }
 
 .dropdown-menu.show {
@@ -797,4 +794,9 @@ canvas {
 .updateChangelog {
   padding: 10px;
   background-color: #222222;
+}
+
+.proxyTesterTable {
+  width: 100%;
+  max-height: 70%;
 }

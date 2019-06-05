@@ -112,6 +112,7 @@ export default class ActivityGenerator extends Component {
         minimizable: true,
         closable: true,
         webPreferences: {
+          webviewTag: true,
           allowRunningInsecureContent: true,
           nodeIntegration: true,
           webSecurity: false,
@@ -216,6 +217,7 @@ export default class ActivityGenerator extends Component {
             closable: true,
             allowRunningInsecureContent: true,
             webPreferences: {
+              webviewTag: true,
               allowRunningInsecureContent: true,
               nodeIntegration: true,
               webSecurity: false,

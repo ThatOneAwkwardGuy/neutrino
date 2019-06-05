@@ -62,36 +62,36 @@ class Login extends Component {
   }
 
   checkLoggedIn = async () => {
-    if (process.env.NODE_ENV !== 'development') {
-      try {
-        await auth.authorise.onAuthStateChanged(async user => {
-          if (user !== null) {
-            console.log(user);
+    // if (process.env.NODE_ENV !== 'development') {
+    try {
+      await auth.authorise.onAuthStateChanged(async user => {
+        if (user !== null) {
+          console.log(user);
+          this.setState({
+            currentlyLoggingIn: true
+          });
+          await setUserMachineIDOnFirstLoad(user.uid);
+          const machineIDStatus = await checkIfUserMachineIDMatches(user.uid);
+          if (machineIDStatus) {
+            this.props.history.push('/bot');
+          } else {
             this.setState({
-              currentlyLoggingIn: true
+              loginError: true,
+              currentlyLoggingIn: false
             });
-            await setUserMachineIDOnFirstLoad(user.uid);
-            const machineIDStatus = await checkIfUserMachineIDMatches(user.uid);
-            if (machineIDStatus) {
-              this.props.history.push('/bot');
-            } else {
-              this.setState({
-                loginError: true,
-                currentlyLoggingIn: false
-              });
-            }
           }
-        });
-      } catch (error) {
-        console.log(error);
-        this.setState({
-          loginError: true,
-          currentlyLoggingIn: false
-        });
-      }
-    } else {
-      this.props.history.push('/bot');
+        }
+      });
+    } catch (error) {
+      console.log(error);
+      this.setState({
+        loginError: true,
+        currentlyLoggingIn: false
+      });
     }
+    // } else {
+    //   this.props.history.push('/bot');
+    // }
   };
 
   handleLogin = async () => {
