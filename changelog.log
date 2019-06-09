@@ -80,6 +80,11 @@
 
 1.0.11
 - Added Via as keyword in address jigger for spanish addresses (if you have anymore you want to add just ask, dont know much about spanish addresses :) )
+- More robust proxy creator testing to see if the proxy works after creation
+- Proxy creator will now only delete vm instances in google cloud tagged "neutrinoproxies" to prevent accidentally deleteing any other instances you have. (proxies made using version 1.0.11 and onward will tag them automatically)
+- Fixed account creator reload window problem
+- Added NakedCPH to account creator
+- Better error reporting when logging in
 
 
 - Added auto updating (NO MORE MANUALLY DOWNLOADING UPDATES!!!) (Testing needed though :/)

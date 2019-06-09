@@ -1,14 +1,16 @@
 import React, { Component } from 'react';
-import { Row, Col, Table, FormGroup, Input, Label, Button, Modal, ModalBody, ModalHeader, ModalFooter } from 'reactstrap';
+import { Container, Row, Col, Table, FormGroup, Input, Label, Button, Modal, ModalBody, ModalHeader, ModalFooter } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
 import FontAwesome from 'react-fontawesome';
+import ReactTable from 'react-table';
+import { createNewWindow } from '../utils/functions';
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const remote = require('electron').remote;
 const { BrowserWindow } = require('electron').remote;
 const { dialog } = require('electron').remote;
 const fs = require('fs');
-
+import FootpatrolUK from '../utils/raffle/FootpatrolUK';
 export default class RaffleBot extends Component {
   constructor(props) {
     super(props);
@@ -18,17 +20,32 @@ export default class RaffleBot extends Component {
       profilesLoaded: '',
       proxiesInput: '',
       site: '',
+      style: '',
+      size: '',
       raffleLink: '',
       sizes: [],
       styles: [],
       entries: [],
       proxies: [],
       raffleDetails: {},
-      neutrinoRafflesProfileJSON: {}
+      neutrinoRafflesProfileJSON: [],
+      styleInput: true,
+      sizeInput: true
     };
+    this.rp = rp.defaults({
+      headers: {
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'
+      }
+    });
   }
 
   handleChange = e => {
+    if (e.target.name === 'site') {
+      this.setState({
+        sizeInput: true,
+        styleInput: true
+      });
+    }
     this.setState({
       [e.target.name]: e.target.value
     });
@@ -40,7 +57,7 @@ export default class RaffleBot extends Component {
     });
   };
 
-  toggleProfilesModal = () => {
+  toggleProxyModal = () => {
     this.setState({
       proxyModal: !this.state.proxyModal
     });
@@ -71,6 +88,16 @@ export default class RaffleBot extends Component {
     });
   };
 
+  getRandomProxy = () => {
+    const proxies = this.state.proxies;
+    const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
+    if (randomProxy === undefined) {
+      return '';
+    } else {
+      return randomProxy;
+    }
+  };
+
   importFile = () => {
     dialog.showOpenDialog(
       {
@@ -84,7 +111,7 @@ export default class RaffleBot extends Component {
             var contents = fs.readFileSync(fileNames[0]);
             var jsonContent = JSON.parse(contents);
             this.setState({
-              neutrinoRafflesProfileJSON: jsonContent,
+              neutrinoRafflesProfileJSON: Object.values(jsonContent),
               profilesLoaded: 'Success'
             });
           } catch (error) {
@@ -98,13 +125,38 @@ export default class RaffleBot extends Component {
   };
 
   loadEntries = () => {
-    console.log(this.state);
+    this.toggleProfilesModal();
+    const newEntries = [];
+    this.state.neutrinoRafflesProfileJSON.forEach(profile => {
+      let entry = false;
+      switch (this.state.site) {
+        case 'Footpatrol UK':
+          entry = new FootpatrolUK(
+            this.state.raffleLink,
+            profile,
+            this.state.site,
+            this.state.style,
+            this.state.size,
+            'Not Started',
+            this.getRandomProxy(),
+            this.triggerRender
+          );
+          break;
+        default:
+          break;
+      }
+      console.log(entry);
+      if (entry) {
+        newEntries.push(entry);
+      }
+    });
+    this.setState({ entries: [...this.state.entries, ...newEntries] });
   };
 
   loadRaffleInfo = async () => {
     if (this.state.raffleLink !== '') {
       try {
-        this.props.setLoading(`Loading ${this.state.raffleLink} Raffle Details`, true);
+        this.props.setLoading(`Loading ${this.state.site} Raffle Details`, true);
         switch (this.state.site) {
           case 'DSML':
             await this.loadDSMLRaffleInfo(this.state.raffleLink);
@@ -112,11 +164,16 @@ export default class RaffleBot extends Component {
           case 'Footpatrol UK':
             await this.loadFootpatrolUKRaffleInfo(this.state.raffleLink);
             break;
+          case 'NakedCPH':
+            await this.loadNakedCphRaffleInfo(this.state.raffleLink);
+            break;
           default:
             break;
         }
       } catch (error) {
         console.log(error);
+      } finally {
+        this.props.setLoading(``, false);
       }
     }
   };
@@ -167,8 +224,31 @@ export default class RaffleBot extends Component {
     });
   };
 
+  loadNakedCphRaffleInfo = async link => {
+    const win = createNewWindow('', '');
+    win.loadURL(link);
+    win.webContents.on('did-finish-load', () => {
+      win.webContents.executeJavaScript('window.location.href', false, result => {
+        if (result === link) {
+          win.webContents.executeJavaScript('document.documentElement.innerHTML', false, result => {
+            const $ = cheerio.load(result);
+            const typeformCode = $('.typeform-widget')
+              .attr('data-url')
+              .split('/to/')[1];
+            this.setState({
+              sizeInput: false,
+              styleInput: false,
+              raffleDetails: { typeformCode }
+            });
+            win.close();
+          });
+        }
+      });
+    });
+  };
+
   loadFootpatrolUKRaffleInfo = async link => {
-    const response = await rp.get(link);
+    const response = await this.rp.get(link);
     const $ = cheerio.load(response);
     const styles = $('select[name="shoeColor"] option:not([disabled])')
       .map((index, style) => {
@@ -181,9 +261,15 @@ export default class RaffleBot extends Component {
       })
       .toArray();
     this.setState({
+      style: styles[0].id,
+      size: sizes[0].id,
       styles,
       sizes
     });
+  };
+
+  triggerRender = () => {
+    this.forceUpdate();
   };
 
   returnEntryRow = (entry, index) => {
@@ -200,12 +286,77 @@ export default class RaffleBot extends Component {
     ));
   };
 
+  startAll = () => {
+    this.state.entries.forEach(entry => {
+      entry.run = true;
+      entry.start();
+    });
+  };
+
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-        <Col className="activeWindow d-flex flex-column">
+        <Container fluid className="activeWindow d-flex flex-column">
           <Row className="flex-grow-1">
-            <Table responsive hover className="text-center col-12">
+            <ReactTable
+              className="proxyTesterTable"
+              showPagination={false}
+              showPageSizeOptions={false}
+              noDataText="no raffles added"
+              data={this.state.entries}
+              columns={[
+                {
+                  Header: '#',
+                  id: 'row',
+                  maxWidth: 50,
+                  filterable: false,
+                  Cell: row => {
+                    return <div>{row.index + 1}</div>;
+                  }
+                },
+                // {
+                //   Header: 'email',
+                //   accessor: 'profile.email'
+                // },
+                {
+                  Header: 'site',
+                  accessor: 'site'
+                },
+                {
+                  Header: 'style',
+                  accessor: 'style'
+                },
+                {
+                  Header: 'size',
+                  accessor: 'size'
+                },
+                {
+                  Header: 'status',
+                  accessor: 'status',
+                  minWidth: 100
+                },
+                {
+                  Header: 'actions',
+                  id: 'row',
+                  maxWidth: 50,
+                  filterable: false,
+                  Cell: row => {
+                    return (
+                      <div>
+                        <FontAwesome className="px-2" name="play" />
+                        <FontAwesome className="px-2" name="stop" />
+                        <FontAwesome className="px-2" name="trash" />
+                      </div>
+                    );
+                  }
+                }
+                // {
+                //   Header: 'actions',
+                //   accessor: ''
+                // }
+              ]}
+            />
+            {/* <Table responsive hover className="text-center col-12">
               <thead>
                 <tr>
                   <th>#</th>
@@ -218,7 +369,7 @@ export default class RaffleBot extends Component {
                 </tr>
               </thead>
               <tbody>{this.state.entries.map(this.returnEntryRow)}</tbody>
-            </Table>
+            </Table> */}
           </Row>
           <FormGroup row>
             <Col xs="2">
@@ -227,37 +378,47 @@ export default class RaffleBot extends Component {
                 <option disabled>select site</option>
                 {/* <option>DSML</option> */}
                 <option>Footpatrol UK</option>
+                <option>NakedCPH</option>
               </Input>
             </Col>
             <Col xs="2">
               <Label>Raffle Link</Label>
               <Input name="raffleLink" type="text" onChange={this.handleChange} />
             </Col>
-            <Col xs="2">
-              <Label>Style</Label>
-              <Input name="style" type="select">
-                {this.returnOptions('style', this.state.styles)}
-              </Input>
-            </Col>
-            <Col xs="1">
-              <Label>Size</Label>
-              <Input name="size" type="select">
-                {this.returnOptions('size', this.state.sizes)}
-              </Input>
-            </Col>
             <Col xs="1" className="d-flex">
               <Button className="nButton w-100 align-self-end" onClick={this.loadRaffleInfo}>
                 Load
               </Button>
             </Col>
-            <Col xs="2" className="d-flex">
-              <Button className="nButton w-100 align-self-end" onClick={this.toggleProfilesModal}>
-                Add Profiles
+            {this.state.styleInput ? (
+              <Col xs="2">
+                <Label>Style</Label>
+                <Input name="style" type="select" onChange={this.handleChange}>
+                  {this.returnOptions('style', this.state.styles)}
+                </Input>
+              </Col>
+            ) : null}
+            {this.state.sizeInput ? (
+              <Col xs="1">
+                <Label>Size</Label>
+                <Input name="size" type="select" onChange={this.handleChange}>
+                  {this.returnOptions('size', this.state.sizes)}
+                </Input>
+              </Col>
+            ) : null}
+            <Col className="d-flex">
+              <Button className="nButton w-100 align-self-end" onClick={this.toggleProxyModal}>
+                Proxies
               </Button>
             </Col>
-            <Col xs="2" className="d-flex">
+            <Col className="d-flex">
               <Button className="nButton w-100 align-self-end" onClick={this.toggleProfilesModal}>
-                Add Proxies
+                Profiles
+              </Button>
+            </Col>
+            <Col className="d-flex">
+              <Button className="nButton w-100 align-self-end" onClick={this.startAll}>
+                Start
               </Button>
             </Col>
           </FormGroup>
@@ -298,8 +459,8 @@ export default class RaffleBot extends Component {
             </ModalFooter>
           </Modal>
           <Modal isOpen={this.state.proxyModal} toggle={this.toggleProxyModal} size="xl" centered>
-            <ModalHeader style={{ borderBottom: 'none' }} toggle={this.toggleProfilesModal}>
-              Load Profiles
+            <ModalHeader style={{ borderBottom: 'none' }} toggle={this.toggleProxyModal}>
+              Load Proxies
             </ModalHeader>
             <ModalBody>
               <Row>
@@ -309,7 +470,7 @@ export default class RaffleBot extends Component {
                     rows="6"
                     name="proxiesInput"
                     onChange={this.handleChange}
-                    placeholder="Input line seperated proxies in the format user:pass@ip:port or up:port"
+                    placeholder="Input line seperated proxies in the format user:pass@ip:port or user:pass:ip:port or ip:port"
                   />
                 </Col>
               </Row>
@@ -321,7 +482,7 @@ export default class RaffleBot extends Component {
               <Button onClick={this.loadProxies}>Apply</Button>
             </ModalFooter>
           </Modal>
-        </Col>
+        </Container>
       </CSSTransition>
     );
   }

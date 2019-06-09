@@ -122,11 +122,11 @@ class Login extends Component {
               <Row>
                 <Col xs="4">
                   <Alert color="danger" isOpen={this.state.formError} toggle={this.onDismiss}>
-                    you may have entered the wrong details, please try again or contact us via the discord.
+                    You may have entered the wrong details, please try again, reset your password or contact us via the discord.
                   </Alert>
                   <Alert color="danger" isOpen={this.state.loginError}>
-                    it appears there was a problem logging you in, this maybe be due to incorrect account info or your account may be bound to another machine,
-                    if this is the case, you can login and unbind your account.
+                    There was a problem logging you in, your account may be bound to another machine, if this is the case, you can login to neutrinotools.app to
+                    unbind your account.
                   </Alert>
                   <Form>
                     <FormGroup row>

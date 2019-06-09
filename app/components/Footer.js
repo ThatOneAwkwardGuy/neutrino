@@ -51,10 +51,13 @@ export default class Footer extends Component {
             <FontAwesome name="instagram" className="twitterLogoFooter logoFooter" />
           </a>
         </Col>
-        <Col xs="6" className="text-center footerCenterSection">
+        <Col xs="2">{this.props.updateDownloading ? 'Downloading Update' : ''}</Col>
+        <Col xs="3" className="text-center footerCenterSection">
           Copyright © 2019 Neutrino - All Rights Reserved
         </Col>
-        <Col xs="1">v{remote.app.getVersion()}</Col>
+        <Col xs="2" className="text-right">
+          v{remote.app.getVersion()}
+        </Col>
         <Col xs="2" className="text-right footerRightSection">
           <img style={{ maxWidth: '100px' }} src={Logo} className="ml-auto" />
         </Col>

@@ -260,7 +260,7 @@ export default class ProxyCreator extends Component {
         exit = true;
       } catch (err) {
         console.log(err);
-        if (err.error.code !== 'ECONNREFUSED') {
+        if (err.error.code !== 'ECONNREFUSED' && err.error.code !== 'ETIMEDOUT') {
           const split = [this.state.proxyUser, this.state.proxyPassword, ip, '3128'];
           this.setState({
             proxyPings: [
@@ -305,6 +305,7 @@ export default class ProxyCreator extends Component {
       os: 'centos-7',
       http: true,
       https: true,
+      tags: ['neutrinoproxies'],
       machineType: this.state.machineType,
       canIpForward: true,
       metadata: {
@@ -664,7 +665,9 @@ export default class ProxyCreator extends Component {
     const vmsDeletePromises = [];
     console.log(vms);
     vms[0].forEach(vm => {
-      vmsDeletePromises.push(vm.delete().catch(e => e));
+      if (vm.metadata.tags.items.includes('neutrinoproxies')) {
+        vmsDeletePromises.push(vm.delete().catch(e => e));
+      }
     });
     console.log(vmsDeletePromises);
     return Promise.all(vmsDeletePromises);

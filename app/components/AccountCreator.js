@@ -12,6 +12,8 @@ const uuidv4 = require('uuid/v4');
 const ipcRenderer = require('electron').ipcRenderer;
 var tough = require('tough-cookie');
 const cheerio = require('cheerio');
+const remote = require('electron').remote;
+const { BrowserWindow } = require('electron').remote;
 
 import {
   BOT_SEND_COOKIES_AND_CAPTCHA_PAGE,
@@ -83,6 +85,7 @@ const sites = {
   menuskateshop: 'https://menuskateshop.com',
   minishopmadrid: 'https://www.minishopmadrid.com',
   mondotees: 'https://mondotees.com',
+  nakedcph: 'https://www.nakedcph.com',
   nocturnalskateshop: 'https://www.nocturnalskateshop.com',
   noirfonce: 'https://www.noirfonce.eu',
   notre: 'https://www.notre-shop.com',
@@ -155,6 +158,7 @@ export default class AccountCreator extends Component {
       password: '',
       firstName: '',
       lastName: '',
+      proxies: '',
       accountCreationDelayAmount: 5000
     };
     this.tokenIDs = [];
@@ -213,6 +217,21 @@ export default class AccountCreator extends Component {
   getRandomProxy = () => {
     const proxies = this.state.proxies.split(/\n/);
     return proxies[Math.floor(Math.random() * proxies.length)];
+  };
+
+  setProxyForWindow = async (proxy, win) => {
+    return await new Promise((resolve, reject) => {
+      const proxyArray = proxy.split(/@|:/);
+      if (proxyArray.length === 4) {
+        win.webContents.session.on('login', (event, webContents, request, authInfo, callback) => {
+          callback(proxyArray[0], proxyArray[1]);
+        });
+      }
+      const proxyIpAndPort = proxyArray.slice(-2);
+      win.webContents.session.setProxy({ proxyRules: `${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` }, () => {
+        resolve();
+      });
+    });
   };
 
   awaitShopifyAccountChallenge = () => {
@@ -335,6 +354,76 @@ export default class AccountCreator extends Component {
     }
   };
 
+  createNewWindow = tokenID => {
+    let win = new BrowserWindow({
+      width: 500,
+      height: 650,
+      show: true,
+      frame: true,
+      resizable: true,
+      focusable: true,
+      minimizable: true,
+      closable: true,
+      webPreferences: {
+        webviewTag: true,
+        allowRunningInsecureContent: true,
+        nodeIntegration: true,
+        webSecurity: false,
+        session: remote.session.fromPartition(`activity-${tokenID}`)
+      }
+    });
+    const proxy = this.getRandomProxy();
+    console.log(proxy);
+    if (proxy !== '' && proxy !== undefined) {
+      this.setProxyForWindow(proxy, win);
+    }
+    return win;
+  };
+
+  createNakedCphAccount = async () => {
+    return new Promise((resolve, reject) => {
+      const email = randomEmail({ domain: this.state.catchall });
+      const pass = this.state.randomPassword ? randomize('a', 10) : this.state.password;
+      const firstName = this.state.randomFirstLast ? random.first() : this.state.firstName;
+      const lastName = this.state.randomFirstLast ? random.last() : this.state.lastName;
+      const tokenID = uuidv4();
+      const window = this.createNewWindow(tokenID);
+      window.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      window.loadURL('https://www.nakedcph.com/auth/view?op=register');
+      window.webContents.once('did-finish-load', () => {
+        window.webContents.executeJavaScript(
+          `
+        document.getElementById('firstNameInput').value = '${firstName} ${lastName}';
+        document.getElementById('emailInput').value = '${email}';
+        document.getElementById('passwordInput').value = '${pass}';
+        document.querySelector('button[type="submit"]').click();
+        `,
+          false,
+          () => {
+            window.webContents.once('did-finish-load', () => {
+              window.webContents.executeJavaScript(`window.location`, false, result => {
+                console.log(result);
+                if (result.pathname === '/auth/success') {
+                  window.webContents.removeAllListeners('close', (event, input) => {});
+                  this.props.onCreateAccount({
+                    email: email,
+                    site: this.state.site,
+                    pass: pass,
+                    status: 'created'
+                  });
+                }
+                window.close();
+                resolve();
+              });
+            });
+          }
+        );
+      });
+    });
+  };
+
   removeTokenFromTokenIDs = tokenID => {
     this.tokenIDs = this.tokenIDs.filter(token => token !== tokenID);
   };
@@ -344,10 +433,12 @@ export default class AccountCreator extends Component {
       this.props.setLoading('Creating Accounts', true, false);
       this.tokenIDs = [];
       this.cookieJars = {};
+      const delay = this.state.accountCreationDelay ? this.state.accountCreationDelayAmount : 0;
       const accountPromises = Array.from(Array(parseInt(this.state.quantity))).map((x, i) => {
         switch (this.state.site) {
+          case 'nakedcph':
+            return this.sleep(delay).then(() => this.createNakedCphAccount().catch(e => e));
           default:
-            const delay = this.state.accountCreationDelay ? this.state.accountCreationDelayAmount : 0;
             return this.sleep(delay).then(() => this.createShopifyAccount().catch(e => e));
         }
       });
@@ -590,7 +681,7 @@ export default class AccountCreator extends Component {
                         onChange={e => {
                           this.handleChange(e);
                         }}
-                        placeholder="http://user:pass@ip:port or http://ip:port"
+                        placeholder="user:pass@ip:port or ip:port or user:pass:ip:port"
                         name="proxies"
                         type="textarea"
                       />

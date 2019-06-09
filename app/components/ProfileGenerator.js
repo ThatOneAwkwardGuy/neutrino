@@ -76,11 +76,13 @@ export default class ProfileGenerator extends Component {
       regionArrayBilling: [],
       cards: [],
       jigAddresses: true,
-      fourCharPrefix: false
+      fourCharPrefix: false,
+      nsbProfileAmount: 0
     };
   }
 
   handleChange = e => {
+    console.log(e.target.value);
     this.setState({ [e.target.name]: e.target.value });
   };
 
@@ -709,7 +711,14 @@ export default class ProfileGenerator extends Component {
                 city: this.state.formdata.billingCity,
                 firstName: this.state.formdata.billingFirstName,
                 lastName: this.state.formdata.billingLastName,
-                phoneNumber: this.state.formdata.phoneNumber,
+                phoneNumber: this.state.formdata.randomPhoneNumber
+                  ? this.state.formdata.randomPhoneNumberTemplate
+                      .split('#')
+                      .map(number => {
+                        return number === '' ? this.getRandomInt(9) : number;
+                      })
+                      .join('')
+                  : this.state.formdata.phoneNumber,
                 state: this.state.formdata.billingProvince,
                 zipCode: this.state.formdata.billingZip
               },
@@ -719,7 +728,14 @@ export default class ProfileGenerator extends Component {
                 city: this.state.formdata.deliveryCity,
                 firstName: this.state.formdata.deliveryFirstName,
                 lastName: this.state.formdata.deliveryLastName,
-                phoneNumber: this.state.formdata.phoneNumber,
+                phoneNumber: this.state.formdata.randomPhoneNumber
+                  ? this.state.formdata.randomPhoneNumberTemplate
+                      .split('#')
+                      .map(number => {
+                        return number === '' ? this.getRandomInt(9) : number;
+                      })
+                      .join('')
+                  : this.state.formdata.phoneNumber,
                 state: this.state.formdata.deliveryProvince,
                 zipCode: this.state.formdata.deliveryZip
               },
@@ -739,13 +755,20 @@ export default class ProfileGenerator extends Component {
         case 'Neutrino Raffle':
           profiles[`Profile - ${index}`] = {
             email: this.state.formdata.paymentEmail,
+            firstName: this.state.formdata.billingFirstName,
+            lastName: this.state.formdata.billingLastName,
+            phoneNumber: this.state.formdata.randomPhoneNumber
+              ? this.state.formdata.randomPhoneNumberTemplate
+                  .split('#')
+                  .map(number => {
+                    return number === '' ? this.getRandomInt(9) : number;
+                  })
+                  .join('')
+              : this.state.formdata.phoneNumber,
             address: {
               address: this.state.formdata.billingAddress,
               apt: this.state.formdata.billingAptorSuite,
               city: this.state.formdata.billingCity,
-              firstName: this.state.formdata.billingFirstName,
-              lastName: this.state.formdata.billingLastName,
-              phoneNumber: this.state.formdata.phoneNumber,
               state: this.state.formdata.billingProvince,
               zipCode: this.state.formdata.billingZip,
               region: this.state.formdata.deliveryCountry
@@ -832,7 +855,7 @@ export default class ProfileGenerator extends Component {
             checkoutLimit: 0,
             billingSame: this.state.formdata.sameAsDelivery,
             date: +new Date(),
-            id: index
+            id: parseInt(this.state.nsbProfileAmount) + index
           };
           break;
         case 'SOLE AIO':
@@ -1037,6 +1060,12 @@ export default class ProfileGenerator extends Component {
                 <Toggle name="fourCharPrefix" checked={this.state.fourCharPrefix} onChange={this.toggleButton} />
               </div>
             </Col>
+            {this.state.botType === 'NSB' ? (
+              <Col xs="2">
+                <Label>NSB Profile No.</Label>
+                <Input type="number" name="nsbProfileAmount" onChange={this.handleChange} value={this.state.nsbProfileAmount} />
+              </Col>
+            ) : null}
             <Col xs="2" className="d-flex flex-column justify-content-end">
               <Button onClick={this.exportAddressesAndCards}>export</Button>
             </Col>

@@ -29,6 +29,7 @@ import {
   UPDATE_DOWNLOADED,
   START_INSTALL
 } from '../utils/constants';
+import { stat } from 'fs';
 const ipcRenderer = require('electron').ipcRenderer;
 const remote = require('electron').remote;
 const windowManager = remote.require('electron-window-manager');
@@ -47,7 +48,8 @@ class Home extends Component {
       updateModal: false,
       infoModalHeader: '',
       infoModalBody: '',
-      infoModalFooter: ''
+      infoModalFooter: '',
+      updateDownloading: false
     };
   }
 
@@ -200,6 +202,9 @@ class Home extends Component {
   };
 
   triggerDownload = () => {
+    this.setState({
+      updateDownloading: true
+    });
     ipcRenderer.send(START_UPDATE);
     this.toggleUpdateModal();
   };
@@ -248,7 +253,9 @@ class Home extends Component {
       this.changeLoading('', false);
     });
     ipcRenderer.on(UPDATE_DOWNLOADED, (event, arg) => {
-      console.log(arg);
+      this.setState({
+        updateDownloading: false
+      });
       this.toggleInstallModal();
     });
     // ipcRenderer.send(CHECK_FOR_UPDATES);
@@ -268,7 +275,7 @@ class Home extends Component {
       <Container fluid className="d-flex flex-column">
         <Header changeActiveComponent={this.changeActiveComponent} activeWindow={this.state.activeWindow} />
         <Row className="homeContainer">{this.returnActiveComponent(this.state.activeWindow)}</Row>
-        <Footer type="homepage" />
+        <Footer type="homepage" updateDownloading={this.state.updateDownloading} />
         <Modal isOpen={this.state.loading} size="sm" centered className="text-center">
           {this.state.loadingModalClosable ? <ModalHeader style={{ border: 'none' }} toggle={this.toggleLoading} /> : null}
           <BarLoader width={100} widthUnit="%" color="#2745fb" />

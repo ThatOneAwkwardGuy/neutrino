@@ -38,6 +38,7 @@ const checkCaptcha = () => {
   if (invisibleCaptcha === 'invisible' && invisibleCaptcha !== undefined) {
     grecaptcha.execute().then(() => {
       const captchaResponse3 = grecaptcha.getResponse();
+      console.log(captchaResponse3);
       if (captchaResponse3 !== '') {
         clearInterval(captchaChecker);
         ipcRenderer.send('send-captcha-token', {
@@ -53,6 +54,7 @@ const checkCaptcha = () => {
     });
   } else if (captchaResponse !== '' && captchaResponse !== undefined) {
     clearInterval(captchaChecker);
+    console.log(captchaResponse);
     ipcRenderer.send('send-captcha-token', {
       ...args,
       checkoutURL: document.location.href,
@@ -68,6 +70,7 @@ const checkCaptcha = () => {
 // if (!document.location.href.includes('google.com') && !document.location.href.includes('youtube.com')) {
 //   document.addEventListener('DOMContentLoaded', function() {
 //     const bodySiteKey = document.body.innerHTML.match(/.sitekey: "(.*)"/)[1];
+//     const bodySiteKey = document.querySelector('.g-recaptcha').getAttribute('data-sitekey');
 //     if (document.location.href.includes('/challenge')) {
 //       authToken = document.querySelector('input[name="authenticity_token"]').value;
 //     }
