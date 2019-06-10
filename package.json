@@ -1,6 +1,6 @@
 {
   "name": "Neutrino",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "Neutrino AIO Bot",
   "main": "./webpack-pack/main.js",
   "author": {
@@ -16,10 +16,14 @@
     "extends": null,
     "appId": "com.neutrino.bot",
     "directories": {},
+    "afterSign": "scripts/notarize.js",
     "mac": {
       "category": "com.neutrino.bot",
       "icon": "./webpack-pack/icon.png",
-      "hardenedRuntime": true
+      "hardenedRuntime": true,
+      "gatekeeperAssess": false,
+      "entitlements": "./entitlements.mac.plist",
+      "entitlementsInherit": "./entitlements.mac.plist"
     },
     "win": {
       "icon": "./webpack-pack/icon.png",
@@ -64,6 +68,7 @@
     "csvtojson": "^2.0.8",
     "discord-rpc": "^3.0.2",
     "do-wrapper": "^3.22.0",
+    "dotenv": "^8.0.0",
     "electron-store": "^3.2.0",
     "electron-updater": "^4.0.6",
     "electron-window-manager": "^1.0.6",
@@ -159,6 +164,7 @@
     "electron-builder": "^20.43.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-mocha": "^8.0.2",
+    "electron-notarize": "^0.1.1",
     "eslint": "^5.16.0",
     "eslint-config-prettier": "^4.3.0",
     "eslint-plugin-react": "^7.13.0",
@@ -214,12 +220,12 @@
     "webpack:dev:windows": "run-p webpack:dev:server webpack:dev:start",
     "webpack:dist": "run-s webpack:prod:clean webpack:prod:pack webpack:prod:dist",
     "webpack:prod": "run-s webpack:prod:clean webpack:prod:pack",
-    "webpack:prod:build": "cross-env NODE_ENV=production CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -mw --x64 --ia32",
+    "webpack:prod:build": "cross-env NODE_ENV=production electron-builder -mw --x64 --ia32",
     "webpack:dev:build": "cross-env NODE_ENV=development electron-builder -mw --x64 --ia32",
     "webpack:prod:build:mac": "cross-env NODE_ENV=production electron-builder -m --x64",
     "webpack:prod:build:win": "cross-env NODE_ENV=production electron-builder -w --x64",
     "webpack:prod:clean": "rimraf webpack-pack dist",
-    "webpack:prod:dist": "cross-env NODE_ENV=production CSC_IDENTITY_AUTO_DISCOVERY=false GH_TOKEN=22658cb28e268b0a1bbe49b10a86a1b1b9407490 electron-builder -mw --x64 --ia32 -p always",
+    "webpack:prod:dist": "cross-env NODE_ENV=production GH_TOKEN=22658cb28e268b0a1bbe49b10a86a1b1b9407490 electron-builder -mw --x64 --ia32 -p always",
     "webpack:prod:pack": "cross-env NODE_ENV=production webpack --mode production --config webpack.build.config.js"
   }
 }

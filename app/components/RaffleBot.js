@@ -139,6 +139,7 @@ export default class RaffleBot extends Component {
             this.state.size,
             'Not Started',
             this.getRandomProxy(),
+            this.raffleDetails,
             this.triggerRender
           );
           break;
@@ -198,28 +199,32 @@ export default class RaffleBot extends Component {
     });
     win.loadURL(link);
     win.webContents.once('did-finish-load', () => {
-      win.webContents.executeJavaScript('document.documentElement.innerHTML', false, result => {
-        win.close();
-        const $ = cheerio.load(result);
-        const styles = $('div[fs-field-validation-name="Colour"] option')
-          .map((index, style) => {
-            return { id: style.attribs.value, name: style.attribs.value };
-          })
-          .toArray();
-        const sizes = $('div[fs-field-validation-name="US Size"] option')
-          .map((index, size) => {
-            return { id: size.attribs.value, name: size.attribs.value };
-          })
-          .toArray();
-        const fullNameFormID = $('div[fs-field-validation-name="Full Name"] input').attr('name');
-        const emailFormID = $('div[fs-field-validation-name="Email"] input').attr('name');
-        const phoneFormID = $('div[fs-field-validation-name="Mobile Phone Number"] input').attr('name');
-        const postcodeFormID = $('div[fs-field-validation-name="Postcode"] input').attr('name');
-        this.setState({
-          styles,
-          sizes,
-          raffleDetails: { fullNameFormID, emailFormID, phoneFormID, postcodeFormID }
-        });
+      win.webContents.executeJavaScript('window.location.href', false, result => {
+        if (result === link) {
+          win.webContents.executeJavaScript('document.documentElement.innerHTML', false, result => {
+            win.close();
+            const $ = cheerio.load(result);
+            const styles = $('div[fs-field-validation-name="Colour"] option')
+              .map((index, style) => {
+                return { id: style.attribs.value, name: style.attribs.value };
+              })
+              .toArray();
+            const sizes = $('div[fs-field-validation-name="US Size"] option')
+              .map((index, size) => {
+                return { id: size.attribs.value, name: size.attribs.value };
+              })
+              .toArray();
+            const fullNameFormID = $('div[fs-field-validation-name="Full Name"] input').attr('name');
+            const emailFormID = $('div[fs-field-validation-name="Email"] input').attr('name');
+            const phoneFormID = $('div[fs-field-validation-name="Mobile Phone Number"] input').attr('name');
+            const postcodeFormID = $('div[fs-field-validation-name="Postcode"] input').attr('name');
+            this.setState({
+              styles,
+              sizes,
+              raffleDetails: { fullNameFormID, emailFormID, phoneFormID, postcodeFormID }
+            });
+          });
+        }
       });
     });
   };

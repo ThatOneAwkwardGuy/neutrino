@@ -1,7 +1,7 @@
 const rp = require('request-promise');
 
 export default class FootpatrolUK {
-  constructor(url, profile, site, style, size, status, proxy, forceUpdate) {
+  constructor(url, profile, site, style, size, status, proxy, raffleDetails, forceUpdate) {
     this.url = url;
     this.profile = profile;
     this.run = false;
@@ -28,9 +28,13 @@ export default class FootpatrolUK {
     }
   };
 
-  makeEntry = async () => {
-    this.status = 'Started';
+  changeStatus = status => {
+    this.status = status;
     this.forceUpdate();
+  };
+
+  makeEntry = async () => {
+    this.changeStatus('Started');
     const name = `${this.profile.firstName}%20${this.profile.lastName}`;
     const params = this.url.split('html')[1].split('?');
     const tag = params[1].split('=')[1];
@@ -49,7 +53,6 @@ export default class FootpatrolUK {
       }&yzemail=${tag}${shortTag}_countryofres=${encodeURIComponent(this.profile.region)}&emailpermit=0&sms_optout=0&site=FP&currency=GBP`
     });
     console.log(response);
-    this.status = 'Finished';
-    this.forceUpdate();
+    this.changeStatus('Finished');
   };
 }

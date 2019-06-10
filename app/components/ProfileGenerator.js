@@ -829,8 +829,8 @@ export default class ProfileGenerator extends Component {
               address: deliveryAddress,
               address2: deliveryAptorSuite,
               state:
-                Countries[this.state.formdata.deliveryCountry].province_codes[deliveryCity] !== undefined
-                  ? Countries[this.state.formdata.deliveryCountry].province_codes[deliveryCity]
+                Countries[this.state.formdata.deliveryCountry].province_codes[deliveryProvince] !== undefined
+                  ? Countries[this.state.formdata.deliveryCountry].province_codes[deliveryProvince]
                   : '',
               zip: deliveryZip,
               phone: this.state.formdata.randomPhoneNumber
@@ -1060,12 +1060,12 @@ export default class ProfileGenerator extends Component {
                 <Toggle name="fourCharPrefix" checked={this.state.fourCharPrefix} onChange={this.toggleButton} />
               </div>
             </Col>
-            {this.state.botType === 'NSB' ? (
+            {/* {this.state.botType === 'NSB' ? (
               <Col xs="2">
                 <Label>NSB Profile No.</Label>
                 <Input type="number" name="nsbProfileAmount" onChange={this.handleChange} value={this.state.nsbProfileAmount} />
               </Col>
-            ) : null}
+            ) : null} */}
             <Col xs="2" className="d-flex flex-column justify-content-end">
               <Button onClick={this.exportAddressesAndCards}>export</Button>
             </Col>

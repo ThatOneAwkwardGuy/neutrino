@@ -86,6 +86,9 @@
 - Added NakedCPH to account creator
 - Better error reporting when logging in
 
+1.0.12
+- Fixed NSB Profile Gen
+
 
 - Added auto updating (NO MORE MANUALLY DOWNLOADING UPDATES!!!) (Testing needed though :/)
 
