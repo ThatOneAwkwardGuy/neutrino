@@ -7,7 +7,6 @@ import '../node_modules/font-awesome/css/font-awesome.css';
 import '../node_modules/bootstrap/dist/css/bootstrap.css';
 import './fonts/stylesheet.css';
 import './app.global.css';
-import './react-datetime.css';
 import 'react-toggle/style.css';
 import 'react-table/react-table.css';
 import { PersistGate } from 'redux-persist/integration/react';

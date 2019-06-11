@@ -8,7 +8,6 @@ const fs = require('fs');
 const { dialog } = require('electron').remote;
 const csvtojsonV2 = require('csvtojson');
 const csvToJson = require('convert-csv-to-json');
-const Papa = require('papaparse');
 const profileTaskConversionOptions = ['CyberSole', 'ProjectDestroyer', 'EveAIO', 'TheKickStation'];
 const profileAttributeMaping = {
   profileID: 'profile name',

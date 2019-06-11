@@ -10,7 +10,6 @@ const random = require('random-name');
 const { clipboard } = require('electron');
 const uuidv4 = require('uuid/v4');
 const ipcRenderer = require('electron').ipcRenderer;
-var tough = require('tough-cookie');
 const cheerio = require('cheerio');
 const remote = require('electron').remote;
 const { BrowserWindow } = require('electron').remote;

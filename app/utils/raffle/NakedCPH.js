@@ -22,7 +22,9 @@ export default class NakedCPH {
     while (this.run) {
       try {
         this.makeEntry();
-      } catch (error) {}
+      } catch (error) {
+        this.changeStatus('Error Submitting Raffle');
+      }
       this.run = false;
     }
   };
@@ -42,10 +44,29 @@ export default class NakedCPH {
     return response;
   };
 
-  //https://nakedcph.typeform.com/app/form/submit/yUHpA1
-
   makeEntry = async () => {
     this.changeStatus('Started');
     const { token, landed_at } = await this.getRaffleToken(this.raffleDetails.typeformCode);
+    const payload = {};
+    this.raffleDetails.renderData.form.fields.forEach(row => {
+      if (row.title.includes('first name')) {
+        payload[`form[textfield:${row.id}]`] = this.profile.firstName;
+      } else if (row.title.includes('last name')) {
+        payload[`form[textfield:${row.id}]`] = this.profile.lastName;
+      } else if (row.title.includes('email')) {
+        payload[`form[${row.type}:${row.id}]`] = this.profile.email;
+      } else if (row.title.includes('country')) {
+        payload[`form[${row.type}:${row.id}]`] = this.profile.region;
+      }
+    });
+    payload['form[token]'] = token;
+    payload['form[landed_at]'] = landed_at;
+    payload['form[language]'] = this.raffleDetails.renderData.form.settings.language;
+    const response = await this.rp({
+      method: 'POST',
+      uri: `https://nakedcph.typeform.com/app/form/submit/${raffleId}`,
+      form: payload
+    });
+    this.changeStatus('Finished');
   };
 }

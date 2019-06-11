@@ -235,17 +235,19 @@ export default class RaffleBot extends Component {
     win.webContents.on('did-finish-load', () => {
       win.webContents.executeJavaScript('window.location.href', false, result => {
         if (result === link) {
-          win.webContents.executeJavaScript('document.documentElement.innerHTML', false, result => {
-            const $ = cheerio.load(result);
-            const typeformCode = $('.typeform-widget')
-              .attr('data-url')
-              .split('/to/')[1];
-            this.setState({
-              sizeInput: false,
-              styleInput: false,
-              raffleDetails: { typeformCode }
+          win.webContents.executeJavaScript('document.documentElement.innerHTML', false, innerHTML => {
+            win.webContents.executeJavaScript('window.rendererData', false, renderData => {
+              const $ = cheerio.load(innerHTML);
+              const typeformCode = $('.typeform-widget')
+                .attr('data-url')
+                .split('/to/')[1];
+              this.setState({
+                sizeInput: false,
+                styleInput: false,
+                raffleDetails: { typeformCode, renderData }
+              });
+              win.close();
             });
-            win.close();
           });
         }
       });

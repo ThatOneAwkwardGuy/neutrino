@@ -137,7 +137,7 @@ export default class Settings extends Component {
                 />
               </Col>
             </FormGroup>
-            {/* <FormGroup row>
+            <FormGroup row>
               <Col xs="6">
                 <label>Amazon AWS Access Key</label>
                 <Input
@@ -160,7 +160,7 @@ export default class Settings extends Component {
                   }}
                 />
               </Col>
-            </FormGroup> */}
+            </FormGroup>
             <FormGroup row>
               <Col xs="6">
                 <label>Vultr API Key</label>

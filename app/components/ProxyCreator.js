@@ -4,6 +4,7 @@ import { CSSTransition } from 'react-transition-group';
 const rp = require('request-promise');
 const Compute = require('@google-cloud/compute');
 const DigitalOcean = require('do-wrapper').default;
+const AWS = require('aws-sdk');
 const { clipboard } = require('electron');
 const numberOfTries = 50;
 const sleepTime = 2000;
@@ -128,6 +129,9 @@ export default class ProxyCreator extends Component {
         case 'DigitalOcean':
           await this.initializeDigitalOcean();
           break;
+        case 'AWS':
+          await this.initialiseAWS();
+          break;
         default:
           break;
       }
@@ -137,6 +141,27 @@ export default class ProxyCreator extends Component {
     } finally {
       this.props.setLoading('', false, false);
     }
+  };
+
+  initialiseAWS = async () => {
+    AWS.config.update({ accessKeyId: this.props.settings.awsAccessKey, secretAccessKey: this.props.settings.awsSecretKey });
+    AWS.config.update({ region: 'us-east-1' });
+    var ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
+    var params = {};
+    ec2.describeRegions(params, function(err, data) {
+      if (err) {
+        console.log('Error', err);
+      } else {
+        console.log('Regions: ', data.Regions);
+      }
+    });
+    ec2.describeAvailabilityZones(params, function(err, data) {
+      if (err) {
+        console.log('Error', err);
+      } else {
+        console.log('Availability Zones: ', data.AvailabilityZones);
+      }
+    });
   };
 
   sleep = ms => {
@@ -738,6 +763,7 @@ export default class ProxyCreator extends Component {
                 <option>Google Cloud</option>
                 <option>Vultr</option>
                 <option>DigitalOcean</option>
+                <option>AWS</option>
               </Input>
             </Col>
             <Col xs="2">
