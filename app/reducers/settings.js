@@ -5,8 +5,6 @@ const initialState = {
   activityDelayMax: 120000,
   googleCredentialsPath: '',
   googleCredentialsPojectID: '',
-  awsAccessKey: '',
-  awsSecretKey: '',
   vultrAPIKey: '',
   digitalOceanAPIKey: '',
   showAcitivtyWindows: false,

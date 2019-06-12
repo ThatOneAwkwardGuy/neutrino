@@ -16,9 +16,8 @@ export default class Settings extends Component {
         activityDelayMin: 60000,
         activityDelayMax: 120000,
         googleCredentialsPath: '',
+        awsCredentialsPath: '',
         googleCredentialsPojectID: '',
-        awsAccessKey: '',
-        awsSecretKey: '',
         vultrAPIKey: '',
         digitalOceanAPIKey: '',
         showAcitivtyWindows: false
@@ -31,14 +30,6 @@ export default class Settings extends Component {
 
   save = () => {
     this.props.onUpdateSettings(this.state.settings);
-
-    // if (this.state.settings.activityDelayMin > this.state.settings.activityDelayMax) {
-    //   this.setState({ settings: { ...this.state.settings, activityDelayMax: this.state.settings.activityDelayMin + 1 } }, () => {
-    //     this.props.onUpdateSettings(this.state.settings);
-    //   });
-    // } else {
-    //   this.props.onUpdateSettings(this.state.settings);
-    // }
   };
 
   signOut = () => {
@@ -106,7 +97,7 @@ export default class Settings extends Component {
             <FormGroup row>
               <Col xs="4">
                 <label>
-                  Google Cloud Credentials File (json){' '}
+                  Google Cloud Credentials File (json)
                   <a
                     onClick={() => {
                       shell.openExternal('https://cloud.google.com/video-intelligence/docs/common/auth');
@@ -127,6 +118,7 @@ export default class Settings extends Component {
               </Col>
               <Col xs="6">
                 <label>Google Cloud Project ID</label>
+                <br />
                 <Input
                   type="text"
                   name="googleCredentialsPojectID"
@@ -138,28 +130,17 @@ export default class Settings extends Component {
               </Col>
             </FormGroup>
             <FormGroup row>
-              <Col xs="6">
-                <label>Amazon AWS Access Key</label>
-                <Input
-                  type="text"
-                  name="awsAccessKey"
-                  value={this.state.settings.awsAccessKey}
-                  onChange={e => {
-                    this.handleChange(e);
-                  }}
-                />
-              </Col>
-              <Col xs="6">
-                <label>Amazon AWS Secret Key</label>
-                <Input
-                  type="text"
-                  name="awsSecretKey"
-                  value={this.state.settings.awsSecretKey}
-                  onChange={e => {
-                    this.handleChange(e);
-                  }}
-                />
-              </Col>
+              <label>AWS Credentials (json)</label>
+              <br />
+              <Button
+                style={{ display: 'block' }}
+                className="nButton"
+                onClick={() => {
+                  this.importFile('AWS Credentials', 'awsCredentialsPath');
+                }}
+              >
+                Browse
+              </Button>
             </FormGroup>
             <FormGroup row>
               <Col xs="6">

@@ -120,9 +120,6 @@ export default class ProxyCreator extends Component {
         case 'Google Cloud':
           await this.initializeGoogleCloud();
           break;
-        case 'Amazon AWS':
-          await this.initializeAmazonAWS();
-          break;
         case 'Vultr':
           await this.initializeVultr();
           break;
@@ -144,7 +141,8 @@ export default class ProxyCreator extends Component {
   };
 
   initialiseAWS = async () => {
-    AWS.config.update({ accessKeyId: this.props.settings.awsAccessKey, secretAccessKey: this.props.settings.awsSecretKey });
+    AWS.config.loadFromPath(this.props.settings.awsCredentialsPath);
+    // AWS.config.update({ accessKeyId: this.props.settings.awsAccessKey, secretAccessKey: this.props.settings.awsSecretKey });
     AWS.config.update({ region: 'us-east-1' });
     var ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
     var params = {};
