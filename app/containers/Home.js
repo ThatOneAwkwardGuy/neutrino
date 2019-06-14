@@ -33,6 +33,7 @@ import { stat } from 'fs';
 const ipcRenderer = require('electron').ipcRenderer;
 const remote = require('electron').remote;
 const windowManager = remote.require('electron-window-manager');
+const parse = require('html-react-parser');
 
 class Home extends Component {
   constructor(props) {
@@ -258,14 +259,14 @@ class Home extends Component {
       });
       this.toggleInstallModal();
     });
-    // ipcRenderer.send(CHECK_FOR_UPDATES);
+    ipcRenderer.send(CHECK_FOR_UPDATES);
   };
 
   componentDidMount() {
     if (process.env.NODE_ENV !== 'development') {
       this.watchForActiveStatus();
     }
-    // this.watchForUpdates();
+    this.watchForUpdates();
     windowManager.closeAll();
     this.setAllAcitivities('Not Started');
   }
@@ -296,7 +297,7 @@ class Home extends Component {
           </ModalHeader>
           <ModalBody>
             <p>Neutrino version {this.props.settings.update.version} is now available</p>
-            <p className="updateChangelog">{this.props.settings.update.changelog}</p>
+            <p className="updateChangelog">{parse(this.props.settings.update.changelog)}</p>
             <small>The update will download in the background and alert you when you can install it.</small>
           </ModalBody>
           <ModalFooter>

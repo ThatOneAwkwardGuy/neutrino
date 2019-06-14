@@ -222,7 +222,8 @@ export default class AccountCreator extends Component {
     return await new Promise((resolve, reject) => {
       const proxyArray = proxy.split(/@|:/);
       if (proxyArray.length === 4) {
-        win.webContents.session.on('login', (event, webContents, request, authInfo, callback) => {
+        win.webContents.session.on('login', (event, request, authInfo, callback) => {
+          event.preventDefault();
           callback(proxyArray[0], proxyArray[1]);
         });
       }

@@ -24,7 +24,21 @@ const TRANSLATIONS = [
   ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace']
 ];
 const cardTypes = ['visa', 'mastercard'];
-const bots = ['Cybersole', 'Project Destroyer', 'Ghost', 'EVE AIO', 'Phantom', 'Dashe', 'Hastey', 'Kodai', 'NSB', 'SOLE AIO', 'Neutrino Raffle', 'CSV'];
+const bots = [
+  'Cybersole',
+  'Project Destroyer',
+  'Ghost',
+  'Balko',
+  'EVE AIO',
+  'Phantom',
+  'Dashe',
+  'Hastey',
+  'Kodai',
+  'NSB',
+  'SOLE AIO',
+  'Neutrino Raffle',
+  'CSV'
+];
 export default class ProfileGenerator extends Component {
   constructor() {
     super();
@@ -76,8 +90,7 @@ export default class ProfileGenerator extends Component {
       regionArrayBilling: [],
       cards: [],
       jigAddresses: true,
-      fourCharPrefix: false,
-      nsbProfileAmount: 0
+      fourCharPrefix: false
     };
   }
 
@@ -905,6 +918,45 @@ export default class ProfileGenerator extends Component {
             CheckoutLimit: 'No checkout limit'
           };
           break;
+        case 'Balko':
+          profiles[`Profile - ${index}`] = {
+            id: `Profile - ${index}`,
+            firstname: this.state.formdata.randomName ? randomFirstName : this.state.formdata.deliveryFirstName,
+            lastname: this.state.formdata.randomName ? randomLastName : this.state.formdata.deliveryLastName,
+            email: this.state.formdata.useCatchallEmail
+              ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
+              : this.state.formdata.paymentEmail,
+            phone: this.state.formdata.randomPhoneNumber
+              ? this.state.formdata.randomPhoneNumberTemplate
+                  .split('#')
+                  .map(number => {
+                    return number === '' ? this.getRandomInt(9) : number;
+                  })
+                  .join('')
+              : this.state.formdata.phoneNumber,
+            add1: deliveryAddress,
+            add2: deliveryAptorSuite,
+            state: this.state.formdata.deliveryProvince,
+            zip: deliveryZip,
+            country: this.state.formdata.deliveryCountry,
+            city: deliveryCity,
+            ccfirst: this.state.formdata.billingFirstName,
+            cclast: this.state.formdata.billingLastName,
+            cc: this.state.cards[index].cardNumber,
+            expm: this.state.cards[index].cardExpiryMonth,
+            expy: this.state.cards[index].cardExpiryYear,
+            ccv: this.state.cards[index].cardCVV,
+            oneCheckout: false,
+            bfirstname: this.state.formdata.billingFirstName,
+            blastname: this.state.formdata.billingLastName,
+            badd1: this.state.formdata.billingAddress,
+            badd2: this.state.formdata.billingAptorSuite,
+            bstate: this.state.formdata.billingProvince,
+            bzip: this.state.formdata.billingZip,
+            bcountry: this.state.formdata.billingCountry,
+            bcity: this.state.formdata.billingCity
+          };
+          break;
         default:
           break;
       }
@@ -1060,12 +1112,6 @@ export default class ProfileGenerator extends Component {
                 <Toggle name="fourCharPrefix" checked={this.state.fourCharPrefix} onChange={this.toggleButton} />
               </div>
             </Col>
-            {/* {this.state.botType === 'NSB' ? (
-              <Col xs="2">
-                <Label>NSB Profile No.</Label>
-                <Input type="number" name="nsbProfileAmount" onChange={this.handleChange} value={this.state.nsbProfileAmount} />
-              </Col>
-            ) : null} */}
             <Col xs="2" className="d-flex flex-column justify-content-end">
               <Button onClick={this.exportAddressesAndCards}>export</Button>
             </Col>

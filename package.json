@@ -16,7 +16,6 @@
     "extends": null,
     "appId": "com.neutrino.bot",
     "directories": {},
-    "afterSign": "scripts/notarize.js",
     "mac": {
       "category": "com.neutrino.bot",
       "icon": "./webpack-pack/icon.png",
@@ -65,11 +64,13 @@
     "discord-rpc": "^3.0.2",
     "do-wrapper": "^3.22.0",
     "dotenv": "^8.0.0",
+    "electron-log": "^3.0.6",
     "electron-store": "^3.2.0",
     "electron-updater": "^4.0.6",
     "electron-window-manager": "^1.0.6",
     "firebase": "^6.1.0",
     "font-awesome": "^4.7.0",
+    "html-react-parser": "^0.7.1",
     "json-2-csv": "^3.5.4",
     "lodash": "^4.17.11",
     "node-machine-id": "^1.1.12",
@@ -97,6 +98,7 @@
     "redux": "^4.0.1",
     "redux-persist": "^5.10.0",
     "redux-persist-electron-storage": "^2.1.0",
+    "register-scheme": "0.0.2",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
     "uuid": "^3.3.2",
@@ -135,7 +137,7 @@
     "copy-webpack-plugin": "^5.0.3",
     "cross-env": "^5.2.0",
     "css-loader": "^2.1.1",
-    "electron": "^5.0.2",
+    "electron": "^5.0.3",
     "electron-builder": "^20.43.0",
     "electron-devtools-installer": "^2.2.4",
     "electron-mocha": "^8.0.2",
@@ -197,11 +199,15 @@
     "webpack:dist": "run-s webpack:prod:clean webpack:prod:pack webpack:prod:dist",
     "webpack:prod": "run-s webpack:prod:clean webpack:prod:pack",
     "webpack:prod:build": "cross-env NODE_ENV=production electron-builder -mw --x64 --ia32",
-    "webpack:dev:build": "cross-env NODE_ENV=development electron-builder -mw --x64 --ia32",
+    "webpack:dev:build": "cross-env NODE_ENV=development CSC_IDENTITY_AUTO_DISCOVERY=false electron-builder -mw --x64 --ia32",
     "webpack:prod:build:mac": "cross-env NODE_ENV=production electron-builder -m --x64",
     "webpack:prod:build:win": "cross-env NODE_ENV=production electron-builder -w --x64",
     "webpack:prod:clean": "rimraf webpack-pack dist",
     "webpack:prod:dist": "cross-env NODE_ENV=production GH_TOKEN=22658cb28e268b0a1bbe49b10a86a1b1b9407490 electron-builder -mw --x64 --ia32 -p always",
     "webpack:prod:pack": "cross-env NODE_ENV=production webpack --mode production --config webpack.build.config.js"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.1",
+    "utf-8-validate": "^5.0.2"
   }
 }

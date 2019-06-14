@@ -20,7 +20,11 @@ export default class Settings extends Component {
         googleCredentialsPojectID: '',
         vultrAPIKey: '',
         digitalOceanAPIKey: '',
-        showAcitivtyWindows: false
+        showAcitivtyWindows: false,
+        activityGoogleSearch: true,
+        activityGoogleNews: true,
+        activityGoogleShopping: true,
+        activityYoutube: true
       }
     };
   }
@@ -118,7 +122,6 @@ export default class Settings extends Component {
               </Col>
               <Col xs="6">
                 <label>Google Cloud Project ID</label>
-                <br />
                 <Input
                   type="text"
                   name="googleCredentialsPojectID"
@@ -129,19 +132,21 @@ export default class Settings extends Component {
                 />
               </Col>
             </FormGroup>
-            <FormGroup row>
-              <label>AWS Credentials (json)</label>
-              <br />
-              <Button
-                style={{ display: 'block' }}
-                className="nButton"
-                onClick={() => {
-                  this.importFile('AWS Credentials', 'awsCredentialsPath');
-                }}
-              >
-                Browse
-              </Button>
-            </FormGroup>
+            {/* <FormGroup row>
+              <Col>
+                <label>AWS Credentials (json)</label>
+                <br />
+                <Button
+                  style={{ display: 'block' }}
+                  className="nButton"
+                  onClick={() => {
+                    this.importFile('AWS Credentials', 'awsCredentialsPath');
+                  }}
+                >
+                  Browse
+                </Button>
+              </Col>
+            </FormGroup> */}
             <FormGroup row>
               <Col xs="6">
                 <label>Vultr API Key</label>
@@ -212,7 +217,41 @@ export default class Settings extends Component {
                 </Label>
               </Col>
             </FormGroup>
-            {/* <h6>
+            <FormGroup row>
+              <Col xs="2">
+                <Label>
+                  <span>Google Search</span>
+                  <div style={{ marginTop: '15px' }}>
+                    <Toggle name="activityGoogleSearch" checked={this.state.settings.activityGoogleSearch} onChange={this.toggleButton} />
+                  </div>
+                </Label>
+              </Col>
+              <Col xs="2">
+                <Label>
+                  <span>Google News</span>
+                  <div style={{ marginTop: '15px' }}>
+                    <Toggle name="activityGoogleNews" checked={this.state.settings.activityGoogleNews} onChange={this.toggleButton} />
+                  </div>
+                </Label>
+              </Col>
+              <Col xs="2">
+                <Label>
+                  <span>Google Shopping</span>
+                  <div style={{ marginTop: '15px' }}>
+                    <Toggle name="activityGoogleShopping" checked={this.state.settings.activityGoogleShopping} onChange={this.toggleButton} />
+                  </div>
+                </Label>
+              </Col>
+              <Col xs="2">
+                <Label>
+                  <span>Youtube</span>
+                  <div style={{ marginTop: '15px' }}>
+                    <Toggle name="activityYoutube" checked={this.state.settings.activityYoutube} onChange={this.toggleButton} />
+                  </div>
+                </Label>
+              </Col>
+            </FormGroup>
+            <h6>
               <strong>Updates</strong>
             </h6>
             <FormGroup row>
@@ -224,7 +263,7 @@ export default class Settings extends Component {
               <Col>
                 <Button onClick={this.checkForUpdate}>Check For Updates</Button>
               </Col>
-            </FormGroup> */}
+            </FormGroup>
           </Form>
           <Row>
             <Col xs="2">

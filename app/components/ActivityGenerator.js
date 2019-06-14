@@ -130,7 +130,8 @@ export default class ActivityGenerator extends Component {
         await new Promise((resolve, reject) => {
           const proxyArray = activity.activityProxy.split(/@|:/);
           if (proxyArray.length === 4) {
-            win.webContents.session.on('login', (event, webContents, request, authInfo, callback) => {
+            win.webContents.on('login', (event, request, authInfo, callback) => {
+              event.preventDefault();
               callback(proxyArray[0], proxyArray[1]);
             });
           }
@@ -140,7 +141,7 @@ export default class ActivityGenerator extends Component {
           });
         });
       }
-      win.loadURL('http://google.com');
+      win.loadURL('https://google.com');
       win.webContents.once('did-finish-load', () => {
         win.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
         win.webContents.once('did-finish-load', () => {
@@ -237,6 +238,7 @@ export default class ActivityGenerator extends Component {
       windowManager.sharedData.set(`activity-${tokenID}`, {
         activityDelayMin: this.props.settings.activityDelayMin,
         activityDelayMax: this.props.settings.activityDelayMax,
+        settings: this.props.settings,
         data: this.props.activities[index],
         index,
         update: this.props.onUpdateActivity,

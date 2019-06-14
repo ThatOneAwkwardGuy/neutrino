@@ -1,3 +1,5 @@
+const rp = require('request-promise');
+
 export default class NakedCPH {
   constructor(url, profile, site, style, size, status, proxy, raffleDetails, forceUpdate) {
     this.url = url;

@@ -4,13 +4,16 @@ import { CSSTransition } from 'react-transition-group';
 import FontAwesome from 'react-fontawesome';
 import ReactTable from 'react-table';
 import { createNewWindow } from '../utils/functions';
+import FootpatrolUK from '../utils/raffle/FootpatrolUK';
+import NakedCPH from '../utils/raffle/NakedCPH';
+import ExtraButter from '../utils/raffle/ExtraButter';
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 const remote = require('electron').remote;
 const { BrowserWindow } = require('electron').remote;
 const { dialog } = require('electron').remote;
 const fs = require('fs');
-import FootpatrolUK from '../utils/raffle/FootpatrolUK';
+
 export default class RaffleBot extends Component {
   constructor(props) {
     super(props);
@@ -129,17 +132,45 @@ export default class RaffleBot extends Component {
     const newEntries = [];
     this.state.neutrinoRafflesProfileJSON.forEach(profile => {
       let entry = false;
+      const sizeObject = this.state.sizes.find(size => String(size.id) === this.state.size);
+      const styleObject = this.state.styles.find(style => String(style.id) === this.state.style);
       switch (this.state.site) {
         case 'Footpatrol UK':
           entry = new FootpatrolUK(
             this.state.raffleLink,
             profile,
             this.state.site,
-            this.state.style,
-            this.state.size,
+            styleObject,
+            sizeObject,
             'Not Started',
             this.getRandomProxy(),
-            this.raffleDetails,
+            this.state.raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'NakedCPH':
+          entry = new NakedCPH(
+            this.state.raffleLink,
+            profile,
+            this.state.site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            this.state.raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'ExtraButter':
+          entry = new ExtraButter(
+            this.state.raffleLink,
+            profile,
+            this.state.site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            this.state.raffleDetails,
             this.triggerRender
           );
           break;
@@ -167,6 +198,9 @@ export default class RaffleBot extends Component {
             break;
           case 'NakedCPH':
             await this.loadNakedCphRaffleInfo(this.state.raffleLink);
+            break;
+          case 'ExtraButter':
+            await this.loadExtraButterRaffleInfo(this.state.raffleLink);
             break;
           default:
             break;
@@ -275,6 +309,20 @@ export default class RaffleBot extends Component {
     });
   };
 
+  loadExtraButterRaffleInfo = async link => {
+    const response = await this.rp.get(`${link}.json`);
+    const raffleInfo = JSON.parse(response);
+    const sizes = raffleInfo.product.variants.map(size => {
+      return { id: size.id, name: size.title };
+    });
+    this.setState({
+      styleInput: false,
+      size: sizes[0].id,
+      sizes,
+      raffleDetails: { product: raffleInfo }
+    });
+  };
+
   triggerRender = () => {
     this.forceUpdate();
   };
@@ -331,11 +379,11 @@ export default class RaffleBot extends Component {
                 },
                 {
                   Header: 'style',
-                  accessor: 'style'
+                  accessor: 'style.name'
                 },
                 {
                   Header: 'size',
-                  accessor: 'size'
+                  accessor: 'size.name'
                 },
                 {
                   Header: 'status',
@@ -386,6 +434,7 @@ export default class RaffleBot extends Component {
                 {/* <option>DSML</option> */}
                 <option>Footpatrol UK</option>
                 <option>NakedCPH</option>
+                <option>ExtraButter</option>
               </Input>
             </Col>
             <Col xs="2">

@@ -1,4 +1,5 @@
 const remote = require('electron').remote;
+const log = require('electron-log');
 const windowManager = remote.require('electron-window-manager');
 const currentWindow = windowManager.getCurrent();
 const data = windowManager.sharedData.fetch(currentWindow.name);
@@ -276,7 +277,20 @@ const randomTrendingYoutubeVideo = async () => {
   changeURLYoutubeVideo();
 };
 
-const functionsArray = [randomGoogleSearch, randomGoogleShoppingSearch, randomGoogleNewsSearch, randomTrendingYoutubeVideo];
+const functionsArray = [];
+
+if (data.settings.activityGoogleSearch) {
+  functionsArray.push(randomGoogleSearch);
+}
+if (data.settings.activityGoogleNews) {
+  functionsArray.push(randomGoogleNewsSearch);
+}
+if (data.settings.activityGoogleShopping) {
+  functionsArray.push(randomGoogleShoppingSearch);
+}
+if (data.settings.activityYoutube) {
+  functionsArray.push(randomTrendingYoutubeVideo);
+}
 
 const loop = async () => {
   webview.removeEventListener('dom-ready', loop);
@@ -291,6 +305,12 @@ const loop = async () => {
 const setCookieAndRunLoop = async () => {
   webview = await getWebview();
   setActivityToRunning();
+  webview.on('did-fail-load', (errorCode, errorDescription, validatedURL, isMainFrame) => {
+    log.error(errorCode);
+    log.error(errorDescription);
+    log.error(validatedURL);
+    log.error(isMainFrame);
+  });
   webview.addEventListener('dom-ready', loop);
 };
 

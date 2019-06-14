@@ -88,9 +88,11 @@
 
 1.0.12
 - Fixed NSB Profile Gen
-
-
-- Added auto updating (NO MORE MANUALLY DOWNLOADING UPDATES!!!) (Testing needed though :/)
+- Added Activity Gen options to turn off or turn on activities
+- Added Balko to profile gen
+- Improved error reporting for One Click Gen (for me when dealing with tickets)
+- Added auto updating (beta)
+- Fixed Activity Gen proxy use and Account creator proxy use
 
 
 4242424242424242:Visa:03:2020:123

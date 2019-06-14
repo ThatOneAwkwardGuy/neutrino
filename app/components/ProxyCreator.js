@@ -757,11 +757,10 @@ export default class ProxyCreator extends Component {
                 defaultValue="select provider"
               >
                 <option disabled>select provider</option>
-                {/* <option>Amazon AWS</option> */}
                 <option>Google Cloud</option>
+                {/* <option>AWS</option> */}
                 <option>Vultr</option>
                 <option>DigitalOcean</option>
-                <option>AWS</option>
               </Input>
             </Col>
             <Col xs="2">

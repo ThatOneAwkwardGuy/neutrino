@@ -23,7 +23,9 @@ import {
   START_UPDATE
 } from './utils/constants';
 const ipcMain = require('electron').ipcMain;
+const log = require('electron-log');
 const DiscordRPC = require('discord-rpc');
+log.catchErrors();
 const isDevelopment = process.env.NODE_ENV === 'development';
 const clientId = '575360564767752194';
 const rpc = new DiscordRPC.Client({ transport: 'ipc' });
@@ -85,6 +87,10 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
+});
+
+app.on('login', (event, webContents, request, authInfo, callback) => {
+  event.preventDefault();
 });
 
 app.on('ready', async () => {
@@ -222,41 +228,41 @@ app.on('ready', async () => {
     captchaWindow.show();
   });
 
-  // autoUpdater.on('update-available', info => {
-  //   mainWindow.send(UPDATE_AVAILABLE, info);
-  // });
+  autoUpdater.on('update-available', info => {
+    mainWindow.send(UPDATE_AVAILABLE, info);
+  });
 
-  // autoUpdater.on('update-not-available', info => {
-  //   mainWindow.send(NO_UPDATE_AVAILABLE, info);
-  // });
+  autoUpdater.on('update-not-available', info => {
+    mainWindow.send(NO_UPDATE_AVAILABLE, info);
+  });
 
-  // autoUpdater.on('update-downloaded', info => {
-  //   mainWindow.send(UPDATE_DOWNLOADED, info);
-  // });
+  autoUpdater.on('update-downloaded', info => {
+    mainWindow.send(UPDATE_DOWNLOADED, info);
+  });
 
-  // ipcMain.on(START_INSTALL, () => {
-  //   const electron = require('electron');
-  //   const BrowserWindow = electron.BrowserWindow;
-  //   app.removeAllListeners('window-all-closed');
-  //   app.removeAllListeners('before-quit');
-  //   var browserWindows = BrowserWindow.getAllWindows();
-  //   browserWindows.forEach(browserWindow => {
-  //     browserWindow.removeAllListeners('close');
-  //   });
-  //   browserWindows.forEach(browserWindow => {
-  //     browserWindow.close();
-  //   });
-  //   // mainWindow.destroy();
-  //   autoUpdater.quitAndInstall(false, true);
-  // });
+  ipcMain.on(START_INSTALL, () => {
+    const electron = require('electron');
+    const BrowserWindow = electron.BrowserWindow;
+    app.removeAllListeners('window-all-closed');
+    app.removeAllListeners('before-quit');
+    var browserWindows = BrowserWindow.getAllWindows();
+    browserWindows.forEach(browserWindow => {
+      browserWindow.removeAllListeners('close');
+    });
+    browserWindows.forEach(browserWindow => {
+      browserWindow.close();
+    });
+    // mainWindow.destroy();
+    autoUpdater.quitAndInstall(false, true);
+  });
 
-  // ipcMain.on(CHECK_FOR_UPDATES, () => {
-  //   autoUpdater.checkForUpdates();
-  // });
+  ipcMain.on(CHECK_FOR_UPDATES, () => {
+    autoUpdater.checkForUpdates();
+  });
 
-  // ipcMain.on(START_UPDATE, () => {
-  //   autoUpdater.downloadUpdate();
-  // });
+  ipcMain.on(START_UPDATE, () => {
+    autoUpdater.downloadUpdate();
+  });
 
   rpc.on('ready', () => {
     // activity can only be set every 15 seconds

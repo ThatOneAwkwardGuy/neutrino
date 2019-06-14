@@ -136,6 +136,8 @@ export default class ProxyTester extends Component {
                 ]
               });
             }
+          } finally {
+            this.props.setLoading('', false, false);
           }
         });
         await Promise.all(proxiesPromises);
