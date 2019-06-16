@@ -3,6 +3,7 @@ import { Container, Row } from 'reactstrap';
 import CaptchaTopbar from '../components/CaptchaTopbar';
 const remote = require('electron').remote;
 const windowManager = remote.require('electron-window-manager');
+const thisWindow = remote.getCurrentWindow();
 
 class Activity extends Component {
   constructor(props) {
@@ -16,7 +17,7 @@ class Activity extends Component {
         <webview
           id="activityWebview"
           src="http://google.com"
-          partition={windowManager.getCurrent().name}
+          partition={windowManager.getById(thisWindow.id).name}
           webpreferences="allowRunningInsecureContent, javascript=yes, nodeIntegration"
           style={{
             width: '100%',

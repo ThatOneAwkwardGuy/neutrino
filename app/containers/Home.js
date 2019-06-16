@@ -47,6 +47,7 @@ class Home extends Component {
       activityGeneratorAccountsClases: [],
       infoModal: false,
       updateModal: false,
+      installModal: false,
       infoModalHeader: '',
       infoModalBody: '',
       infoModalFooter: '',
@@ -254,6 +255,7 @@ class Home extends Component {
       this.changeLoading('', false);
     });
     ipcRenderer.on(UPDATE_DOWNLOADED, (event, arg) => {
+      console.log(arg);
       this.setState({
         updateDownloading: false
       });

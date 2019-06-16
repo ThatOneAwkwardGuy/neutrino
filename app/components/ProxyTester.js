@@ -79,7 +79,8 @@ export default class ProxyTester extends Component {
               uri: this.state.proxySite,
               proxy: split.length === 4 ? `http://${split[0]}:${split[1]}@${split[2]}:${split[3]}` : split.length === 2 ? `http://${split[0]}:${split[1]}` : ''
             });
-            console.log(responsePing);
+            console.log(proxyItem);
+            console.log(responsePing.timings);
             if (split.length === 4) {
               this.setState({
                 proxyPings: [
@@ -136,11 +137,10 @@ export default class ProxyTester extends Component {
                 ]
               });
             }
-          } finally {
-            this.props.setLoading('', false, false);
           }
         });
         await Promise.all(proxiesPromises);
+        this.props.setLoading('', false, false);
       } catch (error) {
         this.props.changeInfoModal(true, `Error Checking Proxies`, 'There was an error checking the proxies you entered', '');
       } finally {

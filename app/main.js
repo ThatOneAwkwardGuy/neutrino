@@ -36,6 +36,9 @@ let forceQuit = false;
 let discordRPCState = '';
 const version = app.getVersion();
 DiscordRPC.register(clientId);
+autoUpdater.logger = log;
+autoUpdater.logger.transports.file.level = 'info';
+autoUpdater.autoDownload = false;
 
 let initialiseCaptchaWindow = () => {
   captchaWindow = new BrowserWindow({
@@ -173,6 +176,19 @@ app.on('ready', async () => {
     });
   }
 
+  autoUpdater.on('update-downloaded', info => {
+    log.info(info);
+    mainWindow.send(UPDATE_DOWNLOADED, info);
+  });
+
+  autoUpdater.on('update-available', info => {
+    mainWindow.send(UPDATE_AVAILABLE, info);
+  });
+
+  autoUpdater.on('update-not-available', info => {
+    mainWindow.send(NO_UPDATE_AVAILABLE, info);
+  });
+
   ipcMain.on(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, (event, args) => {
     captchaWindow.send(CAPTCHA_RECEIVE_COOKIES_AND_CAPTCHA_PAGE, args);
   });
@@ -228,18 +244,6 @@ app.on('ready', async () => {
     captchaWindow.show();
   });
 
-  autoUpdater.on('update-available', info => {
-    mainWindow.send(UPDATE_AVAILABLE, info);
-  });
-
-  autoUpdater.on('update-not-available', info => {
-    mainWindow.send(NO_UPDATE_AVAILABLE, info);
-  });
-
-  autoUpdater.on('update-downloaded', info => {
-    mainWindow.send(UPDATE_DOWNLOADED, info);
-  });
-
   ipcMain.on(START_INSTALL, () => {
     const electron = require('electron');
     const BrowserWindow = electron.BrowserWindow;
@@ -252,7 +256,9 @@ app.on('ready', async () => {
     browserWindows.forEach(browserWindow => {
       browserWindow.close();
     });
-    // mainWindow.destroy();
+    if (mainWindow !== null && !mainWindow.isDestroyed()) {
+      mainWindow.destroy();
+    }
     autoUpdater.quitAndInstall(false, true);
   });
 
@@ -271,7 +277,7 @@ app.on('ready', async () => {
     }, 60e3);
   });
 
-  rpc.login({ clientId }).catch(console.error);
+  rpc.login({ clientId }).catch(e => log.error(e));
 });
 
 function setActivity() {

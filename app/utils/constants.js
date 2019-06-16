@@ -22,10 +22,10 @@ export const RESET_CAPTCHA_TOKENS_ARRAY = 'reset-captcha-tokens-array';
 export const RECEIVE_RESET_CAPTCHA_TOKENS_ARRAY = 'receive-reset-captcha-tokens-array';
 
 export const SET_DISCORD_RPC_STATE = 'set-discord-rpc-state';
-export const UPDATE_AVAILABLE = 'update-available';
-export const CHECK_FOR_UPDATES = 'check-for-updates';
-export const NO_UPDATE_AVAILABLE = 'no-update-available';
-export const START_UPDATE = 'start-update';
+export const UPDATE_AVAILABLE = 'update-available-neutrino';
+export const CHECK_FOR_UPDATES = 'check-for-updates-neutrino';
+export const NO_UPDATE_AVAILABLE = 'no-update-available-neutrino';
+export const START_UPDATE = 'start-update-neutrino';
 export const UPDATE_DOWNLOAD_PROGRESS = 'update-download-progress';
-export const UPDATE_DOWNLOADED = 'update-downloaded';
-export const START_INSTALL = 'start-update-install';
+export const UPDATE_DOWNLOADED = 'update-downloaded-neutrino';
+export const START_INSTALL = 'start-update-install-neutrino';
