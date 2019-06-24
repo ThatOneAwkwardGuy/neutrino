@@ -3,20 +3,25 @@ import { Row, Col, Button, Form, FormGroup, Input, Container, Label } from 'reac
 import { CSSTransition } from 'react-transition-group';
 import Toggle from 'react-toggle';
 const { dialog } = require('electron').remote;
+const remote = require('electron').remote;
 import FontAwesome from 'react-fontawesome';
 var shell = require('electron').shell;
 import { auth } from '../api/firebase';
 import { ipcRenderer } from 'electron';
 import { CHECK_FOR_UPDATES } from '../utils/constants';
+import configureStore from '../store.js';
+
 export default class Settings extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      googleFileLoaded: false,
       settings: {
         activityDelayMin: 60000,
         activityDelayMax: 120000,
         googleCredentialsPath: '',
-        awsCredentialsPath: '',
+        awsAccessKey: '',
+        awsSecretKey: '',
         googleCredentialsPojectID: '',
         vultrAPIKey: '',
         digitalOceanAPIKey: '',
@@ -39,6 +44,12 @@ export default class Settings extends Component {
   signOut = () => {
     auth.signOut();
     this.props.history.push('/');
+  };
+
+  clearStore = async () => {
+    const { store, persistor } = configureStore();
+    await persistor.purge();
+    remote.getCurrentWindow().reload();
   };
 
   initialize() {
@@ -71,6 +82,11 @@ export default class Settings extends Component {
               value: fileNames[0]
             }
           });
+          if (settingsName === 'googleCredentialsPath') {
+            this.setState({
+              googleFileLoaded: true
+            });
+          }
         }
       }
     );
@@ -119,6 +135,7 @@ export default class Settings extends Component {
                 >
                   Browse
                 </Button>
+                {this.state.googleFileLoaded || this.state.settings.googleCredentialsPath !== '' ? <span className="my-2">File Loaded</span> : null}
               </Col>
               <Col xs="6">
                 <label>Google Cloud Project ID</label>
@@ -133,18 +150,27 @@ export default class Settings extends Component {
               </Col>
             </FormGroup>
             {/* <FormGroup row>
-              <Col>
-                <label>AWS Credentials (json)</label>
-                <br />
-                <Button
-                  style={{ display: 'block' }}
-                  className="nButton"
-                  onClick={() => {
-                    this.importFile('AWS Credentials', 'awsCredentialsPath');
+              <Col xs="6">
+                <label>Amazon AWS Access Key</label>
+                <Input
+                  type="text"
+                  name="awsAccessKey"
+                  value={this.state.settings.awsAccessKey}
+                  onChange={e => {
+                    this.handleChange(e);
                   }}
-                >
-                  Browse
-                </Button>
+                />
+              </Col>
+              <Col xs="6">
+                <label>Amazon AWS Secret Key</label>
+                <Input
+                  type="text"
+                  name="awsSecretKey"
+                  value={this.state.settings.awsSecretKey}
+                  onChange={e => {
+                    this.handleChange(e);
+                  }}
+                />
               </Col>
             </FormGroup> */}
             <FormGroup row>
@@ -255,12 +281,10 @@ export default class Settings extends Component {
               <strong>Updates</strong>
             </h6>
             <FormGroup row>
-              <Col>
+              <Col xs="3">
                 {this.props.settings.update.status === 'N' ? `No updates as of ${new Date(this.props.settings.update.lastChecked).toUTCString()}` : null}
               </Col>
-            </FormGroup>
-            <FormGroup row>
-              <Col>
+              <Col xs="3">
                 <Button onClick={this.checkForUpdate}>Check For Updates</Button>
               </Col>
             </FormGroup>
@@ -269,6 +293,11 @@ export default class Settings extends Component {
             <Col xs="2">
               <Button color="danger" onClick={this.signOut}>
                 Sign Out
+              </Button>
+            </Col>
+            <Col xs="2">
+              <Button color="danger" onClick={this.clearStore}>
+                Clear All Data
               </Button>
             </Col>
             <Col xs="2" className="ml-auto text-right">

@@ -94,6 +94,7 @@ const sites = {
   'octobersveryown-uk': 'https://uk.octobersveryown.com',
   offthehook: 'https://offthehook.ca',
   oipolloi: 'https://www.oipolloi.com',
+  oneblockdown: 'https://www.oneblockdown.it',
   oneness287: 'https://www.oneness287.com',
   over9000: 'https://over9000.com',
   oqium: 'https://oqium.com',
@@ -324,10 +325,8 @@ export default class AccountCreator extends Component {
         'accept-language': 'en-US,en;q=0.9'
       },
       body: queryString
-      // form: payload
     });
 
-    console.log(response);
     if (response.request.href && response.request.href.includes('challenge')) {
       ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
       ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
@@ -351,6 +350,49 @@ export default class AccountCreator extends Component {
           status: 'created'
         });
       }
+    }
+  };
+
+  createOneBlockDownAccount = async () => {
+    const email = randomEmail({ domain: this.state.catchall });
+    const pass = this.state.randomPassword ? randomize('a', 10) : this.state.password;
+    const firstName = this.state.randomFirstLast ? random.first() : this.state.firstName;
+    const lastName = this.state.randomFirstLast ? random.last() : this.state.lastName;
+    const response = await this.rp({
+      method: 'POST',
+      uri: 'https://www.oneblockdown.it/index.php',
+      headers: {
+        accept: 'application/json, text/javascript, */*; q=0.01',
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'no-cache',
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        pragma: 'no-cache',
+        'x-requested-with': 'XMLHttpRequest'
+      },
+      form: {
+        controller: 'auth',
+        action: 'register',
+        extension: 'obd',
+        email,
+        password: pass,
+        firstName,
+        lastName,
+        birthDate: '1990-4-7',
+        sex: 'MALE',
+        'privacy[1]': '1',
+        'privacy[2]': '0',
+        version: '106'
+      }
+    });
+    console.log(response);
+    const responseJSON = JSON.parse(response);
+    if (responseJSON.success) {
+      this.props.onCreateAccount({
+        email: email,
+        site: this.state.site,
+        pass: pass,
+        status: 'created'
+      });
     }
   };
 
@@ -438,6 +480,8 @@ export default class AccountCreator extends Component {
         switch (this.state.site) {
           case 'nakedcph':
             return this.sleep(delay).then(() => this.createNakedCphAccount().catch(e => e));
+          case 'oneblockdown':
+            return this.sleep(delay).then(() => this.createOneBlockDownAccount().catch(e => e));
           default:
             return this.sleep(delay).then(() => this.createShopifyAccount().catch(e => e));
         }
@@ -459,28 +503,12 @@ export default class AccountCreator extends Component {
             </thead>
             <tbody>
               {invalidResults.map((error, index) => {
-                if (error.constructor.name === 'ApiError') {
-                  return (
-                    <tr key={`error-${index}`}>
-                      <td>{error.errors[0].reason}</td>
-                      <td>{error.errors[0].message}</td>
-                    </tr>
-                  );
-                } else if (error instanceof Error) {
-                  return (
-                    <tr key={`error-${index}`}>
-                      <td>{error.name}</td>
-                      <td>{error.error ? (error.error.code ? error.error.code : 'Error') : error.message}</td>
-                    </tr>
-                  );
-                } else {
-                  return (
-                    <tr key={`error-${index}`}>
-                      <td>{error.id}</td>
-                      <td>{error.message}</td>
-                    </tr>
-                  );
-                }
+                return (
+                  <tr key={`error-${index}`}>
+                    <td>{'Error'}</td>
+                    <td style={{ wordBreak: 'break-word' }}>{error.message ? error.message : JSON.stringify(error)}</td>
+                  </tr>
+                );
               })}
             </tbody>
           </Table>

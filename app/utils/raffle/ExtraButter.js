@@ -11,6 +11,7 @@ export default class ExtraButter {
     this.status = status;
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
+    this.cookieJar = rp.jar();
     this.rp = rp.defaults({
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
@@ -20,15 +21,26 @@ export default class ExtraButter {
     });
   }
 
+  changeStatus = status => {
+    this.status = status;
+    this.forceUpdate();
+  };
+
   start = () => {
     while (this.run) {
       try {
         this.makeEntry();
       } catch (error) {
-        this.changeStatus('Error Submitting Raffle');
+        console.log(error);
+        this.changeStatus(`Error Submitting Raffle - ${error.message}`);
       }
       this.run = false;
     }
+  };
+
+  stop = () => {
+    this.run = false;
+    this.changeStatus('Stopped');
   };
 
   getIDForSize = async () => {
@@ -44,7 +56,7 @@ export default class ExtraButter {
     }
   };
 
-  createCustomer = async () => {
+  createCustomer = () => {
     return this.rp({
       method: 'POST',
       uri: 'https://eb-draw.herokuapp.com/customers/new',
@@ -56,7 +68,7 @@ export default class ExtraButter {
     });
   };
 
-  submitRaffle = async (variant, createCustomer) => {
+  submitRaffle = (variant, customerID) => {
     return this.rp({
       method: 'POST',
       uri: 'https://eb-draw.herokuapp.com/draws/entries/new',
@@ -76,15 +88,67 @@ export default class ExtraButter {
     });
   };
 
-  makeEntry = async () => {
-    const variant = await this.getIDForSize();
-    console.log(variant);
-    const createCustomer = await this.createCustomer();
-    console.log(createCustomer);
+  tokenizeCard = () => {
+    return this.rp({
+      url: 'https://api.stripe.com/v1/tokens',
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        Referer: 'https://js.stripe.com/v3/controller-97af8c3dcbdd82cb2827d49bb8aa31ad.html',
+        Origin: 'https://js.stripe.com',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      form: {
+        key: 'pk_test_qM41LJ9RZgw63yIlLC1PDkTL',
+        'card[number]': this.profile.paymentDetails.cardNumber,
+        'card[cvc]': this.profile.paymentDetails.cvv,
+        'card[exp_month]': this.profile.paymentDetails.expirationMonth,
+        'card[exp_year]': this.profile.paymentDetails.expirationYear.slice(-2),
+        payment_user_agent: 'stripe.js/15af90e0; stripe-js-v3/15af90e0',
+        referrer: this.url
+      }
+    });
   };
 
-  changeStatus = status => {
-    this.status = status;
-    this.forceUpdate();
+  completeRaffle = (entry, token) => {
+    return this.rp({
+      method: 'POST',
+      url: 'https://eb-draw.herokuapp.com/draws/entries/checkout',
+      method: 'POST',
+      headers: {
+        Accept: 'application/json, text/javascript, */*; q=0.01',
+        Referer: this.url,
+        Origin: 'https://shop.extrabutterny.com',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      },
+      form: {
+        checkout_token: token,
+        entry_id: entry
+      }
+    });
+  };
+
+  makeEntry = async () => {
+    this.changeStatus('Getting Variant ID For Size');
+    const variant = await this.getIDForSize();
+    console.log(variant);
+    this.changeStatus('Creating Customer');
+    const createCustomerResponse = await this.createCustomer();
+    const createCustomer = JSON.parse(createCustomerResponse);
+    console.log(createCustomer);
+    this.changeStatus('Submitting Raffle Info');
+    const submitRaffleResponse = await this.submitRaffle(variant, createCustomer.id);
+    const submitRaffle = JSON.parse(submitRaffleResponse);
+    console.log(submitRaffle);
+    this.changeStatus('Submitting Card Info');
+    const tokenizeCardResponse = await this.tokenizeCard();
+    const tokenizeCard = JSON.parse(tokenizeCardResponse);
+    console.log(tokenizeCard);
+    this.changeStatus('Submitting Raffle Entry');
+    const completeRaffleResponse = await this.completeRaffle(submitRaffle.id, tokenizeCard.id);
+    console.log(completeRaffleResponse);
+    this.changeStatus('Completed Entry');
   };
 }

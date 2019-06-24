@@ -1,6 +1,6 @@
 {
   "name": "Neutrino",
-  "version": "1.0.13",
+  "version": "1.0.15",
   "description": "Neutrino AIO Bot",
   "main": "./webpack-pack/main.js",
   "author": {
@@ -16,6 +16,7 @@
     "extends": null,
     "appId": "com.neutrino.bot",
     "directories": {},
+    "afterSign": "scripts/notarize.js",
     "mac": {
       "category": "com.neutrino.bot",
       "icon": "./webpack-pack/icon.png",
@@ -101,6 +102,7 @@
     "register-scheme": "0.0.2",
     "request": "^2.88.0",
     "request-promise": "^4.2.4",
+    "tough-cookie": "^3.0.1",
     "uuid": "^3.3.2",
     "ws": "^7.0.0"
   },

@@ -11,6 +11,7 @@ import {
   FINISH_SENDING_CAPTCHA_TOKEN,
   MAIN_PROCESS_CLEAR_RECEIVE_CAPTCHA_TOKEN_LISTENERS
 } from '../utils/constants';
+import { app } from 'firebase';
 var os = require('os');
 
 class Captcha extends Component {
@@ -146,9 +147,24 @@ class Captcha extends Component {
     });
   };
 
+  sleep = ms => {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  };
+
   componentDidMount() {
     this.awaitCookiesAndCaptchaURL();
+    this.refreshDisplayFlex();
   }
+
+  refreshDisplayFlex = () => {
+    const webviewWindow = document.querySelector('webview');
+    webviewWindow.addEventListener('did-stop-loading', async () => {
+      const appElement = document.getElementById('app');
+      appElement.style.cssText = '';
+      await this.sleep(500);
+      appElement.style.cssText = 'display: flex;';
+    });
+  };
 
   render() {
     return (
@@ -162,7 +178,7 @@ class Captcha extends Component {
           preload={process.env.NODE_ENV === 'development' ? '../webpack-pack/captchaPreload.js' : '../../webpack-pack/captchaPreload.js'}
           style={{
             width: '100%',
-            height: this.state.waiting ? '0px' : 'calc(100% - 90px)'
+            height: this.state.waiting ? '0px' : 'calc(100% - 100px)'
           }}
         />
         <CaptchaFooter clearCookies={this.clearCookies} goToGoogleLogin={this.goToGoogleLogin} goToYoutube={this.goToYoutube} />

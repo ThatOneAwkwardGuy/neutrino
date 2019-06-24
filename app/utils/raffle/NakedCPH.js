@@ -11,6 +11,7 @@ export default class NakedCPH {
     this.status = status;
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
+    this.cookieJar = rp.jar();
     this.rp = rp.defaults({
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
@@ -20,10 +21,15 @@ export default class NakedCPH {
     });
   }
 
-  start = () => {
+  changeStatus = status => {
+    this.status = status;
+    this.forceUpdate();
+  };
+
+  start = async () => {
     while (this.run) {
       try {
-        this.makeEntry();
+        await this.makeEntry();
       } catch (error) {
         this.changeStatus('Error Submitting Raffle');
       }
@@ -31,9 +37,9 @@ export default class NakedCPH {
     }
   };
 
-  changeStatus = status => {
-    this.status = status;
-    this.forceUpdate();
+  stop = () => {
+    this.run = false;
+    this.changeStatus('Stopped');
   };
 
   getRaffleToken = async raffleId => {
@@ -64,6 +70,7 @@ export default class NakedCPH {
     payload['form[token]'] = token;
     payload['form[landed_at]'] = landed_at;
     payload['form[language]'] = this.raffleDetails.renderData.form.settings.language;
+    this.changeStatus('Submitting Raffle Entry');
     const response = await this.rp({
       method: 'POST',
       uri: `https://nakedcph.typeform.com/app/form/submit/${raffleId}`,

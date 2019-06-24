@@ -34,6 +34,7 @@ const ipcRenderer = require('electron').ipcRenderer;
 const remote = require('electron').remote;
 const windowManager = remote.require('electron-window-manager');
 const parse = require('html-react-parser');
+const log = require('electron-log');
 
 class Home extends Component {
   constructor(props) {
@@ -109,7 +110,7 @@ class Home extends Component {
       case 'AddressJigger':
         return 'Jigging Addresses';
       case 'ProfileTaskConverter':
-        return 'Converting Profiles/Tasks';
+        return 'Converting Profiles';
       case 'ActivityGenerator':
         return 'Generating One Clicks';
       case 'RaffleBot':
@@ -271,6 +272,11 @@ class Home extends Component {
     this.watchForUpdates();
     windowManager.closeAll();
     this.setAllAcitivities('Not Started');
+  }
+
+  componentDidCatch(error, info) {
+    log.error(error);
+    log.error(info);
   }
 
   render() {

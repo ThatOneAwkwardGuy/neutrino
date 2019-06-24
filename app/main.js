@@ -1,6 +1,6 @@
 import path from 'path';
 import url from 'url';
-import { app, crashReporter, BrowserWindow, Menu } from 'electron';
+import { app, crashReporter, BrowserWindow, Menu, session } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import {
   CAPTCHA_RECEIVE_COOKIES_AND_CAPTCHA_PAGE,
@@ -268,6 +268,15 @@ app.on('ready', async () => {
 
   ipcMain.on(START_UPDATE, () => {
     autoUpdater.downloadUpdate();
+  });
+
+  const filter = {
+    urls: ['https://.amazonaws.com/', 'https:/.amazonaws.com']
+  };
+
+  session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+    details.requestHeaders['Origin'] = 'http://localhost:4200';
+    callback({ cancel: false, requestHeaders: details.requestHeaders });
   });
 
   rpc.on('ready', () => {

@@ -207,6 +207,12 @@ document.addEventListener(
         await sleep(3000);
         getWebview();
       } else {
+        webview.addEventListener('did-stop-loading', async () => {
+          const appElement = document.getElementById('app');
+          appElement.style.cssText = '';
+          await sleep(500);
+          appElement.style.cssText = 'display: flex;';
+        });
         return webview;
       }
     };
@@ -302,7 +308,6 @@ document.addEventListener(
     const loop = async () => {
       try {
         webview.removeEventListener('dom-ready', loop);
-        console.log(data);
         const rand = Math.round(Math.random() * (parseInt(data.activityDelayMax) - parseInt(data.activityDelayMin))) + parseInt(data.activityDelayMin);
         const chosenFunction = functionsArray[Math.floor(Math.random() * functionsArray.length)];
         chosenFunction();

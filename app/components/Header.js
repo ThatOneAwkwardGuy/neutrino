@@ -10,14 +10,14 @@ const componentToNameMapping = {
   FrontPage: 'Home',
   ActivityGenerator: 'One-click Generator',
   OneClickTester: 'One-click Tester',
-  // RaffleBot: 'Raffle Bot',
+  RaffleBot: 'Raffle Bot',
   ProfileGenerator: 'Profile Generator',
   ProxyCreator: 'Proxy Creator',
   ProxyTester: 'Proxy Tester',
+  ProfileTaskConverter: 'Profile Converter',
   AccountCreator: 'Account Creator',
   AddressJigger: 'Address Jigger',
   Settings: 'Settings'
-  // ProfileTaskConverter: 'Profile/Task Converter',
 };
 
 const nameToSymbolMapping = {

@@ -99,6 +99,20 @@
 - Fixed One Click Tester individual deletion of tasks
 - Fixed Activity Gen windows freezing when using start all button
 
+1.0.14
+- Better account gen error reporting
+- Fixed activity windows going blank during activity gen
+- Fixed not being able to type in captcha window
+- Added clear all data button to remove all saved settings
+- Fixed Profile Gen going blank in some cases
+
+
+1.0.15
+- Fixed overlapping in Profile Generator
+- Raffle Bot
+- Profile Converter
+- Account Gen - One Block Down
+
 4242424242424242:Visa:03:2020:123
 4242424242424243:Visa:03:2020:123
 4242424242424244:Visa:03:2020:123

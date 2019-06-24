@@ -11,6 +11,7 @@ export default class FootpatrolUK {
     this.status = status;
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
+    this.cookieJar = rp.jar();
     this.rp = rp.defaults({
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
@@ -20,13 +21,18 @@ export default class FootpatrolUK {
     });
   }
 
-  start = () => {
+  start = async () => {
     while (this.run) {
       try {
-        this.makeEntry();
+        await this.makeEntry();
       } catch (error) {}
       this.run = false;
     }
+  };
+
+  stop = () => {
+    this.run = false;
+    this.changeStatus('Stopped');
   };
 
   changeStatus = status => {
@@ -40,6 +46,7 @@ export default class FootpatrolUK {
     const params = this.url.split('html')[1].split('?');
     const tag = params[1].split('=')[1];
     const shortTag = params[2].split('=')[1];
+    this.changeStatus('Submitting Raffle Entry');
     const response = await this.rp({
       method: 'GET',
       headers: {

@@ -71,6 +71,7 @@ export default class ProfileGenerator extends Component {
         paymentCVV: '',
         catchallEmail: '',
         randomPhoneNumberTemplate: '',
+        sitePass: '',
         sameAsDelivery: false,
         oneCheckout: false,
         randomName: false,
@@ -170,13 +171,13 @@ export default class ProfileGenerator extends Component {
 
   setRegionArrayShipping = countryName => {
     this.setState({
-      regionArrayShipping: Countries[countryName].provinces
+      regionArrayShipping: Countries[countryName] !== undefined && Countries[countryName].provinces !== undefined ? Countries[countryName].provinces : []
     });
-    if (Countries[countryName].provinces !== null) {
+    if (Countries[countryName] !== undefined && Countries[countryName].provinces !== undefined && Countries[countryName].provinces !== null) {
       this.setState(prevState => ({
         formdata: {
           ...prevState.formdata,
-          deliveryProvince: Countries[countryName].provinces[0]
+          deliveryProvince: Countries[countryName] !== undefined && Countries[countryName].provinces !== undefined ? Countries[countryName].provinces[0] : []
         }
       }));
     } else {
@@ -191,13 +192,13 @@ export default class ProfileGenerator extends Component {
 
   setRegionArrayBilling = countryName => {
     this.setState({
-      regionArrayBilling: Countries[countryName].provinces
+      regionArrayBilling: Countries[countryName] !== undefined ? Countries[countryName].provinces : []
     });
-    if (Countries[countryName].provinces !== null) {
+    if (Countries[countryName] !== undefined && Countries[countryName].provinces !== undefined && Countries[countryName].provinces !== null) {
       this.setState(prevState => ({
         formdata: {
           ...prevState.formdata,
-          billingProvince: Countries[countryName].provinces[0]
+          billingProvince: Countries[countryName] !== undefined ? Countries[countryName].provinces[0] : []
         }
       }));
     } else {
@@ -528,7 +529,7 @@ export default class ProfileGenerator extends Component {
             BillingAddressLine2: this.state.formdata.billingAptorSuite,
             BillingCity: this.state.formdata.billingCity,
             BillingState: this.state.formdata.billingProvince,
-            BillingCountryCode: Countries[this.state.formdata.deliveryCountry].code,
+            BillingCountryCode: Countries[this.state.formdata.billingCountry] !== undefined ? Countries[this.state.formdata.billingCountry].code : '',
             BillingZip: this.state.formdata.billingZip,
             BillingPhone: this.state.formdata.randomPhoneNumber
               ? this.state.formdata.randomPhoneNumberTemplate
@@ -547,7 +548,7 @@ export default class ProfileGenerator extends Component {
             ShippingAddressLine2: deliveryAptorSuite,
             ShippingCity: deliveryCity,
             ShippingState: deliveryProvince,
-            ShippingCountryCode: deliveryCountry,
+            ShippingCountryCode: Countries[this.state.formdata.deliveryCountry] !== undefined ? Countries[this.state.formdata.deliveryCountry].code : '',
             ShippingZip: deliveryZip,
             ShippingPhone: this.state.formdata.randomPhoneNumber
               ? this.state.formdata.randomPhoneNumberTemplate
@@ -617,8 +618,8 @@ export default class ProfileGenerator extends Component {
         case 'Dashe':
           profiles[`Profile - ${index}`] = {
             billing: {
-              address1: this.state.formdata.billingAddress,
-              address2: this.state.formdata.billingAptorSuite,
+              address: this.state.formdata.billingAddress,
+              apt: this.state.formdata.billingAptorSuite,
               city: this.state.formdata.billingCity,
               country: this.state.formdata.billingCountry,
               firstName: this.state.formdata.billingFirstName,
@@ -717,59 +718,62 @@ export default class ProfileGenerator extends Component {
           };
         case 'Kodai':
           profiles[`Profile - ${index}`] = {
-            Dummy: {
-              billingAddress: {
-                address: this.state.formdata.billingAddress,
-                apt: this.state.formdata.billingAptorSuite,
-                city: this.state.formdata.billingCity,
-                firstName: this.state.formdata.billingFirstName,
-                lastName: this.state.formdata.billingLastName,
-                phoneNumber: this.state.formdata.randomPhoneNumber
-                  ? this.state.formdata.randomPhoneNumberTemplate
-                      .split('#')
-                      .map(number => {
-                        return number === '' ? this.getRandomInt(9) : number;
-                      })
-                      .join('')
-                  : this.state.formdata.phoneNumber,
-                state: this.state.formdata.billingProvince,
-                zipCode: this.state.formdata.billingZip
-              },
-              deliveryAddress: {
-                address: this.state.formdata.deliveryAddress,
-                apt: this.state.formdata.deliveryAptorSuite,
-                city: this.state.formdata.deliveryCity,
-                firstName: this.state.formdata.deliveryFirstName,
-                lastName: this.state.formdata.deliveryLastName,
-                phoneNumber: this.state.formdata.randomPhoneNumber
-                  ? this.state.formdata.randomPhoneNumberTemplate
-                      .split('#')
-                      .map(number => {
-                        return number === '' ? this.getRandomInt(9) : number;
-                      })
-                      .join('')
-                  : this.state.formdata.phoneNumber,
-                state: this.state.formdata.deliveryProvince,
-                zipCode: this.state.formdata.deliveryZip
-              },
-              miscellaneousInformation: { deliverySameAsBilling: this.state.formdata.sameAsDelivery },
-              paymentDetails: {
-                cardHolder: this.state.formdata.deliveryFirstName + ' ' + this.state.formdata.deliveryLastName,
-                cardNumber: this.state.cards[index].cardExpiryMonth,
-                cvv: this.state.cards[index].cardCVV,
-                emailAddress: this.state.formdata.paymentEmail,
-                expirationDate: `${this.state.cards[index].cardExpiryMonth}/${this.state.cards[index].cardExpiryYear.slice(-2)}`
-              },
-              profileName: `Profile - ${index}`,
-              region: this.state.formdata.deliveryCountry
-            }
+            billingAddress: {
+              address: this.state.formdata.billingAddress,
+              apt: this.state.formdata.billingAptorSuite,
+              city: this.state.formdata.billingCity,
+              firstName: this.state.formdata.billingFirstName,
+              lastName: this.state.formdata.billingLastName,
+              phoneNumber: this.state.formdata.randomPhoneNumber
+                ? this.state.formdata.randomPhoneNumberTemplate
+                    .split('#')
+                    .map(number => {
+                      return number === '' ? this.getRandomInt(9) : number;
+                    })
+                    .join('')
+                : this.state.formdata.phoneNumber,
+              state: this.state.formdata.billingProvince,
+              zipCode: this.state.formdata.billingZip
+            },
+            deliveryAddress: {
+              address: this.state.formdata.deliveryAddress,
+              apt: this.state.formdata.deliveryAptorSuite,
+              city: this.state.formdata.deliveryCity,
+              firstName: this.state.formdata.deliveryFirstName,
+              lastName: this.state.formdata.deliveryLastName,
+              phoneNumber: this.state.formdata.randomPhoneNumber
+                ? this.state.formdata.randomPhoneNumberTemplate
+                    .split('#')
+                    .map(number => {
+                      return number === '' ? this.getRandomInt(9) : number;
+                    })
+                    .join('')
+                : this.state.formdata.phoneNumber,
+              state: this.state.formdata.deliveryProvince,
+              zipCode: this.state.formdata.deliveryZip
+            },
+            miscellaneousInformation: { deliverySameAsBilling: this.state.formdata.sameAsDelivery },
+            paymentDetails: {
+              cardHolder: this.state.formdata.deliveryFirstName + ' ' + this.state.formdata.deliveryLastName,
+              cardNumber: this.state.cards[index].cardNumber,
+              cvv: this.state.cards[index].cardCVV,
+              emailAddress: this.state.formdata.useCatchallEmail
+                ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
+                : this.state.formdata.paymentEmail,
+              expirationDate: `${this.state.cards[index].cardExpiryMonth}/${this.state.cards[index].cardExpiryYear.slice(-2)}`
+            },
+            profileName: `Profile - ${index}`,
+            region: this.state.formdata.deliveryCountry
           };
           break;
         case 'Neutrino Raffle':
           profiles[`Profile - ${index}`] = {
-            email: this.state.formdata.paymentEmail,
+            email: this.state.formdata.useCatchallEmail
+              ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
+              : this.state.formdata.paymentEmail,
             firstName: this.state.formdata.billingFirstName,
             lastName: this.state.formdata.billingLastName,
+            password: this.state.formdata.sitePass,
             phoneNumber: this.state.formdata.randomPhoneNumber
               ? this.state.formdata.randomPhoneNumberTemplate
                   .split('#')
@@ -790,8 +794,11 @@ export default class ProfileGenerator extends Component {
               cardHolder: this.state.formdata.deliveryFirstName + ' ' + this.state.formdata.deliveryLastName,
               cardNumber: this.state.cards[index].cardExpiryMonth,
               cvv: this.state.cards[index].cardCVV,
-              emailAddress: this.state.formdata.paymentEmail,
-              expirationDate: `${this.state.cards[index].cardExpiryMonth}/${this.state.cards[index].cardExpiryYear.slice(-2)}`
+              emailAddress: this.state.formdata.useCatchallEmail
+                ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
+                : this.state.formdata.paymentEmail,
+              expirationMonth: this.state.cards[index].cardExpiryMonth,
+              expirationYear: this.state.cards[index].cardExpiryYear
             }
           };
           break;
@@ -837,7 +844,7 @@ export default class ProfileGenerator extends Component {
             shipping: {
               firstname: this.state.formdata.randomName ? randomFirstName : this.state.formdata.deliveryFirstName,
               lastname: this.state.formdata.randomName ? randomLastName : this.state.formdata.deliveryLastName,
-              country: Countries[this.state.formdata.deliveryCountry].code,
+              country: Countries[this.state.formdata.deliveryCountry] !== undefined ? Countries[this.state.formdata.deliveryCountry].code : '',
               city: deliveryCity,
               address: deliveryAddress,
               address2: deliveryAptorSuite,
@@ -965,7 +972,6 @@ export default class ProfileGenerator extends Component {
     const extension = this.returnFileExtension(this.state.botType);
     let file;
     if (this.state.botType === 'CSV') {
-      console.log(profiles);
       file = await converter.json2csvAsync(this.convertProfiles(profiles));
     } else {
       file = JSON.stringify(this.convertProfiles(profiles));
@@ -1032,7 +1038,7 @@ export default class ProfileGenerator extends Component {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
         <Container fluid className="activeWindow d-flex flex-column">
-          <Row className="d-flex flex-grow-1" style={{ maxHeight: '100%' }}>
+          <Row className="d-flex flex-grow-1" style={{ maxHeight: '100%', overflowY: 'scroll' }}>
             <Col xs="12" style={{ overflowY: 'scroll', marginBottom: '30px' }}>
               <Table responsive hover className="text-center">
                 <thead>
@@ -1136,10 +1142,10 @@ export default class ProfileGenerator extends Component {
           <Modal size="lg" isOpen={this.state.profileModal} toggle={this.toggleProfileModal} centered={true}>
             <ModalHeader style={{ borderBottom: 'none' }}>Profile</ModalHeader>
             <ModalBody>
-              <Row>
+              <Row className="my-3">
                 {!this.state.formdata.useCatchallEmail ? (
                   <Col>
-                    <Label for="store">payment email</Label>
+                    <Label for="store">email</Label>
                     <Input
                       type="text"
                       name="paymentEmail"
@@ -1161,7 +1167,12 @@ export default class ProfileGenerator extends Component {
                     />
                   </Col>
                 )}
-
+                {this.state.botType === 'Neutrino Raffle' ? (
+                  <Col xs="6">
+                    <Label for="store">site password (optional)</Label>
+                    <Input type="text" name="sitePass" id="sitePass" value={this.state.formdata.sitePass} onChange={this.handleChangeShippingOrBilling} />
+                  </Col>
+                ) : null}
                 {!this.state.formdata.randomPhoneNumber ? (
                   <Col>
                     <Label for="store">phone number</Label>

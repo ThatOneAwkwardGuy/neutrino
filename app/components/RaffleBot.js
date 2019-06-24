@@ -7,9 +7,12 @@ import { createNewWindow } from '../utils/functions';
 import FootpatrolUK from '../utils/raffle/FootpatrolUK';
 import NakedCPH from '../utils/raffle/NakedCPH';
 import ExtraButter from '../utils/raffle/ExtraButter';
+import END from '../utils/raffle/END';
+import VooStore from '../utils/raffle/VooStore';
+import Bodega from '../utils/raffle/Bodega';
+import OneBlockDown from '../utils/raffle/OneBlockDown';
 const rp = require('request-promise');
 const cheerio = require('cheerio');
-const remote = require('electron').remote;
 const { BrowserWindow } = require('electron').remote;
 const { dialog } = require('electron').remote;
 const fs = require('fs');
@@ -56,7 +59,8 @@ export default class RaffleBot extends Component {
 
   toggleProfilesModal = () => {
     this.setState({
-      profilesModal: !this.state.profilesModal
+      profilesModal: !this.state.profilesModal,
+      profilesLoaded: false
     });
   };
 
@@ -174,6 +178,58 @@ export default class RaffleBot extends Component {
             this.triggerRender
           );
           break;
+        case 'END':
+          entry = new END(
+            this.state.raffleLink,
+            profile,
+            this.state.site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            this.state.raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'VooStore':
+          entry = new VooStore(
+            this.state.raffleLink,
+            profile,
+            this.state.site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            this.state.raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'Bodega':
+          entry = new Bodega(
+            this.state.raffleLink,
+            profile,
+            this.state.site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            this.state.raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'OneBlockDown':
+          entry = new OneBlockDown(
+            this.state.raffleLink,
+            profile,
+            this.state.site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            this.state.raffleDetails,
+            this.triggerRender
+          );
+          break;
         default:
           break;
       }
@@ -201,6 +257,18 @@ export default class RaffleBot extends Component {
             break;
           case 'ExtraButter':
             await this.loadExtraButterRaffleInfo(this.state.raffleLink);
+            break;
+          case 'END':
+            await this.loadEndRaffleInfo(this.state.raffleLink);
+            break;
+          case 'VooStore':
+            await this.loadVooStoreRaffleInfo(this.state.raffleLink);
+            break;
+          case 'Bodega':
+            await this.loadBodegaRaffleInfo(this.state.raffleLink);
+            break;
+          case 'OneBlockDown':
+            await this.loadOneBlockDownRaffleInfo(this.state.raffleLink);
             break;
           default:
             break;
@@ -310,7 +378,7 @@ export default class RaffleBot extends Component {
   };
 
   loadExtraButterRaffleInfo = async link => {
-    const response = await this.rp.get(`${link}.json`);
+    const response = await this.rp.get(`${link.split('?')[0]}.json`);
     const raffleInfo = JSON.parse(response);
     const sizes = raffleInfo.product.variants.map(size => {
       return { id: size.id, name: size.title };
@@ -323,14 +391,164 @@ export default class RaffleBot extends Component {
     });
   };
 
+  loadEndRaffleInfo = async link => {
+    const splitLink = link.split('/');
+    const apilink = `https://launches-api.endclothing.com/api/products/${splitLink[splitLink.length - 1]}`;
+    const apiResponse = await this.rp({
+      method: 'GET',
+      json: true,
+      uri: apilink
+    });
+    const sizes = apiResponse.productSizes.map(size => ({ id: size.id, name: size.sizeDescription }));
+    this.setState({
+      styleInput: false,
+      sizeInput: true,
+      sizes,
+      size: sizes[0].id,
+      raffleDetails: { product: apiResponse }
+    });
+  };
+
+  loadVooStoreRaffleInfo = async link => {
+    const response = await this.rp.get(link);
+    const $ = cheerio.load(response);
+    const sizes = $('.shoes-sizen-mp>li[id]')
+      .map((index, size) => {
+        return { id: size.attribs.id.split('_')[1], name: $(size).text() };
+      })
+      .toArray();
+    const token = $('input[name="token"]').val();
+    const page_id = $('input[name="page_id"]').val();
+    this.setState({
+      styleInput: false,
+      sizeInput: true,
+      sizes,
+      size: sizes[0].id,
+      raffleDetails: { token, page_id }
+    });
+  };
+
+  loadBodegaRaffleInfo = async link => {
+    const response = await this.rp.get(link);
+    let $ = cheerio.load(response);
+    const widgetCode = $('script[async=""]')
+      .map((index, el) => el.attribs.src)
+      .toArray()
+      .find(src => src.includes('vsa-widget'))
+      .match(/vsa-widget-(.*).js/)[1];
+    console.log(widgetCode);
+    const widgetBody = await this.rp.get(`https://app.viralsweep.com/vrlswp/widget/${widgetCode}?framed=1`);
+    $ = cheerio.load(widgetBody);
+    const sizeID = $('select:not([name=""])').attr('name');
+    const sizes = $('option:not([value=""])')
+      .map((index, el) => ({ id: el.attribs.value, name: el.attribs.value }))
+      .toArray();
+    console.log(sizeID);
+    this.setState({
+      styleInput: false,
+      sizeInput: true,
+      sizes,
+      size: sizes[0].id,
+      raffleDetails: { widgetCode, sizeID }
+    });
+  };
+
+  loadOneBlockDownRaffleInfo = async link => {
+    return new Promise((resolve, reject) => {
+      let win = new BrowserWindow({
+        width: 500,
+        height: 650,
+        show: true,
+        frame: true,
+        resizable: true,
+        focusable: true,
+        minimizable: true,
+        closable: true,
+        allowRunningInsecureContent: true,
+        webPreferences: {
+          webviewTag: true,
+          allowRunningInsecureContent: true,
+          nodeIntegration: true,
+          webSecurity: false
+        }
+      });
+      win.loadURL(link);
+      win.webContents.once('did-finish-load', () => {
+        win.webContents.executeJavaScript('preloadedStock', false, preloadedStock => {
+          win.webContents.executeJavaScript(`document.querySelector('#raffle-id').value`, false, raffleID => {
+            if (preloadedStock) {
+              const sizes = preloadedStock.map(size => ({ id: size.id, name: size.variant }));
+              this.setState({
+                styleInput: false,
+                sizeInput: true,
+                sizes,
+                size: sizes[0].id,
+                raffleDetails: { itemId: preloadedStock[0].itemId, stockItemId: preloadedStock[0].stockItemId, raffleID }
+              });
+              win.close();
+              resolve();
+            } else {
+              reject();
+            }
+          });
+        });
+      });
+    });
+  };
+
   triggerRender = () => {
     this.forceUpdate();
   };
 
+  startEntry = index => {
+    this.state.entries[index].run = true;
+    this.state.entries[index].start();
+  };
+
+  stopEntry = index => {
+    this.state.entries[index].stop();
+  };
+
+  deleteEntry = index => {
+    this.setState({
+      entries: this.state.entries.filter((entry, entryIndex) => index !== entryIndex)
+    });
+  };
+
   returnEntryRow = (entry, index) => {
-    <tr key={`entry-${index}`}>
-      <td>{index + 1}</td>
-    </tr>;
+    return (
+      <tr key={`entry-${index}`}>
+        <td>{index + 1}</td>
+        <td>{entry.profile ? entry.profile.email : 'N/A'}</td>
+        <td>{entry.site || 'N/A'}</td>
+        <td>{entry.style ? entry.style.name : 'N/A'}</td>
+        <td>{entry.size ? entry.size.name : 'N/A'}</td>
+        <td>{entry.status || 'N/A'}</td>
+        <td>
+          <FontAwesome
+            className="px-2"
+            name="play"
+            onClick={() => {
+              this.startEntry(index);
+            }}
+          />
+          <FontAwesome
+            className="px-2"
+            name="stop"
+            onClick={() => {
+              this.stopEntry(index);
+            }}
+          />
+          <FontAwesome
+            className="px-2"
+            name="trash"
+            onClick={() => {
+              this.deleteEntry(index);
+            }}
+          />
+        </td>
+      </tr>
+    );
   };
 
   returnOptions = (name, array) => {
@@ -348,12 +566,18 @@ export default class RaffleBot extends Component {
     });
   };
 
+  clearAll = () => {
+    this.setState({
+      entries: []
+    });
+  };
+
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
         <Container fluid className="activeWindow d-flex flex-column">
           <Row className="flex-grow-1">
-            <ReactTable
+            {/* <ReactTable
               className="proxyTesterTable"
               showPagination={false}
               showPageSizeOptions={false}
@@ -410,8 +634,8 @@ export default class RaffleBot extends Component {
                 //   accessor: ''
                 // }
               ]}
-            />
-            {/* <Table responsive hover className="text-center col-12">
+            /> */}
+            <Table responsive hover className="text-center col-12">
               <thead>
                 <tr>
                   <th>#</th>
@@ -424,9 +648,9 @@ export default class RaffleBot extends Component {
                 </tr>
               </thead>
               <tbody>{this.state.entries.map(this.returnEntryRow)}</tbody>
-            </Table> */}
+            </Table>
           </Row>
-          <FormGroup row>
+          <Row className="my-3">
             <Col xs="2">
               <Label>Site</Label>
               <Input name="site" type="select" onChange={this.handleChange} defaultValue="select site">
@@ -435,6 +659,10 @@ export default class RaffleBot extends Component {
                 <option>Footpatrol UK</option>
                 <option>NakedCPH</option>
                 <option>ExtraButter</option>
+                {/* <option>END</option> */}
+                <option>VooStore</option>
+                <option>Bodega</option>
+                <option>OneBlockDown</option>
               </Input>
             </Col>
             <Col xs="2">
@@ -477,7 +705,12 @@ export default class RaffleBot extends Component {
                 Start
               </Button>
             </Col>
-          </FormGroup>
+            <Col className="d-flex">
+              <Button className="nButton w-100 align-self-end" onClick={this.clearAll}>
+                Clear
+              </Button>
+            </Col>
+          </Row>
           <Modal isOpen={this.state.profilesModal} toggle={this.toggleProfilesModal} size="xl" centered>
             <ModalHeader style={{ borderBottom: 'none' }} toggle={this.toggleProfilesModal}>
               Load Profiles
@@ -485,8 +718,8 @@ export default class RaffleBot extends Component {
             <ModalBody>
               <Row>
                 <Col xs="4" className="d-flex">
-                  <Button style={{ width: '100%' }} className="align-self-middle nButton">
-                    <FontAwesome name="upload" style={{ display: 'block', padding: '10px', width: '100%' }} size="2x" onClick={this.importFile} />
+                  <Button style={{ width: '100%' }} onClick={this.importFile} className="align-self-middle nButton">
+                    <FontAwesome name="upload" style={{ display: 'block', padding: '10px', width: '100%' }} size="2x" />
                     Load Profiles
                   </Button>
                 </Col>

@@ -7,7 +7,7 @@ import Dropzone from 'react-dropzone';
 const fs = require('fs');
 const { dialog } = require('electron').remote;
 const csvToJson = require('convert-csv-to-json');
-const profileTaskConversionOptions = ['CyberSole', 'Photon'];
+const profileTaskConversionOptions = ['CyberSole', 'Project Destroyer', 'Hastey', 'EVE AIO', 'Phantom', 'Ghost', 'CSV', 'NSB', 'SOLE AIO'];
 const profileAttributeMaping = {
   profileID: 'profile name',
   deliveryCountry: 'delivery country',
@@ -39,6 +39,28 @@ const profileAttributeMaping = {
   proxy: 'proxy',
   quantity: 'quantity'
 };
+import {
+  cybersoleProfileToBase,
+  projectDestroyerProfileToBase,
+  ghostProfileToBase,
+  balkoProfileToBase,
+  eveaioProfileToBase,
+  phantomProfileToBase,
+  dasheProfileToBase,
+  hasteyProfileToBase,
+  kodaiProfileToBase,
+  nsbProfileToBase,
+  soleAioProfileToBase,
+  baseProfileToProjectDestroyer,
+  baseProfileToGhost,
+  baseProfileToBalko,
+  baseProfileToEveaio,
+  baseProfileToPhantom,
+  baseProfileToDashe,
+  baseProfileToKodai,
+  baseProfileToNsb,
+  baseProfileToSoleAio
+} from '../utils/profileConverters';
 export default class ProfileTaskConverter extends Component {
   constructor(props) {
     super(props);
@@ -129,7 +151,7 @@ export default class ProfileTaskConverter extends Component {
               <Row className="flex-grow-1">
                 <Droppable droppableId={`profiles-${indexNumber}`}>
                   {(provided, snapshot) => (
-                    <div ref={provided.innerRef} className="col-12" style={{ padding: '0px' }}>
+                    <div ref={provided.innerRef} className="col-12" style={{ padding: '0px', overflowY: 'scroll', maxHeight: '100%' }}>
                       {this.returnDraggableListUsingArray(
                         this.state.draggableBoxes[this.state.mode][indexNumber],
                         `${this.state.mode}-${indexNumber}`,
@@ -169,6 +191,7 @@ export default class ProfileTaskConverter extends Component {
                     name="save"
                     onClick={() => {
                       this.convertToBot(
+                        this.state.draggableBoxes[this.state.mode][indexNumber].from,
                         this.state.draggableBoxes[this.state.mode][indexNumber].to,
                         this.state.draggableBoxes[this.state.mode][indexNumber].items
                       );
@@ -209,67 +232,6 @@ export default class ProfileTaskConverter extends Component {
   csvToBase = csvJSON => {
     const items = csvJSON;
     this.appendProfile(items);
-  };
-
-  cybersoleProfileToBase = file => {
-    const items = [];
-    for (const profile in file) {
-      items.push({
-        profileID: file[profile].name,
-        deliveryCountry: file[profile].delivery.country,
-        deliveryAddress: file[profile].delivery.addr1,
-        deliveryAddress2: file[profile].delivery.addr2,
-        deliveryCity: file[profile].delivery.city,
-        deliveryFirstName: file[profile].delivery.first_name,
-        deliveryLastName: file[profile].delivery.last_name,
-        deliveryProvince: file[profile].delivery.state,
-        deliveryZip: file[profile].delivery.zip,
-        deliverySameAsDelivery: file[profile].delivery.same_as_del,
-        billingSameAsDelivery: file[profile].billing.last_name,
-        billingZip: file[profile].billing.zip,
-        billingCountry: file[profile].billing.country,
-        billingAddress: file[profile].billing.addr1,
-        billingAddress2: file[profile].billing.addr2,
-        billingCity: file[profile].billing.city,
-        billingFirstName: file[profile].billing.first_name,
-        billingLastName: file[profile].billing.last_name,
-        billingProvince: file[profile].billing.state,
-        phoneNumber: file[profile].payment.phone,
-        paymentEmail: file[profile].payment.email,
-        paymentCardholdersName: file[profile].payment.name,
-        paymentCardnumber: file[profile].payment.card.number,
-        paymentCardExpiryMonth: file[profile].payment.card.exp_month,
-        paymentCardExpiryYear: file[profile].payment.card.exp_year,
-        paymentCVV: file[profile].payment.card.cvv,
-        deliveryAptorSuite: '',
-        billingAptorSuite: ''
-      });
-    }
-    this.appendProfile(items);
-  };
-
-  cybersoleTaskToBase = file => {
-    const tasks = file.tasks;
-    const items = [];
-    for (const task in tasks) {
-      items.push({
-        store: tasks[task].store,
-        size: tasks[task].size,
-        custom_url: tasks[task].custom_url,
-        profileID: tasks[task].profile,
-        afk: tasks[task].afk,
-        proxy: tasks[task].proxy,
-        keywords: tasks[task].keywords,
-        cyber_shopify_store_password: '',
-        cyber_login: tasks[task].login,
-        cyber_supreme: tasks[task].supreme,
-        cyber_bank_transfer: tasks[task].bank_transfer,
-        cyber_pay_on_delivery: tasks[task].pay_on_delivery,
-        id: tasks[task].id
-      });
-    }
-    console.log(items);
-    this.appendTask(items);
   };
 
   baseProfileToCybersole = file => {
@@ -378,7 +340,7 @@ export default class ProfileTaskConverter extends Component {
         profileID: ''
       });
     }
-    this.saveToFile('Photon-Taskss', 'json', { tasks: items });
+    this.saveToFile('Photon-Tasks', 'json', { tasks: items });
   };
 
   saveToFile = (name, extension, file) => {
@@ -390,6 +352,48 @@ export default class ProfileTaskConverter extends Component {
         title: 'name',
         defaultPath: `~/${name}.${extension}`,
         filters: [{ name: `${name} Files`, extensions: [extension] }]
+      },
+      fileName => {
+        if (fileName === undefined) {
+          return;
+        }
+        fs.writeFile(fileName, file, err => {
+          if (err) {
+            this.setState({
+              profileExportFailure: true
+            });
+            return;
+          }
+          this.setState({
+            profileExportSuccess: true
+          });
+        });
+      }
+    );
+  };
+
+  saveProfiles = (fromBotName, botName, profilesArray) => {
+    let formattedProfiles;
+    if (['Project Destroyer', 'Hastey', 'EVE AIO', 'Phantom', 'CSV', 'NSB', 'SOLE AIO'].includes(botName)) {
+      formattedProfiles = profilesArray;
+    } else {
+      formattedProfiles = {};
+      profilesArray.forEach((profile, index) => {
+        formattedProfiles[`${botName} - ${index}`] = profile;
+      });
+    }
+    const file = JSON.stringify(formattedProfiles);
+    let extension = 'json';
+    if (botName === 'Kodai') {
+      extension = 'txt';
+    } else if (botName === 'CSV') {
+      extension = 'csv';
+    }
+    dialog.showSaveDialog(
+      {
+        title: 'name',
+        defaultPath: `~/${botName} Profiles (Converted From ${fromBotName}).${extension}`,
+        filters: [{ name: `${botName} Profiles (Converted From ${fromBotName})`, extensions: [extension] }]
       },
       fileName => {
         if (fileName === undefined) {
@@ -461,7 +465,7 @@ export default class ProfileTaskConverter extends Component {
                 <Col xs="8" style={{ padding: '10px' }}>
                   {this.state.mode === 'profiles' ? item.profileID : `Task - ${item.id}`}
                 </Col>
-                <Col xs="2" className="text-center">
+                {/* <Col xs="2" className="text-center">
                   <FontAwesome
                     name="edit"
                     style={{ padding: '10px' }}
@@ -469,7 +473,7 @@ export default class ProfileTaskConverter extends Component {
                       this.editItem(name, index);
                     }}
                   />
-                </Col>
+                </Col> */}
                 <Col xs="2" className="text-center">
                   <FontAwesome
                     name="trash"
@@ -487,52 +491,116 @@ export default class ProfileTaskConverter extends Component {
     ));
   };
 
-  convertToBase = async file => {
-    const fileExtention = file[0].path.split('.').pop();
-    if (fileExtention === 'json') {
-      fs.readFile(file[0].path, 'utf-8', (err, data) => {
-        if (err) {
-          this.setState({
-            profileImportFailure: true
-          });
-          return;
-        }
-        const profileOBJ = JSON.parse(data);
-        console.log(profileOBJ);
-        if (this.state.mode === 'profiles') {
-          switch (this.state.bot) {
-            case 'CyberSole':
-              this.cybersoleProfileToBase(profileOBJ);
-              break;
-            default:
-              break;
-          }
-        } else if (this.state.mode === 'tasks') {
-          switch (this.state.bot) {
-            case 'CyberSole':
-              this.cybersoleTaskToBase(profileOBJ);
-              break;
-            default:
-              break;
-          }
-        }
-      });
-    } else if (fileExtention === 'csv') {
-      const json = csvToJson.fieldDelimiter(',').getJsonFromCsv(file[0].path);
-      this.csvToBase(json);
+  convertToBase = profiles => {
+    let converteredProfiles;
+    switch (this.state.bot) {
+      case 'CyberSole':
+        converteredProfiles = profiles.map((profile, index) => cybersoleProfileToBase(profile, index));
+        break;
+      case 'Project Destroyer':
+        converteredProfiles = profiles.map((profile, index) => projectDestroyerProfileToBase(profile, index));
+        break;
+      case 'Ghost':
+        converteredProfiles = profiles.map((profile, index) => ghostProfileToBase(profile, index));
+        break;
+      case 'Balko':
+        converteredProfiles = profiles.map((profile, index) => balkoProfileToBase(profile, index));
+        break;
+      case 'EVE AIO':
+        converteredProfiles = profiles.map((profile, index) => eveaioProfileToBase(profile, index));
+        break;
+      case 'Phantom':
+        converteredProfiles = profiles.map((profile, index) => phantomProfileToBase(profile, index));
+        break;
+      case 'Dashe':
+        converteredProfiles = profiles.map((profile, index) => dasheProfileToBase(profile, index));
+        break;
+      case 'Hastey':
+        converteredProfiles = profiles.map((profile, index) => hasteyProfileToBase(profile, index));
+        break;
+      case 'Kodai':
+        converteredProfiles = profiles.map((profile, index) => kodaiProfileToBase(profile, index));
+        break;
+      case 'NSB':
+        converteredProfiles = profiles.map((profile, index) => nsbProfileToBase(profile, index));
+        break;
+      case 'SOLE AIO':
+        converteredProfiles = profiles.map((profile, index) => soleAioProfileToBase(profile, index));
+        break;
+      case 'CSV':
+        break;
+      default:
+        break;
+    }
+    if (converteredProfiles !== undefined) {
+      this.appendProfile(converteredProfiles);
     }
   };
 
-  convertToBot = (botName, file) => {
+  readFile = files => {
+    files.forEach(file => {
+      const fileExtension = file.path.split('.').pop();
+      if (fileExtension === 'json') {
+        fs.readFile(file.path, 'utf-8', (err, data) => {
+          if (!err) {
+            const JSONFile = JSON.parse(data);
+            let profiles;
+            if (['Project Destroyer', 'Hastey', 'EVE AIO', 'Phantom', 'CSV', 'NSB', 'SOLE AIO'].includes(this.state.botType)) {
+              profiles = JSONFile;
+            } else {
+              profiles = Object.values(JSONFile);
+            }
+            this.convertToBase(profiles);
+          }
+        });
+      }
+    });
+  };
+
+  convertToBot = (fromBotName, botName, profiles) => {
     if (this.state.mode == 'profiles') {
+      let converteredProfiles;
       switch (botName) {
         case 'CyberSole':
-          this.baseProfileToCybersole(file);
+          converteredProfiles = profiles.map((profile, index) => this.baseProfileToCybersole(profile, index));
           break;
-        case 'Photon':
-          this.baseProfileToPhoton(file);
+        case 'Project Destroyer':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToProjectDestroyer(profile, index));
+          break;
+        case 'Ghost':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToGhost(profile, index));
+          break;
+        case 'Balko':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToBalko(profile, index));
+          break;
+        case 'EVE AIO':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToEveaio(profile, index));
+          break;
+        case 'Phantom':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToPhantom(profile, index));
+          break;
+        case 'Dashe':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToDashe(profile, index));
+          break;
+        case 'Hastey':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToHastey(profile, index));
+          break;
+        case 'Kodai':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToKodai(profile, index));
+          break;
+        case 'NSB':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToNsb(profile, index));
+          break;
+        case 'SOLE AIO':
+          converteredProfiles = profiles.map((profile, index) => baseProfileToSoleAio(profile, index));
+          break;
+        case 'CSV':
+          break;
         default:
           break;
+      }
+      if (converteredProfiles !== undefined) {
+        this.saveProfiles(fromBotName, botName, converteredProfiles);
       }
     } else if (this.state.mode === 'tasks') {
       switch (botName) {
@@ -602,70 +670,69 @@ export default class ProfileTaskConverter extends Component {
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-        <Col className="activeWindow">
-          <Container fluid className="d-flex flex-column">
-            <Row>
-              <div className="col-10">
-                <Dropzone
-                  accept="application/json, text/csv"
-                  onDrop={accepted => {
-                    this.convertToBase(accepted);
-                  }}
-                >
-                  {({ getRootProps, getInputProps }) => (
-                    <div>
-                      <div {...getRootProps()} className="dropzone text-center">
-                        <input {...getInputProps()} />
-                        <div className="d-flex align-items-center justify-content-center" style={{ height: '100%' }}>
-                          <FontAwesome name="plus" onClick={this.addDraggableBox} />
-                        </div>
+        <Container fluid className="activeWindow d-flex flex-column">
+          <Row>
+            <div className="col-10">
+              <Dropzone
+                accept="application/json, text/csv"
+                onDrop={accepted => {
+                  this.readFile(accepted);
+                  // this.convertToBase(accepted);
+                }}
+              >
+                {({ getRootProps, getInputProps }) => (
+                  <div>
+                    <div {...getRootProps()} className="dropzone text-center">
+                      <input {...getInputProps()} />
+                      <div className="d-flex align-items-center justify-content-center" style={{ height: '100%' }}>
+                        <FontAwesome name="plus" onClick={this.addDraggableBox} />
                       </div>
                     </div>
-                  )}
-                </Dropzone>
-              </div>
-              <div className="col-2 text-center d-flex align-items-center justify-content-center">
-                <h6>drop profiles/tasks files here</h6>
-              </div>
-            </Row>
-            <Row style={{ overflowX: 'scroll', flexWrap: 'nowrap' }} className="flex-fill">
-              <DragDropContext onDragEnd={this.onDragEnd}>{this.returnDraggableBoxes()}</DragDropContext>
-            </Row>
-            <Row>
-              <Col xs="1" className="d-flex align-items-end justify-content-left">
-                <FontAwesome name="plus" className="draggableBoxPlus d-flex align-items-center justify-content-center" onClick={this.addDraggableBox} />
-              </Col>
-              <Col xs="2" className="ml-auto">
-                <Label for="mode">bot</Label>
-                <Input
-                  type="select"
-                  name="bot"
-                  id="bot"
-                  value={this.state.mode}
-                  onChange={event => {
-                    this.handleChange(event);
-                  }}
-                >
-                  {this.returnOptions(profileTaskConversionOptions, 'fileInputBotType')}
-                </Input>
-              </Col>
-              <Col xs="2">
-                <Label for="mode">mode</Label>
-                <Input
-                  type="select"
-                  name="mode"
-                  id="mode"
-                  value={this.state.mode}
-                  onChange={event => {
-                    this.handleChange(event);
-                  }}
-                >
-                  <option>profiles</option>
-                  <option>tasks</option>
-                </Input>
-              </Col>
-            </Row>
-          </Container>
+                  </div>
+                )}
+              </Dropzone>
+            </div>
+            <div className="col-2 text-center d-flex align-items-center justify-content-center">
+              <h6>drop profiles/tasks files here</h6>
+            </div>
+          </Row>
+          <Row style={{ overflowX: 'scroll', flexWrap: 'nowrap' }} className="flex-fill">
+            <DragDropContext onDragEnd={this.onDragEnd}>{this.returnDraggableBoxes()}</DragDropContext>
+          </Row>
+          <Row>
+            <Col xs="1" className="d-flex align-items-end justify-content-left">
+              <FontAwesome name="plus" className="draggableBoxPlus d-flex align-items-center justify-content-center" onClick={this.addDraggableBox} />
+            </Col>
+            <Col xs="2" className="ml-auto">
+              <Label for="mode">bot</Label>
+              <Input
+                type="select"
+                name="bot"
+                id="bot"
+                value={this.state.bot}
+                onChange={event => {
+                  this.handleChange(event);
+                }}
+              >
+                {this.returnOptions(profileTaskConversionOptions, 'fileInputBotType')}
+              </Input>
+            </Col>
+            <Col xs="2">
+              <Label for="mode">mode</Label>
+              <Input
+                type="select"
+                name="mode"
+                id="mode"
+                value={this.state.mode}
+                onChange={event => {
+                  this.handleChange(event);
+                }}
+              >
+                <option>profiles</option>
+                {/* <option>tasks</option> */}
+              </Input>
+            </Col>
+          </Row>
           <Modal isOpen={this.state.editModal} toggle={this.toggleModal} centered={true} size="lg">
             <ModalBody>
               <Form>
@@ -691,7 +758,7 @@ export default class ProfileTaskConverter extends Component {
               </Button>
             </ModalFooter>
           </Modal>
-        </Col>
+        </Container>
       </CSSTransition>
     );
   }

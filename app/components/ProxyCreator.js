@@ -6,6 +6,7 @@ const Compute = require('@google-cloud/compute');
 const DigitalOcean = require('do-wrapper').default;
 const AWS = require('aws-sdk');
 const { clipboard } = require('electron');
+const { session } = require('electron').remote;
 const numberOfTries = 50;
 const sleepTime = 2000;
 
@@ -141,24 +142,29 @@ export default class ProxyCreator extends Component {
   };
 
   initialiseAWS = async () => {
-    AWS.config.loadFromPath(this.props.settings.awsCredentialsPath);
-    // AWS.config.update({ accessKeyId: this.props.settings.awsAccessKey, secretAccessKey: this.props.settings.awsSecretKey });
-    AWS.config.update({ region: 'us-east-1' });
+    AWS.config.update({ accessKeyId: 'AKIAJZY5QY7YVV7OI32Q', secretAccessKey: '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', region: 'us-east-1' });
     var ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
     var params = {};
-    ec2.describeRegions(params, function(err, data) {
-      if (err) {
-        console.log('Error', err);
-      } else {
-        console.log('Regions: ', data.Regions);
-      }
+    const AWSregions = await new Promise((resolve, reject) => {
+      ec2.describeRegions(params, function(err, data) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(data.Regions);
+        }
+      });
     });
-    ec2.describeAvailabilityZones(params, function(err, data) {
-      if (err) {
-        console.log('Error', err);
-      } else {
-        console.log('Availability Zones: ', data.AvailabilityZones);
-      }
+    const regions = AWSregions.map(region => ({ id: region.RegionName, name: region.RegionName }));
+    this.setState({
+      cloudRegions: regions,
+      machineTypes: [
+        { name: 't3.nano', id: 't3.nano', price: '$0.0073/hr' },
+        { name: 't3.micro', id: 't3.micro', price: '$0.0146/hr' },
+        { name: 't3.small', id: 't3.small', price: '$0.0292/hr' },
+        { name: 't3.medium', id: 't3.medium', price: '$0.0584/hr' }
+      ],
+      region: 'us-east-1',
+      machine: 't3.nano'
     });
   };
 
@@ -182,15 +188,13 @@ export default class ProxyCreator extends Component {
               return this.createVultrInstance(i).catch(e => e);
             });
           });
-          // for (let i = 0; i < this.state.quantity; i++) {
-          //   this.createVultrInstance(i);
-          //   await new Promise(r => setTimeout(r, 1500));
-          // }
           break;
         case 'DigitalOcean':
           instances = Array.from(Array(parseInt(this.state.quantity))).map((x, i) => {
             return this.createDigitalOceanInstance(i).catch(e => e);
           });
+        case 'AWS':
+          instances = this.createAmazonInstances(this.state.quantity);
         default:
           break;
       }
@@ -216,29 +220,6 @@ export default class ProxyCreator extends Component {
                     <td style={{ wordBreak: 'break-word' }}>{error.message ? error.message : JSON.stringify(error)}</td>
                   </tr>
                 );
-
-                // if (error.constructor.name === 'ApiError') {
-                //   return (
-                //     <tr key={`error-${index}`}>
-                //       <td>{error.errors[0].reason}</td>
-                //       <td>{error.errors[0].message}</td>
-                //     </tr>
-                //   );
-                // } else if (error instanceof Error) {
-                //   return (
-                //     <tr key={`error-${index}`}>
-                //       <td>{error.name}</td>
-                //       <td>{error.error ? error.error : error.message}</td>
-                //     </tr>
-                //   );
-                // } else {
-                //   return (
-                //     <tr key={`error-${index}`}>
-                //       <td>{error.id}</td>
-                //       <td>{error.message}</td>
-                //     </tr>
-                //   );
-                // }
               })}
             </tbody>
           </Table>
@@ -372,6 +353,26 @@ export default class ProxyCreator extends Component {
       } &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
     });
     return this.pollDigitalOceanInstance(response.body.droplet.id);
+  };
+
+  createAmazonInstances = async () => {
+    if (this.state.region !== 'us-east-1') {
+      AWS.config.update({ region: this.state.region });
+    }
+    const instanceParams = {
+      ImageId: 'ami-e30b829d',
+      InstanceType: this.state.machine,
+      MinCount: this.state.quantity,
+      MaxCount: this.state.quantity,
+      TagSpecifications: [{ Tags: [{ Key: 'neutrinotools', value: 'neutrinotools' }], ResourceType: 'instance' }],
+      UserData: `#!/bin/bash\nyum install squid wget httpd-tools openssl openssl-devel -y &&\ntouch /etc/squid/passwd &&\nhtpasswd -b /etc/squid/passwd ${
+        this.state.proxyUser
+      } ${
+        this.state.proxyPassword
+      } &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
+    };
+    const instancePromise = await new AWS.EC2({ apiVersion: '2016-11-15' }).runInstances(instanceParams).promise();
+    console.log(instancePromise);
   };
 
   createVultrInstance = async index => {
