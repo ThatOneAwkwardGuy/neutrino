@@ -385,7 +385,7 @@ export default class RaffleBot extends Component {
     });
     this.setState({
       styleInput: false,
-      size: sizes[0].id,
+      size: sizes[0].id.toString(),
       sizes,
       raffleDetails: { product: raffleInfo }
     });
@@ -552,11 +552,17 @@ export default class RaffleBot extends Component {
   };
 
   returnOptions = (name, array) => {
-    return array.map((elem, index) => (
+    const options = array.map((elem, index) => (
       <option value={elem.id} key={`${name}-${index}`}>
         {elem.name}
       </option>
     ));
+    options.unshift(
+      <option disabled value="" key={`${name}-'disabled'`}>
+        Select
+      </option>
+    );
+    return options;
   };
 
   startAll = () => {
@@ -705,7 +711,9 @@ export default class RaffleBot extends Component {
                 Start
               </Button>
             </Col>
-            <Col className="d-flex">
+          </Row>
+          <Row className="justify-content-end">
+            <Col xs="2" className="d-flex">
               <Button className="nButton w-100 align-self-end" onClick={this.clearAll}>
                 Clear
               </Button>

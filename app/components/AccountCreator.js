@@ -542,230 +542,228 @@ export default class AccountCreator extends Component {
   render() {
     return (
       <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-        <Col className="activeWindow">
-          <Container fluid className="d-flex flex-column">
-            <Row className="d-flex flex-grow-1" style={{ maxHeight: '100%' }}>
-              <Col xs="12" style={{ overflowY: 'scroll', marginBottom: '30px' }}>
-                <Table responsive hover className="text-center">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>store</th>
-                      <th>email</th>
-                      <th>password</th>
-                      <th>action</th>
-                    </tr>
-                  </thead>
-                  <tbody>{this.props.accounts.accounts.map(this.returnAccountRow)}</tbody>
-                </Table>
-              </Col>
-            </Row>
-            <Row>
-              <Col xs="1">
-                <Label>Site</Label>
-                <Input
-                  name="site"
-                  type="select"
-                  onChange={e => {
-                    this.handleChange(e);
-                  }}
-                  value={this.state.site}
-                >
-                  {this.returnOptions(Object.keys(sites), 'sites')}
-                </Input>
-              </Col>
-              <Col xs="1">
-                <Label>Qty</Label>
-                <Input
-                  onChange={e => {
-                    this.handleChange(e);
-                  }}
-                  value={this.state.quantity}
-                  name="quantity"
-                  type="number"
-                  min="0"
-                  step="1"
-                />
-              </Col>
-              <Col xs="2">
-                <Label>Catchall Domain</Label>
-                <Input
-                  onChange={e => {
-                    this.handleChange(e);
-                  }}
-                  value={this.state.catchall}
-                  name="catchall"
-                  type="text"
-                  placeholder="example.com"
-                />
-              </Col>
-              <Col xs="2">
-                <Label>Password</Label>
-                <Input
-                  onChange={e => {
-                    this.handleChange(e);
-                  }}
-                  value={this.state.password}
-                  name="password"
-                  type="password"
-                />
-              </Col>
-              <Col xs="1">
-                <h6 style={{ fontWeight: 600 }}>Random Pass</h6>
-                <Toggle
-                  className="alignBottomToggle"
-                  defaultChecked={this.state.randomPassword}
-                  onChange={() => {
-                    this.setState({ randomPassword: !this.state.randomPassword });
-                  }}
-                />
-              </Col>
-              <Col xs="1">
-                <h6 style={{ fontWeight: 600 }}>Advanced</h6>
-                <Toggle
-                  className="alignBottomToggle"
-                  defaultChecked={this.state.advancedSettings}
-                  onChange={() => {
-                    this.setState({ advancedSettings: !this.state.advancedSettings });
-                  }}
-                />
-              </Col>
-              <Col xs="4">
-                <Button
-                  style={{ margin: '5px' }}
-                  onClick={() => {
-                    this.start();
-                  }}
-                >
-                  Start
-                </Button>
-                <Button
-                  style={{ margin: '5px' }}
-                  onClick={() => {
-                    this.loadAllAccounts();
-                  }}
-                >
-                  Load All
-                </Button>
-                <Button
-                  style={{ margin: '5px' }}
-                  onClick={() => {
-                    this.copyToClipboard();
-                  }}
-                >
-                  Copy All
-                </Button>
-                <Button color="danger" style={{ margin: '5px' }} onClick={this.toggleConfModal}>
-                  Delete All
-                </Button>
-                <Button
-                  color="danger"
-                  style={{ margin: '5px' }}
-                  onClick={() => {
-                    ipcRenderer.send(RESET_CAPTCHA_WINDOW, 'reset');
-                  }}
-                >
-                  Reload Captcha
-                </Button>
-              </Col>
-            </Row>
-            {this.state.advancedSettings ? (
-              <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
-                <Row style={{ paddingTop: '20px' }}>
-                  <Col xs="1">
-                    <h6 style={{ fontWeight: 600, marginBottom: '50px' }}>Proxies</h6>
-                    <Toggle
-                      className="alignBottomToggle"
-                      defaultChecked={this.state.useProxies}
-                      onChange={() => {
-                        this.setState({ useProxies: !this.state.useProxies });
+        <Container fluid className="d-flex flex-column activeWindow">
+          <Row className="d-flex flex-grow-1" style={{ maxHeight: '100%' }}>
+            <Col xs="12" style={{ overflowY: 'scroll', marginBottom: '30px' }}>
+              <Table responsive hover className="text-center">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>store</th>
+                    <th>email</th>
+                    <th>password</th>
+                    <th>action</th>
+                  </tr>
+                </thead>
+                <tbody>{this.props.accounts.accounts.map(this.returnAccountRow)}</tbody>
+              </Table>
+            </Col>
+          </Row>
+          <Row>
+            <Col xs="1">
+              <Label>Site</Label>
+              <Input
+                name="site"
+                type="select"
+                onChange={e => {
+                  this.handleChange(e);
+                }}
+                value={this.state.site}
+              >
+                {this.returnOptions(Object.keys(sites), 'sites')}
+              </Input>
+            </Col>
+            <Col xs="1">
+              <Label>Qty</Label>
+              <Input
+                onChange={e => {
+                  this.handleChange(e);
+                }}
+                value={this.state.quantity}
+                name="quantity"
+                type="number"
+                min="0"
+                step="1"
+              />
+            </Col>
+            <Col xs="2">
+              <Label>Catchall Domain</Label>
+              <Input
+                onChange={e => {
+                  this.handleChange(e);
+                }}
+                value={this.state.catchall}
+                name="catchall"
+                type="text"
+                placeholder="example.com"
+              />
+            </Col>
+            <Col xs="2">
+              <Label>Password</Label>
+              <Input
+                onChange={e => {
+                  this.handleChange(e);
+                }}
+                value={this.state.password}
+                name="password"
+                type="password"
+              />
+            </Col>
+            <Col xs="1">
+              <h6 style={{ fontWeight: 600 }}>Random Pass</h6>
+              <Toggle
+                className="alignBottomToggle"
+                defaultChecked={this.state.randomPassword}
+                onChange={() => {
+                  this.setState({ randomPassword: !this.state.randomPassword });
+                }}
+              />
+            </Col>
+            <Col xs="1">
+              <h6 style={{ fontWeight: 600 }}>Advanced</h6>
+              <Toggle
+                className="alignBottomToggle"
+                defaultChecked={this.state.advancedSettings}
+                onChange={() => {
+                  this.setState({ advancedSettings: !this.state.advancedSettings });
+                }}
+              />
+            </Col>
+            <Col xs="4">
+              <Button
+                style={{ margin: '5px' }}
+                onClick={() => {
+                  this.start();
+                }}
+              >
+                Start
+              </Button>
+              <Button
+                style={{ margin: '5px' }}
+                onClick={() => {
+                  this.loadAllAccounts();
+                }}
+              >
+                Load All
+              </Button>
+              <Button
+                style={{ margin: '5px' }}
+                onClick={() => {
+                  this.copyToClipboard();
+                }}
+              >
+                Copy All
+              </Button>
+              <Button color="danger" style={{ margin: '5px' }} onClick={this.toggleConfModal}>
+                Delete All
+              </Button>
+              <Button
+                color="danger"
+                style={{ margin: '5px' }}
+                onClick={() => {
+                  ipcRenderer.send(RESET_CAPTCHA_WINDOW, 'reset');
+                }}
+              >
+                Reload Captcha
+              </Button>
+            </Col>
+          </Row>
+          {this.state.advancedSettings ? (
+            <CSSTransition in={true} appear={true} timeout={300} classNames="fade">
+              <Row style={{ paddingTop: '20px' }}>
+                <Col xs="1">
+                  <h6 style={{ fontWeight: 600, marginBottom: '50px' }}>Proxies</h6>
+                  <Toggle
+                    className="alignBottomToggle"
+                    defaultChecked={this.state.useProxies}
+                    onChange={() => {
+                      this.setState({ useProxies: !this.state.useProxies });
+                    }}
+                  />
+                </Col>
+                <Col xs="1">
+                  <h6 style={{ fontWeight: 600 }}>Random Name</h6>
+                  <Toggle
+                    className="alignBottomToggle"
+                    defaultChecked={this.state.randomFirstLast}
+                    onChange={() => {
+                      this.setState({ randomFirstLast: !this.state.randomFirstLast });
+                    }}
+                  />
+                </Col>
+                <Col xs="1">
+                  <h6 style={{ fontWeight: 600 }}>Delay</h6>
+                  <Toggle
+                    className="alignBottomToggle"
+                    defaultChecked={this.state.accountCreationDelay}
+                    onChange={() => {
+                      this.setState({ accountCreationDelay: !this.state.accountCreationDelay });
+                    }}
+                  />
+                </Col>
+                {this.state.useProxies ? (
+                  <Col xs="3">
+                    <Label>Proxies</Label>
+                    <Input
+                      onChange={e => {
+                        this.handleChange(e);
                       }}
+                      placeholder="user:pass@ip:port or ip:port or user:pass:ip:port"
+                      name="proxies"
+                      type="textarea"
                     />
                   </Col>
-                  <Col xs="1">
-                    <h6 style={{ fontWeight: 600 }}>Random Name</h6>
-                    <Toggle
-                      className="alignBottomToggle"
-                      defaultChecked={this.state.randomFirstLast}
-                      onChange={() => {
-                        this.setState({ randomFirstLast: !this.state.randomFirstLast });
+                ) : (
+                  ''
+                )}
+                {!this.state.randomFirstLast ? (
+                  <Col xs="2">
+                    <Label>First Name</Label>
+                    <Input
+                      onChange={e => {
+                        this.handleChange(e);
                       }}
+                      name="firstName"
+                      type="text"
                     />
                   </Col>
-                  <Col xs="1">
-                    <h6 style={{ fontWeight: 600 }}>Delay</h6>
-                    <Toggle
-                      className="alignBottomToggle"
-                      defaultChecked={this.state.accountCreationDelay}
-                      onChange={() => {
-                        this.setState({ accountCreationDelay: !this.state.accountCreationDelay });
+                ) : (
+                  ''
+                )}
+                {!this.state.randomFirstLast ? (
+                  <Col xs="2">
+                    <Label>Last Name</Label>
+                    <Input
+                      onChange={e => {
+                        this.handleChange(e);
                       }}
+                      name="lastName"
+                      type="text"
                     />
                   </Col>
-                  {this.state.useProxies ? (
-                    <Col xs="3">
-                      <Label>Proxies</Label>
-                      <Input
-                        onChange={e => {
-                          this.handleChange(e);
-                        }}
-                        placeholder="user:pass@ip:port or ip:port or user:pass:ip:port"
-                        name="proxies"
-                        type="textarea"
-                      />
-                    </Col>
-                  ) : (
-                    ''
-                  )}
-                  {!this.state.randomFirstLast ? (
-                    <Col xs="2">
-                      <Label>First Name</Label>
-                      <Input
-                        onChange={e => {
-                          this.handleChange(e);
-                        }}
-                        name="firstName"
-                        type="text"
-                      />
-                    </Col>
-                  ) : (
-                    ''
-                  )}
-                  {!this.state.randomFirstLast ? (
-                    <Col xs="2">
-                      <Label>Last Name</Label>
-                      <Input
-                        onChange={e => {
-                          this.handleChange(e);
-                        }}
-                        name="lastName"
-                        type="text"
-                      />
-                    </Col>
-                  ) : (
-                    ''
-                  )}
-                  {this.state.accountCreationDelay ? (
-                    <Col xs="2">
-                      <Label>Delay Amount (ms)</Label>
-                      <Input
-                        name="accountCreationDelayAmount"
-                        value={this.state.accountCreationDelayAmount}
-                        onChange={e => {
-                          this.handleChange(e);
-                        }}
-                        type="number"
-                      />
-                    </Col>
-                  ) : (
-                    ''
-                  )}
-                </Row>
-              </CSSTransition>
-            ) : (
-              ''
-            )}
-          </Container>
+                ) : (
+                  ''
+                )}
+                {this.state.accountCreationDelay ? (
+                  <Col xs="2">
+                    <Label>Delay Amount (ms)</Label>
+                    <Input
+                      name="accountCreationDelayAmount"
+                      value={this.state.accountCreationDelayAmount}
+                      onChange={e => {
+                        this.handleChange(e);
+                      }}
+                      type="number"
+                    />
+                  </Col>
+                ) : (
+                  ''
+                )}
+              </Row>
+            </CSSTransition>
+          ) : (
+            ''
+          )}
           <Modal isOpen={this.state.confModal} toggle={this.toggleConfModal} centered={true}>
             <ModalHeader toggle={this.toggleConfModal} style={{ borderBottom: 'none' }}>
               Delete All Accounts?
@@ -787,7 +785,7 @@ export default class AccountCreator extends Component {
               </Button>
             </ModalFooter>
           </Modal>
-        </Col>
+        </Container>
       </CSSTransition>
     );
   }

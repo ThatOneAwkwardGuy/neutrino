@@ -1,4 +1,7 @@
+import { BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, OPEN_CAPTCHA_WINDOW, RECEIVE_CAPTCHA_TOKEN, FINISH_SENDING_CAPTCHA_TOKEN } from '../constants';
 const rp = require('request-promise');
+const uuidv4 = require('uuid/v4');
+const ipcRenderer = require('electron').ipcRenderer;
 
 export default class ExtraButter {
   constructor(url, profile, site, style, size, status, proxy, raffleDetails, forceUpdate) {
@@ -26,10 +29,10 @@ export default class ExtraButter {
     this.forceUpdate();
   };
 
-  start = () => {
+  start = async () => {
     while (this.run) {
       try {
-        this.makeEntry();
+        await this.makeEntry();
       } catch (error) {
         console.log(error);
         this.changeStatus(`Error Submitting Raffle - ${error.message}`);
@@ -130,13 +133,72 @@ export default class ExtraButter {
     });
   };
 
+  checkEmail = async () => {
+    const captchaToken = await this.getCaptcha();
+    try {
+      const validationEmailResponse = await this.rp({
+        method: 'POST',
+        url: 'https://eb-draw.herokuapp.com/customers/validateEmail',
+        method: 'POST',
+        headers: {
+          Accept: 'application/json, text/javascript, */*; q=0.01',
+          Referer: this.url,
+          Origin: 'https://shop.extrabutterny.com',
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        form: {
+          email: this.profile.email,
+          product_id: this.raffleDetails.product.product.id,
+          challenge_response: captchaToken.captchaResponse
+        }
+      });
+      const JSONparsed = JSON.parse(validationEmailResponse);
+      return JSONparsed.customers[0];
+    } catch (error) {
+      return false;
+    }
+  };
+
+  getCaptcha = () => {
+    return new Promise((resolve, reject) => {
+      try {
+        const tokenID = uuidv4();
+        ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
+        ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
+          checkoutURL: this.url,
+          id: tokenID,
+          type: 'ExtraButter',
+          proxy: this.proxy,
+          site: this.site
+        });
+        ipcRenderer.on(RECEIVE_CAPTCHA_TOKEN, async (event, captchaToken) => {
+          if (captchaToken.id === tokenID) {
+            ipcRenderer.send(FINISH_SENDING_CAPTCHA_TOKEN, {});
+            resolve(captchaToken);
+          }
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
+  };
+
   makeEntry = async () => {
     this.changeStatus('Getting Variant ID For Size');
     const variant = await this.getIDForSize();
     console.log(variant);
-    this.changeStatus('Creating Customer');
-    const createCustomerResponse = await this.createCustomer();
-    const createCustomer = JSON.parse(createCustomerResponse);
+    this.changeStatus('Checking Email');
+    const checkEmailResponse = await this.checkEmail();
+    let createCustomer;
+    if (!checkEmailResponse) {
+      console.log(checkEmailResponse);
+      this.changeStatus('Creating Customer');
+      const createCustomerResponse = await this.createCustomer();
+      createCustomer = JSON.parse(createCustomerResponse);
+    } else {
+      createCustomer = checkEmailResponse;
+    }
     console.log(createCustomer);
     this.changeStatus('Submitting Raffle Info');
     const submitRaffleResponse = await this.submitRaffle(variant, createCustomer.id);
