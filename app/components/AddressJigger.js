@@ -29,7 +29,22 @@ const TRANSLATIONS = [
   ['road', 'rd', 'raod', 'roaad', 'rooad'],
   ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace'],
   ['circle', 'cirkle', 'circl', 'cirkle'],
-  ['via', 'vvia', 'viia', 'viaa', 'vviiaa', 'viiaa', 'vviaa', 'vviia']
+  ['via', 'vvia', 'viia', 'viaa', 'vviiaa', 'viiaa', 'vviaa', 'vviia'],
+  ['viale', 'vviale', 'viiale', 'viaale', 'vialle', 'vialee'],
+  ['vviuzza', 'viiuzza', 'viuuzza', 'viuzzza', 'viuzzza', 'viuzzaa'],
+  ['ccorso', 'coorso', 'corrso', 'corsso', 'corsoo'][('sstrada', 'sttrada', 'strrada', 'straada', 'stradda', 'stradaa')],
+  ['ppassaggio', 'paassaggio', 'passsaggio', 'passsaggio', 'passaaggio', 'passagggio', 'passagggio', 'passaggiio', 'passaggioo'],
+  ['RRoute', 'Rooute', 'Rouute', 'Routte', 'Routee'],
+  ['AAvenue', 'Avvenue', 'Aveenue', 'Avennue', 'Avenuue', 'Avenuee'],
+  ['CChemin', 'Chhemin', 'Cheemin', 'Chemmin', 'Chemiin', 'Cheminn'],
+  ['BBoulevard', 'Booulevard', 'Bouulevard', 'Boullevard', 'Bouleevard', 'Boulevvard', 'Boulevaard', 'Boulevarrd', 'Boulevardd'],
+  ['GGaffe', 'Gaaffe', 'Gafffe', 'Gafffe', 'Gaffee'],
+  ['IImpasse', 'Immpasse', 'Imppasse', 'Impaasse', 'Impassse', 'Impassse', 'Impassee'],
+  ['PPassage', 'Paassage', 'Passsage', 'Passsage', 'Passaage', 'Passagge', 'Passagee'],
+  ['RRou', 'Roou', 'Rouu'],
+  ['RRuelle', 'Ruuelle', 'Rueelle', 'Ruellle', 'Ruellle', 'Ruellee'],
+  ['SStrasse', 'Sttrasse', 'Strrasse', 'Straasse', 'Strassse', 'Strassse', 'Strassee'],
+  ['PPlatz', 'Pllatz', 'Plaatz', 'Plattz', 'Platzz']
 ];
 
 export default class AddressJigger extends Component {

@@ -47,7 +47,11 @@ export default class ExtraButter {
   };
 
   getIDForSize = async () => {
-    const raffleInfoResponse = await this.rp.get(`https://eb-draw.herokuapp.com/draws/${this.raffleDetails.product.product.id}`);
+    // const raffleInfoResponse = await this.rp.get(`https://eb-draw.herokuapp.com/draws/${this.raffleDetails.product.product.id}`);
+    const raffleInfoResponse = await this.rp({
+      method: 'GET',
+      uri: `https://eb-draw.herokuapp.com/draws/${this.raffleDetails.product.product.id}`
+    });
     const raffleInfo = JSON.parse(raffleInfoResponse);
     const variant = raffleInfo[0].variants.find(variant => String(variant.variant_id) === String(this.size.id));
     console.log(raffleInfo);
@@ -103,7 +107,7 @@ export default class ExtraButter {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       form: {
-        key: 'pk_test_qM41LJ9RZgw63yIlLC1PDkTL',
+        key: 'pk_live_BvMSJIayKxTHEJsMvfCPaiRh',
         'card[number]': this.profile.paymentDetails.cardNumber,
         'card[cvc]': this.profile.paymentDetails.cvv,
         'card[exp_month]': this.profile.paymentDetails.expirationMonth,

@@ -9,6 +9,16 @@ const converter = require('json-2-csv');
 const { dialog } = require('electron').remote;
 const randomName = require('random-name');
 const TRANSLATIONS = [
+  ['alley', 'allee', 'aly', 'alley', 'ally', 'aly'],
+  ['anex', 'anex', 'anx', 'annex', 'annx', 'anx'],
+  ['arcade', 'arc', 'arc', 'arcade'],
+  ['avenue', 'av', 'ave', 'ave', 'aven', 'avenu', 'avenue', 'avn', 'avnue'],
+  ['bayou', 'bayoo', 'byu', 'bayou'],
+  ['beach', 'bch', 'bch', 'beach'],
+  ['bend', 'bnd'],
+  ['bluff', 'blf', 'bluf', 'bluffs', 'blfs'],
+  ['bottom', 'bot', 'btm', 'bottm'],
+  ['boulevard', 'blvd', 'boul', 'boulv'],
   ['street', 'st.', 'st', 'streett', 'steet', 'sreet'],
   ['drive', 'dr.', 'dr', 'drivee', 'driv', 'drv'],
   ['lane', 'ln.', 'ln'],
@@ -21,7 +31,24 @@ const TRANSLATIONS = [
   ['boulevard', 'blvd', 'blvd.'],
   ['mountain', 'mtn.', 'mtn'],
   ['road', 'rd', 'raod', 'roaad', 'rooad'],
-  ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace']
+  ['place', 'pl', 'plce', 'plac', 'plae', 'pplace', 'plaace'],
+  ['circle', 'cirkle', 'circl', 'cirkle'],
+  ['via', 'vvia', 'viia', 'viaa', 'vviiaa', 'viiaa', 'vviaa', 'vviia'],
+  ['viale', 'vviale', 'viiale', 'viaale', 'vialle', 'vialee'],
+  ['vviuzza', 'viiuzza', 'viuuzza', 'viuzzza', 'viuzzza', 'viuzzaa'],
+  ['ccorso', 'coorso', 'corrso', 'corsso', 'corsoo'][('sstrada', 'sttrada', 'strrada', 'straada', 'stradda', 'stradaa')],
+  ['ppassaggio', 'paassaggio', 'passsaggio', 'passsaggio', 'passaaggio', 'passagggio', 'passagggio', 'passaggiio', 'passaggioo'],
+  ['RRoute', 'Rooute', 'Rouute', 'Routte', 'Routee'],
+  ['AAvenue', 'Avvenue', 'Aveenue', 'Avennue', 'Avenuue', 'Avenuee'],
+  ['CChemin', 'Chhemin', 'Cheemin', 'Chemmin', 'Chemiin', 'Cheminn'],
+  ['BBoulevard', 'Booulevard', 'Bouulevard', 'Boullevard', 'Bouleevard', 'Boulevvard', 'Boulevaard', 'Boulevarrd', 'Boulevardd'],
+  ['GGaffe', 'Gaaffe', 'Gafffe', 'Gafffe', 'Gaffee'],
+  ['IImpasse', 'Immpasse', 'Imppasse', 'Impaasse', 'Impassse', 'Impassse', 'Impassee'],
+  ['PPassage', 'Paassage', 'Passsage', 'Passsage', 'Passaage', 'Passagge', 'Passagee'],
+  ['RRou', 'Roou', 'Rouu'],
+  ['RRuelle', 'Ruuelle', 'Rueelle', 'Ruellle', 'Ruellle', 'Ruellee'],
+  ['SStrasse', 'Sttrasse', 'Strrasse', 'Straasse', 'Strassse', 'Strassse', 'Strassee'],
+  ['PPlatz', 'Pllatz', 'Plaatz', 'Plattz', 'Platzz']
 ];
 const cardTypes = ['visa', 'mastercard'];
 const bots = [
