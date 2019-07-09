@@ -1,0 +1,42 @@
+#sidebar {
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0px 0 rgba(0, 0, 0, 0.5);
+  background-color: $dark2Colour;
+  overflow-y: scroll;
+  padding: 0;
+  text-decoration: none !important;
+}
+
+#content {
+  margin: 0px 10px 0px 10px;
+  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5),
+    inset 0 1px 0px 0 rgba(0, 0, 0, 0.5);
+  background-color: $dark2Colour;
+  overflow-y: scroll;
+}
+.sidebarIcon,
+.sidebarIcon span {
+  color: white;
+  transition: 0.3s;
+}
+
+.sidebarIcon {
+  padding: 1.2rem;
+}
+.sidebarIcon:hover {
+  background-color: $mainColour;
+}
+
+.sidebarIconActive span {
+  color: $mainColour;
+}
+
+.sidebarIconActive:hover span {
+  color: white;
+}
+
+.sidebarIconLabel {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-left: 20px;
+}

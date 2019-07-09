@@ -1,0 +1,191 @@
+/*
+ * @NOTE: Prepend a `~` to css file paths that are in your node_modules
+ *        See https://github.com/webpack-contrib/sass-loader#imports
+ */
+@import '~@fortawesome/fontawesome-free/css/all.css';
+@import '~font-awesome/css/font-awesome.css';
+@import './styles/constants.scss';
+@import './fonts/stylesheet.css';
+@import '~bootstrap/dist/css/bootstrap.css';
+@import './components/Footer/index.scss';
+@import './components/Header/index.scss';
+@import './screens/Login/index.scss';
+@import './screens/Home/index.scss';
+@import './components/Homepage/index.scss';
+@import './components/ProxyCreator/index.scss';
+@import '~react-table/react-table.css';
+body {
+  position: relative;
+  color: white;
+  height: 100vh;
+  background-color: $dark1Colour;
+  font-family: 'Montserrat', Arial, Helvetica, Helvetica Neue, serif;
+  overflow-y: hidden;
+}
+
+#root {
+  height: 100%;
+}
+
+.neutrinoButton {
+  background-color: $mainColour;
+  border: 0;
+  border-radius: 0;
+  font-weight: bold;
+}
+
+input,
+select,
+textarea {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background-color: $dark1Colour !important;
+  color: white !important;
+  font-weight: bold !important;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.col-0_5 {
+  flex: 0 0 4%;
+  max-width: 4%;
+  min-width: 50px;
+}
+
+::-webkit-scrollbar {
+  display: none;
+}
+
+.panel-left {
+  border: solid 10px $dark1Colour;
+  border-top: 0px;
+  border-bottom: 0px;
+  border-left: 0px;
+  background-color: $dark2Colour;
+  overflow-y: scroll;
+}
+
+.panel-middle {
+  border: solid 10px $dark1Colour;
+  background-color: $dark2Colour;
+  overflow-y: scroll;
+  border-right: 0px;
+  border-left: 0px;
+  border-bottom: 0px;
+}
+
+.panel-right {
+  border: solid 10px $dark1Colour;
+  border-top: 0px;
+  border-bottom: 0px;
+  background-color: $dark2Colour;
+  overflow-y: scroll;
+}
+
+.panel-title {
+  background: $mainColour;
+  padding: 5px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+  supported by Chrome and Opera */
+}
+
+.fs-1rem {
+  font-size: 1rem !important;
+}
+
+.fs-0_8rem {
+  font-size: 0.8rem !important;
+}
+
+.h-25 {
+  height: 25% !important;
+}
+
+.h-50 {
+  height: 50% !important;
+}
+
+.h-75 {
+  height: 75%;
+}
+
+label {
+  font-weight: bold;
+  font-size: 0.8rem;
+}
+
+.btn-secondary {
+  background: $mainColour;
+}
+
+.btn {
+  border-radius: 0px;
+  border: none;
+  width: 100%;
+  font-weight: bold;
+}
+
+.react-bootstrap-table tbody,
+.react-bootstrap-table th,
+.react-bootstrap-table .table thead th,
+.react-bootstrap-table tbody td {
+  color: white !important;
+  border: none;
+  text-align: center;
+  outline: none;
+}
+
+.react-bootstrap-table th {
+  cursor: pointer;
+}
+
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+  supported by Chrome and Opera */
+}
+
+// h2 {
+//   margin: 0;
+//   font-size: 2.25rem;
+//   font-weight: bold;
+//   letter-spacing: -0.025em;
+//   color: #fff;
+// }
+
+// p {
+//   font-size: 24px;
+// }
+
+// li {
+//   list-style: none;
+// }
+
+// a {
+//   color: white;
+//   opacity: 0.75;
+//   text-decoration: none;
+// }
+
+// a:hover {
+//   opacity: 1;
+//   text-decoration: none;
+//   cursor: pointer;
+// }

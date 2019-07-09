@@ -1,0 +1,16 @@
+{
+  "ROOT": "/home",
+  "HOME": "/home",
+  "HOMEPAGE": "/homepage",
+  "LOGIN": "/login",
+  "PROXY_CREATOR": "/home/proxy-creator",
+  "PROXY_TESTER": "/home/proxy-tester",
+  "ACCOUNT_CREATOR": "/home/account-creator",
+  "ADDRESS_JIGGER": "/home/address-jigger",
+  "ONECLICK_GENERATOR": "/home/oneclick-generator",
+  "PROFILE_CREATOR": "/home/profile-creator",
+  "ONECLICK_TESTER": "/home/oneclick-tester",
+  "PROFILE_TASK_EDITOR_CONVERTER": "/home/profile-task-editor-converter",
+  "RAFFLE_BOT": "/home/raffle-bot",
+  "SETTINGS": "/home/settings"
+}

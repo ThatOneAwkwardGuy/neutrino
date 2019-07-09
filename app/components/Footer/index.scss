@@ -1,0 +1,21 @@
+#footer {
+  height: 50px;
+  background-color: $dark2Colour;
+  margin-top: 10px;
+}
+
+.footerIcon {
+  cursor: pointer;
+}
+
+.footerIcon span:hover {
+  color: $mainColour !important;
+  transition: 0.3s;
+}
+.footerText {
+  font-size: 0.8rem;
+}
+
+.footerIcon:focus {
+  outline: 0;
+}

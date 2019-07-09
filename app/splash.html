@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+      #splashImage {
+        width: 50%;
+        align-self: center;
+        justify-self: center;
+      }
+      html,
+      body {
+        height: 100vh;
+        width: 100vw;
+        border: none;
+        background-color: #222222;
+        overflow: hidden;
+        -webkit-app-region: drag;
+        margin: 0px;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <img id="splashImage" draggable="false" src="./images/logo.svg" alt="" />
+  </body>
+</html>

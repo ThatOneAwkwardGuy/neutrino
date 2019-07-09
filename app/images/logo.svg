@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="261px" height="269px" viewBox="0 0 261 269" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->
+    <title>Logo</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="50%" y1="50%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#1138FC" offset="0%"></stop>
+            <stop stop-color="#7C90F2" offset="100%"></stop>
+        </linearGradient>
+        <filter x="-8.2%" y="-8.2%" width="116.4%" height="116.4%" filterUnits="objectBoundingBox" id="filter-2">
+            <feGaussianBlur stdDeviation="3" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <filter x="0.0%" y="0.0%" width="100.0%" height="100.0%" filterUnits="objectBoundingBox" id="filter-3">
+            <feGaussianBlur stdDeviation="0" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Logo">
+            <ellipse id="Oval-2" fill="url(#linearGradient-1)" cx="130.5" cy="134.5" rx="126.5" ry="126.5"></ellipse>
+            <ellipse id="Oval-2" fill="#FFFFFF" filter="url(#filter-2)" cx="131" cy="137" rx="55" ry="55"></ellipse>
+            <ellipse id="Oval-2" fill="#FFFFFF" filter="url(#filter-3)" cx="131" cy="137" rx="55" ry="55"></ellipse>
+        </g>
+    </g>
+</svg>

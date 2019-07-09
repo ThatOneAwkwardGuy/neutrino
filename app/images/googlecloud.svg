@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21px" height="22px" viewBox="0 0 21 22" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->
+    <title>google-brands</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Proxy-Creator---1b" transform="translate(-86.000000, -32.000000)" fill-rule="nonzero" fill="#FFFFFF">
+            <g id="google-brands" transform="translate(86.000000, 32.000000)">
+                <path d="M21,10.9240623 C21,17.0145068 16.830123,21.3488372 10.6721311,21.3488372 C4.76803279,21.3488372 0,16.5797824 0,10.6744186 C0,4.76905476 4.76803279,0 10.6721311,0 C13.5467213,0 15.9651639,1.05452926 17.8284836,2.79342648 L14.9237705,5.58685296 C11.1239754,1.91967367 4.0579918,4.67436234 4.0579918,10.6744186 C4.0579918,14.3975525 7.03155738,17.4147974 10.6721311,17.4147974 C14.8979508,17.4147974 16.4815574,14.3846399 16.7311475,12.8136065 L10.6721311,12.8136065 L10.6721311,9.14212303 L20.8321721,9.14212303 C20.9311475,9.68875656 21,10.2138691 21,10.9240623 Z" id="Shape"></path>
+            </g>
+        </g>
+    </g>
+</svg>
