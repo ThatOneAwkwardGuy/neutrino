@@ -1,0 +1,9 @@
+#TableContainer > div,
+#TableContainer > div > div {
+  height: 100% !important;
+  overflow: visible !important;
+}
+
+#TableContainer > div > div > div:nth-child(2) {
+  height: calc(100% - 50px) !important;
+}

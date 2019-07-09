@@ -173,7 +173,8 @@ export default class ProxyTester extends Component {
     const columns = [
       {
         Header: '#',
-        accessor: 'ip'
+        Cell: row => <div>{row.row.index + 1}</div>,
+        width: 20
       },
       {
         Header: 'IP',
@@ -198,13 +199,12 @@ export default class ProxyTester extends Component {
     ];
 
     const { proxies } = this.state;
-
     return (
       <Row className="h-100 p-0">
-        <Col className="panel-left">
+        <Col className="panel-left h-100">
           <Container fluid className="p-0 h-100 d-flex flex-column">
-            <Row className="px-0 flex-fill">
-              <Col>
+            <Row className="px-0 flex-1 overflow-hidden">
+              <Col id="TableContainer" className="h-100">
                 <Table
                   {...{
                     data: proxies,
@@ -229,31 +229,33 @@ export default class ProxyTester extends Component {
               </Col>
             </Row>
             <Row className="panel-middle">
-              <Container fluid>
-                <Row>
-                  <Col xs="6" className="py-3">
-                    <Label>Proxies*</Label>
-                    <Input
-                      rows="4"
-                      type="textarea"
-                      placeholder="ip:port or ip:port:user:pass"
-                    />
-                  </Col>
-                  <Col xs="3" className="py-3">
-                    <Label>Website*</Label>
-                    <Input type="text" />
-                    <Button className="my-2">Test Proxies</Button>
-                    <Button className="my-2">Copy Proxies</Button>
-                  </Col>
-                  <Col xs="3" className="py-3">
-                    <Label>Max Ping</Label>
-                    <Input type="text" />
-                    <Button color="danger" className="my-2">
-                      Clear Proxies
-                    </Button>
-                  </Col>
-                </Row>
-              </Container>
+              <Col>
+                <Container fluid>
+                  <Row>
+                    <Col xs="6" className="py-3">
+                      <Label>Proxies*</Label>
+                      <Input
+                        rows="4"
+                        type="textarea"
+                        placeholder="ip:port or ip:port:user:pass"
+                      />
+                    </Col>
+                    <Col xs="3" className="py-3">
+                      <Label>Website*</Label>
+                      <Input type="text" />
+                      <Button className="my-2">Test Proxies</Button>
+                      <Button className="my-2">Copy Proxies</Button>
+                    </Col>
+                    <Col xs="3" className="py-3">
+                      <Label>Max Ping</Label>
+                      <Input type="text" />
+                      <Button color="danger" className="my-2">
+                        Clear Proxies
+                      </Button>
+                    </Col>
+                  </Row>
+                </Container>
+              </Col>
             </Row>
           </Container>
         </Col>

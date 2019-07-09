@@ -38,7 +38,7 @@ export default class Homepage extends Component {
       </Col>
       <Col xs="6">
         {raffle.name}
-        <br></br>
+        <br />
         {`Ends ${raffle.endDate.toDate().toLocaleDateString()}`}
       </Col>
       <Col xs="3">{raffle.store}</Col>
@@ -97,20 +97,36 @@ export default class Homepage extends Component {
               </Col>
             </Row>
             <Row className="h-50 panel-middle">
-              <Col className="py-3">
-                <span className="panel-title">Stats</span>
-                <Container fluid>
-                  <Row className="my-5">
-                    <Col xs="9">Raffles Entered</Col>
-                    <Col xs="3">0</Col>
+              <Col className="py-3 h-100">
+                <Container className="h-100 d-flex flex-column">
+                  <Row>
+                    <Col>
+                      <span className="panel-title">Stats</span>
+                    </Col>
                   </Row>
-                  <Row className="my-5">
-                    <Col xs="9">Proxies Created</Col>
-                    <Col xs="3">0</Col>
-                  </Row>
-                  <Row className="my-5">
-                    <Col xs="9">Accounts Created</Col>
-                    <Col xs="3">0</Col>
+                  <Row className="flex-fill">
+                    <Col>
+                      <Container fluid className="d-flex flex-column h-100 p-3">
+                        <Row className="flex-fill align-items-center">
+                          <Col xs="9" className="font-weight-bold">
+                            Raffles Entered
+                          </Col>
+                          <Col xs="3">0</Col>
+                        </Row>
+                        <Row className="flex-fill align-items-center">
+                          <Col xs="9" className="font-weight-bold">
+                            Proxies Created
+                          </Col>
+                          <Col xs="3">0</Col>
+                        </Row>
+                        <Row className="flex-fill align-items-center">
+                          <Col xs="9" className="font-weight-bold">
+                            Accounts Created
+                          </Col>
+                          <Col xs="3">0</Col>
+                        </Row>
+                      </Container>
+                    </Col>
                   </Row>
                 </Container>
               </Col>

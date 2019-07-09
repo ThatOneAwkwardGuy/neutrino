@@ -13,6 +13,7 @@
 @import './screens/Home/index.scss';
 @import './components/Homepage/index.scss';
 @import './components/ProxyCreator/index.scss';
+@import './components/ProxyTester/index.scss';
 @import '~react-table/react-table.css';
 body {
   position: relative;
@@ -20,6 +21,7 @@ body {
   height: 100vh;
   background-color: $dark1Colour;
   font-family: 'Montserrat', Arial, Helvetica, Helvetica Neue, serif;
+  font-size: 1vw;
   overflow-y: hidden;
 }
 
@@ -64,9 +66,9 @@ textarea:focus {
 
 .panel-left {
   border: solid 10px $dark1Colour;
-  border-top: 0px;
-  border-bottom: 0px;
-  border-left: 0px;
+  border-top: 0;
+  border-bottom: 0;
+  border-left: 0;
   background-color: $dark2Colour;
   overflow-y: scroll;
 }
@@ -75,15 +77,16 @@ textarea:focus {
   border: solid 10px $dark1Colour;
   background-color: $dark2Colour;
   overflow-y: scroll;
-  border-right: 0px;
-  border-left: 0px;
-  border-bottom: 0px;
+  border-right: 0;
+  border-left: 0;
+  border-bottom: 0;
 }
 
 .panel-right {
   border: solid 10px $dark1Colour;
-  border-top: 0px;
-  border-bottom: 0px;
+  border-top: 0;
+  border-bottom: 0;
+  border-right: 0;
   background-color: $dark2Colour;
   overflow-y: scroll;
 }
@@ -100,6 +103,10 @@ textarea:focus {
   -ms-user-select: none; /* Internet Explorer/Edge */
   user-select: none; /* Non-prefixed version, currently
   supported by Chrome and Opera */
+}
+
+.panel-container {
+  width: 100%;
 }
 
 .fs-1rem {
@@ -132,10 +139,14 @@ label {
 }
 
 .btn {
-  border-radius: 0px;
+  border-radius: 0;
   border: none;
   width: 100%;
   font-weight: bold;
+}
+
+.react-bootstrap-table th {
+  cursor: pointer;
 }
 
 .react-bootstrap-table tbody,
@@ -148,10 +159,6 @@ label {
   outline: none;
 }
 
-.react-bootstrap-table th {
-  cursor: pointer;
-}
-
 .noselect {
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Safari */
@@ -160,6 +167,10 @@ label {
   -ms-user-select: none; /* Internet Explorer/Edge */
   user-select: none; /* Non-prefixed version, currently
   supported by Chrome and Opera */
+}
+
+.flex-1 {
+  flex: 1 !important;
 }
 
 // h2 {

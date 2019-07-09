@@ -10,7 +10,7 @@
  *
  * @flow
  */
-import { app, BrowserWindow } from 'electron';
+import { app } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import * as Splashscreen from '@trodi/electron-splashscreen';
@@ -68,20 +68,16 @@ app.on('ready', async () => {
     await installExtensions();
   }
 
-  // mainWindow = new BrowserWindow({
-  //   show: false,
-  //   frame: false,
-  //   width: 1024,
-  //   height: 728
-  // });
-
   mainWindow = Splashscreen.initSplashScreen({
     windowOpts: {
       show: false,
       frame: false,
       center: true,
       width: 1224,
-      height: 728
+      height: 728,
+      webPreferences: {
+        nodeIntegration: true
+      }
     },
     minVisible: 3000,
     templateUrl: `${__dirname}/splash.html`,

@@ -1270,13 +1270,9 @@
   version "12.6.1"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.6.1.tgz#d5544f6de0aae03eefbb63d5120f6c8be0691946"
 
-"@types/node@^10.1.0":
+"@types/node@^10.1.0", "@types/node@^10.12.18":
   version "10.14.12"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.14.12.tgz#0eec3155a46e6c4db1f27c3e588a205f767d622f"
-
-"@types/node@^8.0.24":
-  version "8.10.50"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-8.10.50.tgz#f3d68482b1f54b5f4fba8daaac385db12bb6a706"
 
 "@types/prop-types@*":
   version "15.7.1"
@@ -4634,11 +4630,11 @@ electron-updater@^3.2.3:
     semver "^5.6.0"
     source-map-support "^0.5.9"
 
-electron@^3.0.10:
-  version "3.1.11"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-3.1.11.tgz#3381d8a3c5c58809c226530f9b773d0baf1bef45"
+electron@6.0.0-beta.12:
+  version "6.0.0-beta.12"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-6.0.0-beta.12.tgz#fa7297b4e0bc7300800f23eb3d6bed554ed22d8e"
   dependencies:
-    "@types/node" "^8.0.24"
+    "@types/node" "^10.12.18"
     electron-download "^4.1.0"
     extract-zip "^1.0.3"
 
