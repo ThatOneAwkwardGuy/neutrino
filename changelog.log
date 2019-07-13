@@ -116,6 +116,13 @@
 1.0.16
 - Added more support for different languages in address jigger (Italy: Via, Viale, Viuzza, Corso, Strada, Passaggio | France: Route, Avenue, Chemin, Boulevard, Gaffe, Impasse, Passage, Rou, Ruelle | German: Strasse, Platz)
 - ExtraButter Fix
+- NakedCPH Fix and support for NakedCPH Typeform URL
+- NakedCPH mass account add
+- Profile Gen - TKS
+- Profile Gen Fixes
+
+1.0.17
+- ExtraButter fixes
 
 4242424242424242:Visa:03:2020:123
 4242424242424243:Visa:03:2020:123

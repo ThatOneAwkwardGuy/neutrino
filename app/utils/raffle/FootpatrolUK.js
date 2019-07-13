@@ -61,6 +61,6 @@ export default class FootpatrolUK {
       }&yzemail=${tag}${shortTag}_countryofres=${encodeURIComponent(this.profile.region)}&emailpermit=0&sms_optout=0&site=FP&currency=GBP`
     });
     console.log(response);
-    this.changeStatus('Finished');
+    this.changeStatus('Successful Entry');
   };
 }

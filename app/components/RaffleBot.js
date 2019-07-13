@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { Container, Row, Col, Table, FormGroup, Input, Label, Button, Modal, ModalBody, ModalHeader, ModalFooter } from 'reactstrap';
 import { CSSTransition } from 'react-transition-group';
 import FontAwesome from 'react-fontawesome';
-import ReactTable from 'react-table';
 import { createNewWindow } from '../utils/functions';
 import FootpatrolUK from '../utils/raffle/FootpatrolUK';
 import NakedCPH from '../utils/raffle/NakedCPH';
@@ -34,6 +33,7 @@ export default class RaffleBot extends Component {
       entries: [],
       proxies: [],
       raffleDetails: {},
+      profilesMassInput: '',
       neutrinoRafflesProfileJSON: [],
       styleInput: true,
       sizeInput: true
@@ -101,7 +101,11 @@ export default class RaffleBot extends Component {
     if (randomProxy === undefined) {
       return '';
     } else {
-      return randomProxy;
+      return randomProxy.length === 2
+        ? `http://${randomProxy.ip}:${randomProxy.port}`
+        : randomProxy.length === 4
+        ? `http://${randomProxy.user}:${randomProxy.pass}@${randomProxy.ip}:${randomProxy.port}`
+        : '';
     }
   };
 
@@ -134,7 +138,38 @@ export default class RaffleBot extends Component {
   loadEntries = () => {
     this.toggleProfilesModal();
     const newEntries = [];
-    this.state.neutrinoRafflesProfileJSON.forEach(profile => {
+    let profiles = [];
+    if (this.state.neutrinoRafflesProfileJSON.length === 0) {
+      this.state.profilesMassInput.split('\n').map(profileString => {
+        const profileArray = profileString.split(':');
+        profiles.push({
+          email: profileArray[2],
+          firstName: profileArray[0],
+          lastName: profileArray[1],
+          password: profileArray[3],
+          phoneNumber: '',
+          address: {
+            address: '',
+            apt: '',
+            city: '',
+            state: '',
+            zipCode: '',
+            region: profileArray[4]
+          },
+          paymentDetails: {
+            cardHolder: `${profileArray[0]} ${profileArray[1]}`,
+            cardNumber: '',
+            cvv: '',
+            emailAddress: profileArray[2],
+            expirationMonth: '',
+            expirationYear: ''
+          }
+        });
+      });
+    } else {
+      profiles = this.state.neutrinoRafflesProfileJSON;
+    }
+    profiles.forEach(profile => {
       let entry = false;
       const sizeObject = this.state.sizes.find(size => String(size.id) === this.state.size);
       const styleObject = this.state.styles.find(style => String(style.id) === this.state.style);
@@ -339,10 +374,15 @@ export default class RaffleBot extends Component {
         if (result === link) {
           win.webContents.executeJavaScript('document.documentElement.innerHTML', false, innerHTML => {
             win.webContents.executeJavaScript('window.rendererData', false, renderData => {
-              const $ = cheerio.load(innerHTML);
-              const typeformCode = $('.typeform-widget')
-                .attr('data-url')
-                .split('/to/')[1];
+              let typeformCode = '';
+              if (result.includes('nakedcph.typeform.com')) {
+                typeformCode = renderData.form.id;
+              } else {
+                const $ = cheerio.load(innerHTML);
+                typeformCode = $('.typeform-widget')
+                  .attr('data-url')
+                  .split('/to/')[1];
+              }
               this.setState({
                 sizeInput: false,
                 styleInput: false,
@@ -657,7 +697,7 @@ export default class RaffleBot extends Component {
             </Table>
           </Row>
           <Row className="my-3">
-            <Col xs="2">
+            <Col>
               <Label>Site</Label>
               <Input name="site" type="select" onChange={this.handleChange} defaultValue="select site">
                 <option disabled>select site</option>
@@ -671,7 +711,7 @@ export default class RaffleBot extends Component {
                 <option>OneBlockDown</option>
               </Input>
             </Col>
-            <Col xs="2">
+            <Col>
               <Label>Raffle Link</Label>
               <Input name="raffleLink" type="text" onChange={this.handleChange} />
             </Col>
@@ -696,6 +736,8 @@ export default class RaffleBot extends Component {
                 </Input>
               </Col>
             ) : null}
+          </Row>
+          <Row className="justify-content-end">
             <Col className="d-flex">
               <Button className="nButton w-100 align-self-end" onClick={this.toggleProxyModal}>
                 Proxies
@@ -711,8 +753,6 @@ export default class RaffleBot extends Component {
                 Start
               </Button>
             </Col>
-          </Row>
-          <Row className="justify-content-end">
             <Col xs="2" className="d-flex">
               <Button className="nButton w-100 align-self-end" onClick={this.clearAll}>
                 Clear
@@ -725,20 +765,25 @@ export default class RaffleBot extends Component {
             </ModalHeader>
             <ModalBody>
               <Row>
-                <Col xs="4" className="d-flex">
-                  <Button style={{ width: '100%' }} onClick={this.importFile} className="align-self-middle nButton">
+                <Col className="d-flex">
+                  <Button style={{ width: '100%' }} onClick={this.importFile} className="align-self-middle nButton p-5">
                     <FontAwesome name="upload" style={{ display: 'block', padding: '10px', width: '100%' }} size="2x" />
                     Load Profiles
                   </Button>
                 </Col>
-                <Col>
-                  <Label>Input Profiles</Label>
-                  <Input
-                    type="textarea"
-                    rows="6"
-                    placeholder="Input properly formatted neutrino raffle profiles or use the profile converter to convert profiles to neutrino raffle profiles"
-                  />
-                </Col>
+                {this.state.site === 'NakedCPH' ? (
+                  <Col>
+                    <Label>Input Accounts</Label>
+                    <Input
+                      onChange={this.handleChange}
+                      name="profilesMassInput"
+                      value={this.state.profilesMassInput}
+                      type="textarea"
+                      rows="6"
+                      placeholder="FirstName:LastName:Email:Password:Region"
+                    />
+                  </Col>
+                ) : null}
               </Row>
               <Row>
                 <CSSTransition in={true} appear={true} timeout={300} classNames="fade">

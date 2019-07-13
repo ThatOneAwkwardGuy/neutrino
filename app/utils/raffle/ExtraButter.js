@@ -19,7 +19,7 @@ export default class ExtraButter {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
       },
-      proxy,
+      proxy: proxy !== '' ? proxy : null,
       jar: this.cookieJar
     });
   }
@@ -84,12 +84,12 @@ export default class ExtraButter {
         shipping_last_name: this.profile.lastName,
         customer_id: customerID,
         variant_id: variant.id,
-        street_address: this.profile.address.address1,
+        street_address: this.profile.address.address,
         city: this.profile.address.city,
         zip: this.profile.address.zipCode,
         state: this.profile.address.state,
-        phone: this.profile.address.address1,
-        country: this.profile.phoneNumber,
+        phone: this.profile.phoneNumber,
+        country: this.profile.address.region,
         delivery_method: 'online'
       }
     });
@@ -101,19 +101,19 @@ export default class ExtraButter {
       method: 'POST',
       headers: {
         Accept: 'application/json',
-        Referer: 'https://js.stripe.com/v3/controller-97af8c3dcbdd82cb2827d49bb8aa31ad.html',
+        Referer: 'https://js.stripe.com/v3/controller-d223d770b0acbba9ec5ac4658b071b18.html',
         Origin: 'https://js.stripe.com',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
         'Content-Type': 'application/x-www-form-urlencoded'
       },
       form: {
-        key: 'pk_live_BvMSJIayKxTHEJsMvfCPaiRh',
+        key: 'pk_live_u42h9k3kHDcKpj3DjgyIXjc7',
         'card[number]': this.profile.paymentDetails.cardNumber,
         'card[cvc]': this.profile.paymentDetails.cvv,
         'card[exp_month]': this.profile.paymentDetails.expirationMonth,
         'card[exp_year]': this.profile.paymentDetails.expirationYear.slice(-2),
-        payment_user_agent: 'stripe.js/15af90e0; stripe-js-v3/15af90e0',
-        referrer: this.url
+        payment_user_agent: 'stripe.js/901bf2cc; stripe-js-v3/901bf2cc',
+        referrer: `${this.url}&step=size`
       }
     });
   };
@@ -160,6 +160,7 @@ export default class ExtraButter {
       const JSONparsed = JSON.parse(validationEmailResponse);
       return JSONparsed.customers[0];
     } catch (error) {
+      console.log(error);
       return false;
     }
   };

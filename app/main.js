@@ -274,10 +274,10 @@ app.on('ready', async () => {
     urls: ['https://.amazonaws.com/', 'https:/.amazonaws.com']
   };
 
-  session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    details.requestHeaders['Origin'] = 'http://localhost:4200';
-    callback({ cancel: false, requestHeaders: details.requestHeaders });
-  });
+  // session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
+  //   details.requestHeaders['Origin'] = 'http://localhost:4200';
+  //   callback({ cancel: false, requestHeaders: details.requestHeaders });
+  // });
 
   rpc.on('ready', () => {
     // activity can only be set every 15 seconds

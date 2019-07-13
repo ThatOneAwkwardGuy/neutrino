@@ -51,7 +51,6 @@ const sites = {
   centre214: 'https://centre214.com',
   cityblueshop: 'https://www.cityblueshop.com',
   commonwealth: 'https://commonwealth-ftgg.com',
-  cncpts: 'https://cncpts.com',
   concrete: 'https://concrete.nl',
   thedarksideinitiative: 'https://www.thedarksideinitiative.com',
   deadstock: 'https://www.deadstock.ca',
@@ -302,12 +301,12 @@ export default class AccountCreator extends Component {
     };
 
     const queryString = new URLSearchParams(this.getFormData(payload)).toString();
-
+    console.log(this.getRandomProxy());
     const response = await this.rp({
       method: 'POST',
       url: `${sites[this.state.site]}/account`,
       followRedirect: true,
-      proxy: this.state.useProxies ? this.getRandomProxy() : '',
+      proxy: this.state.useProxies ? `http://${this.getRandomProxy()}` : '',
       resolveWithFullResponse: true,
       followAllRedirects: true,
       jar: this.cookieJars[tokenID],

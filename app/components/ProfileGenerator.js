@@ -5,6 +5,7 @@ import { CSSTransition } from 'react-transition-group';
 import Countries from '../store/countries';
 import FontAwesome from 'react-fontawesome';
 const fs = require('fs');
+const uuidv4 = require('uuid/v4');
 const converter = require('json-2-csv');
 const { dialog } = require('electron').remote;
 const randomName = require('random-name');
@@ -36,21 +37,31 @@ const TRANSLATIONS = [
   ['via', 'vvia', 'viia', 'viaa', 'vviiaa', 'viiaa', 'vviaa', 'vviia'],
   ['viale', 'vviale', 'viiale', 'viaale', 'vialle', 'vialee'],
   ['vviuzza', 'viiuzza', 'viuuzza', 'viuzzza', 'viuzzza', 'viuzzaa'],
-  ['ccorso', 'coorso', 'corrso', 'corsso', 'corsoo'][('sstrada', 'sttrada', 'strrada', 'straada', 'stradda', 'stradaa')],
+  ['ccorso', 'coorso', 'corrso', 'corsso', 'corsoo'],
+  ['sstrada', 'sttrada', 'strrada', 'straada', 'stradda', 'stradaa'],
   ['ppassaggio', 'paassaggio', 'passsaggio', 'passsaggio', 'passaaggio', 'passagggio', 'passagggio', 'passaggiio', 'passaggioo'],
-  ['RRoute', 'Rooute', 'Rouute', 'Routte', 'Routee'],
-  ['AAvenue', 'Avvenue', 'Aveenue', 'Avennue', 'Avenuue', 'Avenuee'],
-  ['CChemin', 'Chhemin', 'Cheemin', 'Chemmin', 'Chemiin', 'Cheminn'],
-  ['BBoulevard', 'Booulevard', 'Bouulevard', 'Boullevard', 'Bouleevard', 'Boulevvard', 'Boulevaard', 'Boulevarrd', 'Boulevardd'],
-  ['GGaffe', 'Gaaffe', 'Gafffe', 'Gafffe', 'Gaffee'],
-  ['IImpasse', 'Immpasse', 'Imppasse', 'Impaasse', 'Impassse', 'Impassse', 'Impassee'],
-  ['PPassage', 'Paassage', 'Passsage', 'Passsage', 'Passaage', 'Passagge', 'Passagee'],
-  ['RRou', 'Roou', 'Rouu'],
-  ['RRuelle', 'Ruuelle', 'Rueelle', 'Ruellle', 'Ruellle', 'Ruellee'],
-  ['SStrasse', 'Sttrasse', 'Strrasse', 'Straasse', 'Strassse', 'Strassse', 'Strassee'],
-  ['PPlatz', 'Pllatz', 'Plaatz', 'Plattz', 'Platzz']
+  ['rroute', 'rooute', 'rouute', 'routte', 'routee'],
+  ['aavenue', 'avvenue', 'aveenue', 'avennue', 'avenuue', 'avenuee'],
+  ['cchemin', 'chhemin', 'cheemin', 'chemmin', 'chemiin', 'cheminn'],
+  ['bboulevard', 'booulevard', 'bouulevard', 'boullevard', 'bouleevard', 'boulevvard', 'boulevaard', 'boulevarrd', 'boulevardd'],
+  ['ggaffe', 'gaaffe', 'gafffe', 'gafffe', 'gaffee'],
+  ['iimpasse', 'immpasse', 'imppasse', 'impaasse', 'impassse', 'impassse', 'impassee'],
+  ['ppassage', 'paassage', 'passsage', 'passsage', 'passaage', 'passagge', 'passagee'],
+  ['rrou', 'roou', 'rouu'],
+  ['rruelle', 'ruuelle', 'rueelle', 'ruellle', 'ruellle', 'ruellee'],
+  ['sstrasse', 'sttrasse', 'strrasse', 'straasse', 'strassse', 'strassse', 'strassee'],
+  ['pplatz', 'pllatz', 'plaatz', 'plattz', 'platzz'],
+  ['way', 'wway', 'wayy'],
+  ['straße', 'strasse', 'strase', 'str']
 ];
 const cardTypes = ['visa', 'mastercard'];
+const TKS_CardMappings = {
+  visa: 0,
+  mastercard: 1,
+  amex: 2,
+  discover: 3,
+  jcb: 4
+};
 const bots = [
   'Cybersole',
   'Project Destroyer',
@@ -59,6 +70,7 @@ const bots = [
   'EVE AIO',
   'Phantom',
   'Dashe',
+  'TKS',
   'Hastey',
   'Kodai',
   'NSB',
@@ -246,6 +258,7 @@ export default class ProfileGenerator extends Component {
       let part = parts[index];
       TRANSLATIONS.forEach(entry => {
         let possibleJigs = [];
+        console.log(entry);
         entry.forEach(val => {
           if (part.toLowerCase() === val) {
             entry.forEach(value => {
@@ -819,7 +832,7 @@ export default class ProfileGenerator extends Component {
             },
             paymentDetails: {
               cardHolder: this.state.formdata.deliveryFirstName + ' ' + this.state.formdata.deliveryLastName,
-              cardNumber: this.state.cards[index].cardExpiryMonth,
+              cardNumber: this.state.cards[index].cardNumber,
               cvv: this.state.cards[index].cardCVV,
               emailAddress: this.state.formdata.useCatchallEmail
                 ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
@@ -827,6 +840,72 @@ export default class ProfileGenerator extends Component {
               expirationMonth: this.state.cards[index].cardExpiryMonth,
               expirationYear: this.state.cards[index].cardExpiryYear
             }
+          };
+          break;
+        case 'TKS':
+          profiles[`Profile - ${index}`] = {
+            Id: uuidv4(),
+            Name: `Profile - ${index}`,
+            Billing: {
+              Email: this.state.formdata.useCatchallEmail
+                ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
+                : this.state.formdata.paymentEmail,
+              FirstName: this.state.formdata.billingFirstName,
+              Lastname: this.state.formdata.billingLastName,
+              AddressLine1: this.state.formdata.billingAddress,
+              AddressLine2: null,
+              Zip: this.state.formdata.billingZip,
+              City: this.state.formdata.billingCity,
+              CountryCode: Countries[this.state.formdata.billingCountry] !== undefined ? Countries[this.state.formdata.billingCountry].code : '',
+              StateCode:
+                Countries[this.state.formdata.billingCountry].province_codes[this.state.formdata.billingProvince] !== undefined
+                  ? Countries[this.state.formdata.billingCountry].province_codes[this.state.formdata.billingProvince]
+                  : '',
+              Phone: this.state.formdata.randomPhoneNumber
+                ? this.state.formdata.randomPhoneNumberTemplate
+                    .split('#')
+                    .map(number => {
+                      return number === '' ? this.getRandomInt(9) : number;
+                    })
+                    .join('')
+                : this.state.formdata.phoneNumber
+            },
+            Shipping: {
+              Pccc: null,
+              Email: this.state.formdata.useCatchallEmail
+                ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
+                : this.state.formdata.paymentEmail,
+              FirstName: this.state.formdata.randomName ? randomFirstName : this.state.formdata.deliveryFirstName,
+              Lastname: this.state.formdata.randomName ? randomLastName : this.state.formdata.deliveryLastName,
+              AddressLine1: deliveryAddress,
+              AddressLine2: null,
+              Zip: this.state.formdata.deliveryZip,
+              City: this.state.formdata.deliveryCity,
+              CountryCode: Countries[this.state.formdata.deliveryCountry] !== undefined ? Countries[this.state.formdata.deliveryCountry].code : '',
+              StateCode:
+                Countries[this.state.formdata.deliveryCountry].province_codes[deliveryProvince] !== undefined
+                  ? Countries[this.state.formdata.deliveryCountry].province_codes[deliveryProvince]
+                  : '',
+              Phone: this.state.formdata.randomPhoneNumber
+                ? this.state.formdata.randomPhoneNumberTemplate
+                    .split('#')
+                    .map(number => {
+                      return number === '' ? this.getRandomInt(9) : number;
+                    })
+                    .join('')
+                : this.state.formdata.phoneNumber
+            },
+            Payment: {
+              CardHolder: `${this.state.formdata.billingFirstName} ${this.state.formdata.billingLastName}`,
+              CardNumber: this.state.cards[index].cardNumber,
+              ExpirationMonth: this.state.cards[index].cardExpiryMonth,
+              ExpirationYear: this.state.cards[index].cardExpiryYear,
+              SecurityCode: this.state.cards[index].cardCVV,
+              CardType: Object.keys(TKS_CardMappings).includes(this.getCardType(this.state.cards[index].cardNumber))
+                ? TKS_CardMappings[this.getCardType(this.state.cards[index].cardNumber)]
+                : 0
+            },
+            Options: { UseBillingForShipping: this.state.formdata.sameAsDelivery, OneItemPerWebsite: this.state.formdata.oneCheckout }
           };
           break;
         case 'CSV':
@@ -859,7 +938,7 @@ export default class ProfileGenerator extends Component {
             paymentEmail: this.state.formdata.useCatchallEmail
               ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
               : this.state.formdata.paymentEmail,
-            paymentCardholdersName: this.state.formdata.paymentCardholdersName,
+            paymentCardholdersName: `${this.state.formdata.billingFirstName} ${this.state.formdata.billingLastName}`,
             paymentCardnumber: this.state.cards[index].cardNumber,
             paymentCardExpiryMonth: this.state.cards[index].cardExpiryMonth,
             paymentCardExpiryYear: this.state.cards[index].cardExpiryYear,
@@ -899,7 +978,7 @@ export default class ProfileGenerator extends Component {
             email: this.state.formdata.useCatchallEmail
               ? `${randomFirstName}${randomLastName}@${this.state.formdata.catchallEmail}`
               : this.state.formdata.paymentEmail,
-            checkoutLimit: 0,
+            checkoutLimit: this.state.formdata.oneCheckout ? 1 : 0,
             billingSame: this.state.formdata.sameAsDelivery,
             date: +new Date(),
             id: parseInt(this.state.nsbProfileAmount) + index
@@ -949,7 +1028,7 @@ export default class ProfileGenerator extends Component {
             CardExpiryMonth: this.state.cards[index].cardExpiryMonth,
             CardExpiryYear: this.state.cards[index].cardExpiryYear.slice(-2),
             CardType: this.capitalize(this.getCardType(this.state.cards[index].cardNumber)),
-            CheckoutLimit: 'No checkout limit'
+            CheckoutLimit: this.state.formdata.oneCheckout ? '1 checkout per site' : 'No checkout limit'
           };
           break;
         case 'Balko':
@@ -980,7 +1059,7 @@ export default class ProfileGenerator extends Component {
             expm: this.state.cards[index].cardExpiryMonth,
             expy: this.state.cards[index].cardExpiryYear,
             ccv: this.state.cards[index].cardCVV,
-            oneCheckout: false,
+            oneCheckout: this.state.formdata.oneCheckout,
             bfirstname: this.state.formdata.billingFirstName,
             blastname: this.state.formdata.billingLastName,
             badd1: this.state.formdata.billingAddress,
@@ -995,6 +1074,7 @@ export default class ProfileGenerator extends Component {
           break;
       }
     });
+
     const name = `${this.state.botType} - Profiles`;
     const extension = this.returnFileExtension(this.state.botType);
     let file;
@@ -1041,6 +1121,8 @@ export default class ProfileGenerator extends Component {
   convertProfiles = profiles => {
     if (['Project Destroyer', 'Hastey', 'EVE AIO', 'Phantom', 'CSV', 'NSB', 'SOLE AIO'].includes(this.state.botType)) {
       return Object.values(profiles);
+    } else if (this.state.botType === 'TKS') {
+      return { Profiles: Object.values(profiles) };
     } else {
       return profiles;
     }

@@ -139,6 +139,7 @@ class Home extends Component {
   };
 
   returnActiveComponent = activeComponent => {
+    this.watchForActiveStatus();
     this.setDiscordRichPresence(activeComponent);
     switch (activeComponent) {
       case 'FrontPage':
@@ -217,18 +218,21 @@ class Home extends Component {
     this.toggleInstallModal();
   };
 
-  watchForActiveStatus = () => {
-    const user = auth.currentUser;
-    firestore
-      .collection('users')
-      .doc(user.uid)
-      .onSnapshot(snapshot => {
-        const data = snapshot.data();
-        if (data.status !== 'active') {
-          auth.signOut();
-          this.props.history.push('/');
-        }
-      });
+  watchForActiveStatus = async () => {
+    await auth.onAuthStateChanged(async user => {
+      if (user !== null) {
+        firestore
+          .collection('users')
+          .doc(user.uid)
+          .onSnapshot(snapshot => {
+            const data = snapshot.data();
+            if (data.status !== 'active') {
+              auth.signOut();
+              this.props.history.push('/');
+            }
+          });
+      }
+    });
   };
 
   watchForUpdates = () => {
@@ -266,9 +270,9 @@ class Home extends Component {
   };
 
   componentDidMount() {
-    if (process.env.NODE_ENV !== 'development') {
-      this.watchForActiveStatus();
-    }
+    // if (process.env.NODE_ENV !== 'development') {
+    this.watchForActiveStatus();
+    // }
     this.watchForUpdates();
     windowManager.closeAll();
     this.setAllAcitivities('Not Started');

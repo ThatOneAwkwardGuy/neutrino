@@ -31,6 +31,7 @@ export default class NakedCPH {
       try {
         await this.makeEntry();
       } catch (error) {
+        console.log(error);
         this.changeStatus('Error Submitting Raffle');
       }
       this.run = false;
@@ -46,15 +47,23 @@ export default class NakedCPH {
     this.changeStatus('Getting Raffle Token');
     const response = await this.rp({
       method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'no-cache',
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        pragma: 'no-cache',
+        referrer: `https://nakedcph.typeform.com/to/${raffleId}`,
+        referrerPolicy: 'no-referrer-when-downgrade'
+      },
       uri: `https://nakedcph.typeform.com/app/form/result/token/${raffleId}/default`,
-      body: {}
+      form: {}
     });
-    return response;
+    return JSON.parse(response);
   };
 
-  makeEntry = async () => {
-    this.changeStatus('Started');
-    const { token, landed_at } = await this.getRaffleToken(this.raffleDetails.typeformCode);
+  submitRaffleEntry = async (token, landed_at) => {
+    this.changeStatus('Submitting Raffle Entry');
     const payload = {};
     this.raffleDetails.renderData.form.fields.forEach(row => {
       if (row.title.includes('first name')) {
@@ -70,12 +79,22 @@ export default class NakedCPH {
     payload['form[token]'] = token;
     payload['form[landed_at]'] = landed_at;
     payload['form[language]'] = this.raffleDetails.renderData.form.settings.language;
-    this.changeStatus('Submitting Raffle Entry');
+
     const response = await this.rp({
       method: 'POST',
-      uri: `https://nakedcph.typeform.com/app/form/submit/${raffleId}`,
+      uri: `https://nakedcph.typeform.com/app/form/submit/${this.raffleDetails.typeformCode}`,
       form: payload
     });
-    this.changeStatus('Finished');
+
+    return JSON.parse(response);
+  };
+
+  makeEntry = async () => {
+    this.changeStatus('Started');
+    const { token, landed_at } = await this.getRaffleToken(this.raffleDetails.typeformCode);
+    const submissionResponse = await this.submitRaffleEntry(token, landed_at);
+    if (submissionResponse.message === 'success') {
+      this.changeStatus('Successful Entry');
+    }
   };
 }

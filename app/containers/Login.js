@@ -65,6 +65,7 @@ class Login extends Component {
     // if (process.env.NODE_ENV !== 'development') {
     try {
       await auth.authorise.onAuthStateChanged(async user => {
+        console.log(user);
         if (user !== null) {
           console.log(user);
           this.setState({
