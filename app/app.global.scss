@@ -167,11 +167,25 @@ label {
   background: $mainColour;
 }
 
+.btn-secondary:hover {
+  background: $mainColourDarker1 !important;
+  background-color: $mainColourDarker1 !important;
+}
+.btn-secondary:active {
+  background: $mainColourDarker2 !important;
+  background-color: $mainColourDarker2 !important;
+}
+
 .btn {
   border-radius: 0;
   border: none;
   width: 100%;
   font-weight: bold;
+}
+
+.btn:focus {
+  outline: 0 !important;
+  box-shadow: none !important;
 }
 
 .react-bootstrap-table th {
@@ -203,4 +217,13 @@ label {
 
 .overflow-y-scroll {
   overflow-y: scroll !important;
+}
+
+div:first-of-type > div.NeutrinoToast {
+  margin-top: 30px;
+}
+
+.NeutrinoToast,
+.NeutrinoToast div {
+  border-radius: 0 !important;
 }

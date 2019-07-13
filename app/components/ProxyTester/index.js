@@ -1,127 +1,22 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Input, Label, Button } from 'reactstrap';
+import { withToastManager } from 'react-toast-notifications';
+import PropTypes from 'prop-types';
 import Table from '../Table';
-// import ReactTable from 'react-table';
-export default class ProxyTester extends Component {
+import { testProxy, copyProxies } from './functions';
+
+const log = require('electron-log');
+
+class ProxyTester extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      proxies: [
-        {
-          ip: 'test',
-          user: 'test',
-          pass: 'test',
-          ping: 100,
-          port: 100
-        },
-        {
-          ip: 'test2',
-          user: 'test2',
-          pass: 'test2',
-          ping: 200,
-          port: 100
-        },
-        {
-          ip: 'test',
-          user: 'test',
-          pass: 'test',
-          ping: 100,
-          port: 100
-        },
-        {
-          ip: 'test2',
-          user: 'test2',
-          pass: 'test2',
-          ping: 200,
-          port: 100
-        },
-        {
-          ip: 'test',
-          user: 'test',
-          pass: 'test',
-          ping: 100,
-          port: 100
-        },
-        {
-          ip: 'test2',
-          user: 'test2',
-          pass: 'test2',
-          ping: 200,
-          port: 100
-        },
-        {
-          ip: 'test',
-          user: 'test',
-          pass: 'test',
-          ping: 100,
-          port: 100
-        },
-        {
-          ip: 'test2',
-          user: 'test2',
-          pass: 'test2',
-          ping: 200,
-          port: 100
-        },
-        {
-          ip: 'test',
-          user: 'test',
-          pass: 'test',
-          ping: 100,
-          port: 100
-        },
-        {
-          ip: 'test2',
-          user: 'test2',
-          pass: 'test2',
-          ping: 200,
-          port: 100
-        },
-        {
-          ip: 'test',
-          user: 'test',
-          pass: 'test',
-          ping: 100,
-          port: 100
-        },
-        {
-          ip: 'test2',
-          user: 'test2',
-          pass: 'test2',
-          ping: 200,
-          port: 100
-        },
-        {
-          ip: 'test',
-          user: 'test',
-          pass: 'test',
-          ping: 100,
-          port: 100
-        },
-        {
-          ip: 'test2',
-          user: 'test2',
-          pass: 'test2',
-          ping: 200,
-          port: 100
-        },
-        {
-          ip: 'test',
-          user: 'test',
-          pass: 'test',
-          ping: 100,
-          port: 100
-        },
-        {
-          ip: 'test2',
-          user: 'test2',
-          pass: 'test2',
-          ping: 200,
-          port: 100
-        }
-      ],
+      proxies: [],
       order: 'asc',
-      orderBy: '#'
+      orderBy: '#',
+      proxyInput: '',
+      proxySite: 'http://google.com',
+      maxPing: 1000
     };
   }
 
@@ -134,42 +29,52 @@ export default class ProxyTester extends Component {
     });
   };
 
-  render() {
-    // const columns = [
-    //   {
-    //     text: '#',
-    //     dataField: '',
-    //     formatter: (cell, row, rowIndex, formatExtraData) => {
-    //       return rowIndex + 1;
-    //     }
-    //   },
-    //   {
-    //     text: 'IP',
-    //     dataField: 'ip',
-    //     sort: true
-    //   },
-    //   {
-    //     text: 'Port',
-    //     dataField: 'port',
-    //     sort: true
-    //   },
-    //   {
-    //     text: 'User',
-    //     dataField: 'user',
-    //     sort: true
-    //   },
-    //   {
-    //     text: 'Pass',
-    //     dataField: 'pass',
-    //     sort: true
-    //   },
-    //   {
-    //     text: 'Ping(ms)',
-    //     dataField: 'ping',
-    //     sort: true
-    //   }
-    // ];
+  handleChange = e => {
+    this.setState({
+      [e.target.name]: e.target.value
+    });
+  };
 
+  copyWorkingProxies = () => {
+    const { proxies, maxPing } = this.state;
+    const { toastManager } = this.props;
+    try {
+      toastManager.add('Proxies copied to clipboard', {
+        appearance: 'success',
+        autoDismiss: true,
+        pauseOnHover: true
+      });
+      copyProxies(proxies, maxPing);
+    } catch (error) {
+      log.error(error);
+      toastManager.add('Failed to add proxies to clipboard', {
+        appearance: 'error',
+        autoDismiss: true,
+        pauseOnHover: true
+      });
+    }
+  };
+
+  clearProxies = () => {
+    this.setState({ proxies: [] });
+  };
+
+  testProxies = async () => {
+    const { setLoading } = this.props;
+    const { proxyInput, proxySite } = this.state;
+    setLoading(true, 'Testing Proxies', true);
+    const splitProxies = proxyInput.split('\n').filter(proxy => proxy !== '');
+    const splitProxiesPromises = splitProxies.map(proxy =>
+      testProxy(proxy, proxySite)
+    );
+    const resolvedPromises = await Promise.all(splitProxiesPromises);
+    this.setState({
+      proxies: resolvedPromises
+    });
+    setLoading(false, 'Testing Proxies', false);
+  };
+
+  render() {
     const columns = [
       {
         Header: '#',
@@ -198,7 +103,7 @@ export default class ProxyTester extends Component {
       }
     ];
 
-    const { proxies } = this.state;
+    const { proxies, proxySite, maxPing, proxyInput } = this.state;
     return (
       <Row className="h-100">
         <Col className="h-100">
@@ -211,21 +116,14 @@ export default class ProxyTester extends Component {
                     columns,
                     loading: false,
                     infinite: true,
-                    manualSorting: false, // Manual sorting
-                    manualFilters: false, // Manual filters
-                    manualPagination: false, // Manual pagination
-                    disableMultiSort: true, // Disable multi-sort
-                    disableGrouping: true, // Disable grouping
+                    manualSorting: false,
+                    manualFilters: false,
+                    manualPagination: false,
+                    disableMultiSort: true,
+                    disableGrouping: true,
                     debug: false
                   }}
                 />
-                {/* <BootstrapTable
-                  bootstrap4={true}
-                  bordered={false}
-                  keyField="ip"
-                  data={this.state.proxies}
-                  columns={columns}
-                /> */}
               </Col>
             </Row>
             <Row>
@@ -238,18 +136,42 @@ export default class ProxyTester extends Component {
                         rows="4"
                         type="textarea"
                         placeholder="ip:port or ip:port:user:pass"
+                        value={proxyInput}
+                        name="proxyInput"
+                        onChange={this.handleChange}
                       />
                     </Col>
                     <Col xs="3" className="py-3">
                       <Label>Website*</Label>
-                      <Input type="text" />
-                      <Button className="my-2">Test Proxies</Button>
-                      <Button className="my-2">Copy Proxies</Button>
+                      <Input
+                        type="text"
+                        value={proxySite}
+                        name="proxySite"
+                        onChange={this.handleChange}
+                      />
+                      <Button className="my-2" onClick={this.testProxies}>
+                        Test Proxies
+                      </Button>
+                      <Button
+                        className="my-2"
+                        onClick={this.copyWorkingProxies}
+                      >
+                        Copy Proxies
+                      </Button>
                     </Col>
                     <Col xs="3" className="py-3">
                       <Label>Max Ping</Label>
-                      <Input type="text" />
-                      <Button color="danger" className="my-2">
+                      <Input
+                        type="number"
+                        value={maxPing}
+                        name="maxPing"
+                        onChange={this.handleChange}
+                      />
+                      <Button
+                        color="danger"
+                        className="my-2"
+                        onClick={this.clearProxies}
+                      >
                         Clear Proxies
                       </Button>
                     </Col>
@@ -263,3 +185,14 @@ export default class ProxyTester extends Component {
     );
   }
 }
+
+ProxyTester.propTypes = {
+  setLoading: PropTypes.func.isRequired,
+  toastManager: PropTypes.shape({
+    add: PropTypes.func,
+    remove: PropTypes.func,
+    toasts: PropTypes.array
+  }).isRequired
+};
+
+export default withToastManager(ProxyTester);

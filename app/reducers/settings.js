@@ -9,7 +9,7 @@ export default function settings(
   state: settingsStateType = {
     proxyAccounts: {
       google: [],
-      digitalOcean: [],
+      digitalocean: [],
       vultr: []
     }
   },

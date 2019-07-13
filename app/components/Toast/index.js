@@ -210,7 +210,7 @@ const ToastElement = ({
 };
 
 ToastElement.propTypes = {
-  appearance: PropTypes.objectOf(PropTypes.object).isRequired,
+  appearance: PropTypes.string.isRequired,
   placement: PropTypes.string.isRequired,
   transitionDuration: PropTypes.number.isRequired,
   transitionState: PropTypes.string.isRequired
@@ -230,6 +230,7 @@ export const NeutrinoToast = ({
   onMouseLeave
 }: ToastProps) => (
   <ToastElement
+    className="NeutrinoToast"
     appearance={appearance}
     placement={placement}
     transitionState={transitionState}

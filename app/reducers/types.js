@@ -11,7 +11,7 @@ export type settingsStateType = {
       +projectID: string,
       +credentialsFilePath: string
     }>,
-    +digitalOcean: Array<{ +accountName: string, +apiKey: string }>,
+    +digitalocean: Array<{ +accountName: string, +apiKey: string }>,
     +vultr: Array<{ +accountName: string, +apiKey: string }>
   }
 };

@@ -4,6 +4,20 @@ import { remote } from 'electron';
 import minimiseIcon from '../../images/minimise.svg';
 import closeIcon from '../../images/close.svg';
 
+const hashToName = {
+  '#/home/proxy-creator': 'Proxy Creator',
+  '#/home': 'Home',
+  '#/home/proxy-tester': 'Proxy Tester',
+  '#/home/account-creator': 'Account Creator',
+  '#/home/address-jigger': 'Address Jigger',
+  '#/home/oneclick-generator': 'One Click Generator',
+  '#/home/oneclick-tester': 'One Click Tester',
+  '#/home/profile-creator': 'Profile Creator',
+  '#/home/profile-task-editor-converter': 'Profile Converter',
+  '#/home/raffle-bot': 'Raffle Bot',
+  '#/home/settings': 'Settings'
+};
+
 export default class Header extends Component {
   constructor(props) {
     super(props);
@@ -24,6 +38,13 @@ export default class Header extends Component {
         id="header"
         className="justify-content-end align-items-center text-right"
       >
+        <Col className="text-left">
+          {
+            <span className="font-weight-bold">
+              {hashToName[window.location.hash] || ''}
+            </span>
+          }
+        </Col>
         <Col className="col-0_5 col">
           <span role="button" tabIndex="0" onClick={this.minimiseWindow}>
             <img

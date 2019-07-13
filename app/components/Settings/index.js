@@ -11,6 +11,7 @@ import {
 import FontAwesome from 'react-fontawesome';
 import PropTypes from 'prop-types';
 import { upperCaseFirst, generateUEID } from '../../utils/utils';
+import { signOut } from '../../utils/firebase';
 
 export default class Settings extends Component {
   constructor(props) {
@@ -58,7 +59,7 @@ export default class Settings extends Component {
         account.googleCredentialsPath = googleCredentialsPath;
         account.googleCredentialsProjectID = googleCredentialsProjectID;
         break;
-      case 'digitalOcean':
+      case 'digitalocean':
         account.apiKey = digitalOceanAPIKey;
         break;
       case 'vultr':
@@ -189,7 +190,7 @@ export default class Settings extends Component {
     switch (provider) {
       case 'google':
         return this.returnGoogleCloudProviderFields();
-      case 'digitalOcean':
+      case 'digitalocean':
         return this.returnDigitalOceanProviderFields();
       case 'vultr':
         return this.returnVultrProviderFields();
@@ -289,6 +290,14 @@ export default class Settings extends Component {
                   ) : null}
                   {this.returnProviderAccounts(selectedProxyProvider)}
                 </Container>
+              </Col>
+            </Row>
+            <h6 className="font-weight-bold py-3">Account</h6>
+            <Row className="panel-middle py-3">
+              <Col xs="3">
+                <Button color="danger" onClick={signOut}>
+                  Sign Out
+                </Button>
               </Col>
             </Row>
           </Container>

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { Switch, Route } from 'react-router';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col } from 'reactstrap';
+import { Container, Row, Col, Modal, ModalHeader } from 'reactstrap';
 import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
+import { BarLoader } from 'react-spinners';
 import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
 import * as SettingsActions from '../../actions/settings';
@@ -27,7 +28,10 @@ class Home extends Component {
     super(props);
     this.state = {
       sidebarExpand: false,
-      updateDownloading: false
+      updateDownloading: false,
+      loading: false,
+      loadingText: '',
+      loadingModalClosable: false
     };
   }
 
@@ -38,32 +42,51 @@ class Home extends Component {
     });
   };
 
+  setLoading = (loading, loadingText, loadingModalClosable) => {
+    this.setState({
+      loading,
+      loadingText,
+      loadingModalClosable
+    });
+  };
+
+  toggleLoading = () => {
+    this.setState(prevState => ({ loading: !prevState.loading }));
+  };
+
   render() {
-    const { sidebarExpand, updateDownloading } = this.state;
+    const {
+      sidebarExpand,
+      updateDownloading,
+      loading,
+      loadingText,
+      loadingModalClosable
+    } = this.state;
     const {
       addProxyProviderAccount,
       removeProxyProviderAccount,
       settings
     } = this.props;
+    const { setLoading } = this;
     const appRoutes = [
       { path: routes.HOME, component: Homepage, exact: true, props: [] },
       {
         path: routes.PROXY_CREATOR,
         component: ProxyCreator,
         exact: true,
-        props: []
+        props: { settings, setLoading }
       },
       {
         path: routes.ACCOUNT_CREATOR,
         component: AccountCreator,
         exact: true,
-        props: []
+        props: { setLoading }
       },
       {
         path: routes.PROXY_TESTER,
         component: ProxyTester,
         exact: true,
-        props: []
+        props: { setLoading }
       },
       {
         path: routes.ADDRESS_JIGGER,
@@ -311,6 +334,23 @@ class Home extends Component {
           toggleSidebarExpand={this.toggleSidebarExpand}
           updateDownloading={updateDownloading}
         />
+        <Modal
+          id="loadingModal"
+          isOpen={loading}
+          size="sm"
+          centered
+          className="text-center"
+          toggle={loadingModalClosable ? this.toggleLoading : null}
+        >
+          {loadingModalClosable ? (
+            <ModalHeader
+              style={{ border: 'none' }}
+              toggle={this.toggleLoading}
+            />
+          ) : null}
+          <BarLoader width={100} widthUnit="%" color="#2745fb" />
+          {loadingText ? <p className="p-3">{loadingText}</p> : null}
+        </Modal>
       </Container>
     );
   }

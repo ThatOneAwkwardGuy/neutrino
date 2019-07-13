@@ -11,7 +11,7 @@ import {
 } from 'reactstrap';
 import { withToastManager } from 'react-toast-notifications';
 import PropTypes from 'prop-types';
-import { jigAddress } from './functions';
+import { jigAddress, makeid } from './functions';
 
 const { clipboard } = require('electron');
 
@@ -25,6 +25,7 @@ class AddressJigger extends Component {
       region: '',
       country: '',
       zipcode: '',
+      quantity: 0,
       jigAddressesBool: true,
       fourCharPrefixBool: false,
       jiggedAddresses: []
@@ -38,20 +39,47 @@ class AddressJigger extends Component {
   };
 
   handleToggleChange = e => {
+    const { name } = e.target;
     this.setState(prevState => ({
-      [e.target.name]: !prevState[e.target.name]
+      [name]: !prevState[name]
     }));
   };
 
   jigAddresses = () => {
-    const { address1, city, aptSuite, region, country, zipcode } = this.state;
+    const {
+      address1,
+      city,
+      aptSuite,
+      region,
+      country,
+      zipcode,
+      fourCharPrefixBool,
+      quantity
+    } = this.state;
     const jiggedAddresses = Array.from(jigAddress(address1));
     const newJiggedAddresses = new Set(
       jiggedAddresses.map(address => address.replace('\n', ' '))
     );
-    const finalJiggedAddresses = Array.from(newJiggedAddresses).map(address =>
+    let finalJiggedAddresses = Array.from(newJiggedAddresses).map(address =>
       `${address}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
     );
+    if (
+      fourCharPrefixBool &&
+      finalJiggedAddresses.length < parseInt(quantity, 10)
+    ) {
+      const fourCharPrefixAddresses = Array(
+        parseInt(quantity, 10) - finalJiggedAddresses.length
+      )
+        .fill()
+        .map(() =>
+          `${makeid(
+            4
+          )} ${address1}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
+        );
+      finalJiggedAddresses = finalJiggedAddresses.concat(
+        fourCharPrefixAddresses
+      );
+    }
     this.setState({
       jiggedAddresses: finalJiggedAddresses
     });
@@ -88,7 +116,8 @@ class AddressJigger extends Component {
       zipcode,
       jigAddressesBool,
       fourCharPrefixBool,
-      jiggedAddresses
+      jiggedAddresses,
+      quantity
     } = this.state;
     return (
       <Row className="h-100 p-0">
@@ -157,6 +186,18 @@ class AddressJigger extends Component {
                   type="text"
                 />
               </Col>
+              {fourCharPrefixBool ? (
+                <Col xs="4">
+                  <Label>Quantity</Label>
+                  <Input
+                    name="quantity"
+                    value={quantity}
+                    onChange={this.handleChange}
+                    type="number"
+                    min="0"
+                  />
+                </Col>
+              ) : null}
             </FormGroup>
             <FormGroup row>
               <Col>
@@ -203,7 +244,11 @@ class AddressJigger extends Component {
 }
 
 AddressJigger.propTypes = {
-  toastManager: PropTypes.objectOf(PropTypes.func).isRequired
+  toastManager: PropTypes.shape({
+    add: PropTypes.func,
+    remove: PropTypes.func,
+    toasts: PropTypes.array
+  }).isRequired
 };
 
 export default withToastManager(AddressJigger);

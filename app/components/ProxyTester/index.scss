@@ -7,3 +7,12 @@
 #TableContainer > div > div > div:nth-child(2) {
   height: calc(100% - 50px) !important;
 }
+
+#loadingModal .modal-content {
+  background-color: $dark1Colour;
+}
+
+#loadingModal button[aria-label='Close'] {
+  color: $red;
+  text-shadow: none;
+}

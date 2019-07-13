@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
+import { PersistGate } from 'redux-persist/integration/react';
+import PropTypes from 'prop-types';
 import type { Store } from '../reducers/types';
 import Routes from '../Routes';
 
@@ -10,15 +12,23 @@ type Props = {
   history: {}
 };
 
-export default class Root extends Component<Props> {
+class Root extends Component<Props> {
   render() {
-    const { store, history } = this.props;
+    const { store, history, persistedStore } = this.props;
     return (
       <Provider store={store}>
-        <ConnectedRouter history={history}>
-          <Routes />
-        </ConnectedRouter>
+        <PersistGate loading={null} persistor={persistedStore}>
+          <ConnectedRouter history={history}>
+            <Routes />
+          </ConnectedRouter>
+        </PersistGate>
       </Provider>
     );
   }
 }
+
+Root.propTypes = {
+  persistedStore: PropTypes.objectOf(PropTypes.any).isRequired
+};
+
+export default Root;

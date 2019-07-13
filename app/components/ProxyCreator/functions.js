@@ -1,6 +1,8 @@
+/* eslint-disable no-await-in-loop */
 const Compute = require('@google-cloud/compute');
+const rp = require('request-promise');
 
-export default const createGoogleCloudInstance = async (
+export const createGoogleCloudInstance = async (
   projectID,
   credPath,
   region,
@@ -43,5 +45,90 @@ export default const createGoogleCloudInstance = async (
   await operation.promise();
   const [metadata] = await vm.getMetadata();
   const ip = metadata.networkInterfaces[0].accessConfigs[0].natIP;
-  return ip;
+  const proxyInfo = await pingIP(ip, 3128, user, pass, 'http://google.com', 50);
+  return proxyInfo;
+};
+
+export const loadGoogleCloudApiRegions = async providerAccount => {
+  const compute = new Compute({
+    projectId: providerAccount.googleCredentialsProjectID,
+    keyFilename: providerAccount.googleCredentialsPath
+  });
+  const [regionsResponse] = await compute.getZones();
+  const regions = regionsResponse.map(elem => ({
+    name: elem.name,
+    id: elem.id
+  }));
+  return regions;
+};
+
+export const loadGoogleCloudApiMachineTypes = async (
+  providerAccount,
+  regionID
+) => {
+  const compute = new Compute({
+    projectId: providerAccount.googleCredentialsProjectID,
+    keyFilename: providerAccount.googleCredentialsPath
+  });
+  const [machineTypes] = await compute.getMachineTypes({
+    filter: `zone eq ${regionID}`
+  });
+  const machineTypesArray = machineTypes.map(elem => ({
+    name: elem.name,
+    id: elem.id,
+    price: `N/A`
+  }));
+  return machineTypesArray;
+};
+
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+export const pingIP = async (ip, port, user, pass, website, maxTries) => {
+  let res;
+  let count = 0;
+  while (count <= maxTries) {
+    count += 1;
+    try {
+      res = await rp({
+        method: 'GET',
+        headers: {
+          'user-agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
+        },
+        uri: website,
+        time: true,
+        proxy:
+          user !== ''
+            ? `http://${user}:${pass}@${ip}:${port}`
+            : `http://${ip}:${port}`,
+        resolveWithFullResponse: true,
+        followAllRedirects: true
+      });
+      return {
+        user,
+        pass,
+        ip,
+        port,
+        ping: Math.round(res.timings.response)
+      };
+    } catch (err) {
+      if (err.error.code !== 'ECONNREFUSED' && err.error.code !== 'ETIMEDOUT') {
+        return {
+          user,
+          pass,
+          ip,
+          port,
+          ping: -1
+        };
+      }
+    }
+    await sleep(2000);
+  }
+  return {
+    user,
+    pass,
+    ip,
+    port,
+    ping: -1
+  };
 };
