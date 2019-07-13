@@ -23,7 +23,7 @@ export default class ProxyCreator extends Component {
     const { provider } = this.state;
     return (
       <Row className="h-100 p-0">
-        <Col className="panel-left" xs="1">
+        <Col className="panel-left h-100" xs="1">
           <Container fluid className="px-0 text-center noselect">
             <Row className="px-0">
               <Col
@@ -102,10 +102,10 @@ export default class ProxyCreator extends Component {
         </Col>
         <Col xs="11">
           <Container fluid className="p-0 h-100 d-flex flex-column">
-            <Row className="flex-fill">
+            <Row className="flex-fill panel-middle">
               <Col>Test</Col>
             </Row>
-            <Row className="panel-middle pt-3 align-items-end noselect">
+            <Row className="pt-3 align-items-end noselect">
               <Col>
                 <Label>Account*</Label>
                 <Input type="select" />
@@ -124,13 +124,13 @@ export default class ProxyCreator extends Component {
               </Col>
               <Col>
                 <Label>Quantity*</Label>
-                <Input type="number" />
+                <Input type="number" min="1" max="10" />
               </Col>
             </Row>
             <Row className="py-3 align-items-end">
               <Col>
                 <Label>Username*</Label>
-                <Input type="select" />
+                <Input type="text" />
               </Col>
               <Col>
                 <Label>Password*</Label>

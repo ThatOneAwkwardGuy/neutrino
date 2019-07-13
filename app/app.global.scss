@@ -4,6 +4,7 @@
  */
 @import '~@fortawesome/fontawesome-free/css/all.css';
 @import '~font-awesome/css/font-awesome.css';
+@import '~react-table/react-table.css';
 @import './styles/constants.scss';
 @import './fonts/stylesheet.css';
 @import '~bootstrap/dist/css/bootstrap.css';
@@ -14,8 +15,10 @@
 @import './components/Homepage/index.scss';
 @import './components/ProxyCreator/index.scss';
 @import './components/ProxyTester/index.scss';
-@import '~react-table/react-table.css';
-body {
+@import './components/AddressJigger/index.scss';
+
+body,
+html {
   position: relative;
   color: white;
   height: 100vh;
@@ -38,12 +41,38 @@ body {
 
 input,
 select,
-textarea {
+textarea,
+.custom-file-label,
+.custom-file-label::after,
+.list-group,
+.list-group-item {
   border: 0 !important;
   border-radius: 0 !important;
   background-color: $dark1Colour !important;
   color: white !important;
   font-weight: bold !important;
+}
+
+.custom-switch .custom-control-label::before,
+.custom-switch .custom-control-label::after {
+  border: 0 !important;
+  border-radius: 0 !important;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+  background-color: $mainColour;
+}
+
+:focus {
+  outline: 0 !important;
+}
+
+.manualTableRow {
+  background-color: $dark1Colour !important;
+}
+
+.custom-file-label::after {
+  background-color: $mainColour !important;
 }
 
 input:focus,
@@ -60,7 +89,7 @@ textarea:focus {
   min-width: 50px;
 }
 
-::-webkit-scrollbar {
+*::-webkit-scrollbar {
   display: none;
 }
 
@@ -79,7 +108,7 @@ textarea:focus {
   overflow-y: scroll;
   border-right: 0;
   border-left: 0;
-  border-bottom: 0;
+  border-top: 0;
 }
 
 .panel-right {
@@ -160,43 +189,18 @@ label {
 }
 
 .noselect {
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  user-select: none; /* Non-prefixed version, currently
-  supported by Chrome and Opera */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .flex-1 {
   flex: 1 !important;
 }
 
-// h2 {
-//   margin: 0;
-//   font-size: 2.25rem;
-//   font-weight: bold;
-//   letter-spacing: -0.025em;
-//   color: #fff;
-// }
-
-// p {
-//   font-size: 24px;
-// }
-
-// li {
-//   list-style: none;
-// }
-
-// a {
-//   color: white;
-//   opacity: 0.75;
-//   text-decoration: none;
-// }
-
-// a:hover {
-//   opacity: 1;
-//   text-decoration: none;
-//   cursor: pointer;
-// }
+.overflow-y-scroll {
+  overflow-y: scroll !important;
+}

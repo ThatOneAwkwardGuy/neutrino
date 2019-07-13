@@ -2,7 +2,11 @@ import React, { Component } from 'react';
 import { Switch, Route } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col } from 'reactstrap';
+import { bindActionCreators } from 'redux';
+import { connect } from 'react-redux';
+import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
+import * as SettingsActions from '../../actions/settings';
 import routes from '../../constants/routes';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
@@ -18,7 +22,7 @@ import ProfileTaskEditorConverter from '../../components/ProfileTaskEditorConver
 import RaffleBot from '../../components/RaffleBot';
 import Settings from '../../components/Settings';
 
-export default class Home extends Component {
+class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -36,6 +40,69 @@ export default class Home extends Component {
 
   render() {
     const { sidebarExpand, updateDownloading } = this.state;
+    const {
+      addProxyProviderAccount,
+      removeProxyProviderAccount,
+      settings
+    } = this.props;
+    const appRoutes = [
+      { path: routes.HOME, component: Homepage, exact: true, props: [] },
+      {
+        path: routes.PROXY_CREATOR,
+        component: ProxyCreator,
+        exact: true,
+        props: []
+      },
+      {
+        path: routes.ACCOUNT_CREATOR,
+        component: AccountCreator,
+        exact: true,
+        props: []
+      },
+      {
+        path: routes.PROXY_TESTER,
+        component: ProxyTester,
+        exact: true,
+        props: []
+      },
+      {
+        path: routes.ADDRESS_JIGGER,
+        component: AddressJigger,
+        exact: true,
+        props: []
+      },
+      {
+        path: routes.ONECLICK_GENERATOR,
+        component: OneClickGenerator,
+        exact: true,
+        props: []
+      },
+      {
+        path: routes.ONECLICK_TESTER,
+        component: OneClickTester,
+        exact: true,
+        props: []
+      },
+      {
+        path: routes.PROFILE_CREATOR,
+        component: ProfileCreator,
+        exact: true,
+        props: []
+      },
+      {
+        path: routes.PROFILE_TASK_EDITOR_CONVERTER,
+        component: ProfileTaskEditorConverter,
+        exact: true,
+        props: []
+      },
+      { path: routes.RAFFLE_BOT, component: RaffleBot, exact: true, props: [] },
+      {
+        path: routes.SETTINGS,
+        component: Settings,
+        exact: true,
+        props: { addProxyProviderAccount, removeProxyProviderAccount, settings }
+      }
+    ];
     return (
       <Container fluid className="d-flex flex-column h-100">
         <Header />
@@ -119,7 +186,7 @@ export default class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="address-card" />
+                  <FontAwesome name="envelope" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Address Jigger</span>
                   ) : null}
@@ -228,45 +295,14 @@ export default class Home extends Component {
           </Col>
           <Col id="content">
             <Switch>
-              <Route exact path={routes.HOME} component={Homepage} />
-              <Route
-                exact
-                path={routes.PROXY_CREATOR}
-                component={ProxyCreator}
-              />
-              <Route
-                exact
-                path={routes.ACCOUNT_CREATOR}
-                component={AccountCreator}
-              />
-              <Route exact path={routes.PROXY_TESTER} component={ProxyTester} />
-              <Route
-                exact
-                path={routes.ADDRESS_JIGGER}
-                component={AddressJigger}
-              />
-              <Route
-                exact
-                path={routes.ONECLICK_GENERATOR}
-                component={OneClickGenerator}
-              />
-              <Route
-                exact
-                path={routes.ONECLICK_TESTER}
-                component={OneClickTester}
-              />
-              <Route
-                exact
-                path={routes.PROFILE_CREATOR}
-                component={ProfileCreator}
-              />
-              <Route
-                exact
-                path={routes.PROFILE_TASK_EDITOR_CONVERTER}
-                component={ProfileTaskEditorConverter}
-              />
-              <Route exact path={routes.RAFFLE_BOT} component={RaffleBot} />
-              <Route exact path={routes.SETTINGS} component={Settings} />
+              {appRoutes.map(route => (
+                <Route
+                  key={route.path}
+                  path={route.path}
+                  exact={route.exact}
+                  render={() => <route.component {...route.props} />}
+                />
+              ))}
             </Switch>
           </Col>
         </Row>
@@ -279,3 +315,21 @@ export default class Home extends Component {
     );
   }
 }
+
+const mapStateToProps = state => ({
+  settings: state.settings
+});
+
+const mapDispatchToProps = dispatch =>
+  bindActionCreators(SettingsActions, dispatch);
+
+Home.propTypes = {
+  addProxyProviderAccount: PropTypes.func.isRequired,
+  removeProxyProviderAccount: PropTypes.func.isRequired,
+  settings: PropTypes.objectOf(PropTypes.object).isRequired
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Home);

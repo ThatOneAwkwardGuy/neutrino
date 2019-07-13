@@ -200,10 +200,10 @@ export default class ProxyTester extends Component {
 
     const { proxies } = this.state;
     return (
-      <Row className="h-100 p-0">
-        <Col className="panel-left h-100">
+      <Row className="h-100">
+        <Col className="h-100">
           <Container fluid className="p-0 h-100 d-flex flex-column">
-            <Row className="px-0 flex-1 overflow-hidden">
+            <Row className="flex-1 overflow-hidden panel-middle">
               <Col id="TableContainer" className="h-100">
                 <Table
                   {...{
@@ -228,7 +228,7 @@ export default class ProxyTester extends Component {
                 /> */}
               </Col>
             </Row>
-            <Row className="panel-middle">
+            <Row>
               <Col>
                 <Container fluid>
                   <Row>

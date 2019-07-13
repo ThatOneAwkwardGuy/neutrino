@@ -49,8 +49,8 @@ export default class Homepage extends Component {
     const { raffles } = this.state;
     return (
       <Row className="h-100">
-        <Col className="h-100 panel-left">
-          <Container fluid className="h-100">
+        <Col className="h-100 panel-left h-100">
+          <Container fluid className="h-100 p-0">
             <Row className="h-100">
               <Col>
                 <p className="text-center">
@@ -91,12 +91,12 @@ export default class Homepage extends Component {
         </Col>
         <Col className="h-100 p-0">
           <Container fluid className="h-100">
-            <Row className="h-50">
+            <Row className="h-50 panel-middle">
               <Col className="py-3">
                 <span className="panel-title">Updates</span>
               </Col>
             </Row>
-            <Row className="h-50 panel-middle">
+            <Row className="h-50">
               <Col className="py-3 h-100">
                 <Container className="h-100 d-flex flex-column">
                   <Row>

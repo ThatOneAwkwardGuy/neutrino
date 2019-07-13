@@ -72,11 +72,11 @@ export default class Footer extends Component {
             <FontAwesome name="instagram" />
           </span>
         </Col>
-        <Col xs="2" className="footerText">
+        <Col xs="1" className="footerText">
           {updateDownloading ? 'Downloading Update' : ''}
         </Col>
         <Col
-          xs="3"
+          xs="5"
           className="text-center font-weight-bold footerText noselect"
         >
           Copyright © 2019 Neutrino - All Rights Reserved

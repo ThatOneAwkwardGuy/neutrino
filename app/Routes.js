@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import { Switch, Route } from 'react-router';
-import { Container } from 'reactstrap';
+import { ToastProvider } from 'react-toast-notifications';
 import routes from './constants/routes';
 import App from './containers/App';
 import Home from './screens/Home';
 import Login from './screens/Login';
-import Header from './components/Header';
-import Footer from './components/Footer';
 import { getAuth } from './utils/firebase';
+import { NeutrinoToast } from './components/Toast';
 
 export default class Routes extends Component {
   constructor(props) {
@@ -31,16 +30,23 @@ export default class Routes extends Component {
   }
 
   render() {
+    const { authorised } = this.state;
     return (
-      <App>
-        <Switch>
-          {this.state.authorised ? (
-            <Route path={routes.ROOT} component={Home} />
-          ) : (
-            <Route path={routes.ROOT} component={Login} />
-          )}
-        </Switch>
-      </App>
+      <ToastProvider
+        autoDismissTimeout={5000}
+        component
+        components={{ Toast: NeutrinoToast }}
+      >
+        <App>
+          <Switch>
+            {authorised ? (
+              <Route path={routes.ROOT} component={Home} />
+            ) : (
+              <Route path={routes.ROOT} component={Login} />
+            )}
+          </Switch>
+        </App>
+      </ToastProvider>
     );
   }
 }
