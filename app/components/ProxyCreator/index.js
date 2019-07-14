@@ -5,7 +5,13 @@ import PropTypes from 'prop-types';
 import {
   loadGoogleCloudApiRegions,
   loadGoogleCloudApiMachineTypes,
-  createGoogleCloudInstance
+  createGoogleCloudInstance,
+  loadDigitalOceanApiRegions,
+  loadDigitalOceanApiMachineTypes,
+  createDigitalOceanInstance,
+  loadVultrApiRegions,
+  loadVultrApiMachineTypes,
+  createVultrInstance
 } from './functions';
 import { upperCaseFirst, generateUEID } from '../../utils/utils';
 import { copyProxies } from '../ProxyTester/functions';
@@ -39,6 +45,7 @@ class ProxyCreator extends Component {
     this.setState({
       provider: e.target.textContent.toLowerCase(),
       providerAccount: {},
+      providerAccountName: '',
       regions: [],
       machineTypes: [],
       region: '',
@@ -110,7 +117,7 @@ class ProxyCreator extends Component {
         await this.loadDigitalOceanApi(providerAccount);
         break;
       case 'vultr':
-        await this.loadVultrApi(providerAccount);
+        await this.loadVultrRegions();
         break;
       default:
         break;
@@ -130,6 +137,27 @@ class ProxyCreator extends Component {
     this.setState({ machineTypes });
   };
 
+  loadDigitalOceanApi = async providerAccount => {
+    const [regions, machineTypes] = await Promise.all([
+      loadDigitalOceanApiRegions(providerAccount),
+      loadDigitalOceanApiMachineTypes(providerAccount)
+    ]);
+    this.setState({
+      regions,
+      machineTypes
+    });
+  };
+
+  loadVultrRegions = async () => {
+    const regions = await loadVultrApiRegions();
+    this.setState({ regions });
+  };
+
+  loadVultrMachines = async (providerAccount, regionID) => {
+    const machineTypes = await loadVultrApiMachineTypes(regionID);
+    this.setState({ machineTypes });
+  };
+
   handleRegionChange = async e => {
     const { provider, providerAccount } = this.state;
     const { setLoading } = this.props;
@@ -141,6 +169,9 @@ class ProxyCreator extends Component {
         switch (provider) {
           case 'google':
             await this.loadGoogleCloudMachines(providerAccount, e.target.value);
+            break;
+          case 'vultr':
+            await this.loadVultrMachines(providerAccount, e.target.value);
             break;
           default:
             break;
@@ -224,14 +255,28 @@ class ProxyCreator extends Component {
           proxyPass,
           `${proxyGroupName}-${index}`
         );
+      case 'digitalocean':
+        return createDigitalOceanInstance(
+          providerAccount.apiKey,
+          region,
+          machineType,
+          proxyUser,
+          proxyPass,
+          `${proxyGroupName}-${index}`
+        );
+      case 'vultr':
+        return createVultrInstance(
+          providerAccount.apiKey,
+          region,
+          machineType,
+          proxyUser,
+          proxyPass,
+          `${proxyGroupName}-${index}`
+        );
       default:
         break;
     }
   };
-
-  loadDigitalOceanApi = () => {};
-
-  loadVultrApi = () => {};
 
   render() {
     const {

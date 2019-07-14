@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 const Compute = require('@google-cloud/compute');
+const DigitalOcean = require('do-wrapper').default;
 const rp = require('request-promise');
 
 export const createGoogleCloudInstance = async (
@@ -79,6 +80,168 @@ export const loadGoogleCloudApiMachineTypes = async (
     price: `N/A`
   }));
   return machineTypesArray;
+};
+
+export const loadDigitalOceanApiRegions = async providerAccount => {
+  const compute = new DigitalOcean(providerAccount.apiKey, 10);
+  const regions = await compute.regionsGetAll();
+  const regionsArray = regions.body.regions.map(elem => ({
+    name: elem.name,
+    id: elem.slug
+  }));
+  return regionsArray;
+};
+
+export const loadDigitalOceanApiMachineTypes = async providerAccount => {
+  const compute = new DigitalOcean(providerAccount.apiKey, 10);
+  const sizesArray = await compute.sizesGetAll();
+  const sizes = sizesArray.body.sizes.map(elem => ({
+    id: elem.slug,
+    name: elem.slug,
+    price: `$${elem.price_hourly.toFixed(2)}/hr`
+  }));
+  return sizes;
+};
+
+export const loadVultrApiRegions = async () => {
+  const regions = await rp({
+    method: 'GET',
+    uri: 'https://api.vultr.com/v1/regions/list',
+    json: true
+  });
+  return Object.keys(regions).map(regionKey => ({
+    name: regions[regionKey].name,
+    id: regions[regionKey].DCID
+  }));
+};
+
+export const loadVultrApiMachineTypes = async regionID => {
+  const [plansIDS, plans] = await Promise.all([
+    rp({
+      method: 'GET',
+      uri: `https://api.vultr.com/v1/regions/availability?DCID=${regionID}`,
+      json: true
+    }),
+    rp({
+      method: 'GET',
+      uri: `https://api.vultr.com/v1/plans/list`,
+      json: true
+    })
+  ]);
+  return plansIDS
+    .map(plansID => {
+      if (plans[plansID] !== undefined) {
+        return {
+          name: plans[plansID].name,
+          id: plans[plansID].VPSPLANID,
+          price: `$${plans[plansID].price_per_month}/month`
+        };
+      }
+      return {
+        name: '',
+        id: '',
+        price: ''
+      };
+    })
+    .filter(plan => plan.id !== '');
+};
+
+const pollDigitalOceanInstance = async (ID, apiKey) => {
+  const compute = new DigitalOcean(apiKey, 10);
+  let tryNumber = 0;
+  while (tryNumber <= 50) {
+    tryNumber += 1;
+    const instanceResponse = await compute.dropletsGetById(ID);
+    if (instanceResponse.body.droplet.status === 'active') {
+      return instanceResponse.body.droplet.networks.v4[0].ip_address;
+    }
+    await sleep(2000);
+  }
+  throw new Error(
+    'There was an error creating a DigitalOcean proxy, check your account to makesure the instance is deleted'
+  );
+};
+
+const pollVultrInstance = async (apiKey, SUBID) => {
+  let tryNumber = 0;
+  while (tryNumber <= 50) {
+    tryNumber += 1;
+    const instanceResponse = await rp({
+      method: 'GET',
+      uri: `https://api.vultr.com/v1/server/list?SUBID=${SUBID}`,
+      headers: {
+        'API-Key': apiKey
+      },
+      json: true
+    });
+    if (instanceResponse.status === 'active') {
+      return instanceResponse.main_ip;
+    }
+    await sleep(2000);
+  }
+  throw new Error(
+    'There was a problem creating your Vultr proxy instance, please check your account and delete it if it exists.'
+  );
+};
+
+export const createDigitalOceanInstance = async (
+  apiKey,
+  region,
+  machine,
+  user,
+  pass,
+  name
+) => {
+  const compute = new DigitalOcean(apiKey, 10);
+  const response = await compute.dropletsCreate({
+    name,
+    region,
+    size: machine,
+    image: 'centos-7-x64',
+    user_data: `#!/bin/bash\nyum install squid wget httpd-tools openssl openssl-devel -y &&\ntouch /etc/squid/passwd &&\nhtpasswd -b /etc/squid/passwd ${user} ${pass} &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
+  });
+  const ip = await pollDigitalOceanInstance(response.body.droplet.id, apiKey);
+  const proxyInfo = await pingIP(ip, 3128, user, pass, 'http://google.com', 50);
+  return proxyInfo;
+};
+
+export const createVultrInstance = async (
+  apiKey,
+  region,
+  machine,
+  user,
+  pass,
+  name
+) => {
+  const startUpScriptResponse = await rp({
+    method: 'POST',
+    uri: 'https://api.vultr.com/v1/startupscript/create',
+    headers: {
+      'API-Key': apiKey
+    },
+    json: true,
+    form: {
+      name,
+      script: `#!/bin/bash\nyum install squid wget httpd-tools openssl openssl-devel -y &&\ntouch /etc/squid/passwd &&\nhtpasswd -b /etc/squid/passwd ${user} ${pass} &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
+    }
+  });
+  const instanceCreateResponse = await rp({
+    method: 'POST',
+    uri: 'https://api.vultr.com/v1/server/create',
+    headers: {
+      'API-Key': apiKey
+    },
+    json: true,
+    form: {
+      DCID: parseInt(region, 10),
+      VPSPLANID: parseInt(machine, 10),
+      OSID: 167,
+      SCRIPTID: startUpScriptResponse.SCRIPTID,
+      hostname: name,
+      label: name
+    }
+  });
+  return pollVultrInstance(apiKey, instanceCreateResponse.SUBID);
 };
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
