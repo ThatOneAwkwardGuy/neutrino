@@ -4,6 +4,7 @@ import { ToastProvider } from 'react-toast-notifications';
 import routes from './constants/routes';
 import App from './containers/App';
 import Home from './screens/Home';
+import Captcha from './screens/Captcha';
 import Login from './screens/Login';
 import { getAuth } from './utils/firebase';
 import { NeutrinoToast } from './components/Toast';
@@ -44,6 +45,7 @@ export default class Routes extends Component {
             ) : (
               <Route path={routes.ROOT} component={Login} />
             )}
+            <Route path={routes.CAPTCHA} component={Captcha} />
           </Switch>
         </App>
       </ToastProvider>

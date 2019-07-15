@@ -16,6 +16,15 @@ export type settingsStateType = {
   }
 };
 
+export type accountsStateType = {
+  +accounts: Array<{
+    +email: string,
+    +site: string,
+    +pass: string,
+    +status: string
+  }>
+};
+
 export type Action = {
   +type: string
 };

@@ -269,10 +269,14 @@
     "electron-debug": "^2.0.0",
     "electron-log": "^3.0.6",
     "electron-store": "^4.0.0",
+    "electron-tabs": "^0.9.5",
     "electron-updater": "^3.2.3",
     "firebase": "^6.2.4",
     "font-awesome": "^4.7.0",
     "history": "^4.7.2",
+    "random-email": "^1.0.3",
+    "random-name": "^0.1.2",
+    "randomatic": "^3.1.1",
     "react": "^16.8.6",
     "react-bootstrap-table-next": "^3.1.5",
     "react-dom": "^16.8.6",
@@ -293,7 +297,8 @@
     "redux-thunk": "^2.3.0",
     "request-promise": "^4.2.4",
     "source-map-support": "^0.5.9",
-    "styled-components": "^4.3.2"
+    "styled-components": "^4.3.2",
+    "uuid": "^3.3.2"
   },
   "devEngines": {
     "node": ">=7.x",

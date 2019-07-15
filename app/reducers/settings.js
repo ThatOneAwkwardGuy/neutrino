@@ -3,6 +3,7 @@ import {
   ADD_PROXY_PROVIDER_ACCOUNT,
   REMOVE_PROXY_PROVIDER_ACCOUNT
 } from '../actions/settings';
+
 import type { settingsStateType, Action } from './types';
 
 export default function settings(

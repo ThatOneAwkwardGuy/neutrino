@@ -12,10 +12,12 @@
 @import './components/Header/index.scss';
 @import './screens/Login/index.scss';
 @import './screens/Home/index.scss';
+@import './screens/Captcha/index.scss';
 @import './components/Homepage/index.scss';
 @import './components/ProxyCreator/index.scss';
 @import './components/ProxyTester/index.scss';
 @import './components/AddressJigger/index.scss';
+@import '~electron-tabs/electron-tabs.css';
 
 body,
 html {

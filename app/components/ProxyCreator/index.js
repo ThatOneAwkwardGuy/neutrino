@@ -343,24 +343,6 @@ class ProxyCreator extends Component {
                 </span>
               </Col>
             </Row>
-            {/* <Row className="px-0">
-              <Col
-                className={`proxyIcon ${
-                  provider === 'aws' ? 'proxyIconActive' : ''
-                }`}
-                onClick={this.setProvider}
-              >
-                <span>
-                  <img
-                    src={awsLogo}
-                    className="my-3"
-                    draggable="false"
-                    alt="AWS Logo"
-                  />
-                  <h5>AWS</h5>
-                </span>
-              </Col>
-            </Row> */}
             <Row className="px-0">
               <Col
                 name="digitalocean"
@@ -401,7 +383,7 @@ class ProxyCreator extends Component {
             </Row>
           </Container>
         </Col>
-        <Col xs="11">
+        <Col className="h-100" xs="11">
           <Container fluid className="p-0 h-100 d-flex flex-column">
             <Row className="flex-1 overflow-hidden panel-middle">
               <Col id="TableContainer" className="h-100">

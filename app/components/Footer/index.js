@@ -2,14 +2,18 @@ import React, { Component } from 'react';
 import { Row, Col } from 'reactstrap';
 import FontAwesome from 'react-fontawesome';
 import PropTypes from 'prop-types';
-
-const { shell } = require('electron');
+import { shell, ipcRenderer } from 'electron';
+import { OPEN_CAPTCHA_WINDOW } from '../../constants/ipcConstants';
 
 export default class Footer extends Component {
   constructor(props) {
     super(props);
     this.state = {};
   }
+
+  openCaptchaWindow = () => {
+    ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
+  };
 
   render() {
     const {

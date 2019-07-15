@@ -3567,6 +3567,10 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
     inherits "^2.0.1"
     safe-buffer "^5.0.1"
 
+clamp@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/clamp/-/clamp-1.0.1.tgz#66a0e64011816e37196828fdc8c8c147312c8634"
+
 class-utils@^0.3.5:
   version "0.3.6"
   resolved "https://registry.yarnpkg.com/class-utils/-/class-utils-0.3.6.tgz#f93369ae8b9a7ce02fd41faad0ca83033190c463"
@@ -4874,6 +4878,10 @@ electron-store@^4.0.0:
   dependencies:
     conf "^5.0.0"
     type-fest "^0.5.2"
+
+electron-tabs@^0.9.5:
+  version "0.9.5"
+  resolved "https://registry.yarnpkg.com/electron-tabs/-/electron-tabs-0.9.5.tgz#c02049a0351a68deed9d2f18a34ac39ecd5b8924"
 
 electron-to-chromium@^1.3.188, electron-to-chromium@^1.3.47:
   version "1.3.188"
@@ -7037,6 +7045,18 @@ is-alphanumerical@^1.0.0:
     is-alphabetical "^1.0.0"
     is-decimal "^1.0.0"
 
+is-array-like@^1.1.0:
+  version "1.1.2"
+  resolved "https://registry.yarnpkg.com/is-array-like/-/is-array-like-1.1.2.tgz#7f280aa777f53eb31f74e1dcd3e040923186c205"
+  dependencies:
+    is-array "^1.0.1"
+    is-function "^1.0.1"
+    is-window "^1.0.1"
+
+is-array@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/is-array/-/is-array-1.0.1.tgz#e9850cc2cc860c3bc0977e84ccf0dd464584279a"
+
 is-arrayish@^0.2.1:
   version "0.2.1"
   resolved "https://registry.yarnpkg.com/is-arrayish/-/is-arrayish-0.2.1.tgz#77c99840527aa8ecb1a8ba697b80645a7a926a9d"
@@ -7178,6 +7198,10 @@ is-fullwidth-code-point@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/is-fullwidth-code-point/-/is-fullwidth-code-point-2.0.0.tgz#a3b30a5c4f199183167aaab93beefae3ddfb654f"
 
+is-function@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/is-function/-/is-function-1.0.1.tgz#12cfb98b65b57dd3d193a3121f5f6e2f437602b5"
+
 is-generator-fn@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/is-generator-fn/-/is-generator-fn-1.0.0.tgz#969d49e1bb3329f6bb7f09089be26578b2ddd46a"
@@ -7214,6 +7238,10 @@ is-installed-globally@^0.1.0:
   dependencies:
     global-dirs "^0.1.0"
     is-path-inside "^1.0.0"
+
+is-nil@^1.0.0, is-nil@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/is-nil/-/is-nil-1.0.1.tgz#2daba29e0b585063875e7b539d071f5b15937969"
 
 is-npm@^3.0.0:
   version "3.0.0"
@@ -7361,7 +7389,7 @@ is-svg@^3.0.0:
   dependencies:
     html-comment-regex "^1.1.0"
 
-is-symbol@^1.0.2:
+is-symbol@^1.0.1, is-symbol@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/is-symbol/-/is-symbol-1.0.2.tgz#a055f6ae57192caee329e7a860118b497a950f38"
   dependencies:
@@ -7382,6 +7410,10 @@ is-what@^3.2.3:
 is-whitespace-character@^1.0.0:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/is-whitespace-character/-/is-whitespace-character-1.0.3.tgz#b3ad9546d916d7d3ffa78204bca0c26b56257fac"
+
+is-window@^1.0.1:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/is-window/-/is-window-1.0.2.tgz#2c896ca53db97de45d3c33133a65d8c9f563480d"
 
 is-windows@^1.0.0, is-windows@^1.0.1, is-windows@^1.0.2:
   version "1.0.2"
@@ -8550,6 +8582,14 @@ math-random@^1.0.1:
 mathml-tag-names@^2.0.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/mathml-tag-names/-/mathml-tag-names-2.1.1.tgz#6dff66c99d55ecf739ca53c492e626f1d12a33cc"
+
+max-array-length@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/max-array-length/-/max-array-length-1.0.0.tgz#0e64f5da5deb47bcdaaab47160d66e9f26ed4631"
+
+max-safe-int@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/max-safe-int/-/max-safe-int-1.0.0.tgz#44fba8ec993ded91fb2c5a35e71cf9c9f369ce52"
 
 md5.js@^1.3.4:
   version "1.3.5"
@@ -9767,6 +9807,13 @@ performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
 
+pick-item@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/pick-item/-/pick-item-1.0.4.tgz#0e06cafdb9b81eee1a93bce0df2dce604c9e9015"
+  dependencies:
+    is-array-like "^1.1.0"
+    random-index "^1.0.4"
+
 pify@^2.0.0, pify@^2.2.0, pify@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
@@ -10514,7 +10561,86 @@ randexp@0.4.6:
     discontinuous-range "1.0.0"
     ret "~0.1.10"
 
-randomatic@^3.0.0:
+random-char@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/random-char/-/random-char-1.0.4.tgz#5fe2c95134cafcc5d7bc8f46831dc36fdbbd5c66"
+  dependencies:
+    is-nil "^1.0.1"
+    is-object "^1.0.1"
+    random-natural "^1.0.3"
+    to-str "^1.0.0"
+
+random-domains@1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/random-domains/-/random-domains-1.0.3.tgz#116826525762863d6c1ba534c079073f4751ac0a"
+  dependencies:
+    clamp "^1.0.1"
+    random-lorem "^1.0.3"
+    random-tld "^1.0.2"
+    to-length "^1.0.1"
+    to-str "^1.0.0"
+
+random-email@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/random-email/-/random-email-1.0.3.tgz#477b795dc730ab42e2be842007099415688e8b18"
+  dependencies:
+    random-domains "1.0.3"
+    random-lorem "^1.0.4"
+    to-str "^1.0.0"
+
+random-index@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/random-index/-/random-index-1.0.4.tgz#54c0d1ed7c7fc43683fc88d64b7713bdf5b4e61d"
+  dependencies:
+    max-array-length "^1.0.0"
+    random-natural "^1.0.3"
+
+random-integral@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/random-integral/-/random-integral-1.0.3.tgz#8ff3c117565c9a04b66ddd559f3aed29bd0f0f6c"
+  dependencies:
+    clamp "^1.0.1"
+    max-safe-int "^1.0.0"
+    to-integer "^1.0.1"
+
+random-lorem@^1.0.3, random-lorem@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/random-lorem/-/random-lorem-1.0.4.tgz#fd41444537954bb5c333b3c8efa830d465586152"
+  dependencies:
+    clamp "^1.0.1"
+    random-char "^1.0.4"
+    random-natural "^1.0.3"
+    random-syllable "^1.0.1"
+
+random-name@^0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/random-name/-/random-name-0.1.2.tgz#20a1ad0efce9976764c5dd3c418c7018b57e816d"
+
+random-natural@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/random-natural/-/random-natural-1.0.3.tgz#ef28615b03c2cb71aaebf7f24f487266a443c5c0"
+  dependencies:
+    max-safe-int "^1.0.0"
+    random-integral "^1.0.3"
+
+random-syllable@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/random-syllable/-/random-syllable-1.0.1.tgz#5499fbba872b8bf52aad4341c3ec318dbb3c49f6"
+  dependencies:
+    clamp "^1.0.1"
+    is-object "^1.0.1"
+    random-char "^1.0.4"
+    random-natural "^1.0.3"
+    to-integer "^1.0.1"
+
+random-tld@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/random-tld/-/random-tld-1.0.2.tgz#081f38aa889ffdbcdb09635783daec6d115f11a9"
+  dependencies:
+    pick-item "^1.0.4"
+    tld-list "1.0.0"
+
+randomatic@^3.0.0, randomatic@^3.1.1:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/randomatic/-/randomatic-3.1.1.tgz#b776efc59375984e36c537b2f51a1f0aff0da1ed"
   dependencies:
@@ -12649,6 +12775,10 @@ tiny-warning@^1.0.0, tiny-warning@^1.0.2:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/tiny-warning/-/tiny-warning-1.0.3.tgz#94a30db453df4c643d0fd566060d60a875d84754"
 
+tld-list@1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/tld-list/-/tld-list-1.0.0.tgz#7173ee7592b2b01b3cdca1758d54a12729928a2b"
+
 tmp@0.0.28:
   version "0.0.28"
   resolved "https://registry.yarnpkg.com/tmp/-/tmp-0.0.28.tgz#172735b7f614ea7af39664fa84cf0de4e515d120"
@@ -12681,6 +12811,21 @@ to-fast-properties@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/to-fast-properties/-/to-fast-properties-2.0.0.tgz#dc5e698cbd079265bc73e0377681a4e4e83f616e"
 
+to-integer@^1.0.0, to-integer@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/to-integer/-/to-integer-1.0.1.tgz#511ad41dce6a93730a8f3b6e35a164fd829464da"
+  dependencies:
+    is-function "^1.0.1"
+    is-nil "^1.0.0"
+    is-object "^1.0.1"
+    is-symbol "^1.0.1"
+
+to-length@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/to-length/-/to-length-1.0.1.tgz#b8ae498c8a07fd053ee7c70789a60c0f3d03a4b5"
+  dependencies:
+    to-integer "^1.0.0"
+
 to-object-path@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/to-object-path/-/to-object-path-0.3.0.tgz#297588b7b0e7e0ac08e04e672f85c1f4999e17af"
@@ -12706,6 +12851,15 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     extend-shallow "^3.0.2"
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
+
+to-str@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/to-str/-/to-str-1.0.0.tgz#9034248f56f439804c1fd45a3cbe8195ecb608f1"
+  dependencies:
+    is-function "^1.0.1"
+    is-nil "^1.0.0"
+    is-object "^1.0.1"
+    is-symbol "^1.0.1"
 
 toidentifier@1.0.0:
   version "1.0.0"

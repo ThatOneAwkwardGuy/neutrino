@@ -10,11 +10,17 @@
  *
  * @flow
  */
-import { app } from 'electron';
+import { app, BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import * as Splashscreen from '@trodi/electron-splashscreen';
 import MenuBuilder from './menu';
+import {
+  OPEN_CAPTCHA_WINDOW,
+  SEND_CAPTCHA_TOKEN_FROM_RENDERER,
+  SEND_CAPTCHA_TOKEN_FROM_MAIN,
+  STORE_CAPTCHA_JOB
+} from './constants/ipcConstants';
 
 export default class AppUpdater {
   constructor() {
@@ -24,7 +30,10 @@ export default class AppUpdater {
   }
 }
 
+global.captchaQueue = {};
+
 let mainWindow = null;
+let captchaWindow = null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -38,6 +47,10 @@ if (
   require('electron-debug')();
 }
 
+process.on('uncaughtException', (err, origin) => {
+  log.error(err, origin);
+});
+
 const installExtensions = async () => {
   const installer = require('electron-devtools-installer');
   const forceDownload = !!process.env.UPGRADE_EXTENSIONS;
@@ -46,6 +59,29 @@ const installExtensions = async () => {
   return Promise.all(
     extensions.map(name => installer.default(installer[name], forceDownload))
   ).catch(console.log);
+};
+
+const initialiseCaptchaWindow = () => {
+  captchaWindow = new BrowserWindow({
+    webPreferences: {
+      webviewTag: true,
+      contextIsolation: false,
+      allowRunningInsecureContent: true,
+      webSecurity: false,
+      nodeIntegration: true
+    },
+    show: false,
+    minWidth: 200,
+    minHeight: 300,
+    width: 500,
+    height: 650,
+    frame: false,
+    resizable: true,
+    focusable: true,
+    minimizable: true,
+    closable: true
+  });
+  captchaWindow.loadURL(`file://${__dirname}/app.html#/captcha`);
 };
 
 /**
@@ -67,6 +103,8 @@ app.on('ready', async () => {
   ) {
     await installExtensions();
   }
+
+  initialiseCaptchaWindow();
 
   mainWindow = Splashscreen.initSplashScreen({
     windowOpts: {
@@ -91,7 +129,6 @@ app.on('ready', async () => {
   });
 
   mainWindow.loadURL(`file://${__dirname}/app.html#/home`);
-
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
   mainWindow.webContents.on('did-finish-load', () => {
@@ -116,4 +153,35 @@ app.on('ready', async () => {
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
   new AppUpdater();
+
+  ipcMain.on(OPEN_CAPTCHA_WINDOW, () => {
+    if (captchaWindow.isDestroyed()) {
+      initialiseCaptchaWindow();
+      captchaWindow.show();
+    } else {
+      captchaWindow.show();
+    }
+  });
+
+  ipcMain.on(SEND_CAPTCHA_TOKEN_FROM_RENDERER, (event, arg) => {
+    captchaWindow.webContents.send(SEND_CAPTCHA_TOKEN_FROM_MAIN, arg);
+  });
+
+  ipcMain.on(STORE_CAPTCHA_JOB, (event, id, arg) => {
+    global.captchaQueue[id] = arg;
+  });
+
+  ipcMain.on('send-captcha-token-from-preload-to-captcha', (event, arg) => {
+    captchaWindow.webContents.send(
+      'send-captcha-token-from-preload-to-captcha',
+      arg
+    );
+  });
+
+  ipcMain.on('send-captcha-token-from-captcha-to-renderer', (event, arg) => {
+    mainWindow.webContents.send(
+      'send-captcha-token-from-captcha-to-renderer',
+      arg
+    );
+  });
 });

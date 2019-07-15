@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import { Switch, Route } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Modal, ModalHeader } from 'reactstrap';
-import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import { BarLoader } from 'react-spinners';
 import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
 import * as SettingsActions from '../../actions/settings';
+import * as AccountActions from '../../actions/accounts';
 import routes from '../../constants/routes';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
@@ -65,7 +65,11 @@ class Home extends Component {
     const {
       addProxyProviderAccount,
       removeProxyProviderAccount,
-      settings
+      settings,
+      addCreatedAccount,
+      removeCreatedAccount,
+      removeAllCreatedAccounts,
+      accounts
     } = this.props;
     const { setLoading } = this;
     const appRoutes = [
@@ -74,13 +78,19 @@ class Home extends Component {
         path: routes.PROXY_CREATOR,
         component: ProxyCreator,
         exact: true,
-        props: { settings, setLoading }
+        props: { setLoading, settings }
       },
       {
         path: routes.ACCOUNT_CREATOR,
         component: AccountCreator,
         exact: true,
-        props: { setLoading }
+        props: {
+          setLoading,
+          addCreatedAccount,
+          removeCreatedAccount,
+          removeAllCreatedAccounts,
+          accounts
+        }
       },
       {
         path: routes.PROXY_TESTER,
@@ -357,16 +367,30 @@ class Home extends Component {
 }
 
 const mapStateToProps = state => ({
-  settings: state.settings
+  settings: state.settings,
+  accounts: state.accounts
 });
 
-const mapDispatchToProps = dispatch =>
-  bindActionCreators(SettingsActions, dispatch);
+// const mapDispatchToProps = dispatch => {
+//   console.log({ ...SettingsActions, ...AccountActions });
+//   bindActionCreators({ ...SettingsActions, ...AccountActions }, dispatch);
+// };
+
+const mapDispatchToProps = {
+  ...SettingsActions,
+  ...AccountActions
+};
 
 Home.propTypes = {
   addProxyProviderAccount: PropTypes.func.isRequired,
   removeProxyProviderAccount: PropTypes.func.isRequired,
-  settings: PropTypes.objectOf(PropTypes.object).isRequired
+  settings: PropTypes.objectOf(PropTypes.object).isRequired,
+  addCreatedAccount: PropTypes.func.isRequired,
+  removeCreatedAccount: PropTypes.func.isRequired,
+  removeAllCreatedAccounts: PropTypes.func.isRequired,
+  accounts: PropTypes.shape({
+    accounts: PropTypes.array
+  }).isRequired
 };
 
 export default connect(
