@@ -10,7 +10,6 @@ const random = require('random-name');
 const { clipboard } = require('electron');
 const uuidv4 = require('uuid/v4');
 const ipcRenderer = require('electron').ipcRenderer;
-const cheerio = require('cheerio');
 const remote = require('electron').remote;
 const { BrowserWindow } = require('electron').remote;
 
@@ -444,7 +443,7 @@ export default class AccountCreator extends Component {
           false,
           () => {
             window.webContents.once('did-finish-load', () => {
-              window.webContents.executeJavaScript(`window.location`, false, result => {
+              window.webContents.executeJavaScript('window.location', false, result => {
                 console.log(result);
                 if (result.pathname === '/auth/success') {
                   window.webContents.removeAllListeners('close', (event, input) => {});
