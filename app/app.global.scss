@@ -91,10 +91,6 @@ textarea:focus {
   min-width: 50px;
 }
 
-*::-webkit-scrollbar {
-  display: none;
-}
-
 .panel-left {
   border: solid 10px $dark1Colour;
   border-top: 0;
@@ -138,6 +134,23 @@ textarea:focus {
 
 .panel-container {
   width: 100%;
+}
+
+*::-webkit-scrollbar {
+  display: none;
+}
+
+.panel-left::-webkit-scrollbar,
+.panel-middle::-webkit-scrollbar,
+.panel-right::-webkit-scrollbar {
+  display: block !important;
+  width: 0.4em !important;
+}
+
+.panel-left::-webkit-scrollbar-thumb,
+.panel-middle::-webkit-scrollbar-thumb,
+.panel-right::-webkit-scrollbar-thumb {
+  background-color: $mainColour !important;
 }
 
 .fs-1rem {
