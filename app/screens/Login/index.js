@@ -9,6 +9,7 @@ import {
   Label,
   Button
 } from 'reactstrap';
+import PropTypes from 'prop-types';
 import { getAuth } from '../../utils/firebase';
 import Header from '../../components/Header';
 
@@ -29,14 +30,27 @@ export default class Login extends Component {
 
   login = async () => {
     const { email, pass } = this.state;
-    const auth = getAuth();
-    await auth.signInWithEmailAndPassword(email, pass);
+    const { setAuthAndMessage } = this.props;
+    try {
+      const auth = getAuth();
+      await auth.signInWithEmailAndPassword(email, pass);
+    } catch (error) {
+      let message = 'There was an error logging you in.';
+      if (error.code === 'auth/wrong-password') {
+        message =
+          'The password you have entered is incorrect. If you wish to reset your password you can do so on neutrinotools.app';
+      } else if (error.code === 'auth/invalid-email') {
+        message = 'The email you have entered is formatted incorrectly.';
+      }
+      setAuthAndMessage(false, message);
+    }
   };
 
   render() {
+    const { authorised, message } = this.props;
     return (
       <Container fluid className="d-flex flex-column h-100">
-        <Header />
+        <Header showPageTitle={false} />
         <Row className="flex-fill justify-content-center align-items-center">
           <Col xs="6">
             <div id="loginWindow">
@@ -50,6 +64,11 @@ export default class Login extends Component {
                     src="./images/textLogo.svg"
                   />
                 </FormGroup>
+                {!authorised && message !== '' ? (
+                  <Row id="loginErrorCard" className="text-center">
+                    <Col>{message}</Col>
+                  </Row>
+                ) : null}
                 <FormGroup className="my-4">
                   <Label className="boldLabel">Email</Label>
                   <Input
@@ -79,3 +98,9 @@ export default class Login extends Component {
     );
   }
 }
+
+Login.propTypes = {
+  authorised: PropTypes.bool.isRequired,
+  message: PropTypes.string.isRequired,
+  setAuthAndMessage: PropTypes.func.isRequired
+};

@@ -6,14 +6,19 @@ import App from './containers/App';
 import Home from './screens/Home';
 import Captcha from './screens/Captcha';
 import Login from './screens/Login';
-import { getAuth } from './utils/firebase';
+import {
+  getAuth,
+  setUserMachineIDOnFirstLoad,
+  checkIfUserMachineIDMatches
+} from './utils/firebase';
 import { NeutrinoToast } from './components/Toast';
 
 export default class Routes extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      authorised: false
+      authorised: false,
+      uid: ''
     };
   }
 
@@ -21,17 +26,39 @@ export default class Routes extends Component {
     this.checkAuthChange();
   }
 
+  setAuthAndMessage = (authorised, message) => {
+    this.setState({
+      authorised,
+      message
+    });
+  };
+
+  checkUserAuth = async uid => {
+    const machineIDStatus = await checkIfUserMachineIDMatches(uid);
+    this.setState({
+      authorised: machineIDStatus.authorised,
+      message: machineIDStatus.message,
+      uid
+    });
+  };
+
   checkAuthChange() {
     const auth = getAuth();
-    auth.onAuthStateChanged(user => {
-      this.setState({
-        authorised: !!user
-      });
+    auth.onAuthStateChanged(async user => {
+      if (user) {
+        await setUserMachineIDOnFirstLoad(user.uid);
+        this.checkUserAuth(user.uid);
+      } else {
+        this.setState({
+          authorised: false,
+          message: ''
+        });
+      }
     });
   }
 
   render() {
-    const { authorised } = this.state;
+    const { authorised, message, uid } = this.state;
     return (
       <ToastProvider
         autoDismissTimeout={5000}
@@ -41,9 +68,27 @@ export default class Routes extends Component {
         <App>
           <Switch>
             {authorised ? (
-              <Route path={routes.ROOT} component={Home} />
+              <Route
+                path={routes.ROOT}
+                render={routeProps => (
+                  <Home
+                    checkUserAuth={this.checkUserAuth}
+                    uid={uid}
+                    {...routeProps}
+                  />
+                )}
+              />
             ) : (
-              <Route path={routes.ROOT} component={Login} />
+              <Route
+                path={routes.ROOT}
+                render={() => (
+                  <Login
+                    authorised={authorised}
+                    message={message}
+                    setAuthAndMessage={this.setAuthAndMessage}
+                  />
+                )}
+              />
             )}
             <Route path={routes.CAPTCHA} component={Captcha} />
           </Switch>

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Row, Col } from 'reactstrap';
 import { remote } from 'electron';
+import PropTypes from 'prop-types';
 import minimiseIcon from '../../images/minimise.svg';
 import closeIcon from '../../images/close.svg';
 
@@ -33,18 +34,21 @@ export default class Header extends Component {
   };
 
   render() {
+    const { showPageTitle } = this.props;
     return (
       <Row
         id="header"
         className="justify-content-end align-items-center text-right"
       >
-        <Col className="text-left">
-          {
-            <span className="font-weight-bold">
-              {hashToName[window.location.hash] || ''}
-            </span>
-          }
-        </Col>
+        {showPageTitle ? (
+          <Col className="text-left">
+            {
+              <span className="font-weight-bold">
+                {hashToName[window.location.hash] || ''}
+              </span>
+            }
+          </Col>
+        ) : null}
         <Col className="col-0_5 col">
           <span role="button" tabIndex="0" onClick={this.minimiseWindow}>
             <img
@@ -69,3 +73,11 @@ export default class Header extends Component {
     );
   }
 }
+
+Header.propTypes = {
+  showPageTitle: PropTypes.bool
+};
+
+Header.defaultProps = {
+  showPageTitle: true
+};

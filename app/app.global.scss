@@ -18,6 +18,7 @@
 @import './components/ProxyTester/index.scss';
 @import './components/AddressJigger/index.scss';
 @import '~electron-tabs/electron-tabs.css';
+@import './utils/mixins.scss';
 
 body,
 html {
@@ -26,7 +27,9 @@ html {
   height: 100vh;
   background-color: $dark1Colour;
   font-family: 'Montserrat', Arial, Helvetica, Helvetica Neue, serif;
-  font-size: 1vw;
+  /* stylelint-disable */
+  @include fluid-type(font-size, 320px, 1366px, 10px, 14px);
+  /* stylelint-enable */
   overflow-y: hidden;
 }
 
@@ -98,12 +101,14 @@ textarea:focus {
   border-left: 0;
   background-color: $dark2Colour;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .panel-middle {
   border: solid 10px $dark1Colour;
   background-color: $dark2Colour;
   overflow-y: scroll;
+  overflow-x: hidden;
   border-right: 0;
   border-left: 0;
   border-top: 0;
@@ -116,6 +121,7 @@ textarea:focus {
   border-right: 0;
   background-color: $dark2Colour;
   overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .panel-title {

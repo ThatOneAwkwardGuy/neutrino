@@ -35,6 +35,17 @@ class Home extends Component {
     };
   }
 
+  componentDidUpdate(prevProps) {
+    const { location, checkUserAuth, uid } = this.props;
+    if (location !== prevProps.location && checkUserAuth && uid !== '') {
+      try {
+        checkUserAuth(uid);
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  }
+
   toggleSidebarExpand = () => {
     const { sidebarExpand } = this.state;
     this.setState({
@@ -388,6 +399,9 @@ Home.propTypes = {
   addCreatedAccount: PropTypes.func.isRequired,
   removeCreatedAccount: PropTypes.func.isRequired,
   removeAllCreatedAccounts: PropTypes.func.isRequired,
+  location: PropTypes.objectOf(PropTypes.object).isRequired,
+  checkUserAuth: PropTypes.func.isRequired,
+  uid: PropTypes.string.isRequired,
   accounts: PropTypes.shape({
     accounts: PropTypes.array
   }).isRequired

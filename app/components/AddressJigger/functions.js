@@ -66,3 +66,38 @@ export const jigAddress = addressString => {
   }
   return jigs;
 };
+
+export const jigAddresses = (
+  address1,
+  city,
+  aptSuite,
+  region,
+  country,
+  zipcode,
+  fourCharPrefixBool,
+  quantity
+) => {
+  const jiggedAddresses = Array.from(jigAddress(address1));
+  const newJiggedAddresses = new Set(
+    jiggedAddresses.map(address => address.replace('\n', ' '))
+  );
+  let finalJiggedAddresses = Array.from(newJiggedAddresses).map(address =>
+    `${address}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
+  );
+  if (
+    fourCharPrefixBool &&
+    finalJiggedAddresses.length < parseInt(quantity, 10)
+  ) {
+    const fourCharPrefixAddresses = Array(
+      parseInt(quantity, 10) - finalJiggedAddresses.length
+    )
+      .fill()
+      .map(() =>
+        `${makeid(
+          4
+        )} ${address1}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
+      );
+    finalJiggedAddresses = finalJiggedAddresses.concat(fourCharPrefixAddresses);
+  }
+  return finalJiggedAddresses;
+};

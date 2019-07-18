@@ -11,7 +11,7 @@ import {
 } from 'reactstrap';
 import { withToastManager } from 'react-toast-notifications';
 import PropTypes from 'prop-types';
-import { jigAddress, makeid } from './functions';
+import { jigAddresses } from './functions';
 
 const { clipboard } = require('electron');
 
@@ -56,30 +56,16 @@ class AddressJigger extends Component {
       fourCharPrefixBool,
       quantity
     } = this.state;
-    const jiggedAddresses = Array.from(jigAddress(address1));
-    const newJiggedAddresses = new Set(
-      jiggedAddresses.map(address => address.replace('\n', ' '))
+    const finalJiggedAddresses = jigAddresses(
+      address1,
+      city,
+      aptSuite,
+      region,
+      country,
+      zipcode,
+      fourCharPrefixBool,
+      quantity
     );
-    let finalJiggedAddresses = Array.from(newJiggedAddresses).map(address =>
-      `${address}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
-    );
-    if (
-      fourCharPrefixBool &&
-      finalJiggedAddresses.length < parseInt(quantity, 10)
-    ) {
-      const fourCharPrefixAddresses = Array(
-        parseInt(quantity, 10) - finalJiggedAddresses.length
-      )
-        .fill()
-        .map(() =>
-          `${makeid(
-            4
-          )} ${address1}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
-        );
-      finalJiggedAddresses = finalJiggedAddresses.concat(
-        fourCharPrefixAddresses
-      );
-    }
     this.setState({
       jiggedAddresses: finalJiggedAddresses
     });

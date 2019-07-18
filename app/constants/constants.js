@@ -203,3 +203,13 @@ export const sites = {
   valenciabyenrica: 'https://valenciabyenrica.com',
   ittaherlcurated: 'https://www.ittaherlcurated.com'
 };
+
+export const cardTypes = ['visa', 'mastercard', 'amex', 'discover', 'jcb'];
+
+export const tksCardMappings = {
+  visa: 0,
+  mastercard: 1,
+  amex: 2,
+  discover: 3,
+  jcb: 4
+};
