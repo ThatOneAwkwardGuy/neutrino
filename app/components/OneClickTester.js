@@ -137,7 +137,7 @@ export default class OneClickTester extends Component {
     });
     win.loadURL('https://google.com');
     win.webContents.once('did-finish-load', () => {
-      win.webContents.executeJavaScript(`document.querySelector('a[target="_top"]').click();`);
+      win.webContents.executeJavaScript('document.querySelector(\'a[target="_top"]\').click();');
       win.webContents.once('did-finish-load', () => {
         win.webContents.executeJavaScript(`
           document.getElementById("Email").value = "${account.email}";
@@ -162,16 +162,16 @@ export default class OneClickTester extends Component {
             })
             `);
           win.webContents.once('did-finish-load', () => {
-            win.webContents.executeJavaScript(`window.location`, false, result => {
+            win.webContents.executeJavaScript('window.location', false, result => {
               if (result.pathname === '/') {
                 win.webContents.session.cookies.get({}, (error, cookies) => {
                   if (error) {
                   } else {
                     win.loadURL('https://neutrinotools.app/captcha');
                     win.webContents.once('dom-ready', () => {
-                      win.webContents.executeJavaScript(`grecaptcha.execute()`, false, result => {});
+                      win.webContents.executeJavaScript('grecaptcha.execute()', false, result => {});
                       win.webContents.once('did-navigate-in-page', () => {
-                        win.webContents.executeJavaScript(`window.location.hash`, false, result => {
+                        win.webContents.executeJavaScript('window.location.hash', false, result => {
                           if (result === '#success') {
                             this.setAccountStatus(index, 'One Click Success');
                           } else {

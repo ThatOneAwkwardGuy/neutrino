@@ -54,7 +54,7 @@ const TRANSLATIONS = [
   ['way', 'wway', 'wayy'],
   ['straße', 'strasse', 'strase', 'str']
 ];
-const cardTypes = ['visa', 'mastercard'];
+const cardTypes = ['visa', 'mastercard', 'amex', 'discover', 'jcb'];
 const TKS_CardMappings = {
   visa: 0,
   mastercard: 1,
