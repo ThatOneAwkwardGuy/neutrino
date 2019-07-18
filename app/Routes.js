@@ -18,6 +18,7 @@ export default class Routes extends Component {
     super(props);
     this.state = {
       authorised: false,
+      message: '',
       uid: ''
     };
   }
