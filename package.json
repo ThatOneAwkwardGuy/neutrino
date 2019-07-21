@@ -276,6 +276,7 @@
     "firebase": "^6.2.4",
     "font-awesome": "^4.7.0",
     "history": "^4.7.2",
+    "jquery": "^3.4.1",
     "json-2-csv": "^3.5.5",
     "node-machine-id": "^1.1.12",
     "random-email": "^1.0.3",
@@ -302,6 +303,7 @@
     "request-promise": "^4.2.4",
     "source-map-support": "^0.5.9",
     "styled-components": "^4.3.2",
+    "superagent": "^5.1.0",
     "uuid": "^3.3.2"
   },
   "devEngines": {
