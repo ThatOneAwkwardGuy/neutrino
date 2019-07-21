@@ -10,26 +10,33 @@ export const convertCybersoleProfileToBase = profile => ({
   deliveryCity: profile.delivery.city,
   deliveryFirstName: profile.delivery.first_name,
   deliveryLastName: profile.delivery.last_name,
-  deliveryProvince: profile.delivery.state,
+  deliveryRegion: profile.delivery.state,
   deliveryZip: profile.delivery.zip,
-  deliveryAptorSuite: profile.delivery.addr2,
+  deliveryApt: profile.delivery.addr2,
   billingZip: profile.billing.zip,
   billingCountry: profile.billing.country,
   billingAddress: profile.billing.addr1,
   billingCity: profile.billing.city,
   billingFirstName: profile.billing.first_name,
   billingLastName: profile.billing.last_name,
-  billingProvince: profile.billing.state,
-  billingAptorSuite: profile.billing.addr2,
-  phoneNumber: profile.payment.phone,
-  paymentCardholdersName: profile.payment.card.name,
-  paymentCardnumber: profile.payment.card.number,
-  paymentCardExpiryMonth: profile.payment.card.exp_month,
-  paymentCardExpiryYear: profile.payment.card.exp_year,
-  paymentCVV: profile.payment.card.cvv,
+  billingRegion: profile.billing.state,
+  billingApt: profile.billing.addr2,
+  phone: profile.payment.phone,
+  card: {
+    paymentCardholdersName: profile.payment.card.name,
+    cardNumber: profile.payment.card.number,
+    expMonth: profile.payment.card.exp_month,
+    expYear: profile.payment.card.exp_year,
+    cvv: profile.payment.card.cvv
+  },
   email: profile.payment.email,
-  sameAsDelivery: profile.billing.same_as_del,
-  oneCheckout: profile.one_checkout
+  sameDeliveryBillingBool: profile.billing.same_as_del,
+  oneCheckoutBool: profile.one_checkout,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertProjectDestroyerProfileToBase = profile => ({
   profileID: profile.title,
@@ -38,26 +45,33 @@ export const convertProjectDestroyerProfileToBase = profile => ({
   deliveryCity: profile.shipping.city,
   deliveryFirstName: profile.shipping.firstName,
   deliveryLastName: profile.shipping.lastName,
-  deliveryProvince: profile.shipping.state,
+  deliveryRegion: profile.shipping.state,
   deliveryZip: profile.shipping.zipcode,
-  deliveryAptorSuite: profile.shipping.address2,
+  deliveryApt: profile.shipping.address2,
   billingZip: profile.billing.zipcode,
   billingCountry: profile.billing.country,
   billingAddress: profile.billing.address1,
   billingCity: profile.billing.city,
   billingFirstName: profile.billing.firstName,
   billingLastName: profile.billing.lastName,
-  billingProvince: profile.billing.state,
-  billingAptorSuite: profile.billing.address2,
-  phoneNumber: profile.billing.phone,
-  paymentCardholdersName: profile.card.name,
-  paymentCardnumber: profile.card.number,
-  paymentCardExpiryMonth: profile.card.expire.split(' / ')[0],
-  paymentCardExpiryYear: profile.card.expire.split(' / ')[1],
-  paymentCVV: profile.card.code,
+  billingRegion: profile.billing.state,
+  billingApt: profile.billing.address2,
+  phone: profile.billing.phone,
+  card: {
+    paymentCardholdersName: profile.card.name,
+    cardNumber: profile.card.number,
+    expMonth: profile.card.expire.split(' / ')[0],
+    expYear: profile.card.expire.split(' / ')[1],
+    cvv: profile.card.code
+  },
   email: profile.email,
-  sameAsDelivery: profile.match,
-  oneCheckout: profile.limit
+  sameDeliveryBillingBool: profile.match,
+  oneCheckoutBool: profile.limit,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertGhostProfileToBase = profile => ({
   profileID: profile.Name,
@@ -66,26 +80,33 @@ export const convertGhostProfileToBase = profile => ({
   deliveryCity: profile.Shipping.City,
   deliveryFirstName: profile.Shipping.FirstName,
   deliveryLastName: profile.Shipping.LastName,
-  deliveryProvince: profile.Shipping.State,
+  deliveryRegion: profile.Shipping.State,
   deliveryZip: profile.Shipping.Zip,
-  deliveryAptorSuite: profile.Shipping.Apt,
+  deliveryApt: profile.Shipping.Apt,
   billingZip: profile.Billing.Zip,
   billingCountry: profile.Country,
   billingAddress: profile.Billing.Address,
   billingCity: profile.Billing.City,
   billingFirstName: profile.Billing.FirstName,
   billingLastName: profile.Billing.LastName,
-  billingProvince: profile.Billing.State,
-  billingAptorSuite: profile.Billing.Apt,
-  phoneNumber: profile.Phone,
-  paymentCardholdersName: '',
-  paymentCardnumber: profile.CCNumber,
-  paymentCardExpiryMonth: profile.ExpMonth,
-  paymentCardExpiryYear: profile.ExpYear,
-  paymentCVV: profile.CVV,
+  billingRegion: profile.Billing.State,
+  billingApt: profile.Billing.Apt,
+  phone: profile.Phone,
+  card: {
+    paymentCardholdersName: '',
+    cardNumber: profile.CCNumber,
+    expMonth: profile.ExpMonth,
+    expYear: profile.ExpYear,
+    cvv: profile.CVV
+  },
   email: '',
-  sameAsDelivery: profile.Same,
-  oneCheckout: false
+  sameDeliveryBillingBool: profile.Same,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertBalkoProfileToBase = profile => ({
   profileID: profile.id,
@@ -94,26 +115,33 @@ export const convertBalkoProfileToBase = profile => ({
   deliveryCity: profile.city,
   deliveryFirstName: profile.firstname,
   deliveryLastName: profile.lastname,
-  deliveryProvince: profile.state,
+  deliveryRegion: profile.state,
   deliveryZip: profile.zip,
-  deliveryAptorSuite: profile.add2,
+  deliveryApt: profile.add2,
   billingZip: profile.zip,
   billingCountry: profile.bcountry,
   billingAddress: profile.badd1,
   billingCity: profile.bcity,
   billingFirstName: profile.bfirstname,
   billingLastName: profile.blastname,
-  billingProvince: profile.bstate,
-  billingAptorSuite: profile.badd2,
-  phoneNumber: profile.phone,
-  paymentCardholdersName: `${profile.ccfirst} ${profile.cclast}`,
-  paymentCardnumber: profile.cc,
-  paymentCardExpiryMonth: profile.expm,
-  paymentCardExpiryYear: profile.expy,
-  paymentCVV: profile.ccv,
+  billingRegion: profile.bstate,
+  billingApt: profile.badd2,
+  phone: profile.phone,
+  card: {
+    paymentCardholdersName: `${profile.ccfirst} ${profile.cclast}`,
+    cardNumber: profile.cc,
+    expMonth: profile.expm,
+    expYear: profile.expy,
+    cvv: profile.ccv
+  },
   email: profile.email,
-  sameAsDelivery: false,
-  oneCheckout: false
+  sameDeliveryBillingBool: false,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertEveaioProfileToBase = profile => ({
   profileID: profile.ProfileName,
@@ -122,26 +150,33 @@ export const convertEveaioProfileToBase = profile => ({
   deliveryCity: profile.ShippingCity,
   deliveryFirstName: profile.ShippingFirstName,
   deliveryLastName: profile.ShippingLastName,
-  deliveryProvince: shortToLongStates[profile.ShippingState] || '',
+  deliveryRegion: shortToLongStates[profile.ShippingState] || '',
   deliveryZip: profile.ShippingZip,
-  deliveryAptorSuite: profile.ShippingAddressLine2,
+  deliveryApt: profile.ShippingAddressLine2,
   billingZip: profile.BillingZip,
   billingCountry: shortToLongCountries[profile.BillingCountryCode] || '',
   billingAddress: profile.BillingAddressLine1,
   billingCity: profile.BillingCity,
   billingFirstName: profile.BillingFirstName,
   billingLastName: profile.BillingLastName,
-  billingProvince: shortToLongStates[profile.BillingState] || '',
-  billingAptorSuite: profile.BillingAddressLine2,
-  phoneNumber: profile.ShippingPhone,
-  paymentCardholdersName: profile.NameOnCard,
-  paymentCardnumber: profile.CreditCardNumber,
-  paymentCardExpiryMonth: profile.ExpirationMonth,
-  paymentCardExpiryYear: profile.ExpirationYear,
-  paymentCVV: profile.Cvv,
+  billingRegion: shortToLongStates[profile.BillingState] || '',
+  billingApt: profile.BillingAddressLine2,
+  phone: profile.ShippingPhone,
+  card: {
+    paymentCardholdersName: profile.NameOnCard,
+    cardNumber: profile.CreditCardNumber,
+    expMonth: profile.ExpirationMonth,
+    expYear: profile.ExpirationYear,
+    cvv: profile.Cvv
+  },
   email: profile.BillingEmail,
-  sameAsDelivery: profile.SameBillingShipping,
-  oneCheckout: profile.OneCheckoutPerWebsite
+  sameDeliveryBillingBool: profile.SameBillingShipping,
+  oneCheckoutBool: profile.OneCheckoutPerWebsite,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertPhantomProfileToBase = profile => ({
   profileID: profile.Name,
@@ -150,26 +185,33 @@ export const convertPhantomProfileToBase = profile => ({
   deliveryCity: profile.Shipping.City,
   deliveryFirstName: profile.Shipping.FirstName,
   deliveryLastName: profile.Shipping.LastName,
-  deliveryProvince: profile.Shipping.State,
+  deliveryRegion: profile.Shipping.State,
   deliveryZip: profile.Shipping.Zip,
-  deliveryAptorSuite: profile.Shipping.Apt,
+  deliveryApt: profile.Shipping.Apt,
   billingZip: profile.Billing.Zip,
   billingCountry: profile.Country,
   billingAddress: profile.Billing.Address,
   billingCity: profile.Billing.City,
   billingFirstName: profile.Billing.FirstName,
   billingLastName: profile.Billing.LastName,
-  billingProvince: profile.Billing.State,
-  billingAptorSuite: profile.Billing.Apt,
-  phoneNumber: profile.Phone,
-  paymentCardholdersName: '',
-  paymentCardnumber: profile.CCNumber,
-  paymentCardExpiryMonth: profile.ExpMonth,
-  paymentCardExpiryYear: profile.ExpYear,
-  paymentCVV: profile.CVV,
+  billingRegion: profile.Billing.State,
+  billingApt: profile.Billing.Apt,
+  phone: profile.Phone,
+  card: {
+    paymentCardholdersName: '',
+    cardNumber: profile.CCNumber,
+    expMonth: profile.ExpMonth,
+    expYear: profile.ExpYear,
+    cvv: profile.CVV
+  },
   email: profile.Email,
-  sameAsDelivery: profile.Same,
-  oneCheckout: false
+  sameDeliveryBillingBool: profile.Same,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertDasheProfileToBase = profile => ({
   profileID: profile.profileName,
@@ -178,26 +220,33 @@ export const convertDasheProfileToBase = profile => ({
   deliveryCity: profile.shipping.city,
   deliveryFirstName: profile.shipping.firstName,
   deliveryLastName: profile.shipping.lastName,
-  deliveryProvince: profile.shipping.state,
+  deliveryRegion: profile.shipping.state,
   deliveryZip: profile.shipping.zipCode,
-  deliveryAptorSuite: profile.shipping.apt,
+  deliveryApt: profile.shipping.apt,
   billingZip: profile.billing.zipcode,
   billingCountry: profile.billing.country,
   billingAddress: profile.billing.address,
   billingCity: profile.billing.city,
   billingFirstName: profile.billing.firstName,
   billingLastName: profile.billing.lastName,
-  billingProvince: profile.billing.state,
-  billingAptorSuite: profile.billing.apt,
-  phoneNumber: profile.billing.phone,
-  paymentCardholdersName: profile.holder,
-  paymentCardnumber: profile.card.number,
-  paymentCardExpiryMonth: profile.card.month,
-  paymentCardExpiryYear: profile.card.year,
-  paymentCVV: profile.card.cvv,
+  billingRegion: profile.billing.state,
+  billingApt: profile.billing.apt,
+  phone: profile.billing.phone,
+  card: {
+    paymentCardholdersName: profile.holder,
+    cardNumber: profile.card.number,
+    expMonth: profile.card.month,
+    expYear: profile.card.year,
+    cvv: profile.card.cvv
+  },
   email: profile.email,
-  sameAsDelivery: profile.billingMatch,
-  oneCheckout: false
+  sameDeliveryBillingBool: profile.billingMatch,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertHasteyProfileToBase = profile => ({
   // eslint-disable-next-line no-underscore-dangle
@@ -207,26 +256,33 @@ export const convertHasteyProfileToBase = profile => ({
   deliveryCity: profile.city,
   deliveryFirstName: profile.name.split(' ')[0],
   deliveryLastName: profile.name.split(' ')[1],
-  deliveryProvince: profile.state,
+  deliveryRegion: profile.state,
   deliveryZip: profile.zip,
-  deliveryAptorSuite: profile.address_2,
+  deliveryApt: profile.address_2,
   billingZip: profile.zip,
   billingCountry: profile.country,
   billingAddress: profile.address,
   billingCity: profile.city,
   billingFirstName: profile.name.split(' ')[0],
   billingLastName: profile.name.split(' ')[1],
-  billingProvince: profile.state,
-  billingAptorSuite: profile.address_2,
-  paymentCardholdersName: profile.name,
-  paymentCardnumber: profile.cc_number,
-  paymentCardExpiryMonth: profile.cc_month,
-  paymentCardExpiryYear: profile.cc_year,
-  paymentCVV: profile.cc_cvv,
+  billingRegion: profile.state,
+  billingApt: profile.address_2,
   email: profile.email,
-  phoneNumber: profile.tel,
-  sameAsDelivery: false,
-  oneCheckout: false
+  phone: profile.tel,
+  card: {
+    paymentCardholdersName: profile.name,
+    cardNumber: profile.cc_number,
+    expMonth: profile.cc_month,
+    expYear: profile.cc_year,
+    cvv: profile.cc_cvv
+  },
+  sameDeliveryBillingBool: false,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertKodaiProfileToBase = profile => ({
   profileID: profile.profileName,
@@ -235,28 +291,34 @@ export const convertKodaiProfileToBase = profile => ({
   deliveryCity: profile.deliveryAddress.city,
   deliveryFirstName: profile.deliveryAddress.firstName,
   deliveryLastName: profile.deliveryAddress.lastName,
-  deliveryProvince: profile.deliveryAddress.state,
+  deliveryRegion: profile.deliveryAddress.state,
   deliveryZip: profile.deliveryAddress.zipCode,
-  deliveryAptorSuite: profile.deliveryAddress.apt,
+  deliveryApt: profile.deliveryAddress.apt,
   billingZip: profile.billingAddress.zipCode,
   billingCountry: profile.region,
   billingAddress: profile.billingAddress.address,
   billingCity: profile.billingAddress.city,
   billingFirstName: profile.billingAddress.firstName,
   billingLastName: profile.billingAddress.lastName,
-  billingProvince: profile.billingAddress.state,
-  billingAptorSuite: profile.billingAddress.apt,
-  phoneNumber: profile.billingAddress.phoneNumber,
-  paymentCardholdersName: profile.paymentDetails.cardHolder,
-  paymentCardnumber: profile.paymentDetails.paymentCardnumber,
-  paymentCardExpiryMonth: profile.paymentDetails.expirationDate.split('/')[0],
-  paymentCardExpiryYear: `20${
-    profile.paymentDetails.expirationDate.split('/')[1]
-  }`,
-  paymentCVV: profile.paymentDetails.paymentCVV,
+  billingRegion: profile.billingAddress.state,
+  billingApt: profile.billingAddress.apt,
+  phone: profile.billingAddress.phoneNumber,
+  card: {
+    paymentCardholdersName: profile.paymentDetails.cardHolder,
+    cardNumber: profile.paymentDetails.paymentCardnumber,
+    expMonth: profile.paymentDetails.expirationDate.split('/')[0],
+    expYear: `20${profile.paymentDetails.expirationDate.split('/')[1]}`,
+    cvv: profile.paymentDetails.paymentCVV
+  },
   email: profile.paymentDetails.emailAddress,
-  sameAsDelivery: profile.miscellaneousInformation.deliverySameAsBilling,
-  oneCheckout: false
+  sameDeliveryBillingBool:
+    profile.miscellaneousInformation.deliverySameAsBilling,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertNsbProfileToBase = profile => ({
   profileID: profile.name,
@@ -265,26 +327,33 @@ export const convertNsbProfileToBase = profile => ({
   deliveryCity: profile.shipping.city,
   deliveryFirstName: profile.shipping.firstname,
   deliveryLastName: profile.shipping.lastname,
-  deliveryProvince: shortToLongStates[profile.shipping.state],
+  deliveryRegion: shortToLongStates[profile.shipping.state],
   deliveryZip: profile.shipping.zip,
-  deliveryAptorSuite: profile.shipping.address2,
+  deliveryApt: profile.shipping.address2,
   billingZip: profile.shipping.zip,
   billingCountry: shortToLongCountries[profile.shipping.country] || '',
   billingAddress: profile.shipping.address,
   billingCity: profile.shipping.city,
   billingFirstName: profile.shipping.firstname,
   billingLastName: profile.shipping.lastname,
-  billingProvince: shortToLongStates[profile.shipping.state] || '',
-  billingAptorSuite: profile.shipping.address2,
-  paymentCardholdersName: profile.cc.name,
-  paymentCardnumber: profile.cc.number.split(' ').join(''),
-  paymentCardExpiryMonth: profile.cc.expiry.split(' / ')[0],
-  paymentCardExpiryYear: `20${profile.cc.expiry.split(' / ')[1]}`,
-  paymentCVV: profile.cc.cvc,
+  billingRegion: shortToLongStates[profile.shipping.state] || '',
+  billingApt: profile.shipping.address2,
+  card: {
+    paymentCardholdersName: profile.cc.name,
+    cardNumber: profile.cc.number.split(' ').join(''),
+    expMonth: profile.cc.expiry.split(' / ')[0],
+    expYear: `20${profile.cc.expiry.split(' / ')[1]}`,
+    cvv: profile.cc.cvc
+  },
   email: profile.email,
-  phoneNumber: profile.phone,
-  sameAsDelivery: profile.billingSame,
-  oneCheckout: profile.checkoutLimit > 0
+  phone: profile.phone,
+  sameDeliveryBillingBool: profile.billingSame,
+  oneCheckoutBool: profile.checkoutLimit > 0,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
 export const convertSoleAioProfileToBase = profile => ({
   profileID: profile.ProfileName,
@@ -293,24 +362,60 @@ export const convertSoleAioProfileToBase = profile => ({
   deliveryCity: profile.ShippingCity,
   deliveryFirstName: profile.ShippingFirstName,
   deliveryLastName: profile.ShippingLastName,
-  deliveryProvince: shortToLongStates[profile.ShippingState],
+  deliveryRegion: shortToLongStates[profile.ShippingState],
   deliveryZip: profile.ShippingZip,
-  deliveryAptorSuite: profile.ShippingAddress2,
+  deliveryApt: profile.ShippingAddress2,
   billingZip: profile.BillingZip,
   billingCountry: profile.BillingCountry,
   billingAddress: profile.BillingAddress1,
   billingCity: profile.BillingCity,
   billingFirstName: profile.BillingFirstName,
   billingLastName: profile.BillingLastName,
-  billingProvince: shortToLongStates[profile.BillingState],
-  billingAptorSuite: profile.BillingAddress2,
-  paymentCardholdersName: profile.CardName,
-  paymentCardnumber: profile.paymentCardnumber,
-  paymentCardExpiryMonth: profile.paymentCardExpiryMonth,
-  paymentCardExpiryYear: `20${profile.paymentCardExpiryYear}`,
-  paymentCVV: profile.paymentCVV,
+  billingRegion: shortToLongStates[profile.BillingState],
+  billingApt: profile.BillingAddress2,
+  card: {
+    paymentCardholdersName: profile.CardName,
+    cardNumber: profile.paymentCardnumber,
+    expMonth: profile.paymentCardExpiryMonth,
+    expYear: `20${profile.paymentCardExpiryYear}`,
+    cvv: profile.paymentCVV
+  },
   email: profile.Email,
-  phoneNumber: profile.Phone,
-  sameAsDelivery: false,
-  oneCheckout: false
+  phone: profile.Phone,
+  sameDeliveryBillingBool: false,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
 });
+
+export const convertProfileToBase = (bot, profile) => {
+  switch (bot) {
+    case 'Cybersole':
+      return convertCybersoleProfileToBase(profile);
+    case 'Project Destroyer':
+      return convertProjectDestroyerProfileToBase(profile);
+    case 'Ghost':
+      return convertGhostProfileToBase(profile);
+    case 'Phantom':
+      return convertPhantomProfileToBase(profile);
+    case 'EVE AIO':
+      return convertEveaioProfileToBase(profile);
+    case 'Dashe':
+      return convertDasheProfileToBase(profile);
+    case 'Hastey':
+      return convertHasteyProfileToBase(profile);
+    case 'NSB':
+      return convertNsbProfileToBase(profile);
+    case 'SOLE AIO':
+      return convertSoleAioProfileToBase(profile);
+    case 'Balko':
+      return convertBalkoProfileToBase(profile);
+    case 'Kodai':
+      return convertKodaiProfileToBase(profile);
+    default:
+      return undefined;
+  }
+};

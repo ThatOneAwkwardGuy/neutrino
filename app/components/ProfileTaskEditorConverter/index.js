@@ -12,6 +12,8 @@ import projectdestroyer from '../../images/projectdestroyer.png';
 import soleaio from '../../images/soleaio.jpg';
 
 const { dialog } = require('electron').remote;
+const fsPromises = require('fs').promises;
+const csv = require('csvtojson');
 
 const profileConversionOptions = [
   'CyberSole',
@@ -59,13 +61,15 @@ export default class ProfileTaskEditorConverter extends Component {
   };
 
   handleFromBotChange = e => {
+    const { toBot } = this.state;
     this.setState({
       [e.target.name]: e.target.value,
-      toBot: 'Unknown'
+      toBot: e.target.value === toBot ? 'Unknown' : toBot
     });
   };
 
   loadFile = () => {
+    const { fromBot } = this.state;
     dialog.showOpenDialog(
       null,
       {
@@ -74,12 +78,33 @@ export default class ProfileTaskEditorConverter extends Component {
           { name: 'All Files', extensions: ['*'] }
         ]
       },
-      filePaths => {
+      async filePaths => {
         const filePath = filePaths[0];
-        console.log(filePath);
+        const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
+        let processedFile = null;
+        if (
+          [
+            'Project Destroyer',
+            'Hastey',
+            'EVE AIO',
+            'Phantom',
+            'NSB',
+            'SOLE AIO'
+          ].includes(fromBot)
+        ) {
+          processedFile = JSON.parse(file);
+        } else if (filePath.split('.').slice(-1)[0] === 'csv') {
+          const csvToJSON = await csv().fromString(file);
+          processedFile = csvToJSON;
+        } else {
+          processedFile = Object.values(JSON.parse(file));
+        }
+        console.lof(processedFile);
       }
     );
   };
+
+  exportFile = () => {};
 
   render() {
     const { fromBot, toBot } = this.state;
@@ -126,6 +151,18 @@ export default class ProfileTaskEditorConverter extends Component {
                     <Col>
                       <Button className="py-5" onClick={this.loadFile}>
                         <FontAwesome name="save" size="2x" className="mr-3" />
+                        Load File
+                      </Button>
+                    </Col>
+                  </Row>
+                  <Row className="my-5">
+                    <Col>
+                      <Button className="py-5" onClick={this.loadFile}>
+                        <FontAwesome
+                          name="download"
+                          size="2x"
+                          className="mr-3"
+                        />
                         Load File
                       </Button>
                     </Col>
