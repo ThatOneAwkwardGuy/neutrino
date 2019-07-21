@@ -34,7 +34,7 @@ export default class Header extends Component {
   };
 
   render() {
-    const { showPageTitle } = this.props;
+    const { showPageTitle, closable } = this.props;
     return (
       <Row
         id="header"
@@ -59,25 +59,29 @@ export default class Header extends Component {
             />
           </span>
         </Col>
-        <Col className="col-0_5 col">
-          <span role="button" tabIndex="0" onClick={this.closeWindow}>
-            <img
-              draggable="false"
-              alt="Close Window"
-              className="headerIcon"
-              src={closeIcon}
-            />
-          </span>
-        </Col>
+        {closable ? (
+          <Col className="col-0_5 col">
+            <span role="button" tabIndex="0" onClick={this.closeWindow}>
+              <img
+                draggable="false"
+                alt="Close Window"
+                className="headerIcon"
+                src={closeIcon}
+              />
+            </span>
+          </Col>
+        ) : null}
       </Row>
     );
   }
 }
 
 Header.propTypes = {
-  showPageTitle: PropTypes.bool
+  showPageTitle: PropTypes.bool,
+  closable: PropTypes.bool
 };
 
 Header.defaultProps = {
-  showPageTitle: true
+  showPageTitle: true,
+  closable: true
 };

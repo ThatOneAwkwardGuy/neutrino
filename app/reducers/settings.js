@@ -1,7 +1,8 @@
 // @flow
 import {
   ADD_PROXY_PROVIDER_ACCOUNT,
-  REMOVE_PROXY_PROVIDER_ACCOUNT
+  REMOVE_PROXY_PROVIDER_ACCOUNT,
+  SET_ROOT_SETTING_VALUE
 } from '../actions/settings';
 
 import type { settingsStateType, Action } from './types';
@@ -12,7 +13,14 @@ export default function settings(
       google: [],
       digitalocean: [],
       vultr: []
-    }
+    },
+    activityDelayMin: '60000',
+    activityDelayMax: '120000',
+    showAcitivtyWindows: false,
+    activityGoogleSearch: true,
+    activityGoogleNews: true,
+    activityGoogleShopping: true,
+    activityYoutube: true
   },
   action: Action
 ) {
@@ -32,6 +40,11 @@ export default function settings(
         (account, index) => index !== action.index
       );
       return removeProxyProviderAccountState;
+    }
+    case SET_ROOT_SETTING_VALUE: {
+      const changeRootSetting = { ...state };
+      changeRootSetting[action.key] = action.value;
+      return changeRootSetting;
     }
     default:
       return state;

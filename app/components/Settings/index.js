@@ -68,6 +68,7 @@ export default class Settings extends Component {
       default:
         break;
     }
+
     addProxyProviderAccount(account);
     this.setState({
       accountName: '',
@@ -77,6 +78,18 @@ export default class Settings extends Component {
       vultrAPIKey: '',
       digitalOceanAPIKey: ''
     });
+  };
+
+  handleSettingsChange = e => {
+    const { setKeyInSetting } = this.props;
+    const { name, value } = e.target;
+    setKeyInSetting(name, value);
+  };
+
+  handleSettingsToggleChange = e => {
+    const { name } = e.target;
+    const { settings, setKeyInSetting } = this.props;
+    setKeyInSetting(name, !settings[name]);
   };
 
   returnDigitalOceanProviderFields = () => {
@@ -292,6 +305,79 @@ export default class Settings extends Component {
                 </Container>
               </Col>
             </Row>
+            <h6 className="font-weight-bold py-3">One Click Generator</h6>
+            <Row className="p-3 align-items-end">
+              <Col xs="3">
+                <Label>Min Delay</Label>
+                <Input
+                  type="number"
+                  name="activityDelayMin"
+                  onChange={this.handleSettingsChange}
+                  value={settings.activityDelayMin}
+                />
+              </Col>
+              <Col xs="3">
+                <Label>Max Delay</Label>
+                <Input
+                  type="number"
+                  name="activityDelayMax"
+                  onChange={this.handleSettingsChange}
+                  value={settings.activityDelayMax}
+                />
+              </Col>
+            </Row>
+            <Row className="panel-middle p-3 align-items-end">
+              <Col>
+                <Label>Show Activity Windows</Label>
+                <CustomInput
+                  type="switch"
+                  id="showAcitivtyWindows"
+                  name="showAcitivtyWindows"
+                  checked={settings.showAcitivtyWindows}
+                  onChange={this.handleSettingsToggleChange}
+                />
+              </Col>
+              <Col>
+                <Label>Google Search</Label>
+                <CustomInput
+                  type="switch"
+                  id="activityGoogleSearch"
+                  name="activityGoogleSearch"
+                  checked={settings.activityGoogleSearch}
+                  onChange={this.handleSettingsToggleChange}
+                />
+              </Col>
+              <Col>
+                <Label>Google News</Label>
+                <CustomInput
+                  type="switch"
+                  id="activityGoogleNews"
+                  name="activityGoogleNews"
+                  checked={settings.activityGoogleNews}
+                  onChange={this.handleSettingsToggleChange}
+                />
+              </Col>
+              <Col>
+                <Label>Google Shopping</Label>
+                <CustomInput
+                  type="switch"
+                  id="activityGoogleShopping"
+                  name="activityGoogleShopping"
+                  checked={settings.activityGoogleShopping}
+                  onChange={this.handleSettingsToggleChange}
+                />
+              </Col>
+              <Col>
+                <Label>Youtube</Label>
+                <CustomInput
+                  type="switch"
+                  id="activityYoutube"
+                  name="activityYoutube"
+                  checked={settings.activityYoutube}
+                  onChange={this.handleSettingsToggleChange}
+                />
+              </Col>
+            </Row>
             <h6 className="font-weight-bold py-3">Account</h6>
             <Row className="panel-middle py-3">
               <Col xs="3">
@@ -309,6 +395,7 @@ export default class Settings extends Component {
 
 Settings.propTypes = {
   addProxyProviderAccount: PropTypes.func.isRequired,
-  settings: PropTypes.objectOf(PropTypes.object).isRequired,
-  removeProxyProviderAccount: PropTypes.func.isRequired
+  settings: PropTypes.objectOf(PropTypes.any).isRequired,
+  removeProxyProviderAccount: PropTypes.func.isRequired,
+  setKeyInSetting: PropTypes.func.isRequired
 };

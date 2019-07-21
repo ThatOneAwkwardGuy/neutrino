@@ -104,7 +104,7 @@ export default class Captcha extends Component {
   render() {
     return (
       <Container id="captchaWindow" fluid className="d-flex flex-column h-100">
-        <Header />
+        <Header closable={false} />
         <Row className="flex-fill overflow-hidden">
           <div className="etabs-tabgroup">
             <div className="etabs-tabs" />
@@ -112,7 +112,7 @@ export default class Captcha extends Component {
           </div>
           <div className="etabs-views" />
         </Row>
-        <Row className="py-5" style={{ height: '60px' }}>
+        <Row className="py-3" style={{ height: '60px' }}>
           <Col>
             <Button>Clear Cookies</Button>
           </Col>

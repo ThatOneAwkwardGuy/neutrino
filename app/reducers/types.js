@@ -13,7 +13,14 @@ export type settingsStateType = {
     }>,
     +digitalocean: Array<{ +accountName: string, +apiKey: string }>,
     +vultr: Array<{ +accountName: string, +apiKey: string }>
-  }
+  },
+  +activityDelayMin: string,
+  +activityDelayMax: string,
+  +showAcitivtyWindows: boolean,
+  +activityGoogleSearch: boolean,
+  +activityGoogleNews: boolean,
+  +activityGoogleShopping: boolean,
+  +activityYoutube: boolean
 };
 
 export type accountsStateType = {
@@ -21,6 +28,20 @@ export type accountsStateType = {
     +email: string,
     +site: string,
     +pass: string,
+    +status: string
+  }>
+};
+
+export type activityStateType = {
+  +activities: Array<{
+    +email: string,
+    +pass: string,
+    +proxy: string,
+    +googleSearch: integer,
+    +googleNews: integer,
+    +googleShopping: integer,
+    +youtube: integer,
+    +total: integer,
     +status: string
   }>
 };

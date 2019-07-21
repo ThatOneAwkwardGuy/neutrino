@@ -8,6 +8,7 @@ import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
 import * as SettingsActions from '../../actions/settings';
 import * as AccountActions from '../../actions/accounts';
+import * as ActivityActions from '../../actions/activities';
 import routes from '../../constants/routes';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
@@ -76,11 +77,18 @@ class Home extends Component {
     const {
       addProxyProviderAccount,
       removeProxyProviderAccount,
+      setKeyInSetting,
       settings,
       addCreatedAccount,
       removeCreatedAccount,
       removeAllCreatedAccounts,
-      accounts
+      accounts,
+      addActivities,
+      incrementActivity,
+      updateActivity,
+      deleteActivity,
+      deleteAllActivities,
+      activities
     } = this.props;
     const { setLoading } = this;
     const appRoutes = [
@@ -119,7 +127,15 @@ class Home extends Component {
         path: routes.ONECLICK_GENERATOR,
         component: OneClickGenerator,
         exact: true,
-        props: []
+        props: {
+          settings,
+          addActivities,
+          incrementActivity,
+          updateActivity,
+          deleteActivity,
+          deleteAllActivities,
+          activities
+        }
       },
       {
         path: routes.ONECLICK_TESTER,
@@ -144,7 +160,12 @@ class Home extends Component {
         path: routes.SETTINGS,
         component: Settings,
         exact: true,
-        props: { addProxyProviderAccount, removeProxyProviderAccount, settings }
+        props: {
+          addProxyProviderAccount,
+          removeProxyProviderAccount,
+          setKeyInSetting,
+          settings
+        }
       }
     ];
     return (
@@ -379,7 +400,8 @@ class Home extends Component {
 
 const mapStateToProps = state => ({
   settings: state.settings,
-  accounts: state.accounts
+  accounts: state.accounts,
+  activities: state.activities
 });
 
 // const mapDispatchToProps = dispatch => {
@@ -389,20 +411,30 @@ const mapStateToProps = state => ({
 
 const mapDispatchToProps = {
   ...SettingsActions,
-  ...AccountActions
+  ...AccountActions,
+  ...ActivityActions
 };
 
 Home.propTypes = {
   addProxyProviderAccount: PropTypes.func.isRequired,
   removeProxyProviderAccount: PropTypes.func.isRequired,
-  settings: PropTypes.objectOf(PropTypes.object).isRequired,
+  setKeyInSetting: PropTypes.func.isRequired,
+  settings: PropTypes.objectOf(PropTypes.any).isRequired,
   addCreatedAccount: PropTypes.func.isRequired,
   removeCreatedAccount: PropTypes.func.isRequired,
   removeAllCreatedAccounts: PropTypes.func.isRequired,
-  location: PropTypes.objectOf(PropTypes.object).isRequired,
+  location: PropTypes.objectOf(PropTypes.any).isRequired,
   checkUserAuth: PropTypes.func.isRequired,
   uid: PropTypes.string.isRequired,
   accounts: PropTypes.shape({
+    accounts: PropTypes.array
+  }).isRequired,
+  addActivities: PropTypes.func.isRequired,
+  updateActivity: PropTypes.func.isRequired,
+  incrementActivity: PropTypes.func.isRequired,
+  deleteActivity: PropTypes.func.isRequired,
+  deleteAllActivities: PropTypes.func.isRequired,
+  activities: PropTypes.shape({
     accounts: PropTypes.array
   }).isRequired
 };

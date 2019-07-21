@@ -511,7 +511,7 @@ class ProxyCreator extends Component {
 }
 
 ProxyCreator.propTypes = {
-  settings: PropTypes.objectOf(PropTypes.object).isRequired,
+  settings: PropTypes.objectOf(PropTypes.any).isRequired,
   setLoading: PropTypes.func.isRequired,
   toastManager: PropTypes.shape({
     add: PropTypes.func,
