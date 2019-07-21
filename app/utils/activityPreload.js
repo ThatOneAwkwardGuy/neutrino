@@ -26,7 +26,7 @@ document.addEventListener(
       'Tencent',
       'Facebook',
       'Visa',
-      "McDonald's",
+      'McDonald\'s',
       'Alibaba',
       'AT&T',
       'IBM',
@@ -62,7 +62,7 @@ document.addEventListener(
       'Baidu',
       'Zara',
       'Ping An',
-      "L'Oréal Paris",
+      'L\'Oréal Paris',
       'Oracle',
       'Mercedes-Benz',
       'BMW',
@@ -113,7 +113,7 @@ document.addEventListener(
       'ANZ',
       'ALDI',
       'BT',
-      "Lowe's",
+      'Lowe\'s',
       'Ford',
       'Honda',
       'Pepsi',
@@ -188,6 +188,7 @@ document.addEventListener(
       'Write',
       'Yell'
     ];
+
     let webview;
     log.catchErrors();
     passChomeTest(window);
@@ -230,7 +231,7 @@ document.addEventListener(
         webview.removeEventListener('dom-ready', changeURLGoogleSearch);
         activity.searches += 1;
         // activity.status = `Google Search - ${question}`;
-        activity.status = `Google Search`;
+        activity.status = 'Google Search';
         updateFunction({ index: data.index, activity });
       };
       changeURLGoogleSearch();
@@ -243,7 +244,7 @@ document.addEventListener(
         webview.removeEventListener('dom-ready', changeURLShoppingSearch);
         activity.shopping += 1;
         // activity.status = `Google Shopping Search - ${chosenQuery}`;
-        activity.status = `Google Shopping Search`;
+        activity.status = 'Google Shopping Search';
         updateFunction({ index: data.index, activity });
       };
       changeURLShoppingSearch();
@@ -256,7 +257,7 @@ document.addEventListener(
         webview.removeEventListener('dom-ready', changeURLNewsSearch);
         activity.news += 1;
         // activity.status = `Google News Search - ${chosenQuery}`;
-        activity.status = `Google News Search`;
+        activity.status = 'Google News Search';
         updateFunction({ index: data.index, activity });
       };
       changeURLNewsSearch();
@@ -284,7 +285,7 @@ document.addEventListener(
         webview.removeEventListener('dom-ready', changeURLYoutubeVideo);
         activity.youtube += 1;
         // activity.status = `Watching Youtube Video - ${chosenVideo.attribs.title}`;
-        activity.status = `Watching Youtube Video`;
+        activity.status = 'Watching Youtube Video';
         updateFunction({ index: data.index, activity });
       };
       changeURLYoutubeVideo();

@@ -55,7 +55,7 @@ const short2long = {
   CD: 'Congo, The Democratic Republic of the',
   CK: 'Cook Islands',
   CR: 'Costa Rica',
-  CI: "Côte d'Ivoire",
+  CI: 'Côte d\'Ivoire',
   HR: 'Croatia',
   CU: 'Cuba',
   CW: 'Curaçao',
@@ -118,11 +118,11 @@ const short2long = {
   KZ: 'Kazakhstan',
   KE: 'Kenya',
   KI: 'Kiribati',
-  KP: "Korea, Democratic People's Republic of",
+  KP: 'Korea, Democratic People\'s Republic of',
   KR: 'Korea, Republic of',
   KW: 'Kuwait',
   KG: 'Kyrgyzstan',
-  LA: "Lao People's Democratic Republic",
+  LA: 'Lao People\'s Democratic Republic',
   LV: 'Latvia',
   LB: 'Lebanon',
   LS: 'Lesotho',
@@ -301,7 +301,6 @@ export const cybersoleProfileToBase = (profile, index) => {
     oneCheckout: profile.one_checkout
   };
 };
-
 export const projectDestroyerProfileToBase = (profile, index) => {
   return {
     profileID: profile.title,
