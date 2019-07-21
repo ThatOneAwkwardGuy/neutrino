@@ -190,11 +190,11 @@ label {
   background: $mainColour;
 }
 
-.btn-secondary:hover {
+.btn-secondary:hover:enabled {
   background: $mainColourDarker1 !important;
   background-color: $mainColourDarker1 !important;
 }
-.btn-secondary:active {
+.btn-secondary:active:enabled {
   background: $mainColourDarker2 !important;
   background-color: $mainColourDarker2 !important;
 }

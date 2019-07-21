@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Input, Button } from 'reactstrap';
+import { withToastManager } from 'react-toast-notifications';
 import FontAwesome from 'react-fontawesome';
 import { generateUEID } from '../../utils/utils';
 import unknownImage from '../../images/unknown-image.svg';
@@ -40,7 +41,7 @@ const profileConversionOptionsMapping = {
   Phantom: unknownImage
 };
 
-export default class ProfileTaskEditorConverter extends Component {
+class ProfileTaskEditorConverter extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -99,7 +100,7 @@ export default class ProfileTaskEditorConverter extends Component {
         } else {
           processedFile = Object.values(JSON.parse(file));
         }
-        console.lof(processedFile);
+        console.log(processedFile);
       }
     );
   };
@@ -149,21 +150,29 @@ export default class ProfileTaskEditorConverter extends Component {
                 <Container>
                   <Row>
                     <Col>
-                      <Button className="py-5" onClick={this.loadFile}>
+                      <Button
+                        className="py-5"
+                        onClick={this.loadFile}
+                        disabled={fromBot === 'Unknown'}
+                      >
                         <FontAwesome name="save" size="2x" className="mr-3" />
-                        Load File
+                        Load Profiles
                       </Button>
                     </Col>
                   </Row>
                   <Row className="my-5">
                     <Col>
-                      <Button className="py-5" onClick={this.loadFile}>
+                      <Button
+                        className="py-5"
+                        onClick={this.exportFile}
+                        disabled={fromBot === 'Unknown' || toBot === 'Unknown'}
+                      >
                         <FontAwesome
                           name="download"
                           size="2x"
                           className="mr-3"
                         />
-                        Load File
+                        Export Profiles
                       </Button>
                     </Col>
                   </Row>
@@ -210,3 +219,5 @@ export default class ProfileTaskEditorConverter extends Component {
     );
   }
 }
+
+export default withToastManager(ProfileTaskEditorConverter);

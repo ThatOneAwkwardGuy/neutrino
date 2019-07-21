@@ -9,6 +9,7 @@ import FontAwesome from 'react-fontawesome';
 import * as SettingsActions from '../../actions/settings';
 import * as AccountActions from '../../actions/accounts';
 import * as ActivityActions from '../../actions/activities';
+import * as ProfileActions from '../../actions/profile';
 import routes from '../../constants/routes';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
@@ -38,7 +39,12 @@ class Home extends Component {
 
   componentDidUpdate(prevProps) {
     const { location, checkUserAuth, uid } = this.props;
-    if (location !== prevProps.location && checkUserAuth && uid !== '') {
+    if (
+      location !== prevProps.location &&
+      checkUserAuth &&
+      uid !== '' &&
+      process.env.NODE_ENV !== 'development'
+    ) {
       try {
         checkUserAuth(uid);
       } catch (error) {
@@ -88,7 +94,11 @@ class Home extends Component {
       updateActivity,
       deleteActivity,
       deleteAllActivities,
-      activities
+      activities,
+      profile,
+      updateProfileAttribute,
+      clearProfileAttributes,
+      updateProfile
     } = this.props;
     const { setLoading } = this;
     const appRoutes = [
@@ -147,7 +157,12 @@ class Home extends Component {
         path: routes.PROFILE_CREATOR,
         component: ProfileCreator,
         exact: true,
-        props: []
+        props: {
+          profile,
+          updateProfileAttribute,
+          clearProfileAttributes,
+          updateProfile
+        }
       },
       {
         path: routes.PROFILE_TASK_EDITOR_CONVERTER,
@@ -401,7 +416,8 @@ class Home extends Component {
 const mapStateToProps = state => ({
   settings: state.settings,
   accounts: state.accounts,
-  activities: state.activities
+  activities: state.activities,
+  profile: state.profile
 });
 
 // const mapDispatchToProps = dispatch => {
@@ -412,7 +428,8 @@ const mapStateToProps = state => ({
 const mapDispatchToProps = {
   ...SettingsActions,
   ...AccountActions,
-  ...ActivityActions
+  ...ActivityActions,
+  ...ProfileActions
 };
 
 Home.propTypes = {
@@ -436,7 +453,11 @@ Home.propTypes = {
   deleteAllActivities: PropTypes.func.isRequired,
   activities: PropTypes.shape({
     accounts: PropTypes.array
-  }).isRequired
+  }).isRequired,
+  profile: PropTypes.objectOf(PropTypes.any).isRequired,
+  updateProfileAttribute: PropTypes.func.isRequired,
+  clearProfileAttributes: PropTypes.func.isRequired,
+  updateProfile: PropTypes.func.isRequired
 };
 
 export default connect(
