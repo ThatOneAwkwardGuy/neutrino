@@ -16,7 +16,8 @@ export const createActivityWindow = (
   index,
   activity,
   settings,
-  updateActivity
+  updateActivity,
+  showAcitivtyWindows
 ) =>
   new Promise(resolve => {
     if (updateActivity) {
@@ -41,6 +42,9 @@ export const createActivityWindow = (
         session: remote.session.fromPartition(`activity-${tokenID}`)
       }
     });
+    if (!showAcitivtyWindows) {
+      win.minimize();
+    }
     win.webContents.once('close', () => {
       updateActivity(index, { status: 'Not Started' });
     });

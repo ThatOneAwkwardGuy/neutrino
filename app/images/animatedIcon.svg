@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="500px" height="500px" viewBox="0 0 500 500" version="1.1" 
+    xmlns="http://www.w3.org/2000/svg" 
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 43.1 (39012) - http://www.bohemiancoding.com/sketch -->
+    <title>Artboard</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="50%" y1="50%" x2="50%" y2="100%" id="linearGradient-1">
+            <stop stop-color="#1138FC" offset="0%"></stop>
+            <stop stop-color="#ACB8F4" offset="100%"></stop>
+        </linearGradient>
+        <filter x="-6.9%" y="-6.9%" width="113.9%" height="113.9%" filterUnits="objectBoundingBox" id="filter-2">
+            <feGaussianBlur id="gBlur" stdDeviation="5" in="SourceGraphic"></feGaussianBlur>
+        </filter>
+        <animate xlink:href="#gBlur" id="filter-animation" attributeName="stdDeviation" dur="2s" values="5;10;5" repeatCount="indefinite" />
+        <animate xlink:href="#Oval-2-blur" id="filter-animation-shape" attributeName="r" dur="2s" values="107.925442;115;107.925442" repeatCount="indefinite" />
+    </defs>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Artboard">
+            <g id="Group" transform="translate(2.000000, 2.000000)">
+                <circle id="Oval-2" fill="url(#linearGradient-1)" cx="248.228516" cy="248.228516" r="248.228516"></circle>
+                <circle id="Oval-2-blur" fill="#FFFFFF" filter="url(#filter-2)" cx="249.31458" cy="249.31458" r="107.925442"></circle>
+                <circle id="Oval-2" fill="#FFFFFF" cx="249.31458" cy="249.31458" r="107.925442"></circle>
+            </g>
+        </g>
+    </g>
+</svg>

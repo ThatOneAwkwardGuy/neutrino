@@ -95,13 +95,15 @@ export default class OneClickGenerator extends Component {
     activity,
     settings,
     updateActivity,
-    incrementActivity
+    incrementActivity,
+    showAcitivtyWindows
   ) => {
     this.windows[index] = await createActivityWindow(
       index,
       activity,
       settings,
-      updateActivity
+      updateActivity,
+      showAcitivtyWindows
     );
     runAcitivitiesOnWindow(
       this.windows[index],
@@ -113,9 +115,11 @@ export default class OneClickGenerator extends Component {
   };
 
   stopActivity = index => {
+    const { updateActivity } = this.props;
     if (this.windows[index] && !this.windows[index].isDestroyed()) {
       this.windows[index].close();
     }
+    updateActivity(index, { status: 'Not Started' });
   };
 
   startAllActivities = () => {
@@ -123,7 +127,8 @@ export default class OneClickGenerator extends Component {
       activities,
       settings,
       updateActivity,
-      incrementActivity
+      incrementActivity,
+      showAcitivtyWindows
     } = this.props;
     activities.activities.forEach((activity, index) => {
       this.runActivity(
@@ -131,7 +136,8 @@ export default class OneClickGenerator extends Component {
         activity,
         settings,
         updateActivity,
-        incrementActivity
+        incrementActivity,
+        showAcitivtyWindows
       );
     });
   };
@@ -337,6 +343,7 @@ OneClickGenerator.propTypes = {
   deleteAllActivities: PropTypes.func.isRequired,
   updateActivity: PropTypes.func.isRequired,
   incrementActivity: PropTypes.func.isRequired,
+  showAcitivtyWindows: PropTypes.bool.isRequired,
   settings: PropTypes.shape({
     activityGoogleSearch: PropTypes.bool.isRequired,
     activityGoogleNews: PropTypes.bool.isRequired,

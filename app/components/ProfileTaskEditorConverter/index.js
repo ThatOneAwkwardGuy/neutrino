@@ -5,11 +5,13 @@ import { generateUEID } from '../../utils/utils';
 import unknownImage from '../../images/unknown-image.svg';
 import eveaio from '../../images/eveaio.jpg';
 import cybersole from '../../images/cybersole.svg';
-import ghostaio from '../../images/ghostaio.jpg';
+import ghostaio from '../../images/ghostaio.png';
 import hastey from '../../images/hastey.jpg';
 import nsb from '../../images/nsb.jpg';
 import projectdestroyer from '../../images/projectdestroyer.png';
 import soleaio from '../../images/soleaio.jpg';
+import phantom from '../../images/phantom.png';
+import csvLogo from '../../images/csv.png';
 
 const { dialog } = require('electron').remote;
 const fsPromises = require('fs').promises;
@@ -35,9 +37,9 @@ const profileConversionOptionsMapping = {
   NSB: nsb,
   'Project Destroyer': projectdestroyer,
   'SOLE AIO': soleaio,
-  CSV: unknownImage,
-  Unknown: unknownImage,
-  Phantom: unknownImage
+  Phantom: phantom,
+  CSV: csvLogo,
+  Unknown: unknownImage
 };
 
 export default class ProfileTaskEditorConverter extends Component {

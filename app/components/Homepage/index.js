@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { Container, Row, Col } from 'reactstrap';
 import { getFirestore } from '../../utils/firebase';
-import icon from '../../images/logo.svg';
+import icon from '../../images/animatedIcon.svg';
 
 export default class Homepage extends Component {
   constructor(props) {
