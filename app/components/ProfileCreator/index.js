@@ -68,6 +68,7 @@ class ProfileCreator extends Component {
       jigAddressesBool: false,
       fourCharPrefixBool: false,
       randomPhoneNumberTemplate: '',
+      catchallEmail: '',
       email: '',
       phone: '',
       deliveryAddress: '',
@@ -88,6 +89,122 @@ class ProfileCreator extends Component {
       billingZip: ''
     };
   }
+
+  componentDidMount() {
+    const { profile } = this.props;
+    this.setState(prevState => ({
+      ...prevState,
+      ...profile
+    }));
+  }
+
+  saveProfile = () => {
+    const { updateProfile, toastManager } = this.props;
+    const {
+      sameDeliveryBillingBool,
+      oneCheckoutBool,
+      randomNameBool,
+      randomPhoneNumberBool,
+      useCatchallBool,
+      jigAddressesBool,
+      fourCharPrefixBool,
+      randomPhoneNumberTemplate,
+      catchallEmail,
+      email,
+      phone,
+      deliveryAddress,
+      deliveryFirstName,
+      deliveryLastName,
+      deliveryCity,
+      deliveryApt,
+      deliveryCountry,
+      deliveryRegion,
+      deliveryZip,
+      billingAddress,
+      billingFirstName,
+      billingLastName,
+      billingCity,
+      billingApt,
+      billingCountry,
+      billingRegion,
+      billingZip
+    } = this.state;
+    updateProfile({
+      sameDeliveryBillingBool,
+      oneCheckoutBool,
+      randomNameBool,
+      randomPhoneNumberBool,
+      useCatchallBool,
+      jigAddressesBool,
+      fourCharPrefixBool,
+      randomPhoneNumberTemplate,
+      catchallEmail,
+      email,
+      phone,
+      deliveryAddress,
+      deliveryFirstName,
+      deliveryLastName,
+      deliveryCity,
+      deliveryApt,
+      deliveryCountry,
+      deliveryRegion,
+      deliveryZip,
+      billingAddress,
+      billingFirstName,
+      billingLastName,
+      billingCity,
+      billingApt,
+      billingCountry,
+      billingRegion,
+      billingZip
+    });
+    toastManager.add('Saved profile', {
+      appearance: 'success',
+      autoDismiss: true,
+      pauseOnHover: true
+    });
+  };
+
+  clearProfile = () => {
+    const { clearProfileAttributes, toastManager } = this.props;
+    clearProfileAttributes();
+    this.setState({
+      cards: [],
+      cardsInput: '',
+      sameDeliveryBillingBool: false,
+      oneCheckoutBool: false,
+      randomNameBool: false,
+      randomPhoneNumberBool: false,
+      useCatchallBool: false,
+      jigAddressesBool: false,
+      fourCharPrefixBool: false,
+      randomPhoneNumberTemplate: '',
+      catchallEmail: '',
+      email: '',
+      phone: '',
+      deliveryAddress: '',
+      deliveryFirstName: '',
+      deliveryLastName: '',
+      deliveryCity: '',
+      deliveryApt: '',
+      deliveryCountry: '',
+      deliveryRegion: '',
+      deliveryZip: '',
+      billingAddress: '',
+      billingFirstName: '',
+      billingLastName: '',
+      billingCity: '',
+      billingApt: '',
+      billingCountry: '',
+      billingRegion: '',
+      billingZip: ''
+    });
+    toastManager.add('Cleared profile', {
+      appearance: 'success',
+      autoDismiss: true,
+      pauseOnHover: true
+    });
+  };
 
   handleChange = e => {
     this.setState({
@@ -432,8 +549,6 @@ class ProfileCreator extends Component {
       randomNameBool,
       randomPhoneNumberBool,
       useCatchallBool,
-      cards,
-      cardsInput,
       deliveryAddress,
       deliveryFirstName,
       deliveryLastName,
@@ -449,7 +564,13 @@ class ProfileCreator extends Component {
       billingApt,
       billingCountry,
       billingRegion,
-      billingZip
+      billingZip,
+      catchallEmail,
+      email,
+      randomPhoneNumberTemplate,
+      phone,
+      cards,
+      cardsInput
     } = this.state;
     const columns = [
       {
@@ -491,6 +612,7 @@ class ProfileCreator extends Component {
                     type="text"
                     id="catchallEmail"
                     name="catchallEmail"
+                    value={catchallEmail}
                     placeholder="example.com"
                     onChange={this.handleChange}
                   />
@@ -502,6 +624,7 @@ class ProfileCreator extends Component {
                     type="text"
                     id="email"
                     name="email"
+                    value={email}
                     placeholder="johndoe@example.com"
                     onChange={this.handleChange}
                   />
@@ -514,6 +637,7 @@ class ProfileCreator extends Component {
                     type="text"
                     id="randomPhoneNumberTemplate"
                     name="randomPhoneNumberTemplate"
+                    value={randomPhoneNumberTemplate}
                     placeholder="+44######### #->random number"
                     onChange={this.handleChange}
                   />
@@ -525,6 +649,7 @@ class ProfileCreator extends Component {
                     type="text"
                     id="phone"
                     name="phone"
+                    value={phone}
                     placeholder="12345678910"
                     onChange={this.handleChange}
                   />
@@ -821,9 +946,19 @@ class ProfileCreator extends Component {
                 />
               </Col>
             </Row>
+            <Row className="my-4">
+              <Col>
+                <Button onClick={this.saveProfile}>Save Profile</Button>
+              </Col>
+              <Col>
+                <Button color="danger" onClick={this.clearProfile}>
+                  Clear Profile
+                </Button>
+              </Col>
+            </Row>
           </Container>
         </Col>
-        <Col>
+        <Col className="h-100">
           <Container fluid className="p-0 h-100 d-flex flex-column">
             <Row className="flex-1 overflow-hidden panel-middle">
               <Col id="TableContainer" className="h-100">
@@ -895,7 +1030,31 @@ ProfileCreator.propTypes = {
     add: PropTypes.func,
     remove: PropTypes.func,
     toasts: PropTypes.array
-  }).isRequired
+  }).isRequired,
+  profile: PropTypes.shape({
+    randomNameBool: PropTypes.bool.isRequired,
+    randomPhoneNumberBool: PropTypes.bool.isRequired,
+    useCatchallBool: PropTypes.bool.isRequired,
+    deliveryAddress: PropTypes.string.isRequired,
+    deliveryFirstName: PropTypes.string.isRequired,
+    deliveryLastName: PropTypes.string.isRequired,
+    deliveryCity: PropTypes.string.isRequired,
+    deliveryApt: PropTypes.string.isRequired,
+    deliveryCountry: PropTypes.string.isRequired,
+    deliveryRegion: PropTypes.string.isRequired,
+    deliveryZip: PropTypes.string.isRequired,
+    billingAddress: PropTypes.string.isRequired,
+    billingFirstName: PropTypes.string.isRequired,
+    billingLastName: PropTypes.string.isRequired,
+    billingCity: PropTypes.string.isRequired,
+    billingApt: PropTypes.string.isRequired,
+    billingCountry: PropTypes.string.isRequired,
+    billingRegion: PropTypes.string.isRequired,
+    billingZip: PropTypes.string.isRequired
+  }).isRequired,
+  clearProfileAttributes: PropTypes.func.isRequired,
+  updateProfileAttribute: PropTypes.func.isRequired,
+  updateProfile: PropTypes.func.isRequired
 };
 
 export default withToastManager(ProfileCreator);

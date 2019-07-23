@@ -46,6 +46,35 @@ export type activityStateType = {
   }>
 };
 
+export type profileStateType = {
+  +sameDeliveryBillingBool: boolean,
+  +oneCheckoutBool: boolean,
+  +randomNameBool: boolean,
+  +randomPhoneNumberBool: boolean,
+  +useCatchallBool: boolean,
+  +jigAddressesBool: boolean,
+  +fourCharPrefixBool: boolean,
+  +randomPhoneNumberTemplate: string,
+  +email: string,
+  +phone: string,
+  +deliveryAddress: string,
+  +deliveryFirstName: string,
+  +deliveryLastName: string,
+  +deliveryCity: string,
+  +deliveryApt: string,
+  +deliveryCountry: string,
+  +deliveryRegion: string,
+  +deliveryZip: string,
+  +billingAddress: string,
+  +billingFirstName: string,
+  +billingLastName: string,
+  +billingCity: string,
+  +billingApt: string,
+  +billingCountry: string,
+  +billingRegion: string,
+  +billingZip: string
+};
+
 export type Action = {
   +type: string
 };

@@ -17,14 +17,16 @@ export default class Routes extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      authorised: false,
+      authorised: process.env.NODE_ENV === 'development',
       message: '',
       uid: ''
     };
   }
 
   componentDidMount() {
-    this.checkAuthChange();
+    if (process.env.NODE_ENV !== 'development') {
+      this.checkAuthChange();
+    }
   }
 
   setAuthAndMessage = (authorised, message) => {
