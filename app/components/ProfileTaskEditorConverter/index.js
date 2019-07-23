@@ -3,6 +3,8 @@ import { Container, Row, Col, Input, Button } from 'reactstrap';
 import { withToastManager } from 'react-toast-notifications';
 import FontAwesome from 'react-fontawesome';
 import { generateUEID } from '../../utils/utils';
+import { convertProfileToBase } from './functions';
+import { convertFromBase } from '../ProfileCreator/functions';
 import unknownImage from '../../images/unknown-image.svg';
 import eveaio from '../../images/eveaio.jpg';
 import cybersole from '../../images/cybersole.svg';
@@ -48,7 +50,8 @@ class ProfileTaskEditorConverter extends Component {
     super(props);
     this.state = {
       fromBot: 'Unknown',
-      toBot: 'Unknown'
+      toBot: 'Unknown',
+      profiles: []
     };
   }
 
@@ -102,12 +105,24 @@ class ProfileTaskEditorConverter extends Component {
         } else {
           processedFile = Object.values(JSON.parse(file));
         }
-        console.log(processedFile);
+        this.setState({
+          profiles: processedFile
+        });
       }
     );
   };
 
-  exportFile = () => {};
+  exportFile = () => {
+    const { profiles, fromBot, toBot } = this.state;
+    console.log(profiles);
+    const baseProfiles = profiles.map(profile =>
+      convertProfileToBase(fromBot, profile)
+    );
+    const convertedProfiles = baseProfiles.map((profile, index) =>
+      convertFromBase(index, toBot, profile)
+    );
+    console.log(convertedProfiles);
+  };
 
   render() {
     const { fromBot, toBot } = this.state;

@@ -790,3 +790,34 @@ export const convertBaseToCSV = (
   paymentexpYear: card.expYear,
   paymentCVV: card.cvv
 });
+
+export const convertFromBase = (index, bot, profile) => {
+  switch (bot) {
+    case 'CyberSole':
+      return convertBaseToCybersole(index, profile, profile.card, '', '');
+    case 'Project Destroyer':
+      return convertBaseToProjectDestroyer(
+        index,
+        profile,
+        profile.card,
+        '',
+        ''
+      );
+    case 'Hastey':
+      return convertBaseToHastey(index, profile, profile.card, '', '');
+    case 'EVE AIO':
+      return convertBaseToEVEAIO(index, profile, profile.card, '', '');
+    case 'Phantom':
+      return convertBaseToPhantom(index, profile, profile.card, '', '');
+    case 'Ghost':
+      return convertBaseToGhost(index, profile, profile.card, '', '');
+    case 'CSV':
+      return convertBaseToCSV(index, profile, profile.card, '', '');
+    case 'NSB':
+      return convertBaseToNSB(index, profile, profile.card, '', '');
+    case 'SOLE AIO':
+      return convertBaseToSOLEAIO(index, profile, profile.card, '', '');
+    default:
+      return undefined;
+  }
+};
