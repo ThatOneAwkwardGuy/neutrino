@@ -31,13 +31,13 @@ export default class RaffleBot extends Component {
       // proxiesInput: '',
       // style: '',
       // size: '',
-      // loadedRaffle: false,
+      // loadedRaffle: false
       // sizes: [],
       // styles: [],
       // entries: [],
       // proxies: [],
       // profiles: [],
-      // raffleDetails: {},
+      // raffleDetails: {}
       // styleInput: true,
       // sizeInput: true
     };
@@ -57,9 +57,12 @@ export default class RaffleBot extends Component {
 
   loadRaffle = async () => {
     const { site, link } = this.state;
-    console.log(site, link);
-    const raffleDetails = await loadRaffleInfo(site, link);
-    console.log(raffleDetails);
+    try {
+      await loadRaffleInfo(site, link);
+      // this.setState({ loadedRaffle: true });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   render() {
