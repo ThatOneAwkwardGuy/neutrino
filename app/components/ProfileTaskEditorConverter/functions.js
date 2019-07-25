@@ -3,7 +3,7 @@ import {
   shortToLongStates
 } from '../../constants/constants';
 
-export const convertCybersoleProfileToBase = profile => ({
+export const convertCybersoleToBase = profile => ({
   profileID: profile.name,
   deliveryCountry: profile.delivery.country,
   deliveryAddress: profile.delivery.addr1,
@@ -38,7 +38,8 @@ export const convertCybersoleProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertProjectDestroyerProfileToBase = profile => ({
+
+export const convertProjectDestroyerToBase = profile => ({
   profileID: profile.title,
   deliveryCountry: profile.shipping.country,
   deliveryAddress: profile.shipping.address1,
@@ -73,7 +74,8 @@ export const convertProjectDestroyerProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertGhostProfileToBase = profile => ({
+
+export const convertGhostToBase = profile => ({
   profileID: profile.Name,
   deliveryCountry: profile.Country,
   deliveryAddress: profile.Shipping.Address,
@@ -108,7 +110,8 @@ export const convertGhostProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertBalkoProfileToBase = profile => ({
+
+export const convertBalkoToBase = profile => ({
   profileID: profile.id,
   deliveryCountry: profile.country,
   deliveryAddress: profile.add1,
@@ -143,7 +146,8 @@ export const convertBalkoProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertEveaioProfileToBase = profile => ({
+
+export const convertEveaioToBase = profile => ({
   profileID: profile.ProfileName,
   deliveryCountry: shortToLongCountries[profile.ShippingCountryCode] || '',
   deliveryAddress: profile.ShippingAddressLine1,
@@ -178,7 +182,8 @@ export const convertEveaioProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertPhantomProfileToBase = profile => ({
+
+export const convertPhantomToBase = profile => ({
   profileID: profile.Name,
   deliveryCountry: profile.Country,
   deliveryAddress: profile.Shipping.Address,
@@ -213,7 +218,8 @@ export const convertPhantomProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertDasheProfileToBase = profile => ({
+
+export const convertDasheToBase = profile => ({
   profileID: profile.profileName,
   deliveryCountry: profile.shipping.country,
   deliveryAddress: profile.shipping.address,
@@ -248,7 +254,8 @@ export const convertDasheProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertHasteyProfileToBase = profile => ({
+
+export const convertHasteyToBase = profile => ({
   // eslint-disable-next-line no-underscore-dangle
   profileID: profile.__profile__name,
   deliveryCountry: profile.country,
@@ -284,7 +291,8 @@ export const convertHasteyProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertKodaiProfileToBase = profile => ({
+
+export const convertKodaiToBase = profile => ({
   profileID: profile.profileName,
   deliveryCountry: profile.region,
   deliveryAddress: profile.deliveryAddress.address,
@@ -320,7 +328,8 @@ export const convertKodaiProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertNsbProfileToBase = profile => ({
+
+export const convertNsbToBase = profile => ({
   profileID: profile.name,
   deliveryCountry: shortToLongCountries[profile.shipping.country] || '',
   deliveryAddress: profile.shipping.address,
@@ -355,7 +364,8 @@ export const convertNsbProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-export const convertSoleAioProfileToBase = profile => ({
+
+export const convertSoleAioToBase = profile => ({
   profileID: profile.ProfileName,
   deliveryCountry: profile.ShippingCountry,
   deliveryAddress: profile.ShippingAddress1,
@@ -390,37 +400,6 @@ export const convertSoleAioProfileToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
-
-export const convertProfileToBase = (bot, profile) => {
-  switch (bot) {
-    case 'Cybersole':
-      return convertCybersoleProfileToBase(profile);
-    case 'Project Destroyer':
-      return convertProjectDestroyerProfileToBase(profile);
-    case 'Ghost':
-      return convertGhostProfileToBase(profile);
-    case 'Phantom':
-      return convertPhantomProfileToBase(profile);
-    case 'EVE AIO':
-      return convertEveaioProfileToBase(profile);
-    case 'Dashe':
-      return convertDasheProfileToBase(profile);
-    case 'Hastey':
-      return convertHasteyProfileToBase(profile);
-    case 'NSB':
-      return convertNsbProfileToBase(profile);
-    case 'SOLE AIO':
-      return convertSoleAioProfileToBase(profile);
-    case 'Balko':
-      return convertBalkoProfileToBase(profile);
-    case 'Kodai':
-      return convertKodaiProfileToBase(profile);
-    case 'TKS':
-      return convertTKSToBase(profile);
-    default:
-      return undefined;
-  }
-};
 
 export const convertCSVToBase = profile => ({
   profileID: profile.profileID,
@@ -493,3 +472,40 @@ export const convertTKSToBase = profile => ({
   jigAddressesBool: false,
   fourCharPrefixBool: false
 });
+
+export const convertNeutrinoToBase = profile => ({
+  ...profile
+});
+
+export const convertToBase = (bot, profile) => {
+  switch (bot) {
+    case 'Cybersole':
+      return convertCybersoleToBase(profile);
+    case 'Project Destroyer':
+      return convertProjectDestroyerToBase(profile);
+    case 'Ghost':
+      return convertGhostToBase(profile);
+    case 'Phantom':
+      return convertPhantomToBase(profile);
+    case 'EVE AIO':
+      return convertEveaioToBase(profile);
+    case 'Dashe':
+      return convertDasheToBase(profile);
+    case 'Hastey':
+      return convertHasteyToBase(profile);
+    case 'NSB':
+      return convertNsbToBase(profile);
+    case 'SOLE AIO':
+      return convertSoleAioToBase(profile);
+    case 'Balko':
+      return convertBalkoToBase(profile);
+    case 'Kodai':
+      return convertKodaiToBase(profile);
+    case 'TKS':
+      return convertTKSToBase(profile);
+    case 'Neutrino':
+      return convertNeutrinoToBase(profile);
+    default:
+      return undefined;
+  }
+};

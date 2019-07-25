@@ -752,6 +752,24 @@ export const convertBaseToCSV = (
   paymentCVV: card.cvv
 });
 
+export const convertBaseToNeutrino = (
+  index,
+  baseProfile,
+  card,
+  randomFirstName,
+  randomLastName
+) => ({
+  ...baseProfile,
+  profileID: `Profile - ${index}`,
+  deliveryFirstName: baseProfile.randomName
+    ? randomFirstName
+    : baseProfile.deliveryFirstName,
+  deliveryLastName: baseProfile.randomName
+    ? randomLastName
+    : baseProfile.deliveryLastName,
+  card
+});
+
 export const convertFromBase = (index, bot, profile) => {
   switch (bot) {
     case 'CyberSole':
@@ -786,6 +804,8 @@ export const convertFromBase = (index, bot, profile) => {
       return convertBaseToDashe(index, profile, profile.card, '', '');
     case 'Balko':
       return convertBaseToBalko(index, profile, profile.card, '', '');
+    case 'Neutrino':
+      return convertBaseToNeutrino(index, profile, profile.card, '', '');
     default:
       return undefined;
   }

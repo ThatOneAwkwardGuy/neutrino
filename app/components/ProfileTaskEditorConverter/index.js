@@ -3,7 +3,7 @@ import { Container, Row, Col, Input, Button } from 'reactstrap';
 import { withToastManager } from 'react-toast-notifications';
 import FontAwesome from 'react-fontawesome';
 import { generateUEID } from '../../utils/utils';
-import { convertProfileToBase } from './functions';
+import { convertToBase } from './functions';
 import { convertFromBase } from '../ProfileCreator/functions';
 import unknownImage from '../../images/unknown-image.svg';
 import eveaio from '../../images/eveaio.jpg';
@@ -19,10 +19,12 @@ import balko from '../../images/balko.jpg';
 import dashe from '../../images/dashe.jpg';
 import kodai from '../../images/kodai.jpg';
 import tks from '../../images/tks.jpg';
+import neutrino from '../../images/icon.png';
 
 const { dialog } = require('electron').remote;
 const fsPromises = require('fs').promises;
 const csv = require('csvtojson');
+const fs = require('fs');
 
 const profileConversionOptions = [
   'CyberSole',
@@ -37,7 +39,8 @@ const profileConversionOptions = [
   'Balko',
   'Dashe',
   'Kodai',
-  'TKS'
+  'TKS',
+  'Neutrino'
 ];
 
 const profileConversionOptionsMapping = {
@@ -54,6 +57,7 @@ const profileConversionOptionsMapping = {
   Dashe: dashe,
   Kodai: kodai,
   TKS: tks,
+  Neutrino: neutrino,
   Unknown: unknownImage
 };
 
@@ -124,17 +128,51 @@ class ProfileTaskEditorConverter extends Component {
     );
   };
 
-  exportFile = () => {
+  exportFile = async () => {
     const { profiles, fromBot, toBot } = this.state;
-    console.log(profiles);
     const baseProfiles = profiles.map(profile =>
-      convertProfileToBase(fromBot, profile)
+      convertToBase(fromBot, profile)
     );
     const convertedProfiles = baseProfiles.map((profile, index) =>
       convertFromBase(index, toBot, profile)
     );
-    console.log(convertedProfiles);
+    let extension = 'json';
+    let file = null;
+    if (toBot === 'Kodai') {
+      extension = 'txt';
+      file = JSON.stringify(convertedProfiles);
+    } else if (toBot === 'CSV') {
+      extension = 'csv';
+      file = this.convertToCSVString(convertedProfiles);
+    } else {
+      file = JSON.stringify(convertedProfiles);
+    }
+    dialog.showSaveDialog(
+      {
+        title: 'name',
+        defaultPath: `~/${toBot} Profiles (Converted From ${fromBot}).${extension}`,
+        filters: [
+          {
+            name: `${toBot} Profiles (Converted From ${fromBot})`,
+            extensions: [extension]
+          }
+        ]
+      },
+      fileName => {
+        if (fileName === undefined) {
+          return;
+        }
+        fs.writeFile(fileName, file, err => {
+          if (err) console.log(err);
+        });
+      }
+    );
   };
+
+  convertToCSVString = profiles =>
+    `${Object.keys(profiles[0]).join(',')}\n${profiles
+      .map(profile => Object.values(profile).join(','))
+      .join('\n')}`;
 
   render() {
     const { fromBot, toBot } = this.state;
@@ -167,7 +205,7 @@ class ProfileTaskEditorConverter extends Component {
                           Select a bot to convert from
                         </option>
                         {this.returnOptions(
-                          profileConversionOptions,
+                          profileConversionOptions.sort(),
                           'fromBot'
                         )}
                       </Input>
@@ -231,9 +269,9 @@ class ProfileTaskEditorConverter extends Component {
                           Select a bot to convert to
                         </option>
                         {this.returnOptions(
-                          profileConversionOptions.filter(
-                            option => option !== fromBot
-                          ),
+                          profileConversionOptions
+                            .filter(option => option !== fromBot)
+                            .sort(),
                           'toBot'
                         )}
                       </Input>

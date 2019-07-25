@@ -25,7 +25,6 @@ import {
   convertBaseToKodai,
   convertBaseToNSB,
   convertBaseToSOLEAIO,
-  convertBaseToNeutrinoRaffle,
   convertBaseToCSV
 } from './functions';
 
@@ -50,7 +49,7 @@ const bots = [
   'Kodai',
   'NSB',
   'SOLE AIO',
-  'Neutrino Raffle',
+  'Neutrino',
   'CSV'
 ];
 
@@ -420,14 +419,6 @@ class ProfileCreator extends Component {
               randomLastName
             );
           case 'EVE AIO':
-            return convertBaseToBalko(
-              index,
-              profile,
-              card,
-              randomFirstName,
-              randomLastName
-            );
-          case 'Phantom':
             return convertBaseToEVEAIO(
               index,
               profile,
@@ -435,7 +426,7 @@ class ProfileCreator extends Component {
               randomFirstName,
               randomLastName
             );
-          case 'Dashe':
+          case 'Phantom':
             return convertBaseToPhantom(
               index,
               profile,
@@ -443,7 +434,7 @@ class ProfileCreator extends Component {
               randomFirstName,
               randomLastName
             );
-          case 'Hastey':
+          case 'Dashe':
             return convertBaseToDashe(
               index,
               profile,
@@ -451,15 +442,7 @@ class ProfileCreator extends Component {
               randomFirstName,
               randomLastName
             );
-          case 'Kodai':
-            return convertBaseToTKS(
-              index,
-              profile,
-              card,
-              randomFirstName,
-              randomLastName
-            );
-          case 'Neutrino Raffle':
+          case 'Hastey':
             return convertBaseToHastey(
               index,
               profile,
@@ -467,7 +450,7 @@ class ProfileCreator extends Component {
               randomFirstName,
               randomLastName
             );
-          case 'TKS':
+          case 'Kodai':
             return convertBaseToKodai(
               index,
               profile,
@@ -475,8 +458,16 @@ class ProfileCreator extends Component {
               randomFirstName,
               randomLastName
             );
+          case 'TKS':
+            return convertBaseToTKS(
+              index,
+              profile,
+              card,
+              randomFirstName,
+              randomLastName
+            );
           case 'CSV':
-            return convertBaseToNSB(
+            return convertBaseToCSV(
               index,
               profile,
               card,
@@ -484,7 +475,7 @@ class ProfileCreator extends Component {
               randomLastName
             );
           case 'NSB':
-            return convertBaseToSOLEAIO(
+            return convertBaseToNSB(
               index,
               profile,
               card,
@@ -492,7 +483,7 @@ class ProfileCreator extends Component {
               randomLastName
             );
           case 'SOLE AIO':
-            return convertBaseToNeutrinoRaffle(
+            return convertBaseToSOLEAIO(
               index,
               profile,
               card,
@@ -500,7 +491,7 @@ class ProfileCreator extends Component {
               randomLastName
             );
           case 'Balko':
-            return convertBaseToCSV(
+            return convertBaseToBalko(
               index,
               profile,
               card,
@@ -1009,7 +1000,7 @@ class ProfileCreator extends Component {
                   onChange={this.handleChange}
                 >
                   <option value="">Select a bot</option>
-                  {bots.map(bot => (
+                  {bots.sort().map(bot => (
                     <option value={bot}>{bot}</option>
                   ))}
                 </Input>
