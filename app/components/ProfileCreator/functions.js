@@ -681,7 +681,7 @@ export const convertBaseToSOLEAIO = (
           baseProfile.deliveryRegion
         ]
       : '',
-  UseBilling: !baseProfile.sameDeliveryBillingBool,
+  UseBilling: baseProfile.sameDeliveryBillingBool,
   BillingFirstName: baseProfile.billingFirstName,
   BillingLastName: baseProfile.billingLastName,
   BillingAddress1: baseProfile.billingAddress,
@@ -706,45 +706,6 @@ export const convertBaseToSOLEAIO = (
   CheckoutLimit: baseProfile.oneCheckoutBool
     ? '1 checkout per site'
     : 'No checkout limit'
-});
-
-export const convertBaseToNeutrinoRaffle = (
-  index,
-  baseProfile,
-  card,
-  randomFirstName,
-  randomLastName
-) => ({
-  email: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
-  firstName: baseProfile.billingFirstName,
-  lastName: baseProfile.billingLastName,
-  password: baseProfile.sitePass,
-  phoneNumber: baseProfile.randomPhoneNumberBool
-    ? baseProfile.randomPhoneNumberTemplate
-        .split('#')
-        .map(number => (number === '' ? getRandomInt(9) : number))
-        .join('')
-    : baseProfile.phone,
-  address: {
-    address: baseProfile.billingAddress,
-    apt: baseProfile.billingApt,
-    city: baseProfile.billingCity,
-    state: baseProfile.billingRegion,
-    zipCode: baseProfile.billingZip,
-    region: baseProfile.deliveryCountry
-  },
-  paymentDetails: {
-    cardHolder: `${baseProfile.deliveryFirstName} ${baseProfile.deliveryLastName}`,
-    cardNumber: card.cardNumber,
-    cvv: card.cvv,
-    emailAddress: baseProfile.useCatchallBool
-      ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-      : baseProfile.email,
-    expirationMonth: card.expMonth,
-    expirationYear: card.expYear
-  }
 });
 
 export const convertBaseToCSV = (
@@ -817,6 +778,14 @@ export const convertFromBase = (index, bot, profile) => {
       return convertBaseToNSB(index, profile, profile.card, '', '');
     case 'SOLE AIO':
       return convertBaseToSOLEAIO(index, profile, profile.card, '', '');
+    case 'TKS':
+      return convertBaseToTKS(index, profile, profile.card, '', '');
+    case 'Kodai':
+      return convertBaseToKodai(index, profile, profile.card, '', '');
+    case 'Dashe':
+      return convertBaseToDashe(index, profile, profile.card, '', '');
+    case 'Balko':
+      return convertBaseToBalko(index, profile, profile.card, '', '');
     default:
       return undefined;
   }

@@ -15,6 +15,10 @@ import projectdestroyer from '../../images/projectdestroyer.png';
 import soleaio from '../../images/soleaio.jpg';
 import phantom from '../../images/phantom.png';
 import csvLogo from '../../images/csv.png';
+import balko from '../../images/balko.jpg';
+import dashe from '../../images/dashe.jpg';
+import kodai from '../../images/kodai.jpg';
+import tks from '../../images/tks.jpg';
 
 const { dialog } = require('electron').remote;
 const fsPromises = require('fs').promises;
@@ -29,7 +33,11 @@ const profileConversionOptions = [
   'Ghost',
   'CSV',
   'NSB',
-  'SOLE AIO'
+  'SOLE AIO',
+  'Balko',
+  'Dashe',
+  'Kodai',
+  'TKS'
 ];
 
 const profileConversionOptionsMapping = {
@@ -42,6 +50,10 @@ const profileConversionOptionsMapping = {
   'SOLE AIO': soleaio,
   Phantom: phantom,
   CSV: csvLogo,
+  Balko: balko,
+  Dashe: dashe,
+  Kodai: kodai,
+  TKS: tks,
   Unknown: unknownImage
 };
 

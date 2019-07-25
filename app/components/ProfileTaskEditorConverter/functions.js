@@ -382,8 +382,8 @@ export const convertSoleAioProfileToBase = profile => ({
   },
   email: profile.Email,
   phone: profile.Phone,
-  sameDeliveryBillingBool: false,
-  oneCheckoutBool: false,
+  sameDeliveryBillingBool: profile.UseBilling,
+  oneCheckoutBool: profile.CheckoutLimit === '1 checkout per site',
   randomNameBool: false,
   randomPhoneNumberBool: false,
   useCatchallBool: false,
@@ -415,7 +415,81 @@ export const convertProfileToBase = (bot, profile) => {
       return convertBalkoProfileToBase(profile);
     case 'Kodai':
       return convertKodaiProfileToBase(profile);
+    case 'TKS':
+      return convertTKSToBase(profile);
     default:
       return undefined;
   }
 };
+
+export const convertCSVToBase = profile => ({
+  profileID: profile.profileID,
+  deliveryCountry: profile.deliveryCountry,
+  deliveryAddress: profile.deliveryAddress,
+  deliveryCity: profile.deliveryCity,
+  deliveryFirstName: profile.deliveryFirstName,
+  deliveryLastName: profile.deliveryLastName,
+  deliveryRegion: profile.deliveryRegion,
+  deliveryZip: profile.deliveryZip,
+  deliveryApt: profile.deliveryApt,
+  billingZip: profile.billingZip,
+  billingCountry: profile.billingCountry,
+  billingAddress: profile.billingAddress,
+  billingCity: profile.billingCity,
+  billingFirstName: profile.billingFirstName,
+  billingLastName: profile.billingLastName,
+  billingRegion: profile.billingRegion,
+  billingApt: profile.billingApt,
+  card: {
+    paymentCardholdersName: `${profile.billingFirstName} ${profile.billingLastName}`,
+    cardNumber: profile.paymentCardnumber,
+    expMonth: profile.paymentexpMonth,
+    expYear: profile.paymentexpYear,
+    cvv: profile.paymentCVV
+  },
+  email: profile.paymentEmail,
+  phone: profile.phoneNumber,
+  sameDeliveryBillingBool: false,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
+});
+
+export const convertTKSToBase = profile => ({
+  profileID: profile.ProfileName,
+  deliveryCountry: profile.ShippingCountry,
+  deliveryAddress: profile.ShippingAddress1,
+  deliveryCity: profile.ShippingCity,
+  deliveryFirstName: profile.ShippingFirstName,
+  deliveryLastName: profile.ShippingLastName,
+  deliveryRegion: shortToLongStates[profile.ShippingState],
+  deliveryZip: profile.ShippingZip,
+  deliveryApt: profile.ShippingAddress2,
+  billingZip: profile.BillingZip,
+  billingCountry: profile.BillingCountry,
+  billingAddress: profile.BillingAddress1,
+  billingCity: profile.BillingCity,
+  billingFirstName: profile.BillingFirstName,
+  billingLastName: profile.BillingLastName,
+  billingRegion: shortToLongStates[profile.BillingState],
+  billingApt: profile.BillingAddress2,
+  card: {
+    paymentCardholdersName: profile.CardName,
+    cardNumber: profile.paymentCardnumber,
+    expMonth: profile.paymentCardExpiryMonth,
+    expYear: `20${profile.paymentCardExpiryYear}`,
+    cvv: profile.paymentCVV
+  },
+  email: profile.Email,
+  phone: profile.Phone,
+  sameDeliveryBillingBool: false,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
+});
