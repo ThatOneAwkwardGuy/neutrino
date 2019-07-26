@@ -138,7 +138,17 @@ export default class Homepage extends Component {
             <Row className="h-100">
               <Col className="py-3 px-0">
                 <span className="panel-title">Raffles</span>
-                <Container fluid>{raffles.map(this.returnRaffleRow)}</Container>
+                <Container fluid>
+                  {raffles.length > 0 ? (
+                    raffles.map(this.returnRaffleRow)
+                  ) : (
+                    <Row>
+                      <Col className="text-center p-5">
+                        <h5>No raffles currently</h5>
+                      </Col>
+                    </Row>
+                  )}
+                </Container>
               </Col>
             </Row>
           </Container>

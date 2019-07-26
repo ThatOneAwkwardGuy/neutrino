@@ -9,6 +9,10 @@ import nakedcph from '../../images/nakedcph.jpg';
 import oneblockdown from '../../images/oneblockdown.jpeg';
 import voostore from '../../images/voostore.png';
 import { loadRaffleInfo } from './functions';
+import { generateUEID } from '../../utils/utils';
+
+const { dialog } = require('electron').remote;
+const fs = require('fs');
 
 const sites = [
   {
@@ -27,16 +31,16 @@ export default class RaffleBot extends Component {
     super(props);
     this.state = {
       site: '',
-      link: ''
-      // proxiesInput: '',
-      // style: '',
-      // size: '',
-      // loadedRaffle: false
-      // sizes: [],
-      // styles: [],
+      link: '',
+      loadedRaffle: true,
+      proxiesInput: '',
+      style: '',
+      size: '',
+      sizes: [],
+      styles: [],
       // entries: [],
       // proxies: [],
-      // profiles: [],
+      profiles: []
       // raffleDetails: {}
       // styleInput: true,
       // sizeInput: true
@@ -55,18 +59,68 @@ export default class RaffleBot extends Component {
     });
   };
 
+  goBack = () => {
+    this.setState({ loadedRaffle: false });
+  };
+
+  returnOptions = (name, array) => {
+    const options = array.map(elem => (
+      <option value={elem.id} key={generateUEID()}>
+        {elem.name}
+      </option>
+    ));
+    options.unshift(
+      <option value="" key={generateUEID()}>
+        Select
+      </option>
+    );
+    return options;
+  };
+
   loadRaffle = async () => {
     const { site, link } = this.state;
     try {
       await loadRaffleInfo(site, link);
-      // this.setState({ loadedRaffle: true });
+      this.setState({ loadedRaffle: true });
     } catch (error) {
       console.log(error);
     }
   };
 
+  importProfiles = () => {
+    dialog.showOpenDialog(
+      {
+        filters: [{ name: 'Neutrino Profiles', extensions: ['json'] }]
+      },
+      fileNames => {
+        if (fileNames === undefined) {
+          return;
+        } else {
+          try {
+            var contents = fs.readFileSync(fileNames[0]);
+            var jsonContent = JSON.parse(contents);
+            this.setState({
+              profiles: Object.values(jsonContent)
+            });
+          } catch (error) {
+            console.log(error);
+          }
+        }
+      }
+    );
+  };
+
   render() {
-    const { site, link } = this.state;
+    const {
+      site,
+      link,
+      loadedRaffle,
+      styles,
+      sizes,
+      style,
+      size,
+      proxiesInput
+    } = this.state;
     const columns = [
       {
         Header: '#',
@@ -75,11 +129,19 @@ export default class RaffleBot extends Component {
       },
       {
         Header: 'Email',
-        accessor: 'email'
+        accessor: 'profile.email'
       },
       {
-        Header: 'Proxy',
-        accessor: 'proxy'
+        Header: 'Site',
+        accessor: 'site'
+      },
+      {
+        Header: 'Style',
+        accessor: 'style'
+      },
+      {
+        Header: 'Size',
+        accessor: 'size'
       },
       {
         Header: 'Status',
@@ -118,45 +180,109 @@ export default class RaffleBot extends Component {
                 />
               </Col>
             </Row>
-            <Row className="py-3 align-items-end noselect">
-              <Col xs="6">
-                <Label>Select a site*</Label>
-                <Container>
-                  <Row>
-                    {sites.map(raffleSite => (
-                      <Col
-                        xs="2"
-                        onClick={() => {
-                          this.handleRaffleSiteChange(raffleSite.name);
-                        }}
-                      >
-                        <img
-                          alt={raffleSite.name}
-                          name="raffleSite"
-                          value={raffleSite.name}
-                          className={`w-100 ${
-                            site === raffleSite.name ? 'highlightedImage' : ''
-                          }`}
-                          src={raffleSite.img}
-                        />
+            {loadedRaffle ? (
+              <Row>
+                <Col xs="4">
+                  <Container>
+                    <Row className="py-3">
+                      <Col>
+                        <Label>Style</Label>
+                        <Input
+                          onChange={this.handleChange}
+                          type="select"
+                          name="style"
+                          defaultValue={style}
+                        >
+                          {this.returnOptions('style', styles)}
+                        </Input>
                       </Col>
-                    ))}
-                  </Row>
-                </Container>
-              </Col>
-              <Col xs="4">
-                <Label>Raffle Link*</Label>
-                <Input
-                  name="link"
-                  type="text"
-                  value={link}
-                  onChange={this.handleChange}
-                />
-              </Col>
-              <Col xs="2">
-                <Button onClick={this.loadRaffle}>Load</Button>
-              </Col>
-            </Row>
+                      <Col>
+                        <Label>Size</Label>
+                        <Input
+                          onChange={this.handleChange}
+                          type="select"
+                          name="size"
+                          defaultValue={size}
+                        >
+                          {this.returnOptions('size', sizes)}
+                        </Input>
+                      </Col>
+                    </Row>
+                    <Row className="py-3">
+                      <Col>
+                        <Button onClick={this.importProfiles}>
+                          Load Profiles
+                        </Button>
+                      </Col>
+                      <Col>
+                        <Button onClick={this.goBack}>Back</Button>
+                      </Col>
+                    </Row>
+                  </Container>
+                </Col>
+                <Col xs="4">
+                  <Label>Proxies</Label>
+                  <Input
+                    onChange={this.handleChange}
+                    name="proxiesInput"
+                    value={proxiesInput}
+                    type="textarea"
+                    rows="5"
+                    placeholder="ip:port or ip:port:user:pass"
+                  />
+                </Col>
+                <Col xs="2" className="align-self-center">
+                  <Button className="my-3">Load</Button>
+                  <Button className="my-3">Stop</Button>
+                </Col>
+                <Col xs="2" className="align-self-center">
+                  <Button className="my-3">Start</Button>
+                  <Button color="danger" className="my-3">
+                    Clear
+                  </Button>
+                </Col>
+              </Row>
+            ) : (
+              <Row className="py-3 align-items-end noselect">
+                <Col xs="6">
+                  <Label>Select a site*</Label>
+                  <Container>
+                    <Row>
+                      {sites.map(raffleSite => (
+                        <Col
+                          xs="2"
+                          onClick={() => {
+                            this.handleRaffleSiteChange(raffleSite.name);
+                          }}
+                        >
+                          <img
+                            alt={raffleSite.name}
+                            name="raffleSite"
+                            value={raffleSite.name}
+                            className={`w-100 ${
+                              site === raffleSite.name ? 'highlightedImage' : ''
+                            }`}
+                            src={raffleSite.img}
+                          />
+                        </Col>
+                      ))}
+                    </Row>
+                  </Container>
+                </Col>
+                <Col xs="4">
+                  <Label>Raffle Link*</Label>
+                  <Input
+                    name="link"
+                    type="text"
+                    value={link}
+                    onChange={this.handleChange}
+                  />
+                </Col>
+                <Col xs="2">
+                  <Button onClick={this.loadRaffle}>Load</Button>
+                </Col>
+              </Row>
+            )}
           </Container>
         </Col>
       </Row>

@@ -25,7 +25,8 @@ import {
   convertBaseToKodai,
   convertBaseToNSB,
   convertBaseToSOLEAIO,
-  convertBaseToCSV
+  convertBaseToCSV,
+  convertBaseToNeutrino
 } from './functions';
 
 import Countries from '../../constants/countries';
@@ -498,6 +499,14 @@ class ProfileCreator extends Component {
               randomFirstName,
               randomLastName
             );
+          case 'Neutrino':
+            return convertBaseToNeutrino(
+              index,
+              profile,
+              card,
+              randomFirstName,
+              randomLastName
+            );
           default:
             return undefined;
         }
@@ -661,9 +670,9 @@ class ProfileCreator extends Component {
                   <Label>First Name</Label>
                   <Input
                     type="text"
-                    id="deliveryAddress"
-                    name="deliveryAddress"
-                    value={deliveryAddress}
+                    id="deliveryFirstName"
+                    name="deliveryFirstName"
+                    value={deliveryFirstName}
                     placeholder="John"
                     onChange={this.handleChange}
                   />
@@ -672,9 +681,9 @@ class ProfileCreator extends Component {
                   <Label>Last Name</Label>
                   <Input
                     type="text"
-                    id="deliveryFirstName"
-                    name="deliveryFirstName"
-                    value={deliveryFirstName}
+                    id="deliveryLastName"
+                    name="deliveryLastName"
+                    value={deliveryLastName}
                     placeholder="Doe"
                     onChange={this.handleChange}
                   />
@@ -708,10 +717,10 @@ class ProfileCreator extends Component {
                 <Label>Address</Label>
                 <Input
                   type="text"
-                  id="deliveryLastName"
-                  name="deliveryLastName"
-                  value={deliveryLastName}
-                  placeholder="John"
+                  id="deliveryAddress"
+                  name="deliveryAddress"
+                  value={deliveryAddress}
+                  placeholder="123 Test Street"
                   onChange={this.handleChange}
                 />
               </Col>
@@ -722,7 +731,7 @@ class ProfileCreator extends Component {
                   id="billingAddress"
                   name="billingAddress"
                   value={billingAddress}
-                  placeholder="John"
+                  placeholder="123 Test Street"
                   onChange={this.handleChange}
                 />
               </Col>
@@ -735,7 +744,7 @@ class ProfileCreator extends Component {
                   id="deliveryCity"
                   name="deliveryCity"
                   value={deliveryCity}
-                  placeholder="John"
+                  placeholder="New York"
                   onChange={this.handleChange}
                 />
               </Col>
@@ -757,7 +766,7 @@ class ProfileCreator extends Component {
                   id="billingCity"
                   name="billingCity"
                   value={billingCity}
-                  placeholder="John"
+                  placeholder="New York"
                   onChange={this.handleChange}
                 />
               </Col>
@@ -781,7 +790,6 @@ class ProfileCreator extends Component {
                   id="deliveryCountry"
                   name="deliveryCountry"
                   value={deliveryCountry}
-                  placeholder="John"
                   onChange={this.handleChange}
                 >
                   <option value="">Select a delivery country</option>
@@ -842,7 +850,6 @@ class ProfileCreator extends Component {
                   id="billingRegion"
                   name="billingRegion"
                   value={billingRegion}
-                  placeholder="John"
                   onChange={this.handleChange}
                 >
                   <option value="">Select a billing region</option>

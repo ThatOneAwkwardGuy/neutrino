@@ -7,23 +7,25 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
 
   const setCookiesInWindow = (webContents, cookies) =>
     new Promise(resolve => {
-      Object.keys(cookies).forEach(cookieSite => {
-        const cookiesCookieSite = cookies[cookieSite]['/'];
-        Object.keys(cookiesCookieSite).forEach(actualCookie => {
-          const formattedCookie = {
-            url: `https://${cookieSite}`,
-            value: cookiesCookieSite[actualCookie].value,
-            domain: cookiesCookieSite[actualCookie].domain,
-            path: cookiesCookieSite[actualCookie].path,
-            name: actualCookie
-          };
-          webContents.session.cookies.set(formattedCookie, error => {
-            if (error !== null) {
-              console.log(formattedCookie);
-            }
+      if (cookies) {
+        Object.keys(cookies).forEach(cookieSite => {
+          const cookiesCookieSite = cookies[cookieSite]['/'];
+          Object.keys(cookiesCookieSite).forEach(actualCookie => {
+            const formattedCookie = {
+              url: `https://${cookieSite}`,
+              value: cookiesCookieSite[actualCookie].value,
+              domain: cookiesCookieSite[actualCookie].domain,
+              path: cookiesCookieSite[actualCookie].path,
+              name: actualCookie
+            };
+            webContents.session.cookies.set(formattedCookie, error => {
+              if (error !== null) {
+                console.log(formattedCookie);
+              }
+            });
           });
         });
-      });
+      }
       resolve();
     });
 
