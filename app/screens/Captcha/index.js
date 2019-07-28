@@ -20,12 +20,15 @@ export default class Captcha extends Component {
       this.tabGroup = new TabGroup({
         newTab: {
           title: 'Captcha Solver',
-          src: `file://../../waiting.html`,
+          src:
+            process.env.NODE_ENV === 'development'
+              ? `file://${__dirname}/waiting.html`
+              : `file://waiting.html`,
           visible: true,
           active: true,
           webviewAttributes: {
-            preload: './screens/Captcha/preload.js',
-            // nodeintegration: true,
+            preload: `${__dirname}/screens/Captcha/preload.js`,
+            nodeintegration: true,
             webSecurity: false,
             allowRunningInsecureContent: true,
             javascript: true
@@ -34,13 +37,16 @@ export default class Captcha extends Component {
       });
       this.tabGroup.addTab({
         title: 'Captcha Solver',
-        src: `file://${__dirname}/waiting.html`,
+        src:
+          process.env.NODE_ENV === 'development'
+            ? `file://${__dirname}/waiting.html`
+            : `file://waiting.html`,
         visible: true,
         active: true,
         closable: false,
         webviewAttributes: {
-          preload: './screens/Captcha/preload.js',
-          // nodeintegration: true,
+          preload: `${__dirname}/screens/Captcha/preload.js`,
+          nodeintegration: true,
           webSecurity: false,
           allowRunningInsecureContent: true,
           javascript: true
