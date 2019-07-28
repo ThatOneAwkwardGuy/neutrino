@@ -1,0 +1,5 @@
+owner: ThatOneAwkwardGuy
+repo: Neutrino-Updates
+provider: github
+private: false
+updaterCacheDirName: neutrino-updater

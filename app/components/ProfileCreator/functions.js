@@ -745,6 +745,7 @@ export const convertBaseToCSV = (
   paymentEmail: baseProfile.useCatchallBool
     ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
     : baseProfile.email,
+  password: baseProfile.password,
   paymentCardholdersName: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
   paymentCardnumber: card.cardNumber,
   paymentexpMonth: card.expMonth,

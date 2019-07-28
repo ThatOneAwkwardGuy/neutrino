@@ -35,8 +35,11 @@ export default class FootpatrolUK {
   start = async () => {
     while (this.run) {
       try {
+        // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
       this.run = false;
     }
   };

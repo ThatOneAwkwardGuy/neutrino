@@ -4,6 +4,7 @@ import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'connected-react-router';
 import { PersistGate } from 'redux-persist/integration/react';
 import PropTypes from 'prop-types';
+import { createHashHistory } from 'history';
 import type { Store } from '../reducers/types';
 import Routes from '../Routes';
 
@@ -14,7 +15,8 @@ type Props = {
 
 class Root extends Component<Props> {
   render() {
-    const { store, history, persistedStore } = this.props;
+    const history = createHashHistory();
+    const { store, persistedStore } = this.props;
     return (
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistedStore}>

@@ -2,10 +2,12 @@ import React, { Component } from 'react';
 import { Switch, Route } from 'react-router';
 import { Link } from 'react-router-dom';
 import { Container, Row, Col, Modal, ModalHeader } from 'reactstrap';
+import { ipcRenderer } from 'electron';
 import { connect } from 'react-redux';
-import { BarLoader } from 'react-spinners';
+import BarLoader from 'react-spinners/BarLoader';
 import PropTypes from 'prop-types';
 import FontAwesome from 'react-fontawesome';
+
 import * as SettingsActions from '../../actions/settings';
 import * as AccountActions from '../../actions/accounts';
 import * as ActivityActions from '../../actions/activities';
@@ -24,17 +26,29 @@ import ProfileCreator from '../../components/ProfileCreator';
 import ProfileTaskEditorConverter from '../../components/ProfileTaskEditorConverter';
 import RaffleBot from '../../components/RaffleBot';
 import Settings from '../../components/Settings';
+import {
+  SET_DISCORD_RPC_STATE,
+  UPDATE_AVAILABLE,
+  NO_UPDATE_AVAILABLE,
+  UPDATE_DOWNLOADED,
+  CHECK_FOR_UPDATES
+} from '../../constants/ipcConstants';
 
 class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      loadingText: '',
       sidebarExpand: false,
+      installModal: false,
       updateDownloading: false,
       loading: false,
-      loadingText: '',
       loadingModalClosable: false
     };
+  }
+
+  componentDidMount() {
+    this.watchForUpdates();
   }
 
   componentDidUpdate(prevProps) {
@@ -47,11 +61,46 @@ class Home extends Component {
     ) {
       try {
         checkUserAuth(uid);
+        this.setDiscordRichPresence(location.pathname);
       } catch (error) {
         console.log(error);
       }
     }
   }
+
+  currentWindowToText = currentWindow => {
+    switch (currentWindow) {
+      case '/home/proxy-creator':
+        return 'Proxy Creator';
+      case '/home':
+        return 'Home';
+      case '/home/proxy-tester':
+        return 'Proxy Tester';
+      case '/home/account-creator':
+        return 'Account Creator';
+      case '/home/address-jigger':
+        return 'Address Jigger';
+      case '/home/oneclick-generator':
+        return 'One Click Generator';
+      case '/home/oneclick-tester':
+        return 'One Click Tester';
+      case '/home/profile-creator':
+        return 'Profile Creator';
+      case '/home/profile-task-editor-converter':
+        return 'Profile Converter';
+      case '/home/raffle-bot':
+        return 'Raffle Bot';
+      case '/home/settings':
+        return 'Settings';
+      default:
+        return '';
+    }
+  };
+
+  setDiscordRichPresence = currentWindow => {
+    const state = this.currentWindowToText(currentWindow);
+    ipcRenderer.send(SET_DISCORD_RPC_STATE, { state });
+  };
 
   toggleSidebarExpand = () => {
     const { sidebarExpand } = this.state;
@@ -70,6 +119,45 @@ class Home extends Component {
 
   toggleLoading = () => {
     this.setState(prevState => ({ loading: !prevState.loading }));
+  };
+
+  toggleUpdateModal = () => {
+    this.setState(prevProps => ({
+      installModal: !prevProps.installModal
+    }));
+  };
+
+  watchForUpdates = () => {
+    const { updateUpdateStatus } = this.props;
+    ipcRenderer.on(UPDATE_AVAILABLE, (event, arg) => {
+      const update = {};
+      update.status = 'Y';
+      update.releaseDate = arg.releaseDate;
+      update.lastChecked = new Date().getTime();
+      update.changelog = arg.releaseNotes;
+      update.version = arg.version;
+      updateUpdateStatus(update);
+      this.setLoading(false, '', false);
+      this.toggleUpdateModal();
+    });
+    ipcRenderer.on(NO_UPDATE_AVAILABLE, (event, arg) => {
+      const update = {};
+      update.status = 'N';
+      update.releaseDate = arg.releaseDate;
+      update.lastChecked = new Date().getTime();
+      update.changelog = arg.releaseNotes;
+      update.version = arg.version;
+      updateUpdateStatus(update);
+      this.setLoading(false, '', false);
+    });
+    ipcRenderer.on(UPDATE_DOWNLOADED, (event, arg) => {
+      console.log(arg);
+      this.setState({
+        updateDownloading: false
+      });
+      this.toggleInstallModal();
+    });
+    ipcRenderer.send(CHECK_FOR_UPDATES);
   };
 
   render() {
@@ -102,7 +190,12 @@ class Home extends Component {
     } = this.props;
     const { setLoading } = this;
     const appRoutes = [
-      { path: routes.HOME, component: Homepage, exact: true, props: [] },
+      {
+        path: routes.HOME,
+        component: Homepage,
+        exact: true,
+        props: { settings, setLoading }
+      },
       {
         path: routes.PROXY_CREATOR,
         component: ProxyCreator,
@@ -170,7 +263,12 @@ class Home extends Component {
         exact: true,
         props: []
       },
-      { path: routes.RAFFLE_BOT, component: RaffleBot, exact: true, props: [] },
+      {
+        path: routes.RAFFLE_BOT,
+        component: RaffleBot,
+        exact: true,
+        props: { setLoading }
+      },
       {
         path: routes.SETTINGS,
         component: Settings,
@@ -436,6 +534,7 @@ Home.propTypes = {
   addProxyProviderAccount: PropTypes.func.isRequired,
   removeProxyProviderAccount: PropTypes.func.isRequired,
   setKeyInSetting: PropTypes.func.isRequired,
+  updateUpdateStatus: PropTypes.func.isRequired,
   settings: PropTypes.objectOf(PropTypes.any).isRequired,
   addCreatedAccount: PropTypes.func.isRequired,
   removeCreatedAccount: PropTypes.func.isRequired,

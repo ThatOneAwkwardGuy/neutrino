@@ -13,27 +13,65 @@
 import { app, BrowserWindow, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+
 import * as Splashscreen from '@trodi/electron-splashscreen';
 import MenuBuilder from './menu';
 import {
   OPEN_CAPTCHA_WINDOW,
   SEND_CAPTCHA_TOKEN_FROM_RENDERER,
   SEND_CAPTCHA_TOKEN_FROM_MAIN,
-  STORE_CAPTCHA_JOB
+  STORE_CAPTCHA_JOB,
+  SET_DISCORD_RPC_STATE,
+  START_UPDATE,
+  UPDATE_AVAILABLE,
+  NO_UPDATE_AVAILABLE,
+  CHECK_FOR_UPDATES
 } from './constants/ipcConstants';
+
+const DiscordRPC = require('discord-rpc');
+
+const clientId = '575360564767752194';
+const rpc = new DiscordRPC.Client({ transport: 'ipc' });
+let discordRPCState = '';
+const startTimestamp = new Date();
+const version = app.getVersion();
+DiscordRPC.register(clientId);
 
 export default class AppUpdater {
   constructor() {
     log.transports.file.level = 'info';
     autoUpdater.logger = log;
     autoUpdater.checkForUpdatesAndNotify();
+    autoUpdater.autoDownload = false;
+    autoUpdater.on('update-downloaded', () => {
+      app.removeAllListeners('window-all-closed');
+      app.removeAllListeners('before-quit');
+      const browserWindows = BrowserWindow.getAllWindows();
+      browserWindows.forEach(browserWindow => {
+        browserWindow.removeAllListeners('close');
+      });
+      browserWindows.forEach(browserWindow => {
+        browserWindow.close();
+      });
+      if (mainWindow !== null && !mainWindow.isDestroyed()) {
+        mainWindow.destroy();
+      }
+      autoUpdater.quitAndInstall(false, true);
+    });
+    autoUpdater.on('update-available', info => {
+      mainWindow.send(UPDATE_AVAILABLE, info);
+    });
+    autoUpdater.on('update-not-available', info => {
+      mainWindow.send(NO_UPDATE_AVAILABLE, info);
+    });
   }
 }
 
+log.catchErrors();
 global.captchaQueue = {};
 
 let mainWindow = null;
-let captchaWindow = null;
+let captchaWindow;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -62,7 +100,7 @@ const installExtensions = async () => {
 };
 
 const initialiseCaptchaWindow = () => {
-  captchaWindow = new BrowserWindow({
+  const initialisedCaptchaWindow = new BrowserWindow({
     webPreferences: {
       webviewTag: true,
       contextIsolation: false,
@@ -81,12 +119,20 @@ const initialiseCaptchaWindow = () => {
     minimizable: true,
     closable: true
   });
-  captchaWindow.loadURL(`file://${__dirname}/app.html#/captcha`);
+  initialisedCaptchaWindow.loadURL(`file://${__dirname}/app.html#/captcha`);
+  return initialisedCaptchaWindow;
 };
 
-/**
- * Add event listeners...
- */
+const setActivity = () => {
+  rpc.setActivity({
+    details: `Version - ${version}`,
+    state: discordRPCState,
+    startTimestamp,
+    largeImageKey: 'logo_small',
+    smallImageKey: 'logo_small',
+    instance: false
+  });
+};
 
 app.on('window-all-closed', () => {
   // Respect the OSX convention of having the application in memory even
@@ -103,8 +149,6 @@ app.on('ready', async () => {
   ) {
     await installExtensions();
   }
-
-  initialiseCaptchaWindow();
 
   mainWindow = Splashscreen.initSplashScreen({
     windowOpts: {
@@ -129,6 +173,9 @@ app.on('ready', async () => {
   });
 
   mainWindow.loadURL(`file://${__dirname}/app.html#/home`);
+
+  captchaWindow = initialiseCaptchaWindow();
+
   // @TODO: Use 'ready-to-show' event
   //        https://github.com/electron/electron/blob/master/docs/api/browser-window.md#using-ready-to-show-event
   mainWindow.webContents.on('did-finish-load', () => {
@@ -151,12 +198,12 @@ app.on('ready', async () => {
   menuBuilder.buildMenu();
 
   // Remove this if your app does not use auto updates
-  // eslint-disable-next-line
+  // eslint-disable-next-line no-new
   new AppUpdater();
 
   ipcMain.on(OPEN_CAPTCHA_WINDOW, () => {
     if (captchaWindow.isDestroyed()) {
-      initialiseCaptchaWindow();
+      captchaWindow = initialiseCaptchaWindow();
       captchaWindow.show();
     } else {
       captchaWindow.show();
@@ -183,5 +230,23 @@ app.on('ready', async () => {
       'send-captcha-token-from-captcha-to-renderer',
       arg
     );
+  });
+
+  ipcMain.on(SET_DISCORD_RPC_STATE, (event, arg) => {
+    discordRPCState = arg.state;
+  });
+
+  ipcMain.on(CHECK_FOR_UPDATES, () => {
+    autoUpdater.checkForUpdates();
+  });
+
+  ipcMain.on(START_UPDATE, () => {
+    autoUpdater.downloadUpdate();
+  });
+
+  rpc.on('ready', () => {
+    setInterval(() => {
+      setActivity();
+    }, 60e3);
   });
 });

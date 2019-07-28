@@ -1,6 +1,7 @@
+import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+
 const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
-const { ipcRenderer } = require('electron');
 
 export default class VooStore {
   constructor(
@@ -44,6 +45,7 @@ export default class VooStore {
   start = async () => {
     while (this.run) {
       try {
+        // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
         console.log(error);
@@ -58,38 +60,14 @@ export default class VooStore {
     this.changeStatus('Stopped');
   };
 
-  getCaptcha = () => {
-    return new Promise((resolve, reject) => {
-      try {
-        const tokenID = uuidv4();
-        ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
-        ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
-          checkoutURL: this.url,
-          id: tokenID,
-          type: 'VooStore',
-          proxy: this.proxy,
-          site: this.site
-        });
-        ipcRenderer.on(RECEIVE_CAPTCHA_TOKEN, async (event, captchaToken) => {
-          if (captchaToken.id === tokenID) {
-            ipcRenderer.send(FINISH_SENDING_CAPTCHA_TOKEN, {});
-            resolve(captchaToken);
-          }
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  };
-
   getFormData = object => {
     const formData = new FormData();
     Object.keys(object).forEach(key => formData.append(key, object[key]));
     return formData;
   };
 
-  submitRaffle = captchaToken => {
-    return this.rp({
+  submitRaffle = captchaToken =>
+    this.rp({
       method: 'POST',
       uri: 'https://raffle.vooberlin.com/ajax.php',
       headers: {
@@ -121,35 +99,32 @@ export default class VooStore {
         'g-recaptcha-response': captchaToken
       }
     });
-  };
 
-  getRafflePage = () => {
-    return this.rp.get(this.url);
-  };
+  getRafflePage = () => this.rp.get(this.url);
 
   makeEntry = async () => {
     this.changeStatus(`Getting Raffle Page`);
     await this.getRafflePage();
     this.changeStatus(`Getting Captcha Token`);
     const tokenID = uuidv4();
-    const capthaResponse = await getCaptchaResponse({
-      cookiesObject: false,
+    const capthcaResponse = await getCaptchaResponse({
+      // eslint-disable-next-line no-underscore-dangle
+      cookiesObject: this.cookieJar._jar.store.idx,
       url: this.url,
       id: tokenID,
       proxy: this.proxy,
       baseURL: this.site,
       site: this.site
     });
-    console.log(capthaResponse);
-    // this.changeStatus(`Submitting Raffle Entry`);
-    // const submitRaffleResponse = await this.submitRaffle(
-    //   captchaToken.captchaResponse
-    // );
-    // const submitRaffle = JSON.parse(submitRaffleResponse);
-    // if (submitRaffle.error) {
-    //   throw new Error(submitRaffle.msg);
-    // } else {
-    //   this.changeStatus(`Raffle Entry Successful`);
-    // }
+    this.changeStatus(`Submitting Raffle Entry`);
+    const submitRaffleResponse = await this.submitRaffle(
+      capthcaResponse.captchaToken
+    );
+    const submitRaffle = JSON.parse(submitRaffleResponse);
+    if (submitRaffle.error) {
+      throw new Error(submitRaffle.msg);
+    } else {
+      this.changeStatus(`Raffle Entry Successful`);
+    }
   };
 }

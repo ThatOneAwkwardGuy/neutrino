@@ -1,6 +1,6 @@
+/* eslint-disable */
 const rp = require('request-promise');
-const remote = require('electron').remote;
-const { BrowserWindow } = require('electron').remote;
+const { remote, BrowserWindow } = require('electron');
 const uuidv4 = require('uuid/v4');
 const tough = require('tough-cookie');
 
@@ -46,6 +46,7 @@ export default class END {
   start = async () => {
     while (this.run) {
       try {
+        // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
         console.log(error);
@@ -60,8 +61,8 @@ export default class END {
     this.changeStatus('Stopped');
   };
 
-  setProxyForWindow = async (proxy, win) => {
-    return await new Promise((resolve, reject) => {
+  setProxyForWindow = async (proxy, win) =>
+    new Promise(resolve => {
       const proxyArray = proxy.split(/@|:/);
       if (proxyArray.length === 4) {
         win.webContents.session.on(
@@ -80,13 +81,12 @@ export default class END {
         }
       );
     });
-  };
 
-  loginToAccount = async () => {
-    return new Promise(async (resolve, reject) => {
+  loginToAccount = async () =>
+    new Promise(async (resolve, reject) => {
       const tokenID = uuidv4();
       console.log(tokenID);
-      let win = new BrowserWindow({
+      const win = new BrowserWindow({
         width: 500,
         height: 650,
         show: true,
@@ -121,7 +121,7 @@ export default class END {
                     reject(error);
                   } else {
                     cookies.forEach(cookie => {
-                      let toughCookie = new tough.Cookie({
+                      const toughCookie = new tough.Cookie({
                         key: cookie.name,
                         value: cookie.value,
                         domain: cookie.domain,
@@ -154,10 +154,9 @@ export default class END {
         );
       });
     });
-  };
 
-  getAccount = token => {
-    return this.rp({
+  getAccount = token =>
+    this.rp({
       method: 'GET',
       uri: 'https://launches-api.endclothing.com/api/account',
       json: true,
@@ -167,10 +166,9 @@ export default class END {
         Authorization: `Bearer ${token}`
       }
     });
-  };
 
-  getPaymentMethods = token => {
-    return this.rp({
+  getPaymentMethods = token =>
+    this.rp({
       method: 'GET',
       uri: 'https://launches-api.endclothing.com/api/payment-methods',
       json: true,
@@ -180,7 +178,6 @@ export default class END {
         Authorization: `Bearer ${token}`
       }
     });
-  };
 
   addNewAddress = (customer, token) => {
     console.log(customer);

@@ -4,6 +4,7 @@ import FontAwesome from 'react-fontawesome';
 import PropTypes from 'prop-types';
 import { shell, ipcRenderer } from 'electron';
 import { OPEN_CAPTCHA_WINDOW } from '../../constants/ipcConstants';
+import textLogo from '../../images/textLogo.png';
 
 export default class Footer extends Component {
   constructor(props) {
@@ -84,6 +85,14 @@ export default class Footer extends Component {
           className="text-center font-weight-bold footerText noselect"
         >
           Copyright © 2019 Neutrino - All Rights Reserved
+        </Col>
+        <Col xs="2" className="text-right ml-auto">
+          <img
+            style={{ width: '50%' }}
+            alt="textLogo"
+            className="h-100"
+            src={textLogo}
+          />
         </Col>
       </Row>
     );

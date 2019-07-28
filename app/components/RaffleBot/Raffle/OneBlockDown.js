@@ -1,12 +1,8 @@
-import {
-  BOT_SEND_COOKIES_AND_CAPTCHA_PAGE,
-  OPEN_CAPTCHA_WINDOW,
-  RECEIVE_CAPTCHA_TOKEN,
-  FINISH_SENDING_CAPTCHA_TOKEN
-} from '../constants';
+import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+
 const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
-const ipcRenderer = require('electron').ipcRenderer;
+
 export default class OneBlockDown {
   constructor(
     url,
@@ -49,6 +45,7 @@ export default class OneBlockDown {
   start = async () => {
     while (this.run) {
       try {
+        // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
         console.log(error);
@@ -63,8 +60,8 @@ export default class OneBlockDown {
     this.changeStatus('Stopped');
   };
 
-  login = () => {
-    return this.rp({
+  login = () =>
+    this.rp({
       method: 'POST',
       uri: 'https://www.oneblockdown.it/index.php',
       headers: {
@@ -88,35 +85,9 @@ export default class OneBlockDown {
         version: '103'
       }
     });
-  };
 
-  getCaptcha = () => {
-    return new Promise((resolve, reject) => {
-      try {
-        const tokenID = uuidv4();
-        ipcRenderer.send(OPEN_CAPTCHA_WINDOW, 'open');
-        ipcRenderer.send(BOT_SEND_COOKIES_AND_CAPTCHA_PAGE, {
-          checkoutURL: this.url,
-          cookiesObject: this.cookieJar._jar.store.idx,
-          id: tokenID,
-          type: 'VooStore',
-          proxy: this.proxy,
-          site: this.site
-        });
-        ipcRenderer.on(RECEIVE_CAPTCHA_TOKEN, async (event, captchaToken) => {
-          if (captchaToken.id === tokenID) {
-            ipcRenderer.send(FINISH_SENDING_CAPTCHA_TOKEN, {});
-            resolve(captchaToken);
-          }
-        });
-      } catch (error) {
-        reject(error);
-      }
-    });
-  };
-
-  submitRaffle = (login, captchaToken) => {
-    return this.rp({
+  submitRaffle = (login, captchaResponse) =>
+    this.rp({
       method: 'POST',
       uri: 'https://www.oneblockdown.it/index.php',
       headers: {
@@ -130,7 +101,7 @@ export default class OneBlockDown {
         extension: 'raffle',
         controller: 'raffles',
         action: 'subscribe',
-        response: captchaToken.captchaResponse,
+        response: captchaResponse.captchaToken,
         userId: login.payload,
         stockItemId: this.raffleDetails.stockItemId,
         itemId: this.raffleDetails.itemId,
@@ -148,7 +119,6 @@ export default class OneBlockDown {
         version: '103'
       }
     });
-  };
 
   formatCountry = profileCountry => {
     switch (profileCountry) {
@@ -211,14 +181,26 @@ export default class OneBlockDown {
 
   makeEntry = async () => {
     this.changeStatus(`Logging In`);
+    const tokenID = uuidv4();
     const loginRepsonse = await this.login();
     console.log(loginRepsonse);
     const login = JSON.parse(loginRepsonse);
     this.changeStatus(`Getting Captcha Token`);
-    const captchaToken = await this.getCaptcha();
-    console.log(captchaToken);
+    const captchaResponse = await getCaptchaResponse({
+      // eslint-disable-next-line no-underscore-dangle
+      cookiesObject: this.cookieJar._jar.store.idx,
+      url: this.url,
+      id: tokenID,
+      proxy: this.proxy,
+      baseURL: this.url,
+      site: this.site
+    });
+    console.log(captchaResponse);
     this.changeStatus(`Submitting Raffle Entry`);
-    const submitRaffleResponse = await this.submitRaffle(login, captchaToken);
+    const submitRaffleResponse = await this.submitRaffle(
+      login,
+      captchaResponse
+    );
     console.log(submitRaffleResponse);
     const submitRaffle = JSON.parse(submitRaffleResponse);
     console.log(submitRaffle);

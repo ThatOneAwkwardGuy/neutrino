@@ -1,5 +1,10 @@
 const { BrowserWindow, remote } = require('electron').remote;
-const rp = require('request-promise');
+const rp = require('request-promise').defaults({
+  headers: {
+    'user-agent':
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'
+  }
+});
 const cheerio = require('cheerio');
 
 export const loadRaffleInfo = async (site, raffleLink) => {

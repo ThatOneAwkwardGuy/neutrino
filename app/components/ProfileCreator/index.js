@@ -86,7 +86,8 @@ class ProfileCreator extends Component {
       billingApt: '',
       billingCountry: '',
       billingRegion: '',
-      billingZip: ''
+      billingZip: '',
+      password: ''
     };
   }
 
@@ -333,6 +334,7 @@ class ProfileCreator extends Component {
       billingRegion,
       billingZip,
       email,
+      password,
       phone
     } = this.state;
     const { toastManager } = this.props;
@@ -389,6 +391,7 @@ class ProfileCreator extends Component {
           billingRegion,
           billingZip,
           email,
+          password,
           phone
         };
         const card = cards[index];
@@ -567,6 +570,7 @@ class ProfileCreator extends Component {
       billingZip,
       catchallEmail,
       email,
+      password,
       randomPhoneNumberTemplate,
       phone,
       cards,
@@ -656,16 +660,29 @@ class ProfileCreator extends Component {
                 </Col>
               )}
             </Row>
+            <Row className="mt-3">
+              <Col xs="6">
+                <Label>Password</Label>
+                <Input
+                  type="text"
+                  id="password"
+                  name="password"
+                  value={password}
+                  placeholder="Password"
+                  onChange={this.handleChange}
+                />
+              </Col>
+            </Row>
             <Row>
               <Col>
-                <h6 className="d-block mt-5 mb-2">Delivery Address</h6>
+                <h6 className="d-block mt-4 mb-2">Delivery Address</h6>
               </Col>
               <Col>
-                <h6 className="d-block mt-5 mb-2">Billing Address</h6>
+                <h6 className="d-block mt-4 mb-2">Billing Address</h6>
               </Col>
             </Row>
             {randomNameBool ? null : (
-              <Row className="mt-3 mb-3">
+              <Row className="my-3">
                 <Col>
                   <Label>First Name</Label>
                   <Input
@@ -712,7 +729,7 @@ class ProfileCreator extends Component {
                 </Col>
               </Row>
             )}
-            <Row className="mt-3 mb-3">
+            <Row className="my-3">
               <Col>
                 <Label>Address</Label>
                 <Input
@@ -736,7 +753,7 @@ class ProfileCreator extends Component {
                 />
               </Col>
             </Row>
-            <Row className="mt-3 mb-3">
+            <Row className="my-3">
               <Col xs="4">
                 <Label>City</Label>
                 <Input
@@ -782,7 +799,7 @@ class ProfileCreator extends Component {
                 />
               </Col>
             </Row>
-            <Row className="mt-3 mb-3">
+            <Row className="my-3">
               <Col>
                 <Label>Country</Label>
                 <Input
@@ -814,7 +831,7 @@ class ProfileCreator extends Component {
                 </Input>
               </Col>
             </Row>
-            <Row className="mt-3 mb-3">
+            <Row className="my-3">
               <Col xs="4">
                 <Label>Region</Label>
                 <Input

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Row, Col, Container, Label, Button, Input } from 'reactstrap';
 import FontAwesome from 'react-fontawesome';
+import PropTypes from 'prop-types';
 import Table from '../Table/index';
 import bodega from '../../images/bodega.jpg';
 import extrabutter from '../../images/extrabutter.jpg';
@@ -10,9 +11,19 @@ import oneblockdown from '../../images/oneblockdown.jpeg';
 import voostore from '../../images/voostore.png';
 import { loadRaffleInfo } from './functions';
 import { generateUEID } from '../../utils/utils';
+import { convertCSVToBase } from '../ProfileTaskEditorConverter/functions';
+import { convertBaseToNeutrino } from '../ProfileCreator/functions';
+import FootpatrolUK from './Raffle/FootpatrolUK';
+import NakedCPH from './Raffle/NakedCPH';
+import ExtraButter from './Raffle/ExtraButter';
+import END from './Raffle/END';
+import VooStore from './Raffle/VooStore';
+import Bodega from './Raffle/Bodega';
+import OneBlockDown from './Raffle/OneBlockDown';
 
 const { dialog } = require('electron').remote;
 const fs = require('fs');
+const csv = require('csvtojson');
 
 const sites = [
   {
@@ -32,18 +43,18 @@ export default class RaffleBot extends Component {
     this.state = {
       site: '',
       link: '',
-      loadedRaffle: true,
+      loadedRaffle: false,
       proxiesInput: '',
       style: '',
       size: '',
       sizes: [],
       styles: [],
-      // entries: [],
-      // proxies: [],
-      profiles: []
-      // raffleDetails: {}
-      // styleInput: true,
-      // sizeInput: true
+      profiles: [],
+      styleInput: true,
+      sizeInput: true,
+      entries: [],
+      proxies: []
+      // raffleDetails: {},
     };
   }
 
@@ -77,28 +88,64 @@ export default class RaffleBot extends Component {
     return options;
   };
 
+  getRandomProxy = () => {
+    const { proxies } = this.state;
+    const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
+    if (randomProxy === undefined) {
+      return '';
+    }
+    if (randomProxy.length === 2) {
+      return `http://${randomProxy.ip}:${randomProxy.port}`;
+    }
+    if (randomProxy.length === 4) {
+      return `http://${randomProxy.user}:${randomProxy.pass}@${randomProxy.ip}:${randomProxy.port}`;
+    }
+  };
+
   loadRaffle = async () => {
     const { site, link } = this.state;
+    const { setLoading } = this.props;
     try {
-      await loadRaffleInfo(site, link);
-      this.setState({ loadedRaffle: true });
+      setLoading(true, 'Loading Raffle Info', false);
+      const raffleInfo = await loadRaffleInfo(site, link);
+      this.setState({ loadedRaffle: true, ...raffleInfo });
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false, 'Loading Raffle Info', false);
     }
   };
 
   importProfiles = () => {
     dialog.showOpenDialog(
       {
-        filters: [{ name: 'Neutrino Profiles', extensions: ['json'] }]
+        filters: [{ name: 'Neutrino Profiles', extensions: ['json', 'csv'] }]
       },
-      fileNames => {
-        if (fileNames === undefined) {
-          return;
-        } else {
+      async fileNames => {
+        if (fileNames !== undefined) {
           try {
-            var contents = fs.readFileSync(fileNames[0]);
-            var jsonContent = JSON.parse(contents);
+            const extension = fileNames[0]
+              .split('.')
+              .slice(-1)[0]
+              .toLowerCase();
+            let jsonContent;
+            if (extension === 'csv') {
+              const convertedCSV = await csv().fromFile(fileNames[0]);
+              jsonContent = convertedCSV.map((profile, index) => {
+                const baseProfile = convertCSVToBase(profile);
+                return convertBaseToNeutrino(
+                  index,
+                  baseProfile,
+                  baseProfile.card,
+                  '',
+                  ''
+                );
+              });
+            } else {
+              const contents = fs.readFileSync(fileNames[0]);
+              jsonContent = JSON.parse(contents);
+            }
+            console.log(jsonContent);
             this.setState({
               profiles: Object.values(jsonContent)
             });
@@ -110,6 +157,145 @@ export default class RaffleBot extends Component {
     );
   };
 
+  loadEntries = () => {
+    const {
+      profiles,
+      site,
+      link,
+      size,
+      style,
+      sizes,
+      styles,
+      raffleDetails,
+      entries,
+      proxiesInput
+    } = this.state;
+    const newEntries = [];
+    this.setState({
+      proxies: proxiesInput.split('\n')
+    });
+    profiles.forEach(profile => {
+      let entry = false;
+      const sizeObject = sizes.find(
+        sizeOption => String(sizeOption.id) === size
+      );
+      const styleObject = styles.find(
+        styleOption => String(styleOption.id) === style
+      );
+      switch (site) {
+        case 'Footpatrol UK':
+          entry = new FootpatrolUK(
+            link,
+            profile,
+            site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'NakedCPH':
+          entry = new NakedCPH(
+            link,
+            profile,
+            site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'ExtraButter':
+          entry = new ExtraButter(
+            link,
+            profile,
+            site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'END':
+          entry = new END(
+            link,
+            profile,
+            site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'VooStore':
+          entry = new VooStore(
+            link,
+            profile,
+            site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'Bodega':
+          entry = new Bodega(
+            link,
+            profile,
+            site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            raffleDetails,
+            this.triggerRender
+          );
+          break;
+        case 'OneBlockDown':
+          entry = new OneBlockDown(
+            link,
+            profile,
+            site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            raffleDetails,
+            this.triggerRender
+          );
+          break;
+        default:
+          break;
+      }
+      if (entry) {
+        newEntries.push(entry);
+      }
+    });
+    this.setState({ entries: [...entries, ...newEntries] });
+  };
+
+  triggerRender = () => {
+    this.forceUpdate();
+  };
+
+  deleteEntry = row => {
+    const { entries } = this.state;
+    const newEntries = entries.filter(
+      (entry, index) => index !== row.row.index
+    );
+    this.setState({ entries: newEntries });
+  };
+
   render() {
     const {
       site,
@@ -119,7 +305,10 @@ export default class RaffleBot extends Component {
       sizes,
       style,
       size,
-      proxiesInput
+      proxiesInput,
+      styleInput,
+      sizeInput,
+      entries
     } = this.state;
     const columns = [
       {
@@ -137,11 +326,11 @@ export default class RaffleBot extends Component {
       },
       {
         Header: 'Style',
-        accessor: 'style'
+        accessor: 'style.name'
       },
       {
         Header: 'Size',
-        accessor: 'size'
+        accessor: 'size.name'
       },
       {
         Header: 'Status',
@@ -149,11 +338,30 @@ export default class RaffleBot extends Component {
       },
       {
         Header: 'Actions',
-        Cell: () => (
+        Cell: row => (
           <div>
-            <FontAwesome className="mx-3" name="play" />
-            <FontAwesome className="mx-3" name="stop" />
-            <FontAwesome className="mx-3" name="trash" />
+            <FontAwesome
+              className="mx-3"
+              name="play"
+              onClick={() => {
+                entries[row.row.index].run = true;
+                entries[row.row.index].start();
+              }}
+            />
+            <FontAwesome
+              className="mx-3"
+              name="stop"
+              onClick={() => {
+                entries[row.row.index].stop();
+              }}
+            />
+            <FontAwesome
+              className="mx-3"
+              name="trash"
+              onClick={() => {
+                this.deleteEntry(row);
+              }}
+            />
           </div>
         )
       }
@@ -166,7 +374,7 @@ export default class RaffleBot extends Component {
               <Col id="TableContainer" className="h-100">
                 <Table
                   {...{
-                    data: [],
+                    data: entries,
                     columns,
                     loading: false,
                     infinite: true,
@@ -185,28 +393,32 @@ export default class RaffleBot extends Component {
                 <Col xs="4">
                   <Container>
                     <Row className="py-3">
-                      <Col>
-                        <Label>Style</Label>
-                        <Input
-                          onChange={this.handleChange}
-                          type="select"
-                          name="style"
-                          defaultValue={style}
-                        >
-                          {this.returnOptions('style', styles)}
-                        </Input>
-                      </Col>
-                      <Col>
-                        <Label>Size</Label>
-                        <Input
-                          onChange={this.handleChange}
-                          type="select"
-                          name="size"
-                          defaultValue={size}
-                        >
-                          {this.returnOptions('size', sizes)}
-                        </Input>
-                      </Col>
+                      {styleInput ? (
+                        <Col>
+                          <Label>Style</Label>
+                          <Input
+                            onChange={this.handleChange}
+                            type="select"
+                            name="style"
+                            value={style}
+                          >
+                            {this.returnOptions('style', styles)}
+                          </Input>
+                        </Col>
+                      ) : null}
+                      {sizeInput ? (
+                        <Col>
+                          <Label>Size</Label>
+                          <Input
+                            onChange={this.handleChange}
+                            type="select"
+                            name="size"
+                            value={size}
+                          >
+                            {this.returnOptions('size', sizes)}
+                          </Input>
+                        </Col>
+                      ) : null}
                     </Row>
                     <Row className="py-3">
                       <Col>
@@ -232,7 +444,9 @@ export default class RaffleBot extends Component {
                   />
                 </Col>
                 <Col xs="2" className="align-self-center">
-                  <Button className="my-3">Load</Button>
+                  <Button className="my-3" onClick={this.loadEntries}>
+                    Load
+                  </Button>
                   <Button className="my-3">Stop</Button>
                 </Col>
                 <Col xs="2" className="align-self-center">
@@ -289,3 +503,7 @@ export default class RaffleBot extends Component {
     );
   }
 }
+
+RaffleBot.propTypes = {
+  setLoading: PropTypes.func.isRequired
+};

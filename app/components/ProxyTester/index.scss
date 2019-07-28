@@ -8,6 +8,15 @@
   height: calc(100% - 50px) !important;
 }
 
+.neutrinoModal .modal-content {
+  background-color: $dark1Colour;
+}
+
+.neutrinoModal button[aria-label='Close'] {
+  color: $red;
+  text-shadow: none;
+}
+
 #loadingModal .modal-content {
   background-color: $dark1Colour;
 }

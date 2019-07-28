@@ -203,6 +203,7 @@ class ProxyCreator extends Component {
       .fill()
       .map((empty, index) => this.returnProxyInstance(index).catch(e => e));
     const resolvedProxyInstances = await Promise.all(proxyInstances);
+    console.log(resolvedProxyInstances);
     setLoading(
       false,
       `Creating ${quantity} ${upperCaseFirst(provider)} ${

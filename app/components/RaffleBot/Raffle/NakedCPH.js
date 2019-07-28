@@ -40,6 +40,7 @@ export default class NakedCPH {
   start = async () => {
     while (this.run) {
       try {
+        // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
         console.log(error);
@@ -73,7 +74,7 @@ export default class NakedCPH {
     return JSON.parse(response);
   };
 
-  submitRaffleEntry = async (token, landed_at) => {
+  submitRaffleEntry = async (token, landedAt) => {
     this.changeStatus('Submitting Raffle Entry');
     const payload = {};
     this.raffleDetails.renderData.form.fields.forEach(row => {
@@ -88,7 +89,7 @@ export default class NakedCPH {
       }
     });
     payload['form[token]'] = token;
-    payload['form[landed_at]'] = landed_at;
+    payload['form[landed_at]'] = landedAt;
     payload[
       'form[language]'
     ] = this.raffleDetails.renderData.form.settings.language;
@@ -104,6 +105,7 @@ export default class NakedCPH {
 
   makeEntry = async () => {
     this.changeStatus('Started');
+    // eslint-disable-next-line camelcase
     const { token, landed_at } = await this.getRaffleToken(
       this.raffleDetails.typeformCode
     );

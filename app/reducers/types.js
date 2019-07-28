@@ -14,6 +14,13 @@ export type settingsStateType = {
     +digitalocean: Array<{ +accountName: string, +apiKey: string }>,
     +vultr: Array<{ +accountName: string, +apiKey: string }>
   },
+  +update: {
+    status: string,
+    releaseDate: integer,
+    lastChecked: string,
+    changelog: string,
+    version: string
+  },
   +activityDelayMin: string,
   +activityDelayMax: string,
   +showAcitivtyWindows: boolean,

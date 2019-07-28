@@ -16,30 +16,40 @@ export default class Captcha extends Component {
   }
 
   componentDidMount() {
-    this.tabGroup = new TabGroup({
-      newTab: {
+    try {
+      this.tabGroup = new TabGroup({
+        newTab: {
+          title: 'Captcha Solver',
+          src: `file://../../waiting.html`,
+          visible: true,
+          active: true,
+          webviewAttributes: {
+            preload: './screens/Captcha/preload.js',
+            // nodeintegration: true,
+            webSecurity: false,
+            allowRunningInsecureContent: true,
+            javascript: true
+          }
+        }
+      });
+      this.tabGroup.addTab({
         title: 'Captcha Solver',
         src: `file://${__dirname}/waiting.html`,
         visible: true,
         active: true,
+        closable: false,
         webviewAttributes: {
           preload: './screens/Captcha/preload.js',
-          nodeintegration: true
+          // nodeintegration: true,
+          webSecurity: false,
+          allowRunningInsecureContent: true,
+          javascript: true
         }
-      }
-    });
-    this.tabGroup.addTab({
-      title: 'Captcha Solver',
-      src: `file://${__dirname}/waiting.html`,
-      visible: true,
-      active: true,
-      closable: false,
-      webviewAttributes: {
-        preload: './screens/Captcha/preload.js',
-        nodeintegration: true
-      }
-    });
-    this.setListeners();
+      });
+      this.setListeners();
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   setListeners = () => {
@@ -50,6 +60,7 @@ export default class Captcha extends Component {
       delete this.tabStatus[tab.id];
     });
     ipcRenderer.on(SEND_CAPTCHA_TOKEN_FROM_MAIN, (event, arg) => {
+      console.log(arg);
       this.handleCaptchaJob(arg);
     });
     ipcRenderer.on(

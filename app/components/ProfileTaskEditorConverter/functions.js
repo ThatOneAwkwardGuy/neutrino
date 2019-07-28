@@ -30,6 +30,7 @@ export const convertCybersoleToBase = profile => ({
     cvv: profile.payment.card.cvv
   },
   email: profile.payment.email,
+  password: '',
   sameDeliveryBillingBool: profile.billing.same_as_del,
   oneCheckoutBool: profile.one_checkout,
   randomNameBool: false,
@@ -66,6 +67,7 @@ export const convertProjectDestroyerToBase = profile => ({
     cvv: profile.card.code
   },
   email: profile.email,
+  password: '',
   sameDeliveryBillingBool: profile.match,
   oneCheckoutBool: profile.limit,
   randomNameBool: false,
@@ -102,6 +104,7 @@ export const convertGhostToBase = profile => ({
     cvv: profile.CVV
   },
   email: '',
+  password: '',
   sameDeliveryBillingBool: profile.Same,
   oneCheckoutBool: false,
   randomNameBool: false,
@@ -138,6 +141,7 @@ export const convertBalkoToBase = profile => ({
     cvv: profile.ccv
   },
   email: profile.email,
+  password: '',
   sameDeliveryBillingBool: false,
   oneCheckoutBool: false,
   randomNameBool: false,
@@ -174,6 +178,7 @@ export const convertEveaioToBase = profile => ({
     cvv: profile.Cvv
   },
   email: profile.BillingEmail,
+  password: '',
   sameDeliveryBillingBool: profile.SameBillingShipping,
   oneCheckoutBool: profile.OneCheckoutPerWebsite,
   randomNameBool: false,
@@ -210,6 +215,7 @@ export const convertPhantomToBase = profile => ({
     cvv: profile.CVV
   },
   email: profile.Email,
+  password: '',
   sameDeliveryBillingBool: profile.Same,
   oneCheckoutBool: false,
   randomNameBool: false,
@@ -246,6 +252,7 @@ export const convertDasheToBase = profile => ({
     cvv: profile.card.cvv
   },
   email: profile.email,
+  password: '',
   sameDeliveryBillingBool: profile.billingMatch,
   oneCheckoutBool: false,
   randomNameBool: false,
@@ -275,6 +282,7 @@ export const convertHasteyToBase = profile => ({
   billingRegion: profile.state,
   billingApt: profile.address_2,
   email: profile.email,
+  password: '',
   phone: profile.tel,
   card: {
     paymentCardholdersName: profile.name,
@@ -319,6 +327,7 @@ export const convertKodaiToBase = profile => ({
     cvv: profile.paymentDetails.paymentCVV
   },
   email: profile.paymentDetails.emailAddress,
+  password: '',
   sameDeliveryBillingBool:
     profile.miscellaneousInformation.deliverySameAsBilling,
   oneCheckoutBool: false,
@@ -355,6 +364,7 @@ export const convertNsbToBase = profile => ({
     cvv: profile.cc.cvc
   },
   email: profile.email,
+  password: '',
   phone: profile.phone,
   sameDeliveryBillingBool: profile.billingSame,
   oneCheckoutBool: profile.checkoutLimit > 0,
@@ -391,6 +401,7 @@ export const convertSoleAioToBase = profile => ({
     cvv: profile.paymentCVV
   },
   email: profile.Email,
+  password: '',
   phone: profile.Phone,
   sameDeliveryBillingBool: profile.UseBilling,
   oneCheckoutBool: profile.CheckoutLimit === '1 checkout per site',
@@ -427,6 +438,7 @@ export const convertCSVToBase = profile => ({
     cvv: profile.paymentCVV
   },
   email: profile.paymentEmail,
+  password: profile.password,
   phone: profile.phoneNumber,
   sameDeliveryBillingBool: false,
   oneCheckoutBool: false,
@@ -463,6 +475,7 @@ export const convertTKSToBase = profile => ({
     cvv: profile.paymentCVV
   },
   email: profile.Email,
+  password: '',
   phone: profile.Phone,
   sameDeliveryBillingBool: false,
   oneCheckoutBool: false,
@@ -505,6 +518,8 @@ export const convertToBase = (bot, profile) => {
       return convertTKSToBase(profile);
     case 'Neutrino':
       return convertNeutrinoToBase(profile);
+    case 'CSV':
+      return convertCSVToBase(profile);
     default:
       return undefined;
   }

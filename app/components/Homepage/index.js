@@ -1,7 +1,12 @@
 import React, { Component } from 'react';
-import { Container, Row, Col } from 'reactstrap';
+import { ipcRenderer } from 'electron';
+import { Container, Row, Col, Button } from 'reactstrap';
+import PropTypes from 'prop-types';
 import { getFirestore } from '../../utils/firebase';
 import icon from '../../images/animatedIcon.svg';
+import { CHECK_FOR_UPDATES, START_UPDATE } from '../../constants/ipcConstants';
+
+const parse = require('html-react-parser');
 
 export default class Homepage extends Component {
   constructor(props) {
@@ -14,6 +19,12 @@ export default class Homepage extends Component {
   componentDidMount() {
     this.loadRaffleInfo();
   }
+
+  checkForUpdate = () => {
+    const { setLoading } = this.props;
+    setLoading(true, 'Checking For Updates', true);
+    ipcRenderer.send(CHECK_FOR_UPDATES);
+  };
 
   loadRaffleInfo = async () => {
     const firestore = getFirestore();
@@ -44,6 +55,44 @@ export default class Homepage extends Component {
       <Col xs="3">{raffle.store}</Col>
     </Row>
   );
+
+  returnUpdateStatus = () => {
+    const { settings } = this.props;
+    if (settings.update.status === 'N') {
+      return `No updates as of ${new Date(
+        settings.update.lastChecked
+      ).toUTCString()}`;
+    }
+    if (settings.update.status === 'Y') {
+      return (
+        <span>
+          <p>Neutrino version {settings.update.version} is now available</p>
+          <p className="updateChangelog">{parse(settings.update.changelog)}</p>
+          <small>
+            The update will download in the background and then install it.
+          </small>
+        </span>
+      );
+    }
+  };
+
+  returnUpdateButton = () => {
+    const { settings } = this.props;
+    if (settings.update.status === 'N') {
+      return <Button onClick={this.checkForUpdate}>Check For Updates</Button>;
+    }
+    if (settings.update.status === 'Y') {
+      return (
+        <Button onClick={this.triggerDownload}>
+          Download and install update
+        </Button>
+      );
+    }
+  };
+
+  triggerDownload = () => {
+    ipcRenderer.send(START_UPDATE);
+  };
 
   render() {
     const { raffles } = this.state;
@@ -83,7 +132,9 @@ export default class Homepage extends Component {
                 <h5 className="font-weight-bold fs-0_8rem">Help?</h5>
                 <p>
                   Need help? Then open up a ticket and our support team will get
-                  back to you as soon as possible.
+                  back to you as soon as possible. Try to include as much
+                  information as you can including screenshots, to help to solve
+                  the problem quickly.
                 </p>
               </Col>
             </Row>
@@ -92,12 +143,22 @@ export default class Homepage extends Component {
         <Col className="h-100 p-0">
           <Container fluid className="h-100">
             <Row className="h-50 panel-middle">
-              <Col className="py-3">
-                <span className="panel-title">Updates</span>
-              </Col>
+              <Container className="h-100 d-flex flex-column">
+                <Row>
+                  <Col className="py-3">
+                    <span className="panel-title">Updates</span>
+                  </Col>
+                </Row>
+                <Row className="flex-fill align-items-center">
+                  <Col>{this.returnUpdateStatus()}</Col>
+                </Row>
+                <Row>
+                  <Col className="mb-3">{this.returnUpdateButton()}</Col>
+                </Row>
+              </Container>
             </Row>
             <Row className="h-50">
-              <Col className="py-3 h-100">
+              <Col className="p-0 py-3 h-100">
                 <Container className="h-100 d-flex flex-column">
                   <Row>
                     <Col>
@@ -144,7 +205,7 @@ export default class Homepage extends Component {
                   ) : (
                     <Row>
                       <Col className="text-center p-5">
-                        <h5>No raffles currently</h5>
+                        <h5>No raffles currently running</h5>
                       </Col>
                     </Row>
                   )}
@@ -157,3 +218,15 @@ export default class Homepage extends Component {
     );
   }
 }
+
+Homepage.propTypes = {
+  settings: PropTypes.shape({
+    update: PropTypes.shape({
+      status: PropTypes.string.isRequired,
+      lastChecked: PropTypes.number.isRequired,
+      changelog: PropTypes.string.isRequired,
+      version: PropTypes.string.isRequired
+    })
+  }).isRequired,
+  setLoading: PropTypes.func.isRequired
+};
