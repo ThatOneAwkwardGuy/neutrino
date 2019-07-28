@@ -43,7 +43,8 @@ class Home extends Component {
       installModal: false,
       updateDownloading: false,
       loading: false,
-      loadingModalClosable: false
+      loadingModalClosable: false,
+      raffleInfo: null
     };
   }
 
@@ -67,6 +68,10 @@ class Home extends Component {
       }
     }
   }
+
+  setRaffleInfo = raffleInfo => {
+    this.setState({ raffleInfo });
+  };
 
   currentWindowToText = currentWindow => {
     switch (currentWindow) {
@@ -166,7 +171,8 @@ class Home extends Component {
       updateDownloading,
       loading,
       loadingText,
-      loadingModalClosable
+      loadingModalClosable,
+      raffleInfo
     } = this.state;
     const {
       addProxyProviderAccount,
@@ -186,15 +192,16 @@ class Home extends Component {
       profile,
       updateProfileAttribute,
       clearProfileAttributes,
-      updateProfile
+      updateProfile,
+      history
     } = this.props;
-    const { setLoading } = this;
+    const { setLoading, setRaffleInfo } = this;
     const appRoutes = [
       {
         path: routes.HOME,
         component: Homepage,
         exact: true,
-        props: { settings, setLoading }
+        props: { settings, setLoading, setRaffleInfo, history }
       },
       {
         path: routes.PROXY_CREATOR,
@@ -267,7 +274,7 @@ class Home extends Component {
         path: routes.RAFFLE_BOT,
         component: RaffleBot,
         exact: true,
-        props: { setLoading }
+        props: { setLoading, raffleInfo, setRaffleInfo }
       },
       {
         path: routes.SETTINGS,
@@ -556,7 +563,8 @@ Home.propTypes = {
   profile: PropTypes.objectOf(PropTypes.any).isRequired,
   updateProfileAttribute: PropTypes.func.isRequired,
   clearProfileAttributes: PropTypes.func.isRequired,
-  updateProfile: PropTypes.func.isRequired
+  updateProfile: PropTypes.func.isRequired,
+  history: PropTypes.objectOf(PropTypes.any).isRequired
 };
 
 export default connect(

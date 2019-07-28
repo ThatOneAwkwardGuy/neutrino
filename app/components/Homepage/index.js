@@ -37,8 +37,20 @@ export default class Homepage extends Component {
     });
   };
 
+  launchRaffle = raffle => {
+    const { setRaffleInfo, history } = this.props;
+    setRaffleInfo(raffle);
+    history.push('/home/raffle-bot', { stuff: 'stuff' });
+  };
+
   returnRaffleRow = (raffle, index) => (
-    <Row className="my-3 raffleRow text-left" key={`Raffle Row ${index}`}>
+    <Row
+      className="my-3 raffleRow text-left c_pointer"
+      key={`Raffle Row ${index}`}
+      onClick={() => {
+        this.launchRaffle(raffle);
+      }}
+    >
       <Col xs="3" className="p-0">
         <img
           alt={`${raffle.name}`}
@@ -228,5 +240,7 @@ Homepage.propTypes = {
       version: PropTypes.string.isRequired
     })
   }).isRequired,
+  setRaffleInfo: PropTypes.func.isRequired,
+  history: PropTypes.objectOf(PropTypes.any).isRequired,
   setLoading: PropTypes.func.isRequired
 };

@@ -2,3 +2,11 @@
   background-color: $dark1Colour;
   padding: 20px;
 }
+
+.raffleRow:hover {
+  background-color: $mainColourDarker1;
+}
+
+.raffleRow:active {
+  background-color: $mainColourDarker2;
+}

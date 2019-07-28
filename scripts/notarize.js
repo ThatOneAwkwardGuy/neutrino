@@ -9,12 +9,11 @@ exports.default = async function notarizing(context) {
     return;
   }
 
-  const notarised = await notarize({
+  // eslint-disable-next-line no-return-await
+  return await notarize({
     appBundleId: 'com.neutrino.bot',
     appPath: `${appOutDir}/${appName}.app`,
     appleId: process.env.APPLEID,
     appleIdPassword: process.env.APPLEIDPASS
   });
-
-  return notarised;
 };

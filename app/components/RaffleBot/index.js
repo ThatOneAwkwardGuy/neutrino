@@ -53,9 +53,19 @@ export default class RaffleBot extends Component {
       styleInput: true,
       sizeInput: true,
       entries: [],
-      proxies: []
-      // raffleDetails: {},
+      proxies: [],
+      raffleDetails: {}
     };
+  }
+
+  componentDidMount() {
+    const { raffleInfo, setRaffleInfo } = this.props;
+    if (raffleInfo !== null) {
+      this.setState({ site: raffleInfo.store, link: raffleInfo.link }, () => {
+        this.loadRaffle();
+      });
+    }
+    setRaffleInfo(null);
   }
 
   handleRaffleSiteChange = site => {
@@ -505,5 +515,10 @@ export default class RaffleBot extends Component {
 }
 
 RaffleBot.propTypes = {
-  setLoading: PropTypes.func.isRequired
+  setLoading: PropTypes.func.isRequired,
+  raffleInfo: PropTypes.shape({
+    store: PropTypes.string.isRequired,
+    link: PropTypes.string.isRequired
+  }).isRequired,
+  setRaffleInfo: PropTypes.func.isRequired
 };
