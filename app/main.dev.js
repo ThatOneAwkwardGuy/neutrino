@@ -21,6 +21,7 @@ import {
   SEND_CAPTCHA_TOKEN_FROM_RENDERER,
   SEND_CAPTCHA_TOKEN_FROM_MAIN,
   STORE_CAPTCHA_JOB,
+  STOP_CAPTCHA_JOB,
   SET_DISCORD_RPC_STATE,
   START_UPDATE,
   UPDATE_AVAILABLE,
@@ -162,7 +163,10 @@ app.on('ready', async () => {
       }
     },
     minVisible: 3000,
-    templateUrl: `${__dirname}/splash.html`,
+    templateUrl:
+      process.env.NODE_ENV === 'development'
+        ? `${__dirname}/splash.html`
+        : `${app.getAppPath()}/app/splash.html`,
     splashScreenOpts: {
       width: 400,
       frame: false,
@@ -242,6 +246,10 @@ app.on('ready', async () => {
 
   ipcMain.on(START_UPDATE, () => {
     autoUpdater.downloadUpdate();
+  });
+
+  ipcMain.on(STOP_CAPTCHA_JOB, (event, arg) => {
+    captchaWindow.webContents.send(STOP_CAPTCHA_JOB, arg);
   });
 
   rpc.on('ready', () => {

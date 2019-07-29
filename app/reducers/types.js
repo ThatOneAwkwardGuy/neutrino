@@ -30,6 +30,12 @@ export type settingsStateType = {
   +activityYoutube: boolean
 };
 
+export type homeStateType = {
+  +rafflesEntered: number,
+  +proxiesCreates: number,
+  +accountsCreated: number
+};
+
 export type accountsStateType = {
   +accounts: Array<{
     +email: string,

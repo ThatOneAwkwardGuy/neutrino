@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import FontAwesome from 'react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { Container, Row, Col, Label, Input, Button } from 'reactstrap';
 import Table from '../Table/index';
 import { testAccount } from './functions';
@@ -124,9 +125,9 @@ export default class OneClickTester extends Component {
         Header: 'Actions',
         Cell: row => (
           <div>
-            <FontAwesome
+            <FontAwesomeIcon
               className="mx-3"
-              name="play"
+              icon="play"
               onClick={() => {
                 this.windows.push(
                   testAccount(
@@ -137,16 +138,16 @@ export default class OneClickTester extends Component {
                 );
               }}
             />
-            <FontAwesome
+            <FontAwesomeIcon
               className="mx-3"
-              name="stop"
+              icon="stop"
               onClick={() => {
                 this.stopAccount(row);
               }}
             />
-            <FontAwesome
+            <FontAwesomeIcon
               className="mx-3"
-              name="trash"
+              icon="trash"
               onClick={() => {
                 this.deleteAccount(row);
               }}

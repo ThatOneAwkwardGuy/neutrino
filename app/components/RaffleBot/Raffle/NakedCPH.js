@@ -10,7 +10,8 @@ export default class NakedCPH {
     status,
     proxy,
     raffleDetails,
-    forceUpdate
+    forceUpdate,
+    incrementRaffles
   ) {
     this.url = url;
     this.profile = profile;
@@ -21,6 +22,7 @@ export default class NakedCPH {
     this.status = status;
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
+    this.incrementRaffles = incrementRaffles;
     this.cookieJar = rp.jar();
     this.rp = rp.defaults({
       headers: {
@@ -112,6 +114,7 @@ export default class NakedCPH {
     const submissionResponse = await this.submitRaffleEntry(token, landed_at);
     if (submissionResponse.message === 'success') {
       this.changeStatus('Successful Entry');
+      this.incrementRaffles();
     }
   };
 }

@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Row, Col } from 'reactstrap';
-import FontAwesome from 'react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import PropTypes from 'prop-types';
 import { shell, ipcRenderer } from 'electron';
 import { OPEN_CAPTCHA_WINDOW } from '../../constants/ipcConstants';
@@ -26,9 +27,15 @@ export default class Footer extends Component {
       <Row id="footer" className="align-items-center">
         <Col className="col-0_5 text-center">
           {sidebarExpand ? (
-            <FontAwesome name="chevron-left" onClick={toggleSidebarExpand} />
+            <FontAwesomeIcon
+              icon="chevron-left"
+              onClick={toggleSidebarExpand}
+            />
           ) : (
-            <FontAwesome name="chevron-right" onClick={toggleSidebarExpand} />
+            <FontAwesomeIcon
+              icon="chevron-right"
+              onClick={toggleSidebarExpand}
+            />
           )}
         </Col>
         <Col className="col-0_5 text-center">
@@ -38,7 +45,7 @@ export default class Footer extends Component {
             role="button"
             onClick={this.openCaptchaWindow}
           >
-            <FontAwesome name="window-maximize" />
+            <FontAwesomeIcon icon="window-maximize" />
           </span>
         </Col>
         <Col className="col-0_5 text-center ml-4">
@@ -50,7 +57,7 @@ export default class Footer extends Component {
               shell.openExternal('http://Neutrinotools.app/');
             }}
           >
-            <FontAwesome name="desktop" />
+            <FontAwesomeIcon icon="desktop" />
           </span>
         </Col>
         <Col className="col-0_5 text-center">
@@ -62,7 +69,7 @@ export default class Footer extends Component {
               shell.openExternal('https://twitter.com/neutrinotools');
             }}
           >
-            <FontAwesome name="twitter" />
+            <FontAwesomeIcon icon={['fab', 'twitter']} />
           </span>
         </Col>
         <Col className="col-0_5 text-center">
@@ -74,7 +81,7 @@ export default class Footer extends Component {
               shell.openExternal('https://www.instagram.com/neutrinotools/');
             }}
           >
-            <FontAwesome name="instagram" />
+            <FontAwesomeIcon icon={['fab', 'instagram']} />
           </span>
         </Col>
         <Col xs="1" className="footerText">

@@ -9,7 +9,7 @@ import {
   Button,
   CustomInput
 } from 'reactstrap';
-import FontAwesome from 'react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import { withToastManager } from 'react-toast-notifications';
 import Table from '../Table/index';
@@ -73,7 +73,7 @@ class AccountCreator extends Component {
 
   createAccounts = async () => {
     const { site, delay, quantity } = this.state;
-    const { setLoading } = this.props;
+    const { setLoading, incrementAccounts } = this.props;
     const accountPromises = Array.from(Array(parseInt(quantity, 10))).map(
       () => {
         switch (site) {
@@ -104,7 +104,10 @@ class AccountCreator extends Component {
       `Creating ${quantity} ${upperCaseFirst(site)} Account(s)`,
       true
     );
-    console.log(resolvedPromises);
+    const successes = resolvedPromises.filter(
+      promise => !(promise instanceof Error)
+    );
+    successes.forEach(() => incrementAccounts());
   };
 
   copyAllAccounts = () => {
@@ -406,7 +409,10 @@ class AccountCreator extends Component {
             </Row>
             <Row className="pt-1 align-items-end noselect">
               <Col className="text-right">
-                <FontAwesome name="cog" onClick={this.toggleAdvancedSettings} />
+                <FontAwesomeIcon
+                  icon="cog"
+                  onClick={this.toggleAdvancedSettings}
+                />
               </Col>
             </Row>
             {!advancedSettings ? (
@@ -565,7 +571,8 @@ AccountCreator.propTypes = {
     remove: PropTypes.func,
     toasts: PropTypes.array
   }).isRequired,
-  setLoading: PropTypes.func.isRequired
+  setLoading: PropTypes.func.isRequired,
+  incrementAccounts: PropTypes.func.isRequired
 };
 
 export default withToastManager(AccountCreator);

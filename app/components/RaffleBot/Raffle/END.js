@@ -14,7 +14,8 @@ export default class END {
     status,
     proxy,
     raffleDetails,
-    forceUpdate
+    forceUpdate,
+    incrementRaffles
   ) {
     this.url = url;
     this.profile = profile;
@@ -27,6 +28,7 @@ export default class END {
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
     this.cookieJar = rp.jar();
+    this.incrementRaffles = incrementRaffles;
     this.headers = {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'

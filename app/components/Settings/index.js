@@ -8,7 +8,8 @@ import {
   CustomInput,
   Button
 } from 'reactstrap';
-import FontAwesome from 'react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import PropTypes from 'prop-types';
 import { upperCaseFirst, generateUEID } from '../../utils/utils';
 import { signOut } from '../../utils/firebase';
@@ -227,8 +228,8 @@ export default class Settings extends Component {
           {account.apiKey ? account.apiKey : account.googleCredentialsProjectID}
         </Col>
         <Col className="text-center">
-          <FontAwesome
-            name="trash"
+          <FontAwesomeIcon
+            icon="trash"
             onClick={() => {
               removeProxyProviderAccount(selectedProxyProvider, index);
             }}

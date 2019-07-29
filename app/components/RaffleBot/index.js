@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Row, Col, Container, Label, Button, Input } from 'reactstrap';
-import FontAwesome from 'react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import PropTypes from 'prop-types';
 import Table from '../Table/index';
 import bodega from '../../images/bodega.jpg';
@@ -180,6 +181,7 @@ export default class RaffleBot extends Component {
       entries,
       proxiesInput
     } = this.state;
+    const { incrementRaffles } = this.props;
     const newEntries = [];
     this.setState({
       proxies: proxiesInput.split('\n')
@@ -203,7 +205,8 @@ export default class RaffleBot extends Component {
             'Not Started',
             this.getRandomProxy(),
             raffleDetails,
-            this.triggerRender
+            this.triggerRender,
+            incrementRaffles
           );
           break;
         case 'NakedCPH':
@@ -216,7 +219,8 @@ export default class RaffleBot extends Component {
             'Not Started',
             this.getRandomProxy(),
             raffleDetails,
-            this.triggerRender
+            this.triggerRender,
+            incrementRaffles
           );
           break;
         case 'ExtraButter':
@@ -229,7 +233,8 @@ export default class RaffleBot extends Component {
             'Not Started',
             this.getRandomProxy(),
             raffleDetails,
-            this.triggerRender
+            this.triggerRender,
+            incrementRaffles
           );
           break;
         case 'END':
@@ -242,7 +247,8 @@ export default class RaffleBot extends Component {
             'Not Started',
             this.getRandomProxy(),
             raffleDetails,
-            this.triggerRender
+            this.triggerRender,
+            incrementRaffles
           );
           break;
         case 'VooStore':
@@ -255,7 +261,8 @@ export default class RaffleBot extends Component {
             'Not Started',
             this.getRandomProxy(),
             raffleDetails,
-            this.triggerRender
+            this.triggerRender,
+            incrementRaffles
           );
           break;
         case 'Bodega':
@@ -268,7 +275,8 @@ export default class RaffleBot extends Component {
             'Not Started',
             this.getRandomProxy(),
             raffleDetails,
-            this.triggerRender
+            this.triggerRender,
+            incrementRaffles
           );
           break;
         case 'OneBlockDown':
@@ -281,7 +289,8 @@ export default class RaffleBot extends Component {
             'Not Started',
             this.getRandomProxy(),
             raffleDetails,
-            this.triggerRender
+            this.triggerRender,
+            incrementRaffles
           );
           break;
         default:
@@ -304,6 +313,22 @@ export default class RaffleBot extends Component {
       (entry, index) => index !== row.row.index
     );
     this.setState({ entries: newEntries });
+  };
+
+  startAll = () => {
+    const { entries } = this.state;
+    entries.forEach(entry => entry.start());
+  };
+
+  stopAll = () => {
+    const { entries } = this.state;
+    entries.forEach(entry => entry.stop());
+  };
+
+  clearAll = () => {
+    this.setState({
+      entries: []
+    });
   };
 
   render() {
@@ -350,24 +375,24 @@ export default class RaffleBot extends Component {
         Header: 'Actions',
         Cell: row => (
           <div>
-            <FontAwesome
+            <FontAwesomeIcon
               className="mx-3"
-              name="play"
+              icon="play"
               onClick={() => {
                 entries[row.row.index].run = true;
                 entries[row.row.index].start();
               }}
             />
-            <FontAwesome
+            <FontAwesomeIcon
               className="mx-3"
-              name="stop"
+              icon="stop"
               onClick={() => {
                 entries[row.row.index].stop();
               }}
             />
-            <FontAwesome
+            <FontAwesomeIcon
               className="mx-3"
-              name="trash"
+              icon="trash"
               onClick={() => {
                 this.deleteEntry(row);
               }}
@@ -457,11 +482,19 @@ export default class RaffleBot extends Component {
                   <Button className="my-3" onClick={this.loadEntries}>
                     Load
                   </Button>
-                  <Button className="my-3">Stop</Button>
+                  <Button className="my-3" onClick={this.stopAll}>
+                    Stop
+                  </Button>
                 </Col>
                 <Col xs="2" className="align-self-center">
-                  <Button className="my-3">Start</Button>
-                  <Button color="danger" className="my-3">
+                  <Button className="my-3" onClick={this.startAll}>
+                    Start
+                  </Button>
+                  <Button
+                    color="danger"
+                    className="my-3"
+                    onClick={this.clearAll}
+                  >
                     Clear
                   </Button>
                 </Col>
@@ -520,5 +553,6 @@ RaffleBot.propTypes = {
     store: PropTypes.string.isRequired,
     link: PropTypes.string.isRequired
   }).isRequired,
-  setRaffleInfo: PropTypes.func.isRequired
+  setRaffleInfo: PropTypes.func.isRequired,
+  incrementRaffles: PropTypes.func.isRequired
 };

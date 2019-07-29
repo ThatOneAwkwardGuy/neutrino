@@ -7,7 +7,8 @@
   "extends": ["airbnb", "prettier", "prettier/flowtype", "prettier/react"],
   "env": {
     "browser": true,
-    "node": true
+    "node": true,
+    "jquery": true
   },
   "rules": {
     "arrow-parens": ["off"],

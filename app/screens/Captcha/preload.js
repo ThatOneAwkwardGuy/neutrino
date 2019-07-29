@@ -3,6 +3,13 @@ const { remote, ipcRenderer } = require('electron');
 const focusedWebContents = remote.getCurrentWebContents();
 
 let captchaChecker = null;
+/* eslint-disable */
+document.addEventListener('DOMNodeInserted', () => {
+  if (!!window && !!!window.$) {
+    window.$ = window.jQuery = require('jquery');
+  }
+});
+/* eslint-enable */
 
 const setCookiesInWindow = (webContents, cookies) =>
   new Promise(resolve => {
@@ -83,11 +90,7 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
   captchaChecker = setInterval(checkCaptcha, 300);
 }
 
-window.onload = () => {
-  // eslint-disable-next-line
-  const $ = require('jquery');
-  // eslint-disable-next-line
-  window.$ = window.jQuery = require('jquery');
-};
-
+if (process.env.NODE_ENV === 'development') {
+  focusedWebContents.openDevTools();
+}
 focusedWebContents.openDevTools();

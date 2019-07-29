@@ -7,6 +7,7 @@
 import webpack from 'webpack';
 import path from 'path';
 import merge from 'webpack-merge';
+import TerserPlugin from 'terser-webpack-plugin';
 import baseConfig from './webpack.config.base';
 import { dependencies } from '../package.json';
 import CheckNodeEnv from '../internals/scripts/CheckNodeEnv';
@@ -40,6 +41,22 @@ export default merge.smart(baseConfig, {
     path: dist,
     filename: '[name].dev.dll.js',
     libraryTarget: 'var'
+  },
+
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          mangle: true,
+          output: {
+            comments: false
+          }
+        },
+        parallel: true,
+        sourceMap: true,
+        cache: true
+      })
+    ]
   },
 
   plugins: [

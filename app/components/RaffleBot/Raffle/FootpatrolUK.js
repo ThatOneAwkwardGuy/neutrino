@@ -10,7 +10,8 @@ export default class FootpatrolUK {
     status,
     proxy,
     raffleDetails,
-    forceUpdate
+    forceUpdate,
+    incrementRaffles
   ) {
     this.url = url;
     this.profile = profile;
@@ -22,6 +23,7 @@ export default class FootpatrolUK {
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
     this.cookieJar = rp.jar();
+    this.incrementRaffles = incrementRaffles;
     this.rp = rp.defaults({
       headers: {
         'User-Agent':
@@ -80,5 +82,6 @@ export default class FootpatrolUK {
     });
     console.log(response);
     this.changeStatus('Successful Entry');
+    this.incrementRaffles();
   };
 }

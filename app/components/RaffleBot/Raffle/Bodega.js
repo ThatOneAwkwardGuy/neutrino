@@ -1,4 +1,6 @@
+import { ipcRenderer } from 'electron';
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+import { STOP_CAPTCHA_JOB } from '../../../constants/ipcConstants';
 
 const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
@@ -13,8 +15,10 @@ export default class Bodega {
     status,
     proxy,
     raffleDetails,
-    forceUpdate
+    forceUpdate,
+    incrementRaffles
   ) {
+    this.tokenID = uuidv4();
     this.url = url;
     this.profile = profile;
     this.run = false;
@@ -26,6 +30,7 @@ export default class Bodega {
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
     this.cookieJar = rp.jar();
+    this.incrementRaffles = incrementRaffles;
     this.headers = {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
@@ -58,6 +63,7 @@ export default class Bodega {
   stop = () => {
     this.run = false;
     this.changeStatus('Stopped');
+    ipcRenderer.send(STOP_CAPTCHA_JOB, this.tokenID);
   };
 
   getFormData = object => {
@@ -100,12 +106,11 @@ export default class Bodega {
 
   makeEntry = async () => {
     this.changeStatus(`Getting Captcha Token`);
-    const tokenID = uuidv4();
     const captchaResponse = await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle
       cookiesObject: this.cookieJar._jar.store.idx,
       url: this.url,
-      id: tokenID,
+      id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.url,
       site: this.site
@@ -115,6 +120,7 @@ export default class Bodega {
     const submitRaffle = JSON.parse(submitRaffleResponse);
     if (submitRaffle.success === 1) {
       this.changeStatus(`Successful Entry`);
+      this.incrementRaffles();
     } else {
       this.changeStatus(`Error Submitting Entry`);
     }

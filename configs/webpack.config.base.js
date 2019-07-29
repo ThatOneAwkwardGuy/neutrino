@@ -4,6 +4,7 @@
 
 import path from 'path';
 import webpack from 'webpack';
+import TerserPlugin from 'terser-webpack-plugin';
 import { dependencies } from '../package.json';
 
 export default {
@@ -30,6 +31,22 @@ export default {
     libraryTarget: 'commonjs2'
   },
 
+  optimization: {
+    minimizer: [
+      new TerserPlugin({
+        terserOptions: {
+          mangle: true,
+          output: {
+            comments: false
+          }
+        },
+        parallel: true,
+        sourceMap: true,
+        cache: true
+      })
+    ]
+  },
+
   /**
    * Determine the array of extensions that should be used to resolve modules.
    */
@@ -41,7 +58,6 @@ export default {
     new webpack.EnvironmentPlugin({
       NODE_ENV: 'production'
     }),
-
     new webpack.NamedModulesPlugin()
   ]
 };

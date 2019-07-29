@@ -4,6 +4,7 @@ import settings from './settings';
 import accounts from './accounts';
 import activities from './activities';
 import profile from './profile';
+import home from './home';
 
 export default function createRootReducer(history: History) {
   return {
@@ -11,6 +12,7 @@ export default function createRootReducer(history: History) {
     settings,
     accounts,
     activities,
-    profile
+    profile,
+    home
   };
 }

@@ -6,12 +6,16 @@ import { ipcRenderer } from 'electron';
 import { connect } from 'react-redux';
 import BarLoader from 'react-spinners/BarLoader';
 import PropTypes from 'prop-types';
-import FontAwesome from 'react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { fas } from '@fortawesome/free-solid-svg-icons';
+import { fab } from '@fortawesome/free-brands-svg-icons';
 import * as SettingsActions from '../../actions/settings';
 import * as AccountActions from '../../actions/accounts';
 import * as ActivityActions from '../../actions/activities';
 import * as ProfileActions from '../../actions/profile';
+import * as HomeActions from '../../actions/home';
 import routes from '../../constants/routes';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
@@ -33,6 +37,9 @@ import {
   UPDATE_DOWNLOADED,
   CHECK_FOR_UPDATES
 } from '../../constants/ipcConstants';
+
+library.add(fab);
+library.add(fas);
 
 class Home extends Component {
   constructor(props) {
@@ -193,6 +200,10 @@ class Home extends Component {
       updateProfileAttribute,
       clearProfileAttributes,
       updateProfile,
+      home,
+      incrementAccounts,
+      incrementProxies,
+      incrementRaffles,
       history
     } = this.props;
     const { setLoading, setRaffleInfo } = this;
@@ -201,13 +212,13 @@ class Home extends Component {
         path: routes.HOME,
         component: Homepage,
         exact: true,
-        props: { settings, setLoading, setRaffleInfo, history }
+        props: { settings, setLoading, setRaffleInfo, history, home }
       },
       {
         path: routes.PROXY_CREATOR,
         component: ProxyCreator,
         exact: true,
-        props: { setLoading, settings }
+        props: { setLoading, settings, incrementProxies }
       },
       {
         path: routes.ACCOUNT_CREATOR,
@@ -218,7 +229,8 @@ class Home extends Component {
           addCreatedAccount,
           removeCreatedAccount,
           removeAllCreatedAccounts,
-          accounts
+          accounts,
+          incrementAccounts
         }
       },
       {
@@ -231,7 +243,7 @@ class Home extends Component {
         path: routes.ADDRESS_JIGGER,
         component: AddressJigger,
         exact: true,
-        props: []
+        props: {}
       },
       {
         path: routes.ONECLICK_GENERATOR,
@@ -251,7 +263,7 @@ class Home extends Component {
         path: routes.ONECLICK_TESTER,
         component: OneClickTester,
         exact: true,
-        props: []
+        props: {}
       },
       {
         path: routes.PROFILE_CREATOR,
@@ -268,13 +280,13 @@ class Home extends Component {
         path: routes.PROFILE_TASK_EDITOR_CONVERTER,
         component: ProfileTaskEditorConverter,
         exact: true,
-        props: []
+        props: {}
       },
       {
         path: routes.RAFFLE_BOT,
         component: RaffleBot,
         exact: true,
-        props: { setLoading, raffleInfo, setRaffleInfo }
+        props: { setLoading, raffleInfo, setRaffleInfo, incrementRaffles }
       },
       {
         path: routes.SETTINGS,
@@ -307,7 +319,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="home" />
+                  <FontAwesomeIcon icon="home" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Home</span>
                   ) : null}
@@ -323,7 +335,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="database" />
+                  <FontAwesomeIcon icon="database" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Proxy Creator</span>
                   ) : null}
@@ -339,7 +351,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="heartbeat" />
+                  <FontAwesomeIcon icon="heartbeat" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Proxy Tester</span>
                   ) : null}
@@ -355,7 +367,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="users" />
+                  <FontAwesomeIcon icon="users" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Account Creator</span>
                   ) : null}
@@ -371,7 +383,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="envelope" />
+                  <FontAwesomeIcon icon="envelope" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Address Jigger</span>
                   ) : null}
@@ -387,7 +399,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="google" />
+                  <FontAwesomeIcon icon={['fab', 'google']} />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">
                       One Click Generator
@@ -405,7 +417,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="check-square" />
+                  <FontAwesomeIcon icon="check-square" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">One Click Tester</span>
                   ) : null}
@@ -421,7 +433,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="user" />
+                  <FontAwesomeIcon icon="user" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Profile Creator</span>
                   ) : null}
@@ -438,7 +450,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="sync" />
+                  <FontAwesomeIcon icon="sync" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Profile Converter</span>
                   ) : null}
@@ -454,7 +466,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="ticket" />
+                  <FontAwesomeIcon icon="ticket-alt" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Raffle Bot</span>
                   ) : null}
@@ -470,7 +482,7 @@ class Home extends Component {
                       : ''
                   }`}
                 >
-                  <FontAwesome name="cogs" />
+                  <FontAwesomeIcon icon="cogs" />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Settings</span>
                   ) : null}
@@ -522,7 +534,8 @@ const mapStateToProps = state => ({
   settings: state.settings,
   accounts: state.accounts,
   activities: state.activities,
-  profile: state.profile
+  profile: state.profile,
+  home: state.home
 });
 
 // const mapDispatchToProps = dispatch => {
@@ -534,7 +547,8 @@ const mapDispatchToProps = {
   ...SettingsActions,
   ...AccountActions,
   ...ActivityActions,
-  ...ProfileActions
+  ...ProfileActions,
+  ...HomeActions
 };
 
 Home.propTypes = {
@@ -564,6 +578,14 @@ Home.propTypes = {
   updateProfileAttribute: PropTypes.func.isRequired,
   clearProfileAttributes: PropTypes.func.isRequired,
   updateProfile: PropTypes.func.isRequired,
+  home: PropTypes.shape({
+    rafflesEntered: PropTypes.number.isRequired,
+    proxiesCreates: PropTypes.number.isRequired,
+    accountsCreated: PropTypes.number.isRequired
+  }).isRequired,
+  incrementAccounts: PropTypes.func.isRequired,
+  incrementProxies: PropTypes.func.isRequired,
+  incrementRaffles: PropTypes.func.isRequired,
   history: PropTypes.objectOf(PropTypes.any).isRequired
 };
 

@@ -192,7 +192,7 @@ class ProxyCreator extends Component {
 
   createProxies = async () => {
     const { quantity, provider, proxies } = this.state;
-    const { setLoading } = this.props;
+    const { setLoading, incrementProxies } = this.props;
     setLoading(
       true,
       `Creating ${quantity} ${upperCaseFirst(provider)} ${
@@ -203,6 +203,10 @@ class ProxyCreator extends Component {
       .fill()
       .map((empty, index) => this.returnProxyInstance(index).catch(e => e));
     const resolvedProxyInstances = await Promise.all(proxyInstances);
+    const successfulProxies = resolvedProxyInstances.filter(
+      proxy => !(proxy instanceof Error)
+    );
+    successfulProxies.forEach(() => incrementProxies());
     console.log(resolvedProxyInstances);
     setLoading(
       false,
@@ -211,7 +215,7 @@ class ProxyCreator extends Component {
       }`
     );
     this.setState({
-      proxies: [...proxies, ...resolvedProxyInstances]
+      proxies: [...proxies, ...successfulProxies]
     });
   };
 
@@ -518,7 +522,8 @@ ProxyCreator.propTypes = {
     add: PropTypes.func,
     remove: PropTypes.func,
     toasts: PropTypes.array
-  }).isRequired
+  }).isRequired,
+  incrementProxies: PropTypes.func.isRequired
 };
 
 export default withToastManager(ProxyCreator);

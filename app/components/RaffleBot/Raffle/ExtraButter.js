@@ -1,4 +1,6 @@
+import { ipcRenderer } from 'electron';
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+import { STOP_CAPTCHA_JOB } from '../../../constants/ipcConstants';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
@@ -13,8 +15,10 @@ export default class ExtraButter {
     status,
     proxy,
     raffleDetails,
-    forceUpdate
+    forceUpdate,
+    incrementRaffles
   ) {
+    this.tokenID = uuidv4();
     this.url = url;
     this.profile = profile;
     this.run = false;
@@ -25,6 +29,7 @@ export default class ExtraButter {
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
     this.cookieJar = rp.jar();
+    this.incrementRaffles = incrementRaffles;
     this.rp = rp.defaults({
       headers: {
         'User-Agent':
@@ -56,6 +61,7 @@ export default class ExtraButter {
   stop = () => {
     this.run = false;
     this.changeStatus('Stopped');
+    ipcRenderer.send(STOP_CAPTCHA_JOB, this.tokenID);
   };
 
   getIDForSize = async () => {
@@ -146,12 +152,12 @@ export default class ExtraButter {
     });
 
   checkEmail = async () => {
-    const tokenID = uuidv4();
+    this.changeStatus('Getting Captcha');
     const captchaResponse = await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle
       cookiesObject: this.cookieJar._jar.store.idx,
       url: this.url,
-      id: tokenID,
+      id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.url,
       site: this.site
@@ -216,5 +222,6 @@ export default class ExtraButter {
     );
     console.log(completeRaffleResponse);
     this.changeStatus('Completed Entry');
+    this.incrementRaffles();
   };
 }

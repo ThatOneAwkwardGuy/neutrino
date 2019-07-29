@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Input, Button } from 'reactstrap';
 import { withToastManager } from 'react-toast-notifications';
-import FontAwesome from 'react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import { generateUEID } from '../../utils/utils';
 import { convertToBase } from './functions';
 import { convertFromBase } from '../ProfileCreator/functions';
@@ -222,7 +223,11 @@ class ProfileTaskEditorConverter extends Component {
                         onClick={this.loadFile}
                         disabled={fromBot === 'Unknown'}
                       >
-                        <FontAwesome name="save" size="2x" className="mr-3" />
+                        <FontAwesomeIcon
+                          icon="save"
+                          size="2x"
+                          className="mr-3"
+                        />
                         Load Profiles
                       </Button>
                     </Col>
@@ -234,8 +239,8 @@ class ProfileTaskEditorConverter extends Component {
                         onClick={this.exportFile}
                         disabled={fromBot === 'Unknown' || toBot === 'Unknown'}
                       >
-                        <FontAwesome
-                          name="download"
+                        <FontAwesomeIcon
+                          icon="download"
                           size="2x"
                           className="mr-3"
                         />

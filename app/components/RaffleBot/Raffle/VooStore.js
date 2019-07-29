@@ -1,4 +1,6 @@
+import { ipcRenderer } from 'electron';
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+import { STOP_CAPTCHA_JOB } from '../../../constants/ipcConstants';
 
 const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
@@ -13,8 +15,10 @@ export default class VooStore {
     status,
     proxy,
     raffleDetails,
-    forceUpdate
+    forceUpdate,
+    incrementRaffles
   ) {
+    this.tokenID = uuidv4();
     this.url = url;
     this.profile = profile;
     this.run = false;
@@ -25,6 +29,7 @@ export default class VooStore {
     this.proxy = proxy;
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
+    this.incrementRaffles = incrementRaffles;
     this.cookieJar = rp.jar();
     this.headers = {
       'User-Agent':
@@ -58,6 +63,7 @@ export default class VooStore {
   stop = () => {
     this.run = false;
     this.changeStatus('Stopped');
+    ipcRenderer.send(STOP_CAPTCHA_JOB, this.tokenID);
   };
 
   getFormData = object => {
@@ -106,12 +112,11 @@ export default class VooStore {
     this.changeStatus(`Getting Raffle Page`);
     await this.getRafflePage();
     this.changeStatus(`Getting Captcha Token`);
-    const tokenID = uuidv4();
     const capthcaResponse = await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle
       cookiesObject: this.cookieJar._jar.store.idx,
       url: this.url,
-      id: tokenID,
+      id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.site,
       site: this.site
@@ -125,6 +130,7 @@ export default class VooStore {
       throw new Error(submitRaffle.msg);
     } else {
       this.changeStatus(`Raffle Entry Successful`);
+      this.incrementRaffles();
     }
   };
 }

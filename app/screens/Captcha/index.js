@@ -1,10 +1,25 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Button } from 'reactstrap';
-import { ipcRenderer } from 'electron';
+import { remote, ipcRenderer } from 'electron';
 import Header from '../../components/Header';
-import { SEND_CAPTCHA_TOKEN_FROM_MAIN } from '../../constants/ipcConstants';
+import {
+  SEND_CAPTCHA_TOKEN_FROM_MAIN,
+  STOP_CAPTCHA_JOB
+} from '../../constants/ipcConstants';
 
 const TabGroup = require('electron-tabs');
+
+const appPath = remote.app.getAppPath();
+
+const waitingURL =
+  process.env.NODE_ENV === 'development'
+    ? `file://${appPath}/waiting.html`
+    : `file://${appPath}/app/waiting.html`;
+
+const preloadPath =
+  process.env.NODE_ENV === 'development'
+    ? `${appPath}/screens/Captcha/preload.js`
+    : `${appPath}/app/screens/Captcha/preload.js`;
 
 export default class Captcha extends Component {
   constructor(props) {
@@ -20,14 +35,11 @@ export default class Captcha extends Component {
       this.tabGroup = new TabGroup({
         newTab: {
           title: 'Captcha Solver',
-          src:
-            process.env.NODE_ENV === 'development'
-              ? `file://${__dirname}/waiting.html`
-              : `file://waiting.html`,
+          src: waitingURL,
           visible: true,
           active: true,
           webviewAttributes: {
-            preload: `${__dirname}/screens/Captcha/preload.js`,
+            preload: preloadPath,
             nodeintegration: true,
             webSecurity: false,
             allowRunningInsecureContent: true,
@@ -37,15 +49,12 @@ export default class Captcha extends Component {
       });
       this.tabGroup.addTab({
         title: 'Captcha Solver',
-        src:
-          process.env.NODE_ENV === 'development'
-            ? `file://${__dirname}/waiting.html`
-            : `file://waiting.html`,
+        src: waitingURL,
         visible: true,
         active: true,
         closable: false,
         webviewAttributes: {
-          preload: `${__dirname}/screens/Captcha/preload.js`,
+          preload: preloadPath,
           nodeintegration: true,
           webSecurity: false,
           allowRunningInsecureContent: true,
@@ -66,7 +75,6 @@ export default class Captcha extends Component {
       delete this.tabStatus[tab.id];
     });
     ipcRenderer.on(SEND_CAPTCHA_TOKEN_FROM_MAIN, (event, arg) => {
-      console.log(arg);
       this.handleCaptchaJob(arg);
     });
     ipcRenderer.on(
@@ -76,6 +84,9 @@ export default class Captcha extends Component {
         this.freeTabForCaptcha(arg.id);
       }
     );
+    ipcRenderer.on(STOP_CAPTCHA_JOB, (event, arg) => {
+      this.freeTabForCaptcha(arg);
+    });
   };
 
   handleCaptchaJob = captchaJob => {
@@ -99,7 +110,7 @@ export default class Captcha extends Component {
       if (this.tabStatus[tabKey].jobID === id) {
         this.tabStatus[tabKey].active = false;
         const tabs = this.tabGroup.getTabs();
-        tabs[tabKey].webview.loadURL(`file://${__dirname}/waiting.html`);
+        tabs[tabKey].webview.loadURL(waitingURL);
         return true;
       }
     });
@@ -118,6 +129,15 @@ export default class Captcha extends Component {
     tab.webview.loadURL('https://accounts.google.com/login');
   };
 
+  gotToWaiting = () => {
+    const tab = this.tabGroup.getActiveTab();
+    const webContents = tab.webview.getWebContents();
+    webContents.session.clearStorageData({
+      storages: ['cookies']
+    });
+    tab.webview.loadURL(waitingURL);
+  };
+
   render() {
     return (
       <Container id="captchaWindow" fluid className="d-flex flex-column h-100">
@@ -130,14 +150,14 @@ export default class Captcha extends Component {
           <div className="etabs-views" />
         </Row>
         <Row className="py-3" style={{ height: '60px' }}>
-          <Col>
-            <Button>Clear Cookies</Button>
+          <Col onClick={this.gotToWaiting}>
+            <Button>Reset</Button>
           </Col>
           <Col>
             <Button onClick={this.goToYoutube}>Youtube</Button>
           </Col>
           <Col>
-            <Button onClick={this.goToGoogleLogin}>Google Login</Button>
+            <Button onClick={this.goToGoogleLogin}>Google</Button>
           </Col>
         </Row>
       </Container>

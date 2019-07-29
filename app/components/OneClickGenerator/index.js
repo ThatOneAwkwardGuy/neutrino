@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import FontAwesome from 'react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import {
   Container,
   Row,
@@ -237,9 +238,9 @@ export default class OneClickGenerator extends Component {
       Header: 'Actions',
       Cell: row => (
         <div>
-          <FontAwesome
+          <FontAwesomeIcon
             className="mx-3"
-            name="play"
+            icon="play"
             onClick={() => {
               this.runActivity(
                 row.row.index,
@@ -250,16 +251,16 @@ export default class OneClickGenerator extends Component {
               );
             }}
           />
-          <FontAwesome
+          <FontAwesomeIcon
             className="mx-3"
-            name="stop"
+            icon="stop"
             onClick={() => {
               this.stopActivity(row.row.index);
             }}
           />
-          <FontAwesome
+          <FontAwesomeIcon
             className="mx-3"
-            name="trash"
+            icon="trash"
             onClick={() => {
               this.deleteActivity(row.row.index);
             }}

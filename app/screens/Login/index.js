@@ -12,6 +12,7 @@ import {
 import PropTypes from 'prop-types';
 import { getAuth } from '../../utils/firebase';
 import Header from '../../components/Header';
+import neutrinoTextLogo from '../../images/textLogo.svg';
 
 export default class Login extends Component {
   constructor(props) {
@@ -61,7 +62,7 @@ export default class Login extends Component {
                     id="loginLogo"
                     draggable="false"
                     className="my-3"
-                    src="./images/textLogo.svg"
+                    src={neutrinoTextLogo}
                   />
                 </FormGroup>
                 {!authorised && message !== '' ? (

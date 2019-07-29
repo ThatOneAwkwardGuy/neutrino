@@ -40,7 +40,7 @@ export default class Homepage extends Component {
   launchRaffle = raffle => {
     const { setRaffleInfo, history } = this.props;
     setRaffleInfo(raffle);
-    history.push('/home/raffle-bot', { stuff: 'stuff' });
+    history.push('/home/raffle-bot');
   };
 
   returnRaffleRow = (raffle, index) => (
@@ -108,6 +108,7 @@ export default class Homepage extends Component {
 
   render() {
     const { raffles } = this.state;
+    const { home } = this.props;
     return (
       <Row className="h-100">
         <Col className="h-100 panel-left h-100">
@@ -184,19 +185,19 @@ export default class Homepage extends Component {
                           <Col xs="9" className="font-weight-bold">
                             Raffles Entered
                           </Col>
-                          <Col xs="3">0</Col>
+                          <Col xs="3">{home.rafflesEntered}</Col>
                         </Row>
                         <Row className="flex-fill align-items-center">
                           <Col xs="9" className="font-weight-bold">
                             Proxies Created
                           </Col>
-                          <Col xs="3">0</Col>
+                          <Col xs="3">{home.proxiesCreates}</Col>
                         </Row>
                         <Row className="flex-fill align-items-center">
                           <Col xs="9" className="font-weight-bold">
                             Accounts Created
                           </Col>
-                          <Col xs="3">0</Col>
+                          <Col xs="3">{home.accountsCreated}</Col>
                         </Row>
                       </Container>
                     </Col>
@@ -242,5 +243,10 @@ Homepage.propTypes = {
   }).isRequired,
   setRaffleInfo: PropTypes.func.isRequired,
   history: PropTypes.objectOf(PropTypes.any).isRequired,
-  setLoading: PropTypes.func.isRequired
+  setLoading: PropTypes.func.isRequired,
+  home: PropTypes.shape({
+    rafflesEntered: PropTypes.number.isRequired,
+    proxiesCreates: PropTypes.number.isRequired,
+    accountsCreated: PropTypes.number.isRequired
+  }).isRequired
 };
