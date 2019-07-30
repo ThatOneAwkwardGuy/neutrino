@@ -142,7 +142,7 @@ class AddressJigger extends Component {
             </FormGroup>
             <FormGroup row>
               <Col xs="12">
-                <Label>Region</Label>
+                <Label>Region/State</Label>
                 <Input
                   name="region"
                   value={region}

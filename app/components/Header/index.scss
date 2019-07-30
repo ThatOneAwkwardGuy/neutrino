@@ -1,10 +1,14 @@
 #header {
   height: 30px;
-  -webkit-app-region: drag;
   padding: 10px;
   margin-bottom: 10px;
 }
 
+.draggable {
+  -webkit-app-region: drag !important;
+}
+
 .headerIcon {
   width: 20px;
+  height: 30px;
 }

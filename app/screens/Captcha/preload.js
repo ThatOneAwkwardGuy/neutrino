@@ -93,4 +93,3 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
 if (process.env.NODE_ENV === 'development') {
   focusedWebContents.openDevTools();
 }
-focusedWebContents.openDevTools();

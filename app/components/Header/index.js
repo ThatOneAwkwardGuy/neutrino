@@ -41,7 +41,7 @@ export default class Header extends Component {
         className="justify-content-end align-items-center text-right"
       >
         {showPageTitle ? (
-          <Col className="text-left">
+          <Col className="text-left draggable">
             {
               <span className="font-weight-bold">
                 {hashToName[window.location.hash] || ''}

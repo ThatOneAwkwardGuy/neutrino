@@ -42,6 +42,7 @@ export const createActivityWindow = (
         session: remote.session.fromPartition(`activity-${tokenID}`)
       }
     });
+    resolve(win);
     if (!showAcitivtyWindows) {
       win.minimize();
     }
@@ -84,7 +85,6 @@ export const createActivityWindow = (
               windowLocation1 => {
                 if (windowLocation1.pathname === '/') {
                   updateActivity(index, { status: 'Logged In' });
-                  resolve(win);
                 } else if (updateActivity) {
                   updateActivity(index, { status: 'Stuck In Login' });
                 }
