@@ -32,10 +32,12 @@ export default class Login extends Component {
   login = async () => {
     const { email, pass } = this.state;
     const { setAuthAndMessage } = this.props;
+    setAuthAndMessage(false, '');
     try {
       const auth = getAuth();
       await auth.signInWithEmailAndPassword(email, pass);
     } catch (error) {
+      console.log(error);
       let message = 'There was an error logging you in.';
       if (error.code === 'auth/wrong-password') {
         message =

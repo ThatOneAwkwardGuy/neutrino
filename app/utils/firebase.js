@@ -17,6 +17,8 @@ const prodConfig = {
 firebase.initializeApp(prodConfig);
 
 const auth = firebase.auth();
+auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
 const firestore = firebase.firestore();
 
 export const doSignInWithEmailAndPassword = (email, password) =>
