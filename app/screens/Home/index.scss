@@ -5,6 +5,7 @@
   padding: 0;
   text-decoration: none !important;
   height: 100%;
+  transition: all 200ms ease;
 }
 
 #content {
@@ -26,10 +27,21 @@
 }
 .sidebarIcon:hover {
   background-color: $mainColour;
+  text-decoration: none;
+}
+
+.sidebarIconLabel {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-left: 20px;
 }
 
 .sidebarIconActive {
   background-color: $mainColour;
+}
+
+.sidebarIconActive .sidebarIconLabel {
+  color: white;
 }
 
 .sidebarIconActive span {
@@ -38,10 +50,5 @@
 
 .sidebarIconActive:hover span {
   color: white;
-}
-
-.sidebarIconLabel {
-  font-size: 0.9rem;
-  font-weight: bold;
-  margin-left: 20px;
+  text-decoration: none;
 }

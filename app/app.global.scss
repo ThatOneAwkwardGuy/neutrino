@@ -36,6 +36,10 @@ html {
   overflow-y: hidden;
 }
 
+a:hover {
+  text-decoration: none;
+}
+
 #root {
   height: 100%;
 }

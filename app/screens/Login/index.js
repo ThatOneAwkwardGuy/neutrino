@@ -9,6 +9,7 @@ import {
   Label,
   Button
 } from 'reactstrap';
+import BarLoader from 'react-spinners/BarLoader';
 import PropTypes from 'prop-types';
 import { getAuth } from '../../utils/firebase';
 import Header from '../../components/Header';
@@ -19,7 +20,8 @@ export default class Login extends Component {
     super(props);
     this.state = {
       email: '',
-      pass: ''
+      pass: '',
+      showLoader: false
     };
   }
 
@@ -32,6 +34,7 @@ export default class Login extends Component {
   login = async () => {
     const { email, pass } = this.state;
     const { setAuthAndMessage } = this.props;
+    this.setState({ showLoader: true });
     setAuthAndMessage(false, '');
     try {
       const auth = getAuth();
@@ -46,11 +49,14 @@ export default class Login extends Component {
         message = 'The email you have entered is formatted incorrectly.';
       }
       setAuthAndMessage(false, message);
+    } finally {
+      this.setState({ showLoader: false });
     }
   };
 
   render() {
     const { authorised, message } = this.props;
+    const { showLoader } = this.state;
     return (
       <Container fluid className="d-flex flex-column h-100">
         <Header showPageTitle={false} />
@@ -89,6 +95,9 @@ export default class Login extends Component {
                   />
                 </FormGroup>
                 <FormGroup>
+                  {showLoader ? (
+                    <BarLoader width={100} widthUnit="%" color="#2745fb" />
+                  ) : null}
                   <Button className="neutrinoButton my-4" onClick={this.login}>
                     Login
                   </Button>

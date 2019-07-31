@@ -52,11 +52,6 @@ export default class Routes extends Component {
       if (user) {
         await setUserMachineIDOnFirstLoad(user.uid);
         this.checkUserAuth(user.uid);
-      } else {
-        this.setState({
-          authorised: false,
-          message: ''
-        });
       }
     });
   }
