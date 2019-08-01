@@ -8,6 +8,36 @@
   transition: all 200ms ease;
 }
 
+/* Safari, Chrome and Opera > 12.1 */
+@keyframes fadein {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.sidebarIcon,
+.sidebarIcon span {
+  color: white;
+  transition: 0.3s;
+}
+
+.sidebarIconActive span {
+  color: $mainColour;
+}
+
+.sidebarIconActive:hover span {
+  color: white;
+  text-decoration: none;
+}
+
+#sidebar span {
+  -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+  animation: fadein 1s;
+}
+
 #content {
   margin: 0 10px 0 10px;
   // box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5),
@@ -16,15 +46,16 @@
   overflow-y: hidden;
   height: 100%;
 }
-.sidebarIcon,
-.sidebarIcon span {
-  color: white;
-  transition: 0.3s;
+
+#content > .row {
+  -webkit-animation: fadein 0.5s; /* Safari, Chrome and Opera > 12.1 */
+  animation: fadein 0.5s;
 }
 
 .sidebarIcon {
   padding: 1.2rem;
 }
+
 .sidebarIcon:hover {
   background-color: $mainColour;
   text-decoration: none;
@@ -42,13 +73,4 @@
 
 .sidebarIconActive .sidebarIconLabel {
   color: white;
-}
-
-.sidebarIconActive span {
-  color: $mainColour;
-}
-
-.sidebarIconActive:hover span {
-  color: white;
-  text-decoration: none;
 }

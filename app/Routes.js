@@ -24,9 +24,6 @@ export default class Routes extends Component {
   }
 
   componentDidMount() {
-    // if (process.env.NODE_ENV !== 'development') {
-    //   this.checkAuthChange();
-    // }
     this.checkAuthChange();
   }
 
@@ -52,6 +49,10 @@ export default class Routes extends Component {
       if (user) {
         await setUserMachineIDOnFirstLoad(user.uid);
         this.checkUserAuth(user.uid);
+      } else {
+        this.setState({
+          authorised: false
+        });
       }
     });
   }

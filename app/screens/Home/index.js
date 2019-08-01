@@ -7,7 +7,6 @@ import { connect } from 'react-redux';
 import BarLoader from 'react-spinners/BarLoader';
 import PropTypes from 'prop-types';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
@@ -61,12 +60,7 @@ class Home extends Component {
 
   componentDidUpdate(prevProps) {
     const { location, checkUserAuth, uid } = this.props;
-    if (
-      location !== prevProps.location &&
-      checkUserAuth &&
-      uid !== '' &&
-      process.env.NODE_ENV !== 'development'
-    ) {
+    if (location !== prevProps.location && checkUserAuth && uid !== '') {
       try {
         checkUserAuth(uid);
         this.setDiscordRichPresence(location.pathname);

@@ -64,7 +64,9 @@ export default class Homepage extends Component {
         <br />
         {`Ends ${raffle.endDate.toDate().toLocaleDateString()}`}
       </Col>
-      <Col xs="3">{raffle.store}</Col>
+      <Col xs="3" className="keep-all">
+        {raffle.store}
+      </Col>
     </Row>
   );
 
