@@ -1,0 +1,7 @@
+2.0.0
+
+Need to add delete all for proxies
+Need to add stop all for proxies
+Need to add beginner popovers (maybe)
+
+Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
