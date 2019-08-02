@@ -11,7 +11,9 @@ import {
   createDigitalOceanInstance,
   loadVultrApiRegions,
   loadVultrApiMachineTypes,
-  createVultrInstance
+  createVultrInstance,
+  loadLinodeApiRegions,
+  loadLinodeApiMachineTypes
 } from './functions';
 import { upperCaseFirst, generateUEID } from '../../utils/utils';
 import { copyProxies } from '../ProxyTester/functions';
@@ -19,6 +21,7 @@ import Table from '../Table';
 import digitaloceanLogo from '../../images/digitalocean.svg';
 import vultrLogo from '../../images/vultr.svg';
 import googlecloudLogo from '../../images/googlecloud.svg';
+import linodeLogo from '../../images/linode.svg';
 
 const log = require('electron-log');
 
@@ -119,6 +122,9 @@ class ProxyCreator extends Component {
       case 'vultr':
         await this.loadVultrRegions();
         break;
+      case 'linode':
+        await this.loadLinodeRegions(providerAccount);
+        break;
       default:
         break;
     }
@@ -158,6 +164,19 @@ class ProxyCreator extends Component {
     this.setState({ machineTypes });
   };
 
+  loadLinodeRegions = async providerAccount => {
+    const regions = await loadLinodeApiRegions(providerAccount);
+    this.setState({ regions });
+  };
+
+  loadLinodeMachineTypes = async (providerAccount, regionID) => {
+    const machineTypes = await loadLinodeApiMachineTypes(
+      providerAccount,
+      regionID
+    );
+    this.setState({ machineTypes });
+  };
+
   handleRegionChange = async e => {
     const { provider, providerAccount } = this.state;
     const { setLoading } = this.props;
@@ -173,6 +192,8 @@ class ProxyCreator extends Component {
           case 'vultr':
             await this.loadVultrMachines(providerAccount, e.target.value);
             break;
+          case 'linode':
+            await this.loadLinodeMachineTypes(providerAccount, e.target.value);
           default:
             break;
         }
@@ -278,6 +299,16 @@ class ProxyCreator extends Component {
           proxyPass,
           `${proxyGroupName}-${index}`
         );
+      case 'linode':
+        return createLinodeInstance(
+          providerAccount.apiKey,
+          region,
+          machineType,
+          proxyUser,
+          proxyPass,
+          `${proxyGroupName}-${index}`
+        );
+        break;
       default:
         break;
     }
@@ -383,6 +414,25 @@ class ProxyCreator extends Component {
                     alt="Vultr Logo"
                   />
                   <h5>Vultr</h5>
+                </span>
+              </Col>
+            </Row>
+            <Row className="px-0">
+              <Col
+                name="linode"
+                className={`proxyIcon ${
+                  provider === 'linode' ? 'proxyIconActive' : ''
+                }`}
+                onClick={this.setProvider}
+              >
+                <span>
+                  <img
+                    src={linodeLogo}
+                    className="my-3"
+                    draggable="false"
+                    alt="Linode Logo"
+                  />
+                  <h5>Linode</h5>
                 </span>
               </Col>
             </Row>
@@ -506,6 +556,9 @@ class ProxyCreator extends Component {
                 <Button className="d-block" onClick={this.copyProxies}>
                   Copy
                 </Button>
+              </Col>
+              <Col>
+                <Button color="danger">Delete All</Button>
               </Col>
             </Row>
           </Container>

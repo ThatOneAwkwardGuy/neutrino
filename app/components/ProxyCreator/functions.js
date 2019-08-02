@@ -2,6 +2,7 @@
 const Compute = require('@google-cloud/compute');
 const DigitalOcean = require('do-wrapper').default;
 const rp = require('request-promise');
+const Linode = require('linode-api-node');
 
 export const createGoogleCloudInstance = async (
   projectID,
@@ -48,6 +49,28 @@ export const createGoogleCloudInstance = async (
   const ip = metadata.networkInterfaces[0].accessConfigs[0].natIP;
   const proxyInfo = await pingIP(ip, 3128, user, pass, 'http://google.com', 50);
   return proxyInfo;
+};
+
+export const loadLinodeApiRegions = async providerAccount => {
+  const linode = new Linode(providerAccount.apiKey);
+  const { data } = await linode.getRegions();
+  const regions = data.map(region => ({
+    name: region.country.toUpperCase(),
+    id: region.id
+  }));
+  checkLinodeStartUpScriptExisits();
+  return regions;
+};
+
+export const loadLinodeApiMachineTypes = async providerAccount => {
+  const linode = new Linode(providerAccount.apiKey);
+  const { data } = await linode.getLinodeTypes();
+  const machineTypesArray = data.map(elem => ({
+    name: elem.label,
+    id: elem.id,
+    price: `$${elem.price.hourly}/hr`
+  }));
+  return machineTypesArray;
 };
 
 export const loadGoogleCloudApiRegions = async providerAccount => {
@@ -243,6 +266,21 @@ export const createVultrInstance = async (
   });
   return pollVultrInstance(apiKey, instanceCreateResponse.SUBID);
 };
+
+export const checkLinodeStartUpScriptExisits = async apiKey => {
+  const linode = new Linode(apiKey);
+  const scriptsResponse = await linode.getLinodeStackscripts();
+  console.log(scriptsResponse);
+};
+
+export const createLinodeInstance = async (
+  apiKey,
+  region,
+  machine,
+  user,
+  pass,
+  name
+) => {};
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 

@@ -13,7 +13,8 @@ export default function settings(
     proxyAccounts: {
       google: [],
       digitalocean: [],
-      vultr: []
+      vultr: [],
+      linode: []
     },
     activityDelayMin: '60000',
     activityDelayMax: '120000',

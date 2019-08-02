@@ -81,6 +81,7 @@ textarea,
 
 .manualTableRow {
   background-color: $dark1Colour !important;
+  word-break: break-all;
 }
 
 .custom-file-label::after {

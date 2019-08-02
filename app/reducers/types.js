@@ -12,7 +12,8 @@ export type settingsStateType = {
       +credentialsFilePath: string
     }>,
     +digitalocean: Array<{ +accountName: string, +apiKey: string }>,
-    +vultr: Array<{ +accountName: string, +apiKey: string }>
+    +vultr: Array<{ +accountName: string, +apiKey: string }>,
+    +linode: Array<{ +accountName: string, +apiKey: string }>
   },
   +update: {
     status: string,

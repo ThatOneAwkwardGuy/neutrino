@@ -24,7 +24,8 @@ export default class Settings extends Component {
       googleCredentialsFileName: '',
       googleCredentialsProjectID: '',
       vultrAPIKey: '',
-      digitalOceanAPIKey: ''
+      digitalOceanAPIKey: '',
+      linodeAPIKey: ''
     };
   }
 
@@ -48,7 +49,8 @@ export default class Settings extends Component {
       googleCredentialsPath,
       googleCredentialsProjectID,
       digitalOceanAPIKey,
-      vultrAPIKey
+      vultrAPIKey,
+      linodeAPIKey
     } = this.state;
     const { addProxyProviderAccount } = this.props;
     const account = {
@@ -66,6 +68,8 @@ export default class Settings extends Component {
       case 'vultr':
         account.apiKey = vultrAPIKey;
         break;
+      case 'linode':
+        account.apiKey = linodeAPIKey;
       default:
         break;
     }
@@ -77,7 +81,8 @@ export default class Settings extends Component {
       googleCredentialsFileName: '',
       googleCredentialsProjectID: '',
       vultrAPIKey: '',
-      digitalOceanAPIKey: ''
+      digitalOceanAPIKey: '',
+      linodeAPIKey: ''
     });
   };
 
@@ -200,6 +205,35 @@ export default class Settings extends Component {
     );
   };
 
+  returnLinodeProviderFields = () => {
+    const { accountName, linodeAPIKey } = this.state;
+    return (
+      <Row className="p-3 align-items-end">
+        <Col>
+          <Label>Account Name*</Label>
+          <Input
+            type="text"
+            name="accountName"
+            value={accountName}
+            onChange={this.handleChange}
+          />
+        </Col>
+        <Col>
+          <Label>API Key*</Label>
+          <Input
+            type="text"
+            name="linodeAPIKey"
+            value={linodeAPIKey}
+            onChange={this.handleChange}
+          />
+        </Col>
+        <Col xs="2">
+          <Button onClick={this.addAccount}>Add</Button>
+        </Col>
+      </Row>
+    );
+  };
+
   returnProviderFields = provider => {
     switch (provider) {
       case 'google':
@@ -208,6 +242,8 @@ export default class Settings extends Component {
         return this.returnDigitalOceanProviderFields();
       case 'vultr':
         return this.returnVultrProviderFields();
+      case 'linode':
+        return this.returnLinodeProviderFields();
       default:
         return [];
     }
