@@ -285,6 +285,7 @@
     "html-react-parser": "^0.9.1",
     "jquery": "^3.4.1",
     "json-2-csv": "^3.5.5",
+    "linode-api-node": "^1.2.3",
     "node-machine-id": "^1.1.12",
     "random-email": "^1.0.3",
     "random-name": "^0.1.2",

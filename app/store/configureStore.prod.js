@@ -3,7 +3,7 @@ import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import { createHashHistory } from 'history';
 import { routerMiddleware } from 'connected-react-router';
-import { persistCombineReducers } from 'redux-persist';
+import { persistCombineReducers, createMigrate } from 'redux-persist';
 import createElectronStorage from 'redux-persist-electron-storage';
 import createRootReducer from '../reducers';
 import type { settingsStateType } from '../reducers/types';
@@ -13,7 +13,9 @@ const Store = require('electron-store');
 const electronStore = new Store();
 const persistConfig = {
   key: 'neutrino-store',
-  storage: createElectronStorage({ electronStore })
+  storage: createElectronStorage({ electronStore }),
+  version: 1,
+  migrate: createMigrate({ 1: state => initialState }, { debug: false })
 };
 
 const history = createHashHistory();
