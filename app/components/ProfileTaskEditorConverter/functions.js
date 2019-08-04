@@ -62,8 +62,8 @@ export const convertProjectDestroyerToBase = profile => ({
   card: {
     paymentCardholdersName: profile.card.name,
     cardNumber: profile.card.number,
-    expMonth: profile.card.expire.split(' / ')[0],
-    expYear: profile.card.expire.split(' / ')[1],
+    expMonth: profile.card.expire.split('/ ')[0].trim(),
+    expYear: profile.card.expire.split('/')[1].trim(),
     cvv: profile.card.code
   },
   email: profile.email,
@@ -359,8 +359,8 @@ export const convertNsbToBase = profile => ({
   card: {
     paymentCardholdersName: profile.cc.name,
     cardNumber: profile.cc.number.split(' ').join(''),
-    expMonth: profile.cc.expiry.split(' / ')[0],
-    expYear: `20${profile.cc.expiry.split(' / ')[1]}`,
+    expMonth: profile.cc.expiry.split('/')[0].trim(),
+    expYear: `20${profile.cc.expiry.split('/')[1].trim()}`,
     cvv: profile.cc.cvc
   },
   email: profile.email,

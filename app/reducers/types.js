@@ -13,7 +13,12 @@ export type settingsStateType = {
     }>,
     +digitalocean: Array<{ +accountName: string, +apiKey: string }>,
     +vultr: Array<{ +accountName: string, +apiKey: string }>,
-    +linode: Array<{ +accountName: string, +apiKey: string }>
+    +linode: Array<{ +accountName: string, +apiKey: string }>,
+    +aws: Array<{
+      +accountName: string,
+      +awsAccessKey: string,
+      +awsSecretKey: string
+    }>
   },
   +update: {
     status: string,
@@ -29,6 +34,10 @@ export type settingsStateType = {
   +activityGoogleNews: boolean,
   +activityGoogleShopping: boolean,
   +activityYoutube: boolean
+};
+
+export type proxyStateType = {
+  +proxies: Array<>
 };
 
 export type homeStateType = {

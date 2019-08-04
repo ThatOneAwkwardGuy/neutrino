@@ -5,6 +5,7 @@ import accounts from './accounts';
 import activities from './activities';
 import profile from './profile';
 import home from './home';
+import proxies from './proxies';
 
 export default function createRootReducer(history: History) {
   return {
@@ -13,6 +14,7 @@ export default function createRootReducer(history: History) {
     accounts,
     activities,
     profile,
-    home
+    home,
+    proxies
   };
 }

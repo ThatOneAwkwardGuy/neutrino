@@ -134,6 +134,7 @@ class ProfileTaskEditorConverter extends Component {
     const baseProfiles = profiles.map(profile =>
       convertToBase(fromBot, profile)
     );
+    console.log(baseProfiles);
     const convertedProfiles = baseProfiles.map((profile, index) =>
       convertFromBase(index, toBot, profile)
     );

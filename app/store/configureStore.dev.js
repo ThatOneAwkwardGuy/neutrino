@@ -15,8 +15,9 @@ const electronStore = new Store();
 const persistConfig = {
   key: 'neutrino-store-dev',
   storage: createElectronStorage({ electronStore }),
-  version: 1,
-  migrate: createMigrate({ 1: state => initialState }, { debug: false })
+  version: 2,
+  // eslint-disable-next-line no-unused-vars, no-undef
+  migrate: createMigrate({ 2: state => initialState }, { debug: true })
 };
 
 const history = createHashHistory();

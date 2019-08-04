@@ -14,7 +14,8 @@ export default function settings(
       google: [],
       digitalocean: [],
       vultr: [],
-      linode: []
+      linode: [],
+      aws: []
     },
     activityDelayMin: '60000',
     activityDelayMax: '120000',

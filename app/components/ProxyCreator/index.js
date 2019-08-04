@@ -6,14 +6,20 @@ import {
   loadGoogleCloudApiRegions,
   loadGoogleCloudApiMachineTypes,
   createGoogleCloudInstance,
+  deleteAllGoogleCloudInstances,
   loadDigitalOceanApiRegions,
   loadDigitalOceanApiMachineTypes,
   createDigitalOceanInstance,
+  deleteAllDigitalOceanInstances,
   loadVultrApiRegions,
   loadVultrApiMachineTypes,
   createVultrInstance,
+  deleteAllVultrInstances,
   loadLinodeApiRegions,
-  loadLinodeApiMachineTypes
+  loadLinodeApiMachineTypes,
+  createLinodeInstance,
+  deleteAllLinodeInstances,
+  loadAWSCloudApiRegions
 } from './functions';
 import { upperCaseFirst, generateUEID } from '../../utils/utils';
 import { copyProxies } from '../ProxyTester/functions';
@@ -22,6 +28,7 @@ import digitaloceanLogo from '../../images/digitalocean.svg';
 import vultrLogo from '../../images/vultr.svg';
 import googlecloudLogo from '../../images/googlecloud.svg';
 import linodeLogo from '../../images/linode.svg';
+import awsLogo from '../../images/aws.svg';
 
 const log = require('electron-log');
 
@@ -125,9 +132,17 @@ class ProxyCreator extends Component {
       case 'linode':
         await this.loadLinodeRegions(providerAccount);
         break;
+      case 'aws':
+        await this.loadAWSCloudRegions(providerAccount);
+        break;
       default:
         break;
     }
+  };
+
+  loadAWSCloudRegions = async providerAccount => {
+    const regions = await loadAWSCloudApiRegions(providerAccount);
+    this.setState({ regions });
   };
 
   loadGoogleCloudRegions = async providerAccount => {
@@ -194,6 +209,7 @@ class ProxyCreator extends Component {
             break;
           case 'linode':
             await this.loadLinodeMachineTypes(providerAccount, e.target.value);
+            break;
           default:
             break;
         }
@@ -212,8 +228,8 @@ class ProxyCreator extends Component {
   };
 
   createProxies = async () => {
-    const { quantity, provider, proxies } = this.state;
-    const { setLoading, incrementProxies } = this.props;
+    const { quantity, provider, providerAccount } = this.state;
+    const { setLoading, incrementProxies, addProxy } = this.props;
     setLoading(
       true,
       `Creating ${quantity} ${upperCaseFirst(provider)} ${
@@ -224,9 +240,13 @@ class ProxyCreator extends Component {
       .fill()
       .map((empty, index) => this.returnProxyInstance(index).catch(e => e));
     const resolvedProxyInstances = await Promise.all(proxyInstances);
-    const successfulProxies = resolvedProxyInstances.filter(
-      proxy => !(proxy instanceof Error)
-    );
+    const successfulProxies = resolvedProxyInstances
+      .filter(proxy => !(proxy instanceof Error))
+      .map(proxy => {
+        const newProxy = { ...proxy };
+        newProxy.providerAccountID = `${provider} - ${providerAccount.name}`;
+        return newProxy;
+      });
     successfulProxies.forEach(() => incrementProxies());
     console.log(resolvedProxyInstances);
     setLoading(
@@ -235,9 +255,46 @@ class ProxyCreator extends Component {
         quantity === '1' ? 'Proxy' : 'Proxies'
       }`
     );
-    this.setState({
-      proxies: [...proxies, ...successfulProxies]
-    });
+    successfulProxies.forEach(proxy => addProxy(proxy));
+  };
+
+  deleteProxies = async () => {
+    const { providerAccount, provider } = this.state;
+    const { setLoading, clearProxies } = this.props;
+    setLoading(
+      true,
+      `Deleting ${upperCaseFirst(provider)} Proxies on Account ${
+        providerAccount.name
+      }`
+    );
+    try {
+      switch (provider) {
+        case 'google':
+          await deleteAllGoogleCloudInstances(providerAccount);
+          break;
+        case 'digitalocean':
+          await deleteAllDigitalOceanInstances(providerAccount);
+          break;
+        case 'vultr':
+          await deleteAllVultrInstances(providerAccount.apiKey);
+          break;
+        case 'linode':
+          await deleteAllLinodeInstances(providerAccount.apiKey);
+          break;
+        default:
+          break;
+      }
+      clearProxies(`${provider} - ${providerAccount.name}`);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoading(
+        false,
+        `Deleting ${upperCaseFirst(provider)} Proxies on Account ${
+          providerAccount.name
+        }`
+      );
+    }
   };
 
   copyProxies = () => {
@@ -308,7 +365,6 @@ class ProxyCreator extends Component {
           proxyPass,
           `${proxyGroupName}-${index}`
         );
-        break;
       default:
         break;
     }
@@ -316,7 +372,6 @@ class ProxyCreator extends Component {
 
   render() {
     const {
-      proxies,
       provider,
       regions,
       machineTypes,
@@ -328,6 +383,7 @@ class ProxyCreator extends Component {
       proxyPass,
       providerAccountName
     } = this.state;
+    const { proxies } = this.props;
     const { settings } = this.props;
     const columns = [
       {
@@ -350,6 +406,10 @@ class ProxyCreator extends Component {
       {
         Header: 'Pass',
         accessor: 'pass'
+      },
+      {
+        Header: 'Account',
+        accessor: 'providerAccountID'
       },
       {
         Header: 'Ping(ms)',
@@ -436,6 +496,25 @@ class ProxyCreator extends Component {
                 </span>
               </Col>
             </Row>
+            <Row className="px-0">
+              <Col
+                name="aws"
+                className={`proxyIcon ${
+                  provider === 'aws' ? 'proxyIconActive' : ''
+                }`}
+                onClick={this.setProvider}
+              >
+                <span>
+                  <img
+                    src={awsLogo}
+                    className="my-3"
+                    draggable="false"
+                    alt="AWS Logo"
+                  />
+                  <h5>AWS</h5>
+                </span>
+              </Col>
+            </Row>
           </Container>
         </Col>
         <Col className="h-100" xs="11">
@@ -444,7 +523,7 @@ class ProxyCreator extends Component {
               <Col id="TableContainer" className="h-100">
                 <Table
                   {...{
-                    data: proxies,
+                    data: proxies.proxies,
                     columns,
                     loading: false,
                     infinite: true,
@@ -558,7 +637,9 @@ class ProxyCreator extends Component {
                 </Button>
               </Col>
               <Col>
-                <Button color="danger">Delete All</Button>
+                <Button color="danger" onClick={this.deleteProxies}>
+                  Delete All
+                </Button>
               </Col>
             </Row>
           </Container>
@@ -576,7 +657,12 @@ ProxyCreator.propTypes = {
     remove: PropTypes.func,
     toasts: PropTypes.array
   }).isRequired,
-  incrementProxies: PropTypes.func.isRequired
+  incrementProxies: PropTypes.func.isRequired,
+  proxies: PropTypes.shape({
+    proxies: PropTypes.arrayOf(PropTypes.any)
+  }).isRequired,
+  addProxy: PropTypes.func.isRequired,
+  clearProxies: PropTypes.func.isRequired
 };
 
 export default withToastManager(ProxyCreator);

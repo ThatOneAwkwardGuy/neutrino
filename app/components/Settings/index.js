@@ -25,7 +25,9 @@ export default class Settings extends Component {
       googleCredentialsProjectID: '',
       vultrAPIKey: '',
       digitalOceanAPIKey: '',
-      linodeAPIKey: ''
+      linodeAPIKey: '',
+      awsAccessKey: '',
+      awsSecretKey: ''
     };
   }
 
@@ -50,7 +52,9 @@ export default class Settings extends Component {
       googleCredentialsProjectID,
       digitalOceanAPIKey,
       vultrAPIKey,
-      linodeAPIKey
+      linodeAPIKey,
+      awsAccessKey,
+      awsSecretKey
     } = this.state;
     const { addProxyProviderAccount } = this.props;
     const account = {
@@ -70,6 +74,11 @@ export default class Settings extends Component {
         break;
       case 'linode':
         account.apiKey = linodeAPIKey;
+        break;
+      case 'aws':
+        account.awsAccessKey = awsAccessKey;
+        account.awsSecretKey = awsSecretKey;
+        break;
       default:
         break;
     }
@@ -96,6 +105,44 @@ export default class Settings extends Component {
     const { name } = e.target;
     const { settings, setKeyInSetting } = this.props;
     setKeyInSetting(name, !settings[name]);
+  };
+
+  returnAwsProviderFeilds = () => {
+    const { accountName, awsAccessKey, awsSecretKey } = this.state;
+    return (
+      <Row className="p-3 align-items-end">
+        <Col>
+          <Label>Account Name*</Label>
+          <Input
+            type="text"
+            name="accountName"
+            value={accountName}
+            onChange={this.handleChange}
+          />
+        </Col>
+        <Col>
+          <Label>Access Key*</Label>
+          <Input
+            type="text"
+            name="awsAccessKey"
+            value={awsAccessKey}
+            onChange={this.handleChange}
+          />
+        </Col>
+        <Col>
+          <Label>Secret Key*</Label>
+          <Input
+            type="text"
+            name="awsSecretKey"
+            value={awsSecretKey}
+            onChange={this.handleChange}
+          />
+        </Col>
+        <Col xs="2">
+          <Button onClick={this.addAccount}>Add</Button>
+        </Col>
+      </Row>
+    );
   };
 
   returnDigitalOceanProviderFields = () => {
@@ -244,8 +291,22 @@ export default class Settings extends Component {
         return this.returnVultrProviderFields();
       case 'linode':
         return this.returnLinodeProviderFields();
+      case 'aws':
+        return this.returnAwsProviderFeilds();
       default:
         return [];
+    }
+  };
+
+  returnProviderAccountIdentifier = account => {
+    if (account.apiKey) {
+      return account.apiKey;
+    }
+    if (account.awsAccessKey) {
+      return account.awsAccessKey;
+    }
+    if (account.googleCredentialsProjectID) {
+      return account.googleCredentialsProjectID;
     }
   };
 
@@ -261,8 +322,11 @@ export default class Settings extends Component {
       >
         <Col className="text-center">{account.name}</Col>
         <Col className="text-center">
-          {account.apiKey ? account.apiKey : account.googleCredentialsProjectID}
+          {this.returnProviderAccountIdentifier(account)}
         </Col>
+        {provider === 'aws' ? (
+          <Col className="text-center">{account.awsSecretKey}</Col>
+        ) : null}
         <Col className="text-center">
           <FontAwesomeIcon
             icon="trash"
@@ -279,8 +343,8 @@ export default class Settings extends Component {
     const { selectedProxyProvider } = this.state;
     const { settings } = this.props;
     return (
-      <Row>
-        <Col>
+      <Row className="h-100">
+        <Col className="overflow-y-scroll h-100">
           <Container fluid className="px-0 py-3 d-flex flex-column">
             <h6 className="font-weight-bold">Proxy Provider Accounts</h6>
             <Row className="p-3 align-items-end">
@@ -319,7 +383,7 @@ export default class Settings extends Component {
             </Row>
             {this.returnProviderFields(selectedProxyProvider)}
             <Row className="panel-middle p-3 align-items-end">
-              <Col xs="6">
+              <Col xs="10">
                 <Container>
                   {selectedProxyProvider !== '' &&
                   settings.proxyAccounts[selectedProxyProvider] !== undefined &&
@@ -333,6 +397,11 @@ export default class Settings extends Component {
                           ? 'Project ID'
                           : 'API Key'}
                       </Col>
+                      {selectedProxyProvider === 'aws' ? (
+                        <Col className="text-center font-weight-bold">
+                          Secret API Key
+                        </Col>
+                      ) : null}
                       <Col className="text-center font-weight-bold">
                         Actions
                       </Col>

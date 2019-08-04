@@ -15,6 +15,7 @@ import * as AccountActions from '../../actions/accounts';
 import * as ActivityActions from '../../actions/activities';
 import * as ProfileActions from '../../actions/profile';
 import * as HomeActions from '../../actions/home';
+import * as ProxiesActions from '../../actions/proxies';
 import routes from '../../constants/routes';
 import Header from '../../components/Header';
 import Footer from '../../components/Footer';
@@ -198,6 +199,9 @@ class Home extends Component {
       incrementAccounts,
       incrementProxies,
       incrementRaffles,
+      proxies,
+      addProxy,
+      clearProxies,
       history
     } = this.props;
     const { setLoading, setRaffleInfo } = this;
@@ -212,7 +216,14 @@ class Home extends Component {
         path: routes.PROXY_CREATOR,
         component: ProxyCreator,
         exact: true,
-        props: { setLoading, settings, incrementProxies }
+        props: {
+          setLoading,
+          settings,
+          incrementProxies,
+          proxies,
+          addProxy,
+          clearProxies
+        }
       },
       {
         path: routes.ACCOUNT_CREATOR,
@@ -529,7 +540,8 @@ const mapStateToProps = state => ({
   accounts: state.accounts,
   activities: state.activities,
   profile: state.profile,
-  home: state.home
+  home: state.home,
+  proxies: state.proxies
 });
 
 // const mapDispatchToProps = dispatch => {
@@ -542,7 +554,8 @@ const mapDispatchToProps = {
   ...AccountActions,
   ...ActivityActions,
   ...ProfileActions,
-  ...HomeActions
+  ...HomeActions,
+  ...ProxiesActions
 };
 
 Home.propTypes = {
@@ -580,6 +593,11 @@ Home.propTypes = {
   incrementAccounts: PropTypes.func.isRequired,
   incrementProxies: PropTypes.func.isRequired,
   incrementRaffles: PropTypes.func.isRequired,
+  proxies: PropTypes.shape({
+    proxies: PropTypes.arrayOf(PropTypes.any)
+  }).isRequired,
+  addProxy: PropTypes.func.isRequired,
+  clearProxies: PropTypes.func.isRequired,
   history: PropTypes.objectOf(PropTypes.any).isRequired
 };
 
