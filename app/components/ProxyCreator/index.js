@@ -19,7 +19,10 @@ import {
   loadLinodeApiMachineTypes,
   createLinodeInstance,
   deleteAllLinodeInstances,
-  loadAWSCloudApiRegions
+  loadAWSCloudApiRegions,
+  loadAWSMachinesTypes,
+  createAWSInstance,
+  deleteAllAWSInstances
 } from './functions';
 import { upperCaseFirst, generateUEID } from '../../utils/utils';
 import { copyProxies } from '../ProxyTester/functions';
@@ -133,16 +136,23 @@ class ProxyCreator extends Component {
         await this.loadLinodeRegions(providerAccount);
         break;
       case 'aws':
-        await this.loadAWSCloudRegions(providerAccount);
+        await this.loadAWSRegions(providerAccount);
         break;
       default:
         break;
     }
   };
 
-  loadAWSCloudRegions = async providerAccount => {
+  loadAWSRegions = async providerAccount => {
     const regions = await loadAWSCloudApiRegions(providerAccount);
     this.setState({ regions });
+  };
+
+  loadAWSMachines = async () => {
+    const machineTypes = loadAWSMachinesTypes();
+    this.setState({
+      machineTypes
+    });
   };
 
   loadGoogleCloudRegions = async providerAccount => {
@@ -210,6 +220,9 @@ class ProxyCreator extends Component {
           case 'linode':
             await this.loadLinodeMachineTypes(providerAccount, e.target.value);
             break;
+          case 'aws':
+            this.loadAWSMachines();
+            break;
           default:
             break;
         }
@@ -259,7 +272,7 @@ class ProxyCreator extends Component {
   };
 
   deleteProxies = async () => {
-    const { providerAccount, provider } = this.state;
+    const { providerAccount, provider, region } = this.state;
     const { setLoading, clearProxies } = this.props;
     setLoading(
       true,
@@ -280,6 +293,9 @@ class ProxyCreator extends Component {
           break;
         case 'linode':
           await deleteAllLinodeInstances(providerAccount.apiKey);
+          break;
+        case 'aws':
+          await deleteAllAWSInstances(providerAccount, region);
           break;
         default:
           break;
@@ -364,6 +380,15 @@ class ProxyCreator extends Component {
           proxyUser,
           proxyPass,
           `${proxyGroupName}-${index}`
+        );
+      case 'aws':
+        return createAWSInstance(
+          providerAccount.awsAccessKey,
+          providerAccount.awsSecretKey,
+          region,
+          machineType,
+          proxyUser,
+          proxyPass
         );
       default:
         break;

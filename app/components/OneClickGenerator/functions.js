@@ -42,7 +42,6 @@ export const createActivityWindow = (
         session: remote.session.fromPartition(`activity-${tokenID}`)
       }
     });
-    resolve(win);
     if (!showAcitivtyWindows) {
       win.minimize();
     }
@@ -88,6 +87,7 @@ export const createActivityWindow = (
                 } else if (updateActivity) {
                   updateActivity(index, { status: 'Stuck In Login' });
                 }
+                resolve(win);
               }
             );
           });

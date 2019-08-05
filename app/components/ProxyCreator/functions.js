@@ -5,37 +5,6 @@ const rp = require('request-promise');
 const Linode = require('linode-api-node');
 const AWS = require('aws-sdk');
 
-// AWS
-export const loadAWSCloudApiRegions = async providerAccount => {
-  AWS.config.update({
-    accessKeyId: providerAccount.awsAccessKey,
-    secretAccessKey: providerAccount.awsSecretKey,
-    region: 'eu-west-2'
-  });
-  const ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
-  const AWSregions = await new Promise((resolve, reject) => {
-    ec2.describeRegions({}, (err, data) => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve(data.Regions);
-      }
-    });
-  });
-  const regions = AWSregions.map(region => ({
-    id: region.RegionName,
-    name: region.RegionName
-  }));
-  return regions;
-};
-
-export const loadAWSCloudApiMachineTypes = () => [
-  { name: 't3.nano', id: 't3.nano', price: '$0.0073/hr' },
-  { name: 't3.micro', id: 't3.micro', price: '$0.0146/hr' },
-  { name: 't3.small', id: 't3.small', price: '$0.0292/hr' },
-  { name: 't3.medium', id: 't3.medium', price: '$0.0584/hr' }
-];
-
 // Google Cloud
 export const createGoogleCloudInstance = async (
   projectID,
@@ -397,6 +366,209 @@ export const deleteAllLinodeInstances = async apiKey => {
     .filter(instance => instance.tags.includes('neutrinoproxy'))
     .map(instance => linode.removeLinodeInstance(instance.id));
   return Promise.all(removedInstances);
+};
+
+// AWS
+export const loadAWSCloudApiRegions = async providerAccount => {
+  AWS.config.update({
+    accessKeyId: providerAccount.awsAccessKey,
+    secretAccessKey: providerAccount.awsSecretKey,
+    region: 'eu-west-2'
+  });
+  const ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
+  const AWSregions = await new Promise((resolve, reject) => {
+    ec2.describeRegions({}, (err, data) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(data.Regions);
+      }
+    });
+  });
+  const regions = AWSregions.map(region => ({
+    id: region.RegionName,
+    name: region.RegionName
+  }));
+  return regions;
+};
+
+export const loadAWSMachinesTypes = () => [
+  { name: 't3.nano', id: 't3.nano', price: '$0.0073/hr' },
+  { name: 't3.micro', id: 't3.micro', price: '$0.0146/hr' },
+  { name: 't3.small', id: 't3.small', price: '$0.0292/hr' },
+  { name: 't3.medium', id: 't3.medium', price: '$0.0584/hr' }
+];
+
+export const returnAWSRegionAMI = region => {
+  switch (region) {
+    case 'eu-north-1':
+      return 'ami-5ee66f20';
+    case 'ap-south-1':
+      break;
+    case 'eu-west-3':
+      return 'ami-0e1ab783dc9489f34';
+    case 'eu-west-2':
+      return 'ami-0eab3a90fc693af19';
+    case 'eu-west-1':
+      return 'ami-0ff760d16d9497662';
+    case 'ap-northeast-2':
+      break;
+    case 'ap-northeast-1':
+      break;
+    case 'sa-east-1':
+      break;
+    case 'ca-central-1':
+      return 'ami-033e6106180a626d0';
+    case 'ap-southeast-1':
+      break;
+    case 'ap-southeast-2':
+      break;
+    case 'eu-central-1':
+      return 'ami-04cf43aca3e6f3de3';
+    case 'us-east-1':
+      return 'ami-02eac2c0129f6376b';
+    case 'us-east-2':
+      return 'ami-0f2b4fc905b0bd1f1';
+    case 'us-west-1':
+      return 'ami-074e2d6769f445be5';
+    case 'us-west-2':
+      return 'ami-01ed306a12b7d1c96';
+    default:
+      return 'ami-5ee66f20';
+  }
+};
+
+export const createAWSSecurityGroup = async (
+  awsAccessKey,
+  awsSecretKey,
+  region
+) => {
+  AWS.config.update({
+    accessKeyId: awsAccessKey,
+    secretAccessKey: awsSecretKey,
+    region
+  });
+  const ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
+  const { Vpcs } = await ec2.describeVpcs().promise();
+  const mainVPCID = Vpcs[0].VpcId;
+  const { GroupId } = await ec2
+    .createSecurityGroup({
+      Description: 'neutrino',
+      GroupName: 'neutrino',
+      VpcId: mainVPCID
+    })
+    .promise();
+  await ec2
+    .authorizeSecurityGroupIngress({
+      GroupId,
+      IpPermissions: [
+        {
+          FromPort: 3128,
+          IpProtocol: 'tcp',
+          ToPort: 3128,
+          IpRanges: [
+            {
+              CidrIp: '0.0.0.0/0'
+            }
+          ]
+        },
+        {
+          FromPort: 3128,
+          IpProtocol: 'tcp',
+          ToPort: 3128,
+          Ipv6Ranges: [
+            {
+              CidrIpv6: '::/0'
+            }
+          ]
+        }
+      ]
+    })
+    .promise();
+  return GroupId;
+};
+
+export const createAWSInstance = async (
+  awsAccessKey,
+  awsSecretKey,
+  region,
+  machine,
+  user,
+  pass
+) => {
+  AWS.config.update({
+    accessKeyId: awsAccessKey,
+    secretAccessKey: awsSecretKey,
+    region
+  });
+  const ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
+  const { SecurityGroups } = await ec2.describeSecurityGroups().promise();
+  let neutrinoSecurityGroup = SecurityGroups.find(
+    securityGroup => securityGroup.GroupName === 'neutrino'
+  );
+  if (!neutrinoSecurityGroup) {
+    const groupID = await createAWSSecurityGroup(
+      awsAccessKey,
+      awsSecretKey,
+      region
+    );
+    neutrinoSecurityGroup = { GroupId: groupID };
+  }
+  const instanceParams = {
+    ImageId: returnAWSRegionAMI(region),
+    InstanceType: machine,
+    MinCount: 1,
+    MaxCount: 1,
+    SecurityGroupIds: [neutrinoSecurityGroup.GroupId],
+    TagSpecifications: [
+      {
+        Tags: [{ Key: 'neutrinotools', Value: 'neutrinotools' }],
+        ResourceType: 'instance'
+      }
+    ],
+    UserData: btoa(
+      `#!/bin/bash\nyum install squid wget httpd-tools openssl openssl-devel -y &&\ntouch /etc/squid/passwd &&\nhtpasswd -b /etc/squid/passwd ${user} ${pass} &&\nwget -O /etc/squid/squid.conf https://raw.githubusercontent.com/ThatOneAwkwardGuy/proxyScript/master/squid.conf --no-check-certificate &&\ntouch /etc/squid/blacklist.acl &&\nsystemctl restart squid.service && systemctl enable squid.service &&\niptables -I INPUT -p tcp --dport 3128 -j ACCEPT &&\niptables-save`
+    )
+  };
+  const instancePromise = await ec2.runInstances(instanceParams).promise();
+  const ip = await new Promise((resolve, reject) => {
+    ec2.waitFor(
+      'instanceRunning',
+      { InstanceIds: [instancePromise.Instances[0].InstanceId] },
+      (err, data) => {
+        if (err) reject(err);
+        resolve(data.Reservations[0].Instances[0].PublicIpAddress);
+      }
+    );
+  });
+  const proxy = await pingIP(ip, 3128, user, pass, 'http://google.com', 50);
+  return proxy;
+};
+
+export const deleteAllAWSInstances = async (providerAccount, region) => {
+  AWS.config.update({
+    accessKeyId: providerAccount.awsAccessKey,
+    secretAccessKey: providerAccount.awsSecretKey,
+    region
+  });
+  const ec2 = new AWS.EC2({ apiVersion: '2016-11-15' });
+  const { Reservations } = await ec2.describeInstances().promise();
+  const { Volumes } = await ec2.describeVolumes().promise();
+  const InstanceIds = Reservations.filter(instance =>
+    instance.Instances[0].Tags.some(tag => tag.Key === 'neutrinotools')
+  ).map(instance => instance.Instances[0].InstanceId);
+  Volumes.forEach(volume => {
+    ec2.deleteVolume({
+      VolumeId: volume.VolumeId
+    });
+  });
+  if (InstanceIds.length > 0) {
+    return ec2
+      .terminateInstances({
+        InstanceIds
+      })
+      .promise();
+  }
 };
 
 // Extra
