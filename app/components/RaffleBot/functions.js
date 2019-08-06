@@ -1,4 +1,4 @@
-const { BrowserWindow, remote } = require('electron').remote;
+const { BrowserWindow } = require('electron').remote;
 const rp = require('request-promise').defaults({
   headers: {
     'user-agent':
@@ -105,41 +105,39 @@ const loadDSMLRaffleInfo = async link => {
 };
 
 const loadNakedCphRaffleInfo = async link => {
-  const win = createNewWindow('', '');
+  const win = await createNewWindow('', '');
   win.loadURL(link);
-  win.webContents.on('did-finish-load', () => {
-    win.webContents.executeJavaScript('window.location.href', false, result => {
-      if (result === link) {
-        win.webContents.executeJavaScript(
-          'document.documentElement.innerHTML',
-          false,
-          innerHTML => {
-            win.webContents.executeJavaScript(
-              'window.rendererData',
-              false,
-              renderData => {
-                let typeformCode = '';
-                if (result.includes('nakedcph.typeform.com')) {
-                  typeformCode = renderData.form.id;
-                } else {
-                  const $ = cheerio.load(innerHTML);
-                  // eslint-disable-next-line prefer-destructuring
-                  typeformCode = $('.typeform-widget')
-                    .attr('data-url')
-                    .split('/to/')[1];
-                }
-                win.close();
-                return {
-                  sizeInput: false,
-                  styleInput: false,
-                  raffleDetails: { typeformCode, renderData }
-                };
-              }
-            );
-          }
-        );
+  win.webContents.on('dom-ready', async () => {
+    const result = await win.webContents.executeJavaScript(
+      'window.location.href',
+      false
+    );
+    if (result === link) {
+      const innerHTML = await win.webContents.executeJavaScript(
+        'document.documentElement.innerHTML',
+        false
+      );
+      const renderData = await win.webContents.executeJavaScript(
+        'window.rendererData',
+        true
+      );
+      let typeformCode = '';
+      if (result.includes('nakedcph.typeform.com')) {
+        typeformCode = renderData.form.id;
+      } else {
+        const $ = cheerio.load(innerHTML);
+        // eslint-disable-next-line prefer-destructuring
+        typeformCode = $('.typeform-widget')
+          .attr('data-url')
+          .split('/to/')[1];
       }
-    });
+      win.close();
+      return {
+        sizeInput: false,
+        styleInput: false,
+        raffleDetails: { typeformCode, renderData }
+      };
+    }
   });
 };
 
@@ -318,8 +316,7 @@ export const createNewWindow = async (tokenID, proxy) => {
       webviewTag: true,
       allowRunningInsecureContent: true,
       nodeIntegration: true,
-      webSecurity: false,
-      session: remote.session.fromPartition(`activity-${tokenID}`)
+      webSecurity: false
     }
   });
   if (proxy !== '' && proxy !== undefined) {
