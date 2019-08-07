@@ -73,7 +73,7 @@ class AccountCreator extends Component {
 
   createAccounts = async () => {
     const { site, delay, quantity } = this.state;
-    const { setLoading, incrementAccounts } = this.props;
+    const { setLoading, incrementAccounts, setInfoModal } = this.props;
     const accountPromises = Array.from(Array(parseInt(quantity, 10))).map(
       () => {
         switch (site) {
@@ -107,6 +107,33 @@ class AccountCreator extends Component {
     const successes = resolvedPromises.filter(
       promise => !(promise instanceof Error)
     );
+    const failures = resolvedPromises.filter(
+      promise => promise instanceof Error
+    );
+    if (failures.length > 0) {
+      setInfoModal({
+        infoModalShowing: true,
+        infoModalHeader: `Errors creating accounts`,
+        infoModalBody: (
+          <table className="w-100">
+            <th>
+              <tr>
+                <td>Errors</td>
+              </tr>
+            </th>
+            <tbody>
+              {failures.map(error => (
+                <tr>
+                  <td>{JSON.stringify(error.message)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ),
+        infoModalFunction: '',
+        infoModalButtonText: ''
+      });
+    }
     successes.forEach(() => incrementAccounts());
   };
 
@@ -572,7 +599,8 @@ AccountCreator.propTypes = {
     toasts: PropTypes.array
   }).isRequired,
   setLoading: PropTypes.func.isRequired,
-  incrementAccounts: PropTypes.func.isRequired
+  incrementAccounts: PropTypes.func.isRequired,
+  setInfoModal: PropTypes.func.isRequired
 };
 
 export default withToastManager(AccountCreator);

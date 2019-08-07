@@ -119,6 +119,7 @@ export default class RaffleBot extends Component {
     try {
       setLoading(true, 'Loading Raffle Info', false);
       const raffleInfo = await loadRaffleInfo(site, link);
+      console.log(raffleInfo);
       this.setState({ loadedRaffle: true, ...raffleInfo });
     } catch (error) {
       console.log(error);

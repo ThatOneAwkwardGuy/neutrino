@@ -17,11 +17,18 @@
   text-shadow: none;
 }
 
-#loadingModal .modal-content {
+#loadingModal .modal-content,
+#infoModal .modal-content {
   background-color: $dark1Colour;
 }
 
-#loadingModal button[aria-label='Close'] {
+.modal-header,
+.modal-footer {
+  border: none;
+}
+
+#loadingModal button[aria-label='Close'],
+#infoModal button[aria-label='Close'] {
   color: $red;
   text-shadow: none;
 }

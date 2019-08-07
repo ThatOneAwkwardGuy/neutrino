@@ -234,5 +234,3 @@ const runActivityOnWindow = async (
     console.log(error);
   }
 };
-
-export const bs = '';

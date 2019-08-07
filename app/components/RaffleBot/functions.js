@@ -1,15 +1,14 @@
 const { BrowserWindow } = require('electron').remote;
+const cheerio = require('cheerio');
 const rp = require('request-promise').defaults({
   headers: {
     'user-agent':
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.80 Safari/537.36'
   }
 });
-const cheerio = require('cheerio');
 
 export const loadRaffleInfo = async (site, raffleLink) => {
   if (raffleLink !== '') {
-    console.log(site);
     switch (site) {
       case 'DSML':
         return loadDSMLRaffleInfo(raffleLink);
@@ -32,8 +31,6 @@ export const loadRaffleInfo = async (site, raffleLink) => {
     }
   }
 };
-
-export const bs = '';
 
 const loadDSMLRaffleInfo = async link => {
   const win = new BrowserWindow({
@@ -107,36 +104,47 @@ const loadDSMLRaffleInfo = async link => {
 const loadNakedCphRaffleInfo = async link => {
   const win = await createNewWindow('', '');
   win.loadURL(link);
-  win.webContents.on('dom-ready', async () => {
-    const result = await win.webContents.executeJavaScript(
-      'window.location.href',
-      false
-    );
-    if (result === link) {
-      const innerHTML = await win.webContents.executeJavaScript(
-        'document.documentElement.innerHTML',
-        false
-      );
-      const renderData = await win.webContents.executeJavaScript(
-        'window.rendererData',
-        true
-      );
-      let typeformCode = '';
-      if (result.includes('nakedcph.typeform.com')) {
-        typeformCode = renderData.form.id;
-      } else {
-        const $ = cheerio.load(innerHTML);
-        // eslint-disable-next-line prefer-destructuring
-        typeformCode = $('.typeform-widget')
-          .attr('data-url')
-          .split('/to/')[1];
-      }
-      win.close();
-      return {
-        sizeInput: false,
-        styleInput: false,
-        raffleDetails: { typeformCode, renderData }
-      };
+  return new Promise((resolve, reject) => {
+    try {
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.webContents.on('dom-ready', async () => {
+        const result = await win.webContents.executeJavaScript(
+          'window.location.href',
+          false
+        );
+        if (result === link) {
+          const innerHTML = await win.webContents.executeJavaScript(
+            'document.documentElement.innerHTML',
+            false
+          );
+          const renderData = await win.webContents.executeJavaScript(
+            'window.rendererData',
+            true
+          );
+          let typeformCode = '';
+          if (result.includes('nakedcph.typeform.com')) {
+            typeformCode = renderData.form.id;
+          } else {
+            const $ = cheerio.load(innerHTML);
+            // eslint-disable-next-line prefer-destructuring
+            console.log($('.typeform-widget'));
+            // eslint-disable-next-line prefer-destructuring
+            typeformCode = $('.typeform-widget')
+              .attr('data-url')
+              .split('/to/')[1];
+          }
+          win.close();
+          resolve({
+            sizeInput: false,
+            styleInput: false,
+            raffleDetails: { typeformCode, renderData }
+          });
+        }
+      });
+    } catch (error) {
+      reject(error);
     }
   });
 };
@@ -249,57 +257,64 @@ const loadBodegaRaffleInfo = async link => {
 
 const loadOneBlockDownRaffleInfo = async link =>
   new Promise((resolve, reject) => {
-    const win = new BrowserWindow({
-      width: 500,
-      height: 650,
-      show: true,
-      frame: true,
-      resizable: true,
-      focusable: true,
-      minimizable: true,
-      closable: true,
-      allowRunningInsecureContent: true,
-      webPreferences: {
-        webviewTag: true,
+    try {
+      const win = new BrowserWindow({
+        width: 500,
+        height: 650,
+        show: true,
+        frame: true,
+        resizable: true,
+        focusable: true,
+        minimizable: true,
+        closable: true,
         allowRunningInsecureContent: true,
-        nodeIntegration: true,
-        webSecurity: false
-      }
-    });
-    win.loadURL(link);
-    win.webContents.once('did-finish-load', () => {
-      win.webContents.executeJavaScript(
-        'preloadedStock',
-        false,
-        preloadedStock => {
-          win.webContents.executeJavaScript(
-            `document.querySelector('#raffle-id').value`,
-            false,
-            raffleID => {
-              if (preloadedStock) {
-                const sizes = preloadedStock.map(size => ({
-                  id: size.id,
-                  name: size.variant
-                }));
-                win.close();
-                resolve({
-                  styleInput: false,
-                  sizeInput: true,
-                  sizes,
-                  size: sizes[0].id,
-                  raffleDetails: {
-                    itemId: preloadedStock[0].itemId,
-                    stockItemId: preloadedStock[0].stockItemId,
-                    raffleID
-                  }
-                });
-              }
-              reject();
-            }
-          );
+        webPreferences: {
+          webviewTag: true,
+          allowRunningInsecureContent: true,
+          nodeIntegration: true,
+          webSecurity: false
         }
-      );
-    });
+      });
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.loadURL(link);
+      win.webContents.once('did-finish-load', () => {
+        win.webContents.executeJavaScript(
+          'preloadedStock',
+          false,
+          preloadedStock => {
+            win.webContents.executeJavaScript(
+              `document.querySelector('#raffle-id').value`,
+              false,
+              raffleID => {
+                if (preloadedStock) {
+                  const sizes = preloadedStock.map(size => ({
+                    id: size.id,
+                    name: size.variant
+                  }));
+                  win.close();
+                  resolve({
+                    styleInput: false,
+                    sizeInput: true,
+                    sizes,
+                    size: sizes[0].id,
+                    raffleDetails: {
+                      itemId: preloadedStock[0].itemId,
+                      stockItemId: preloadedStock[0].stockItemId,
+                      raffleID
+                    }
+                  });
+                }
+                reject(new Error('Unable to find OneBlockDown Raffle Details'));
+              }
+            );
+          }
+        );
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 
 export const createNewWindow = async (tokenID, proxy) => {

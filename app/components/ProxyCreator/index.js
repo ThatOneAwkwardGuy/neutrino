@@ -242,7 +242,7 @@ class ProxyCreator extends Component {
 
   createProxies = async () => {
     const { quantity, provider, providerAccount } = this.state;
-    const { setLoading, incrementProxies, addProxy } = this.props;
+    const { setLoading, incrementProxies, addProxy, setInfoModal } = this.props;
     setLoading(
       true,
       `Creating ${quantity} ${upperCaseFirst(provider)} ${
@@ -261,7 +261,33 @@ class ProxyCreator extends Component {
         return newProxy;
       });
     successfulProxies.forEach(() => incrementProxies());
-    console.log(resolvedProxyInstances);
+    const unsuccessfulProxies = resolvedProxyInstances.filter(
+      proxy => proxy instanceof Error
+    );
+    if (unsuccessfulProxies.length > 0) {
+      setInfoModal({
+        infoModalShowing: true,
+        infoModalHeader: `Errors creating ${provider} proxy`,
+        infoModalBody: (
+          <table className="w-100">
+            <th>
+              <tr>
+                <td>Errors</td>
+              </tr>
+            </th>
+            <tbody>
+              {unsuccessfulProxies.map(error => (
+                <tr>
+                  <td>{JSON.stringify(error.message)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ),
+        infoModalFunction: '',
+        infoModalButtonText: ''
+      });
+    }
     setLoading(
       false,
       `Creating ${quantity} ${upperCaseFirst(provider)} ${
@@ -687,7 +713,8 @@ ProxyCreator.propTypes = {
     proxies: PropTypes.arrayOf(PropTypes.any)
   }).isRequired,
   addProxy: PropTypes.func.isRequired,
-  clearProxies: PropTypes.func.isRequired
+  clearProxies: PropTypes.func.isRequired,
+  setInfoModal: PropTypes.func.isRequired
 };
 
 export default withToastManager(ProxyCreator);

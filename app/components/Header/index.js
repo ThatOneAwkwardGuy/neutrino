@@ -40,15 +40,13 @@ export default class Header extends Component {
         id="header"
         className="justify-content-end align-items-center text-right"
       >
-        {showPageTitle ? (
-          <Col className="text-left draggable">
-            {
-              <span className="font-weight-bold">
-                {hashToName[window.location.hash] || ''}
-              </span>
-            }
-          </Col>
-        ) : null}
+        <Col className="text-left draggable h-100">
+          {showPageTitle ? (
+            <span className="font-weight-bold">
+              {hashToName[window.location.hash] || ''}
+            </span>
+          ) : null}
+        </Col>
         <Col className="col-0_5 col">
           <span role="button" tabIndex="0" onClick={this.minimiseWindow}>
             <img

@@ -1,7 +1,16 @@
 import React, { Component } from 'react';
 import { Switch, Route } from 'react-router';
 import { Link } from 'react-router-dom';
-import { Container, Row, Col, Modal, ModalHeader } from 'reactstrap';
+import {
+  Container,
+  Row,
+  Col,
+  Button,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter
+} from 'reactstrap';
 import { ipcRenderer } from 'electron';
 import { connect } from 'react-redux';
 import BarLoader from 'react-spinners/BarLoader';
@@ -51,7 +60,12 @@ class Home extends Component {
       updateDownloading: false,
       loading: false,
       loadingModalClosable: false,
-      raffleInfo: null
+      raffleInfo: null,
+      infoModalShowing: false,
+      infoModalHeader: '',
+      infoModalBody: '',
+      infoModalFunction: false,
+      infoModalButtonText: ''
     };
   }
 
@@ -70,6 +84,10 @@ class Home extends Component {
       }
     }
   }
+
+  setInfoModal = infoModalDetails => {
+    this.setState({ ...infoModalDetails });
+  };
 
   setRaffleInfo = raffleInfo => {
     this.setState({ raffleInfo });
@@ -134,6 +152,12 @@ class Home extends Component {
     }));
   };
 
+  toggleInfoModal = () => {
+    this.setState(prevProps => ({
+      infoModalShowing: !prevProps.infoModalShowing
+    }));
+  };
+
   watchForUpdates = () => {
     const { updateUpdateStatus } = this.props;
     ipcRenderer.on(UPDATE_AVAILABLE, (event, arg) => {
@@ -157,12 +181,10 @@ class Home extends Component {
       updateUpdateStatus(update);
       this.setLoading(false, '', false);
     });
-    ipcRenderer.on(UPDATE_DOWNLOADED, (event, arg) => {
-      console.log(arg);
+    ipcRenderer.on(UPDATE_DOWNLOADED, () => {
       this.setState({
         updateDownloading: false
       });
-      this.toggleInstallModal();
     });
     ipcRenderer.send(CHECK_FOR_UPDATES);
   };
@@ -174,7 +196,12 @@ class Home extends Component {
       loading,
       loadingText,
       loadingModalClosable,
-      raffleInfo
+      raffleInfo,
+      infoModalShowing,
+      infoModalHeader,
+      infoModalBody,
+      infoModalFunction,
+      infoModalButtonText
     } = this.state;
     const {
       addProxyProviderAccount,
@@ -204,7 +231,7 @@ class Home extends Component {
       clearProxies,
       history
     } = this.props;
-    const { setLoading, setRaffleInfo } = this;
+    const { setLoading, setRaffleInfo, setInfoModal } = this;
     const appRoutes = [
       {
         path: routes.HOME,
@@ -222,7 +249,8 @@ class Home extends Component {
           incrementProxies,
           proxies,
           addProxy,
-          clearProxies
+          clearProxies,
+          setInfoModal
         }
       },
       {
@@ -235,7 +263,8 @@ class Home extends Component {
           removeCreatedAccount,
           removeAllCreatedAccounts,
           accounts,
-          incrementAccounts
+          incrementAccounts,
+          setInfoModal
         }
       },
       {
@@ -529,6 +558,24 @@ class Home extends Component {
           ) : null}
           <BarLoader width={100} widthUnit="%" color="#2745fb" />
           {loadingText ? <p className="p-3">{loadingText}</p> : null}
+        </Modal>
+        <Modal
+          id="infoModal"
+          isOpen={infoModalShowing}
+          size="lg"
+          centered
+          toggle={this.toggleInfoModal}
+        >
+          <ModalHeader toggle={this.toggleInfoModal}>
+            {infoModalHeader}
+          </ModalHeader>
+          <ModalBody>{infoModalBody}</ModalBody>
+          <ModalFooter>
+            <Button onClick={this.toggleInfoModal}>Close</Button>
+            {typeof infoModalFunction === 'function' ? (
+              <Button onClick={infoModalFunction}>{infoModalButtonText}</Button>
+            ) : null}
+          </ModalFooter>
         </Modal>
       </Container>
     );
