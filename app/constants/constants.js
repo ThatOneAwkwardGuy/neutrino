@@ -89,7 +89,7 @@ export const translations = [
 
 export const sites = {
   // cncpts: 'https://cncpts.com',
-  bdgastore: 'https://bdgastore.com',
+  // bdgastore: 'https://bdgastore.com',
   '12amrun': 'https://www.12amrun.com',
   '18montrose': 'https://18montrose.com',
   'a-ma-maniere': 'https://www.a-ma-maniere.com',

@@ -109,7 +109,7 @@ export default class Bodega {
     const captchaResponse = await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle
       cookiesObject: this.cookieJar._jar.store.idx,
-      url: this.url,
+      url: `https://app.viralsweep.com/vrlswp/widget/${this.raffleDetails.widgetCode}?framed=1`,
       id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.url,

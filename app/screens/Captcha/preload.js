@@ -90,6 +90,6 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
   captchaChecker = setInterval(checkCaptcha, 300);
 }
 
-// if (process.env.NODE_ENV === 'development') {
-//   focusedWebContents.openDevTools();
-// }
+if (process.env.NODE_ENV === 'development') {
+  focusedWebContents.openDevTools();
+}
