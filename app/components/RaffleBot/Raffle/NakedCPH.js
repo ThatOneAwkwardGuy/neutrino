@@ -81,13 +81,13 @@ export default class NakedCPH {
     const payload = {};
     this.raffleDetails.renderData.form.fields.forEach(row => {
       if (row.title.includes('first name')) {
-        payload[`form[textfield:${row.id}]`] = this.profile.firstName;
+        payload[`form[textfield:${row.id}]`] = this.profile.deliveryFirstName;
       } else if (row.title.includes('last name')) {
-        payload[`form[textfield:${row.id}]`] = this.profile.lastName;
+        payload[`form[textfield:${row.id}]`] = this.profile.deliveryLastName;
       } else if (row.title.includes('email')) {
         payload[`form[${row.type}:${row.id}]`] = this.profile.email;
       } else if (row.title.includes('country')) {
-        payload[`form[${row.type}:${row.id}]`] = this.profile.region;
+        payload[`form[${row.type}:${row.id}]`] = this.profile.deliveryRegion;
       }
     });
     payload['form[token]'] = token;

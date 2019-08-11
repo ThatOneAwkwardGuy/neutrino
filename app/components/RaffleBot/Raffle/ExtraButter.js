@@ -84,8 +84,8 @@ export default class ExtraButter {
       method: 'POST',
       uri: 'https://eb-draw.herokuapp.com/customers/new',
       form: {
-        first_name: this.profile.firstName,
-        last_name: this.profile.lastName,
+        first_name: this.profile.deliveryFirstName,
+        last_name: this.profile.deliveryLastName,
         email: this.profile.email
       }
     });
@@ -95,16 +95,16 @@ export default class ExtraButter {
       method: 'POST',
       uri: 'https://eb-draw.herokuapp.com/draws/entries/new',
       form: {
-        shipping_first_name: this.profile.firstName,
-        shipping_last_name: this.profile.lastName,
+        shipping_first_name: this.profile.deliveryFirstName,
+        shipping_last_name: this.profile.deliveryLastName,
         customer_id: customerID,
         variant_id: variant.id,
-        street_address: this.profile.address.address,
-        city: this.profile.address.city,
-        zip: this.profile.address.zipCode,
-        state: this.profile.address.state,
+        street_address: this.profile.deliveryAddress,
+        city: this.profile.deliveryCity,
+        zip: this.profile.deliveryZip,
+        state: this.profile.deliveryRegion,
         phone: this.profile.phoneNumber,
-        country: this.profile.address.region,
+        country: this.profile.deliveryRegion,
         delivery_method: 'online'
       }
     });

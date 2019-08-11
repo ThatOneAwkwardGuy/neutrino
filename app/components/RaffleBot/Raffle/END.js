@@ -209,16 +209,16 @@ export default class END {
       //   },
       json: true,
       body: {
-        city: this.profile.address.city,
+        city: this.profile.deliveryCity,
         company: '',
         countryId: customer.group_id,
         customerId: customer.id,
         defaultBilling: false,
         defaultShipping: true,
-        firstName: this.profile.firstName,
-        lastName: this.profile.lastName,
-        postCode: this.profile.address.zipCode,
-        street1: this.profile.address.address,
+        firstName: this.profile.deliveryFirstName,
+        lastName: this.profile.deliveryLastName,
+        postCode: this.profile.deliveryZip,
+        street1: this.profile.deliveryAddress,
         street2: null,
         telephone: this.profile.phoneNumber
       }

@@ -114,14 +114,14 @@ export default class OneBlockDown {
         raffleId: this.raffleDetails.raffleID,
         inStore: '',
         addressId: 'n',
-        'address[countryId]': this.formatCountry(this.profile.address.region),
-        'address[first_name]': this.profile.firstName,
-        'address[last_name]': this.profile.lastName,
-        'address[street_address]': this.profile.address.address,
-        'address[zipcode]': this.profile.address.zipCode,
-        'address[cityName]': this.profile.address.city,
+        'address[countryId]': this.formatCountry(this.profile.deliveryRegion),
+        'address[first_name]': this.profile.deliveryFirstName,
+        'address[last_name]': this.profile.deliveryLastName,
+        'address[street_address]': this.profile.deliveryAddress,
+        'address[zipcode]': this.profile.deliveryZip,
+        'address[cityName]': this.profile.deliveryCity,
         'address[phone_number]': this.profile.phoneNumber,
-        'address[statecode]': this.profile.address.state,
+        'address[statecode]': this.profile.deliveryRegion,
         version: '103'
       }
     });

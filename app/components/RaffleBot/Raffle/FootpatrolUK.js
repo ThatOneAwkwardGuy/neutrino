@@ -58,7 +58,7 @@ export default class FootpatrolUK {
 
   makeEntry = async () => {
     this.changeStatus('Started');
-    const name = `${this.profile.firstName}%20${this.profile.lastName}`;
+    const name = `${this.profile.deliveryFirstName}%20${this.profile.deliveryLastName}`;
     const params = this.url.split('html')[1].split('?');
     const tag = params[1].split('=')[1];
     const shortTag = params[2].split('=')[1];
@@ -77,7 +77,7 @@ export default class FootpatrolUK {
       }&${shortTag}_shoesize=${this.size}&${shortTag}_cityofres=${
         this.profile.city
       }&yzemail=${tag}${shortTag}_countryofres=${encodeURIComponent(
-        this.profile.region
+        this.profile.deliveryRegion
       )}&emailpermit=0&sms_optout=0&site=FP&currency=GBP`
     });
     console.log(response);

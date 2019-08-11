@@ -425,7 +425,7 @@ export default class RaffleBot extends Component {
               </Col>
             </Row>
             {loadedRaffle ? (
-              <Row>
+              <Row className="py-3">
                 <Col xs="4">
                   <Container>
                     <Row className="py-3">
