@@ -19,12 +19,14 @@ import { getCaptchaResponse } from '../../screens/Captcha/functions';
 import { getFormData } from './functions';
 
 const { clipboard } = require('electron');
+const { dialog } = require('electron').remote;
 
 const randomEmail = require('random-email');
 const randomize = require('randomatic');
 const request = require('request-promise');
 const random = require('random-name');
 const uuidv4 = require('uuid/v4');
+const fs = require('fs');
 
 class AccountCreator extends Component {
   constructor(props) {
@@ -45,6 +47,58 @@ class AccountCreator extends Component {
       proxies: ''
     };
   }
+
+  exportAccountsAsProfiles = () => {
+    const { accounts } = this.props;
+    const profiles = accounts.accounts.map(account => ({
+      profileID: `${account.site}-${account.email}`,
+      deliveryCountry: '',
+      deliveryAddress: '',
+      deliveryCity: '',
+      deliveryFirstName: random.first(),
+      deliveryLastName: random.last(),
+      deliveryRegion: '',
+      deliveryZip: '',
+      deliveryApt: '',
+      billingZip: '',
+      billingCountry: '',
+      billingAddress: '',
+      billingCity: '',
+      billingFirstName: random.first(),
+      billingLastName: random.last(),
+      billingRegion: '',
+      billingApt: '',
+      phone: '',
+      card: {
+        paymentCardholdersName: '',
+        cardNumber: '',
+        expMonth: '',
+        expYear: '',
+        cvv: ''
+      },
+      email: account.email,
+      password: account.pass,
+      sameDeliveryBillingBool: false,
+      oneCheckoutBool: false,
+      randomNameBool: false,
+      randomPhoneNumberBool: false,
+      useCatchallBool: false,
+      jigAddressesBool: false,
+      fourCharPrefixBool: false
+    }));
+    dialog.showSaveDialog(
+      {
+        title: 'name',
+        defaultPath: `~/Neutrino-Profiles.json`
+      },
+      fileName => {
+        if (fileName === undefined) {
+          return;
+        }
+        fs.writeFile(fileName, JSON.stringify(profiles), () => {});
+      }
+    );
+  };
 
   handleChange = e => {
     this.setState({
@@ -573,6 +627,11 @@ class AccountCreator extends Component {
                     />
                   </Col>
                 ) : null}
+                <Col>
+                  <Button onClick={this.exportAccountsAsProfiles}>
+                    Export as Profiles
+                  </Button>
+                </Col>
                 <Col>
                   <Button color="danger" onClick={removeAllCreatedAccounts}>
                     Delete All

@@ -6,13 +6,11 @@ import {
   actionVerbList
 } from './constants';
 
-const { remote } = require('electron');
-const { BrowserWindow } = require('electron').remote;
-const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 
 export const createActivityWindow = (
+  win,
   index,
   activity,
   settings,
@@ -23,25 +21,6 @@ export const createActivityWindow = (
     if (updateActivity) {
       updateActivity(index, { status: 'Logging In' });
     }
-    const tokenID = uuidv4();
-    const win = new BrowserWindow({
-      width: 500,
-      height: 650,
-      show: true,
-      frame: true,
-      resizable: true,
-      focusable: true,
-      minimizable: true,
-      closable: true,
-      allowRunningInsecureContent: true,
-      webPreferences: {
-        webviewTag: true,
-        allowRunningInsecureContent: true,
-        nodeIntegration: true,
-        webSecurity: false,
-        session: remote.session.fromPartition(`activity-${tokenID}`)
-      }
-    });
     if (!showAcitivtyWindows) {
       win.minimize();
     }
@@ -87,7 +66,7 @@ export const createActivityWindow = (
                 } else if (updateActivity) {
                   updateActivity(index, { status: 'Stuck In Login' });
                 }
-                resolve(win);
+                resolve();
               }
             );
           });

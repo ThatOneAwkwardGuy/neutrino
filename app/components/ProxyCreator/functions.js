@@ -301,7 +301,7 @@ export const loadLinodeApiRegions = async providerAccount => {
   const linode = new Linode(providerAccount.apiKey);
   const { data } = await linode.getRegions();
   const regions = data.map(region => ({
-    name: region.country.toUpperCase(),
+    name: region.id,
     id: region.id
   }));
   return regions;
@@ -346,7 +346,7 @@ export const createLinodeInstance = async (
   const stackScript = await createLinodeStartupScript(apiKey, user, pass);
   const instance = await linode.createLinodeInstance({
     label: name,
-    root_pass: 'neutrinoproxy',
+    root_pass: 'neutrinoProxy',
     type: machine,
     region,
     stackscript_id: stackScript.id,

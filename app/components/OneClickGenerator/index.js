@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import {
   Container,
   Row,
@@ -15,6 +14,10 @@ import PropTypes from 'prop-types';
 import { createActivityWindow, runAcitivitiesOnWindow } from './functions';
 
 import Table from '../Table';
+
+const { remote } = require('electron');
+const { BrowserWindow } = require('electron').remote;
+const uuidv4 = require('uuid/v4');
 
 export default class OneClickGenerator extends Component {
   constructor(props) {
@@ -99,7 +102,27 @@ export default class OneClickGenerator extends Component {
     incrementActivity,
     showAcitivtyWindows
   ) => {
-    this.windows[index] = await createActivityWindow(
+    const tokenID = uuidv4();
+    this.windows[index] = new BrowserWindow({
+      width: 500,
+      height: 650,
+      show: true,
+      frame: true,
+      resizable: true,
+      focusable: true,
+      minimizable: true,
+      closable: true,
+      allowRunningInsecureContent: true,
+      webPreferences: {
+        webviewTag: true,
+        allowRunningInsecureContent: true,
+        nodeIntegration: true,
+        webSecurity: false,
+        session: remote.session.fromPartition(`activity-${tokenID}`)
+      }
+    });
+    await createActivityWindow(
+      this.windows[index],
       index,
       activity,
       settings,

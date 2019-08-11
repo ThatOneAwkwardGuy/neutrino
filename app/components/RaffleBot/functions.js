@@ -110,37 +110,53 @@ const loadNakedCphRaffleInfo = async link => {
         reject(new Error('Closed Window Before Finished'));
       });
       win.webContents.on('dom-ready', async () => {
-        const result = await win.webContents.executeJavaScript(
+        const currentURL = await win.webContents.executeJavaScript(
           'window.location.href',
           false
         );
-        if (result === link) {
+        if (currentURL === link) {
           const innerHTML = await win.webContents.executeJavaScript(
             'document.documentElement.innerHTML',
             false
           );
-          const renderData = await win.webContents.executeJavaScript(
+          let renderData = await win.webContents.executeJavaScript(
             'window.rendererData',
             true
           );
-          let typeformCode = '';
-          if (result.includes('nakedcph.typeform.com')) {
+          let typeformCode;
+          if (currentURL.includes('nakedcph.typeform.com')) {
             typeformCode = renderData.form.id;
           } else {
             const $ = cheerio.load(innerHTML);
-            // eslint-disable-next-line prefer-destructuring
-            console.log($('.typeform-widget'));
             // eslint-disable-next-line prefer-destructuring
             typeformCode = $('.typeform-widget')
               .attr('data-url')
               .split('/to/')[1];
           }
-          win.close();
-          resolve({
-            sizeInput: false,
-            styleInput: false,
-            raffleDetails: { typeformCode, renderData }
-          });
+          if (!currentURL.includes('nakedcph.typeform.com')) {
+            win.loadURL(
+              `https://nakedcph.typeform.com/to/${typeformCode}?typeform-embed=embed-widget`
+            );
+            win.webContents.on('dom-ready', async () => {
+              renderData = await win.webContents.executeJavaScript(
+                'window.rendererData',
+                true
+              );
+              resolve({
+                sizeInput: false,
+                styleInput: false,
+                raffleDetails: { typeformCode, renderData }
+              });
+              win.close();
+            });
+          } else {
+            resolve({
+              sizeInput: false,
+              styleInput: false,
+              raffleDetails: { typeformCode, renderData }
+            });
+            win.close();
+          }
         }
       });
     } catch (error) {
