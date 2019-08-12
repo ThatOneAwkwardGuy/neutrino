@@ -1,8 +1,12 @@
 {
   "name": "neutrino",
-  "productName": "Neutrino 2.0",
+  "productName": "Neutrino",
+  "description": "Neutrino AIO Bot",
+  "author": {
+    "name": "ThatOneAwkwardGuy",
+    "email": "support@neutrino.app"
+  },
   "version": "2.0.0",
-  "description": "Electron application boilerplate based on React, React Router, Webpack, React Hot Loader for rapid application development",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dev": "concurrently \"yarn build-main\" \"yarn build-renderer-dev\"",
@@ -21,7 +25,7 @@
     "package": "yarn build && electron-builder build --publish never",
     "package-dev": "cross-env NODE_ENV=development yarn build-dev && electron-builder build --publish never",
     "package-all": "yarn build && electron-builder build -mw",
-    "package-ci": "yarn postinstall && yarn build && electron-builder --publish always",
+    "package-ci": "yarn postinstall && yarn build && electron-builder -mw --publish always",
     "package-linux": "yarn build && electron-builder build --linux",
     "package-win": "yarn build && electron-builder build --win --x64",
     "postinstall": "yarn flow-typed && electron-builder install-app-deps package.json && yarn build-dll && opencollective-postinstall",
@@ -104,43 +108,8 @@
       "private": false
     }
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/electron-react-boilerplate/electron-react-boilerplate.git"
-  },
-  "author": {
-    "name": "Electron React Boilerplate Maintainers",
-    "email": "electronreactboilerplate@gmail.com",
-    "url": "https://electron-react-boilerplate.js.org"
-  },
-  "contributors": [
-    {
-      "name": "Vikram Rangaraj",
-      "email": "vikr01@icloud.com",
-      "url": "https://github.com/vikr01"
-    },
-    {
-      "name": "Amila Welihinda",
-      "email": "amilajack@gmail.com",
-      "url": "https://github.com/amilajack"
-    }
-  ],
+  "repository": "https://github.com/ThatOneAwkwardGuy/Neutrino-Updates",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/electron-react-boilerplate/electron-react-boilerplate/issues"
-  },
-  "keywords": [
-    "electron",
-    "boilerplate",
-    "react",
-    "redux",
-    "flow",
-    "sass",
-    "webpack",
-    "hot",
-    "reload"
-  ],
-  "homepage": "https://github.com/electron-react-boilerplate/electron-react-boilerplate#readme",
   "jest": {
     "testURL": "http://localhost/",
     "moduleNameMapper": {
@@ -254,6 +223,8 @@
     "yarn": "^1.17.3"
   },
   "dependencies": {
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@babel/runtime": "^7.5.5",
     "@emotion/core": "^10.0.14",
     "@fortawesome/fontawesome-free": "^5.5.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.19",
@@ -308,6 +279,7 @@
     "redux-persist": "^5.10.0",
     "redux-persist-electron-storage": "^2.1.0",
     "redux-thunk": "^2.3.0",
+    "regenerator-runtime": "^0.13.3",
     "request-promise": "^4.2.4",
     "source-map-support": "^0.5.9",
     "styled-components": "^4.3.2",
@@ -319,10 +291,6 @@
     "npm": ">=4.x",
     "yarn": ">=0.21.3"
   },
-  "collective": {
-    "url": "https://opencollective.com/electron-react-boilerplate-594"
-  },
-  "browserslist": "electron 1.6",
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged"
