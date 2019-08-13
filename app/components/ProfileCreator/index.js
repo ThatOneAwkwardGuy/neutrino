@@ -574,7 +574,11 @@ class ProfileCreator extends Component {
       randomPhoneNumberTemplate,
       phone,
       cards,
-      cardsInput
+      cardsInput,
+      sameDeliveryBillingBool,
+      oneCheckoutBool,
+      jigAddressesBool,
+      fourCharPrefixBool
     } = this.state;
     const columns = [
       {
@@ -903,6 +907,7 @@ class ProfileCreator extends Component {
                   type="switch"
                   id="sameDeliveryBillingBool"
                   name="sameDeliveryBillingBool"
+                  checked={sameDeliveryBillingBool}
                   onChange={this.handleToggleChange}
                 />
               </Col>
@@ -912,6 +917,7 @@ class ProfileCreator extends Component {
                   type="switch"
                   id="oneCheckoutBool"
                   name="oneCheckoutBool"
+                  checked={oneCheckoutBool}
                   onChange={this.handleToggleChange}
                 />
               </Col>
@@ -921,6 +927,7 @@ class ProfileCreator extends Component {
                   type="switch"
                   id="randomNameBool"
                   name="randomNameBool"
+                  checked={randomNameBool}
                   onChange={this.handleToggleChange}
                 />
               </Col>
@@ -930,6 +937,7 @@ class ProfileCreator extends Component {
                   type="switch"
                   id="randomPhoneNumberBool"
                   name="randomPhoneNumberBool"
+                  checked={randomPhoneNumberBool}
                   onChange={this.handleToggleChange}
                 />
               </Col>
@@ -939,6 +947,7 @@ class ProfileCreator extends Component {
                   type="switch"
                   id="useCatchallBool"
                   name="useCatchallBool"
+                  checked={useCatchallBool}
                   onChange={this.handleToggleChange}
                 />
               </Col>
@@ -948,6 +957,7 @@ class ProfileCreator extends Component {
                   type="switch"
                   id="jigAddressesBool"
                   name="jigAddressesBool"
+                  checked={jigAddressesBool}
                   onChange={this.handleToggleChange}
                 />
               </Col>
@@ -957,6 +967,7 @@ class ProfileCreator extends Component {
                   type="switch"
                   id="fourCharPrefixBool"
                   name="fourCharPrefixBool"
+                  checked={fourCharPrefixBool}
                   onChange={this.handleToggleChange}
                 />
               </Col>
