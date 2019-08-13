@@ -146,7 +146,6 @@ class AccountCreator extends Component {
         }
       }
     );
-    console.log(accountPromises);
     setLoading(
       true,
       `Creating ${quantity} ${upperCaseFirst(site)} Account(s)`,
@@ -417,7 +416,7 @@ class AccountCreator extends Component {
                     addCreatedAccount({
                       email,
                       site,
-                      pass,
+                      pass: accountPass,
                       status: 'created'
                     });
                     window.close();

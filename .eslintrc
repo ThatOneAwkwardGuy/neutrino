@@ -12,7 +12,7 @@
   },
   "rules": {
     "arrow-parens": ["off"],
-    "compat/compat": "error",
+    "compat/compat": "off",
     "consistent-return": "off",
     "comma-dangle": "off",
     "flowtype/boolean-style": ["error", "boolean"],
