@@ -5146,9 +5146,9 @@ electron-updater@^4.1.2:
     pako "^1.0.10"
     semver "^6.2.0"
 
-electron@6.0.0-beta.13:
-  version "6.0.0-beta.13"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-6.0.0-beta.13.tgz#91a67f978e030c1ea5d89e84352d86923dfbfb86"
+electron@^6.0.1:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-6.0.2.tgz#437f3ac2bcb42116d92a3f1084280e0b2cff1493"
   dependencies:
     "@types/node" "^10.12.18"
     electron-download "^4.1.0"

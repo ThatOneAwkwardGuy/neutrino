@@ -7,6 +7,8 @@ import { shell, ipcRenderer } from 'electron';
 import { OPEN_CAPTCHA_WINDOW } from '../../constants/ipcConstants';
 import textLogo from '../../images/textLogo.png';
 
+const { remote } = require('electron');
+
 export default class Footer extends Component {
   constructor(props) {
     super(props);
@@ -93,6 +95,7 @@ export default class Footer extends Component {
         >
           Copyright © 2019 Neutrino - All Rights Reserved
         </Col>
+        <Col>v{remote.app.getVersion()}</Col>
         <Col xs="2" className="text-right ml-auto">
           <img
             style={{ width: '50%' }}
