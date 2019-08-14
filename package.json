@@ -6,7 +6,7 @@
     "name": "ThatOneAwkwardGuy",
     "email": "support@neutrino.app"
   },
-  "version": "2.0.0",
+  "version": "2.0.1",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dev": "concurrently \"yarn build-main\" \"yarn build-renderer-dev\"",
@@ -67,6 +67,7 @@
     "appId": "com.neutrino.bot",
     "afterSign": "scripts/notarize.js",
     "files": [
+      "app/constants/Neutrino_CSV_Template.csv",
       "app/dist/",
       "app/app.html",
       "app/splash.html",

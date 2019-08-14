@@ -39,8 +39,8 @@ export const translations = [
     'passaggiio',
     'passaggioo'
   ],
-  ['rroute', 'rooute', 'rouute', 'routte', 'routee'],
-  ['aavenue', 'avvenue', 'aveenue', 'avennue', 'avenuue', 'avenuee'],
+  ['route', 'rroute', 'rooute', 'rouute', 'routte', 'routee', 'rte', 'rt'],
+  ['avenue', 'aavenue', 'avvenue', 'aveenue', 'avennue', 'avenuue', 'avenuee'],
   ['cchemin', 'chhemin', 'cheemin', 'chemmin', 'chemiin', 'cheminn'],
   [
     'bboulevard',
@@ -84,7 +84,19 @@ export const translations = [
     'strassee'
   ],
   ['pplatz', 'pllatz', 'plaatz', 'plattz', 'platzz'],
-  ['way', 'wway', 'wayy']
+  ['way', 'wway', 'wayy'],
+  ['chemin', 'cchemin', 'chhemin', 'cheemin', 'chemmin', 'chemiin', 'cheminn'],
+  [
+    'rouelle',
+    'rrouelle',
+    'roouelle',
+    'rouuelle',
+    'roueelle',
+    'rouellle',
+    'rouellee'
+  ],
+  ['roue', 'rroue', 'rooue', 'rouue', 'rouee'],
+  ['ruoe', 'rruoe', 'ruuoe', 'ruooe', 'ruoee']
 ];
 
 export const sites = {

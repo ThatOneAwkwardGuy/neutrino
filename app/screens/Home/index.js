@@ -258,6 +258,7 @@ class Home extends Component {
         component: AccountCreator,
         exact: true,
         props: {
+          profile,
           setLoading,
           addCreatedAccount,
           removeCreatedAccount,

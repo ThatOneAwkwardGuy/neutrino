@@ -122,24 +122,35 @@ class ProxyCreator extends Component {
 
   loadProviderApi = async () => {
     const { provider, providerAccount } = this.state;
-    switch (provider) {
-      case 'google':
-        await this.loadGoogleCloudRegions(providerAccount);
-        break;
-      case 'digitalocean':
-        await this.loadDigitalOceanApi(providerAccount);
-        break;
-      case 'vultr':
-        await this.loadVultrRegions();
-        break;
-      case 'linode':
-        await this.loadLinodeRegions(providerAccount);
-        break;
-      case 'aws':
-        await this.loadAWSRegions(providerAccount);
-        break;
-      default:
-        break;
+    const { setInfoModal } = this.props;
+    try {
+      switch (provider) {
+        case 'google':
+          await this.loadGoogleCloudRegions(providerAccount);
+          break;
+        case 'digitalocean':
+          await this.loadDigitalOceanApi(providerAccount);
+          break;
+        case 'vultr':
+          await this.loadVultrRegions();
+          break;
+        case 'linode':
+          await this.loadLinodeRegions(providerAccount);
+          break;
+        case 'aws':
+          await this.loadAWSRegions(providerAccount);
+          break;
+        default:
+          break;
+      }
+    } catch (error) {
+      setInfoModal({
+        infoModalShowing: true,
+        infoModalHeader: `Errors creating ${provider} proxy`,
+        infoModalBody: <div>{JSON.stringify(error.message)}</div>,
+        infoModalFunction: '',
+        infoModalButtonText: ''
+      });
     }
   };
 

@@ -9,10 +9,17 @@ import {
   Button
 } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { remote } from 'electron';
 
 import PropTypes from 'prop-types';
+
 import { upperCaseFirst, generateUEID } from '../../utils/utils';
 import { signOut } from '../../utils/firebase';
+
+const fs = require('fs');
+const { dialog } = require('electron').remote;
+
+const appPath = remote.app.getAppPath();
 
 export default class Settings extends Component {
   constructor(props) {
@@ -339,6 +346,33 @@ export default class Settings extends Component {
     ));
   };
 
+  saveCSVTemplate = () => {
+    console.log(appPath);
+    fs.readFile(
+      process.env.NODE_ENV === 'development'
+        ? `${appPath}/constants/Neutrino_CSV_Template.csv`
+        : `${appPath}/app/constants/Neutrino_CSV_Template.csv`,
+      'UTF-8',
+      (err, data) => {
+        console.log(err);
+        if (!err) {
+          dialog.showSaveDialog(
+            {
+              title: 'name',
+              defaultPath: `~/Neutrino CSV Template.csv`
+            },
+            fileName => {
+              if (fileName === undefined) {
+                return;
+              }
+              fs.writeFile(fileName, data, () => {});
+            }
+          );
+        }
+      }
+    );
+  };
+
   render() {
     const { selectedProxyProvider } = this.state;
     const { settings } = this.props;
@@ -482,6 +516,12 @@ export default class Settings extends Component {
                   checked={settings.activityYoutube}
                   onChange={this.handleSettingsToggleChange}
                 />
+              </Col>
+            </Row>
+            <h6 className="font-weight-bold py-3">Neutrino CSV Template</h6>
+            <Row className="panel-middle p-3 align-items-end">
+              <Col xs="3">
+                <Button onClick={this.saveCSVTemplate}>Save</Button>
               </Col>
             </Row>
             <h6 className="font-weight-bold py-3">Account</h6>

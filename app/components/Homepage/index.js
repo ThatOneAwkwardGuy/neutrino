@@ -83,7 +83,7 @@ export default class Homepage extends Component {
           <p>Neutrino version {settings.update.version} is now available</p>
           <p className="updateChangelog">{parse(settings.update.changelog)}</p>
           <small>
-            The update will download in the background and then install it.
+            The update will download in the background and then be installed.
           </small>
         </span>
       );

@@ -49,26 +49,26 @@ class AccountCreator extends Component {
   }
 
   exportAccountsAsProfiles = () => {
-    const { accounts } = this.props;
+    const { accounts, profile } = this.props;
     const profiles = accounts.accounts.map(account => ({
       profileID: `${account.site}-${account.email}`,
-      deliveryCountry: '',
-      deliveryAddress: '',
-      deliveryCity: '',
-      deliveryFirstName: random.first(),
-      deliveryLastName: random.last(),
-      deliveryRegion: '',
-      deliveryZip: '',
-      deliveryApt: '',
-      billingZip: '',
-      billingCountry: '',
-      billingAddress: '',
-      billingCity: '',
-      billingFirstName: random.first(),
-      billingLastName: random.last(),
-      billingRegion: '',
-      billingApt: '',
-      phone: '',
+      deliveryCountry: profile.deliveryCountry,
+      deliveryAddress: profile.deliveryAddress,
+      deliveryCity: profile.deliveryCity,
+      deliveryFirstName: profile.deliveryFirstName,
+      deliveryLastName: profile.deliveryLastName,
+      deliveryRegion: profile.deliveryRegion,
+      deliveryZip: profile.deliveryZip,
+      deliveryApt: profile.deliveryApt,
+      billingZip: profile.billingZip,
+      billingCountry: profile.billingCountry,
+      billingAddress: profile.billingAddress,
+      billingCity: profile.billingCity,
+      billingFirstName: profile.billingFirstName,
+      billingLastName: profile.billingLastName,
+      billingRegion: profile.billingRegion,
+      billingApt: profile.billingApt,
+      phone: profile.phone,
       card: {
         paymentCardholdersName: '',
         cardNumber: '',
@@ -78,18 +78,18 @@ class AccountCreator extends Component {
       },
       email: account.email,
       password: account.pass,
-      sameDeliveryBillingBool: false,
-      oneCheckoutBool: false,
-      randomNameBool: false,
-      randomPhoneNumberBool: false,
-      useCatchallBool: false,
-      jigAddressesBool: false,
-      fourCharPrefixBool: false
+      sameDeliveryBillingBool: profile.sameDeliveryBillingBool,
+      oneCheckoutBool: profile.oneCheckoutBool,
+      randomNameBool: profile.randomNameBool,
+      randomPhoneNumberBool: profile.randomPhoneNumberBool,
+      useCatchallBool: profile.useCatchallBool,
+      jigAddressesBool: profile.jigAddressesBool,
+      fourCharPrefixBool: profile.fourCharPrefixBool
     }));
     dialog.showSaveDialog(
       {
         title: 'name',
-        defaultPath: `~/Neutrino-Profiles.json`
+        defaultPath: `~/Account-Generator-Neutrino-Profiles.json`
       },
       fileName => {
         if (fileName === undefined) {
@@ -466,8 +466,8 @@ class AccountCreator extends Component {
       }
     ];
     return (
-      <Row className="h-100 p-0">
-        <Col className="h-100" xs="12">
+      <Row className="h-100">
+        <Col className="h-100">
           <Container fluid className="p-0 h-100 d-flex flex-column">
             <Row className="flex-1 overflow-hidden panel-middle">
               <Col id="TableContainer" className="h-100">
@@ -658,7 +658,33 @@ AccountCreator.propTypes = {
   }).isRequired,
   setLoading: PropTypes.func.isRequired,
   incrementAccounts: PropTypes.func.isRequired,
-  setInfoModal: PropTypes.func.isRequired
+  setInfoModal: PropTypes.func.isRequired,
+  profile: PropTypes.shape({
+    sameDeliveryBillingBool: PropTypes.bool.isRequired,
+    oneCheckoutBool: PropTypes.bool.isRequired,
+    jigAddressesBool: PropTypes.bool.isRequired,
+    fourCharPrefixBool: PropTypes.bool.isRequired,
+    randomNameBool: PropTypes.bool.isRequired,
+    randomPhoneNumberBool: PropTypes.bool.isRequired,
+    useCatchallBool: PropTypes.bool.isRequired,
+    deliveryAddress: PropTypes.string.isRequired,
+    deliveryFirstName: PropTypes.string.isRequired,
+    deliveryLastName: PropTypes.string.isRequired,
+    deliveryCity: PropTypes.string.isRequired,
+    deliveryApt: PropTypes.string.isRequired,
+    deliveryCountry: PropTypes.string.isRequired,
+    deliveryRegion: PropTypes.string.isRequired,
+    deliveryZip: PropTypes.string.isRequired,
+    billingAddress: PropTypes.string.isRequired,
+    billingFirstName: PropTypes.string.isRequired,
+    billingLastName: PropTypes.string.isRequired,
+    billingCity: PropTypes.string.isRequired,
+    billingApt: PropTypes.string.isRequired,
+    billingCountry: PropTypes.string.isRequired,
+    billingRegion: PropTypes.string.isRequired,
+    billingZip: PropTypes.string.isRequired,
+    phone: PropTypes.string.isRequired
+  }).isRequired
 };
 
 export default withToastManager(AccountCreator);
