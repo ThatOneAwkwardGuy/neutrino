@@ -73,7 +73,7 @@ export default class NakedCPH {
       } else if (row.title.includes('email')) {
         payload[`form[${row.type}:${row.id}]`] = this.profile.email;
       } else if (row.title.includes('country')) {
-        payload[`form[${row.type}:${row.id}]`] = this.profile.region;
+        payload[`form[${row.type}:${row.id}]`] = this.profile.address.region;
       }
     });
     payload['form[token]'] = token;

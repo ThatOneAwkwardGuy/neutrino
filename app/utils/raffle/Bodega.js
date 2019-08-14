@@ -94,8 +94,8 @@ export default class Bodega {
         type: 'widget',
         refer_source: '',
         entry_source: this.url,
-        first_name: this.profile.firstName,
-        last_name: this.profile.lastName,
+        first_name: this.profile.deliveryFirstName,
+        last_name: this.profile.deliveryLastName,
         email: this.profile.email,
         email_again: '',
         [this.raffleDetails.sizeID]: this.size.id,
@@ -110,15 +110,16 @@ export default class Bodega {
   };
 
   makeEntry = async () => {
-    this.changeStatus(`Getting Captcha Token`);
+    this.changeStatus('Getting Captcha Token');
     const captchaToken = await this.getCaptcha();
-    this.changeStatus(`Submitting Raffle Entry`);
+    this.changeStatus('Submitting Raffle Entry');
     const submitRaffleResponse = await this.submitRaffle(captchaToken);
+    console.log(submitRaffleResponse);
     const submitRaffle = JSON.parse(submitRaffleResponse);
     if (submitRaffle.success === 1) {
-      this.changeStatus(`Successful Entry`);
+      this.changeStatus('Successful Entry');
     } else {
-      this.changeStatus(`Error Submitting Entry`);
+      this.changeStatus('Error Submitting Entry');
     }
   };
 }

@@ -63,7 +63,7 @@ export default class ProxyCreator extends Component {
     const regionsArray = regions.map(elem => ({ name: elem.name, id: elem.id }));
     this.setState({ cloudRegions: regionsArray, region: regionsArray[0].id });
     const [machineTypes] = await this.compute.getMachineTypes({ filter: `zone eq ${regionsArray[0].id}` });
-    const machineTypesArray = machineTypes.map(elem => ({ name: elem.name, id: elem.id, price: `N/A` }));
+    const machineTypesArray = machineTypes.map(elem => ({ name: elem.name, id: elem.id, price: 'N/A' }));
     this.setState({ machineTypes: machineTypesArray, machine: machineTypesArray[0] });
   };
 
@@ -80,7 +80,7 @@ export default class ProxyCreator extends Component {
     });
     const plans = await rp({
       method: 'GET',
-      uri: `https://api.vultr.com/v1/plans/list`,
+      uri: 'https://api.vultr.com/v1/plans/list',
       json: true
     });
     const regionsArray = [];
@@ -568,7 +568,7 @@ export default class ProxyCreator extends Component {
     });
     const plans = await rp({
       method: 'GET',
-      uri: `https://api.vultr.com/v1/plans/list`,
+      uri: 'https://api.vultr.com/v1/plans/list',
       json: true
     });
     const plansArray = [];

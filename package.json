@@ -1,6 +1,6 @@
 {
   "name": "Neutrino",
-  "version": "1.0.17",
+  "version": "1.0.19",
   "description": "Neutrino AIO Bot",
   "main": "./webpack-pack/main.js",
   "author": {
@@ -120,7 +120,6 @@
     "@babel/preset-stage-0": "^7.0.0",
     "@babel/register": "^7.4.4",
     "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.1",
     "babel-helper-evaluate-path": "^0.5.0",
     "babel-loader": "^8.0.6",
