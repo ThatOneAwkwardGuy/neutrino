@@ -338,7 +338,7 @@ class Home extends Component {
     return (
       <Container fluid className="d-flex flex-column h-100">
         <Header />
-        <Row className="flex-fill">
+        <Row className="flex-fill overflow-y-scroll">
           <Col
             id="sidebar"
             className={`${

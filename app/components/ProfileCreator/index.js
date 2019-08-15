@@ -335,7 +335,8 @@ class ProfileCreator extends Component {
       billingZip,
       email,
       password,
-      phone
+      phone,
+      catchallEmail
     } = this.state;
     const { toastManager } = this.props;
     const addresses = jigAddressesBool
@@ -392,7 +393,8 @@ class ProfileCreator extends Component {
           billingZip,
           email,
           password,
-          phone
+          phone,
+          catchallEmail
         };
         const card = cards[index];
         const randomFirstName = randomNameBool ? randomName.first() : '';

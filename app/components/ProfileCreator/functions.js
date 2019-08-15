@@ -2,6 +2,7 @@ import Countries from '../../constants/countries';
 import { tksCardMappings } from '../../constants/constants';
 
 const uuidv4 = require('uuid/v4');
+const randomName = require('random-name');
 
 const getRandomInt = max => Math.floor(Math.random() * Math.floor(max));
 
@@ -768,6 +769,11 @@ export const convertBaseToNeutrino = (
   deliveryLastName: baseProfile.randomName
     ? randomLastName
     : baseProfile.deliveryLastName,
+  email: baseProfile.useCatchallBool
+    ? `${randomFirstName !== '' ? randomFirstName : randomName.first()}${
+        randomLastName !== '' ? randomLastName : randomName.last()
+      }@${baseProfile.catchallEmail}`
+    : baseProfile.email,
   card
 });
 
