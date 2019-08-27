@@ -124,10 +124,10 @@ export default class ExtraButter {
       },
       form: {
         key: 'pk_live_u42h9k3kHDcKpj3DjgyIXjc7',
-        'card[number]': this.profile.paymentDetails.cardNumber,
-        'card[cvc]': this.profile.paymentDetails.cvv,
-        'card[exp_month]': this.profile.paymentDetails.expirationMonth,
-        'card[exp_year]': this.profile.paymentDetails.expirationYear.slice(-2),
+        'card[number]': this.profile.card.cardNumber,
+        'card[cvc]': this.profile.card.cvv,
+        'card[exp_month]': this.profile.card.expMonth,
+        'card[exp_year]': this.profile.card.expYear.slice(-2),
         payment_user_agent: 'stripe.js/901bf2cc; stripe-js-v3/901bf2cc',
         referrer: `${this.url}&step=size`
       }
@@ -181,6 +181,7 @@ export default class ExtraButter {
         }
       });
       const JSONparsed = JSON.parse(validationEmailResponse);
+      console.log(JSONparsed);
       return JSONparsed.customers[0];
     } catch (error) {
       console.log(error);
@@ -194,15 +195,18 @@ export default class ExtraButter {
     console.log(variant);
     this.changeStatus('Checking Email');
     const checkEmailResponse = await this.checkEmail();
-    let createCustomer;
     if (!checkEmailResponse) {
-      console.log(checkEmailResponse);
-      this.changeStatus('Creating Customer');
-      const createCustomerResponse = await this.createCustomer();
-      createCustomer = JSON.parse(createCustomerResponse);
-    } else {
-      createCustomer = checkEmailResponse;
+      throw new Error('Email is not linked to an account');
     }
+    const createCustomer = checkEmailResponse;
+    // if (!checkEmailResponse) {
+    //   console.log(checkEmailResponse);
+    //   this.changeStatus('Creating Customer');
+    //   const createCustomerResponse = await this.createCustomer();
+    //   createCustomer = JSON.parse(createCustomerResponse);
+    // } else {
+    //   createCustomer = checkEmailResponse;
+    // }
     console.log(createCustomer);
     this.changeStatus('Submitting Raffle Info');
     const submitRaffleResponse = await this.submitRaffle(

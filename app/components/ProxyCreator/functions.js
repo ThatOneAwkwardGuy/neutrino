@@ -222,7 +222,9 @@ export const createVultrInstance = async (
       tag: 'neutrinoproxy'
     }
   });
-  return pollVultrInstance(apiKey, instanceCreateResponse.SUBID);
+  const ip = await pollVultrInstance(apiKey, instanceCreateResponse.SUBID);
+  const proxyInfo = await pingIP(ip, 3128, user, pass, 'http://google.com', 50);
+  return proxyInfo;
 };
 
 export const loadVultrApiRegions = async () => {

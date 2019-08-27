@@ -39,7 +39,6 @@ class ProxyCreator extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      proxies: [],
       provider: '',
       providerAccount: {},
       providerAccountName: '',
@@ -351,15 +350,14 @@ class ProxyCreator extends Component {
   };
 
   copyProxies = () => {
-    const { proxies } = this.state;
-    const { toastManager } = this.props;
+    const { toastManager, proxies } = this.props;
     try {
+      copyProxies(proxies.proxies, 99999);
       toastManager.add('Proxies copied to clipboard', {
         appearance: 'success',
         autoDismiss: true,
         pauseOnHover: true
       });
-      copyProxies(proxies, 99999);
     } catch (error) {
       log.error(error);
       toastManager.add('Failed to add proxies to clipboard', {

@@ -241,10 +241,10 @@ export default class END {
           sessionId: uuidv4()
         },
         creditCard: {
-          number: this.profile.paymentDetails.cardNumber,
-          cvv: this.profile.paymentDetails.cvv,
-          expiration_month: this.profile.paymentDetails.expirationMonth,
-          expiration_year: this.profile.paymentDetails.expirationYear,
+          number: this.profile.card.cardNumber,
+          cvv: this.profile.card.cvv,
+          expiration_month: this.profile.card.expirationMonth,
+          expiration_year: this.profile.card.expirationYear,
           options: { validate: false }
         },
         braintreeLibraryVersion: 'braintree/web/3.11.0',
