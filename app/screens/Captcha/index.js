@@ -52,7 +52,7 @@ export default class Captcha extends Component {
         src: waitingURL,
         visible: true,
         active: true,
-        closable: false,
+        closable: true,
         webviewAttributes: {
           preload: preloadPath,
           nodeintegration: true,
@@ -68,12 +68,7 @@ export default class Captcha extends Component {
   }
 
   setListeners = () => {
-    this.tabGroup.on('tab-added', tab => {
-      this.tabStatus[tab.id] = { active: false, jobID: '' };
-    });
-    this.tabGroup.on('tab-removed', tab => {
-      delete this.tabStatus[tab.id];
-    });
+    console.log('setting listeners');
     ipcRenderer.on(SEND_CAPTCHA_TOKEN_FROM_MAIN, (event, arg) => {
       this.handleCaptchaJob(arg);
     });
@@ -87,19 +82,30 @@ export default class Captcha extends Component {
     ipcRenderer.on(STOP_CAPTCHA_JOB, (event, arg) => {
       this.freeTabForCaptcha(arg);
     });
+    this.tabGroup.on('tab-added', tab => {
+      this.tabStatus[tab.id] = { active: false, jobID: '' };
+      // if (this.captchaQueue.length >= 1) {
+      //   this.handleCaptchaJob(this.captchaQueue.pop());
+      // }
+    });
+    this.tabGroup.on('tab-removed', tab => {
+      delete this.tabStatus[tab.id];
+    });
   };
 
   handleCaptchaJob = captchaJob => {
     const tabs = this.tabGroup.getTabs();
     const captchaJobOperation = Object.keys(this.tabStatus).some(tabKey => {
       if (!this.tabStatus[tabKey].active) {
-        const webContents = tabs[tabKey].webview.getWebContents();
-        webContents.send(`captcha-details-${webContents.id}`, captchaJob);
         this.tabStatus[tabKey] = { active: true, jobID: captchaJob.id };
+        const webContents = tabs[tabKey].webview.getWebContents();
+        webContents.session.clearCache();
+        webContents.send(`captcha-details-${webContents.id}`, captchaJob);
         return true;
       }
       return false;
     });
+    console.log(captchaJobOperation);
     if (!captchaJobOperation) {
       this.captchaQueue.push(captchaJob);
     }
@@ -114,6 +120,7 @@ export default class Captcha extends Component {
         return true;
       }
     });
+    console.log(this.captchaQueue);
     if (this.captchaQueue.length >= 1) {
       this.handleCaptchaJob(this.captchaQueue.pop());
     }

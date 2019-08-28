@@ -86,16 +86,18 @@ export default class Footer extends Component {
             <FontAwesomeIcon icon={['fab', 'instagram']} />
           </span>
         </Col>
-        <Col xs="1" className="footerText">
-          {updateDownloading ? 'Downloading Update' : ''}
-        </Col>
-        <Col
-          xs="5"
-          className="text-center font-weight-bold footerText noselect"
-        >
+        {updateDownloading ? (
+          <Col xs="2" className="footerText blinking">
+            <FontAwesomeIcon icon="download" className="mr-2" />
+            Downloading Update
+          </Col>
+        ) : (
+          ''
+        )}
+        <Col className="text-center font-weight-bold footerText noselect">
           Copyright © 2019 Neutrino - All Rights Reserved
         </Col>
-        <Col>v{remote.app.getVersion()}</Col>
+        <Col xs="1">v{remote.app.getVersion()}</Col>
         <Col xs="2" className="text-right ml-auto">
           <img
             style={{ width: '50%' }}

@@ -89,6 +89,12 @@ class Home extends Component {
     this.setState({ ...infoModalDetails });
   };
 
+  setDownloading = boolean => {
+    this.setState({
+      updateDownloading: boolean
+    });
+  };
+
   setRaffleInfo = raffleInfo => {
     this.setState({ raffleInfo });
   };
@@ -231,13 +237,20 @@ class Home extends Component {
       clearProxies,
       history
     } = this.props;
-    const { setLoading, setRaffleInfo, setInfoModal } = this;
+    const { setLoading, setRaffleInfo, setInfoModal, setDownloading } = this;
     const appRoutes = [
       {
         path: routes.HOME,
         component: Homepage,
         exact: true,
-        props: { settings, setLoading, setRaffleInfo, history, home }
+        props: {
+          settings,
+          setLoading,
+          setRaffleInfo,
+          history,
+          home,
+          setDownloading
+        }
       },
       {
         path: routes.PROXY_CREATOR,

@@ -14,23 +14,27 @@ document.addEventListener('DOMNodeInserted', () => {
 const setCookiesInWindow = (webContents, cookies) =>
   new Promise(resolve => {
     if (cookies) {
-      Object.keys(cookies).forEach(cookieSite => {
-        const cookiesCookieSite = cookies[cookieSite]['/'];
-        Object.keys(cookiesCookieSite).forEach(actualCookie => {
-          const formattedCookie = {
-            url: `https://${cookieSite}`,
-            value: cookiesCookieSite[actualCookie].value,
-            domain: cookiesCookieSite[actualCookie].domain,
-            path: cookiesCookieSite[actualCookie].path,
-            name: actualCookie
-          };
-          webContents.session.cookies.set(formattedCookie, error => {
-            if (error !== null) {
-              console.log(formattedCookie);
-            }
-          });
-        });
-      });
+      resolve(
+        Promise.all(
+          Object.keys(cookies).map(async cookieSite => {
+            const cookiesCookieSite = cookies[cookieSite]['/'];
+            return Promise.all(
+              Object.keys(cookiesCookieSite).map(async actualCookie => {
+                const formattedCookie = {
+                  url: `https://${cookieSite}`,
+                  value: cookiesCookieSite[actualCookie].value,
+                  domain: cookiesCookieSite[actualCookie].domain,
+                  path: cookiesCookieSite[actualCookie].path,
+                  name: actualCookie
+                };
+                return webContents.session.cookies
+                  .set(formattedCookie)
+                  .catch(e => e);
+              })
+            ).catch(e => e);
+          })
+        )
+      );
     }
     resolve();
   });
@@ -44,7 +48,7 @@ const checkCaptcha = async () => {
       authToken = document.querySelector('input[name="authenticity_token"]')
         .value;
     } catch (error) {
-      console.log(error);
+      // console.log(error);
     }
     if (captchaJob) {
       try {
@@ -53,11 +57,11 @@ const checkCaptcha = async () => {
         try {
           await grecaptcha.execute();
         } catch (error) {
-          console.log(error);
+          // console.log(error);
         }
         const captchaToken = grecaptcha.getResponse();
         if (captchaToken !== '') {
-          console.log(tokenID);
+          // console.log(tokenID);
           ipcRenderer.send('send-captcha-token-from-preload-to-captcha', {
             ...captchaJob,
             url: document.location.href,
@@ -69,18 +73,23 @@ const checkCaptcha = async () => {
           clearInterval(captchaChecker);
         }
       } catch (error) {
-        console.log(error);
+        // console.log(error);
       }
     }
   } catch (error) {
-    console.log(error);
+    // console.log(error);
   }
 };
 
 ipcRenderer.on(
   `captcha-details-${focusedWebContents.id}`,
   async (event, args) => {
-    await setCookiesInWindow(focusedWebContents, args.cookiesObject);
+    console.log(JSON.stringify(args));
+    const cookiesSet = await setCookiesInWindow(
+      focusedWebContents,
+      args.cookiesObject
+    );
+    console.log(cookiesSet);
     ipcRenderer.send('store-captcha-job', focusedWebContents.id, args);
     window.location.href = args.url;
   }

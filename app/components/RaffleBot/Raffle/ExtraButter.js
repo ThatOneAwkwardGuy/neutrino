@@ -1,6 +1,8 @@
 import { ipcRenderer } from 'electron';
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
 import { STOP_CAPTCHA_JOB } from '../../../constants/ipcConstants';
+import { getFormData } from '../../AccountCreator/functions';
+import { longToShortStates } from '../../../constants/constants';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
@@ -102,7 +104,10 @@ export default class ExtraButter {
         street_address: this.profile.deliveryAddress,
         city: this.profile.deliveryCity,
         zip: this.profile.deliveryZip,
-        state: this.profile.deliveryRegion,
+        state:
+          longToShortStates[this.profile.deliveryRegion] !== undefined
+            ? longToShortStates[this.profile.deliveryRegion]
+            : 'none',
         phone: this.profile.phoneNumber,
         country: this.profile.deliveryRegion,
         delivery_method: 'online'
@@ -155,58 +160,75 @@ export default class ExtraButter {
     this.changeStatus('Getting Captcha');
     const captchaResponse = await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle
-      cookiesObject: this.cookieJar._jar.store.idx,
+      cookiesObject: {},
       url: this.url,
       id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.url,
       site: this.site
     });
-    try {
-      const validationEmailResponse = await this.rp({
-        method: 'POST',
-        url: 'https://eb-draw.herokuapp.com/customers/validateEmail',
-        headers: {
-          Accept: 'application/json, text/javascript, */*; q=0.01',
-          Referer: this.url,
-          Origin: 'https://shop.extrabutterny.com',
-          'User-Agent':
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
-          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
-        },
-        form: {
-          email: this.profile.email,
-          product_id: this.raffleDetails.product.product.id,
-          challenge_response: captchaResponse.captchaToken
-        }
-      });
-      const JSONparsed = JSON.parse(validationEmailResponse);
-      console.log(JSONparsed);
-      return JSONparsed.customers[0];
-    } catch (error) {
-      console.log(error);
-      return false;
-    }
+    const payload = {
+      email: this.profile.email,
+      product_id: this.raffleDetails.product.product.id,
+      challenge_response: captchaResponse.captchaToken
+    };
+    const queryString = new URLSearchParams(getFormData(payload)).toString();
+    const validationEmailResponse = await this.rp({
+      method: 'POST',
+      url: 'https://eb-draw.herokuapp.com/customers/validateEmail',
+      headers: {
+        Accept: 'application/json, text/javascript, */*; q=0.01',
+        Referer: this.url,
+        Origin: 'https://shop.extrabutterny.com',
+        'sec-fetch-mode': 'cors',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      },
+      body: queryString
+    });
+    const JSONparsed = JSON.parse(validationEmailResponse);
+    return JSONparsed.customers[0];
+  };
+
+  login = (email, pass) => {
+    this.changeStatus('Logging In');
+    return this.rp({
+      method: 'POST',
+      url: 'https://shop.extrabutterny.com/account/login',
+      headers: {
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'no-cache',
+        'content-type': 'application/x-www-form-urlencoded',
+        pragma: 'no-cache',
+        'sec-fetch-mode': 'navigate',
+        'sec-fetch-site': 'same-origin',
+        'sec-fetch-user': '?1',
+        'upgrade-insecure-requests': '1',
+        Accept: 'application/json, text/javascript, */*; q=0.01',
+        Referer: 'https://shop.extrabutterny.com/account/login',
+        Origin: 'https://shop.extrabutterny.com',
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
+        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+      },
+      followRedirect: true,
+      followAllRedirects: true,
+      form: {
+        form_type: 'customer_login',
+        utf8: '✓',
+        'customer[email]': email,
+        'customer[password]': pass
+      }
+    });
   };
 
   makeEntry = async () => {
     this.changeStatus('Getting Variant ID For Size');
     const variant = await this.getIDForSize();
-    console.log(variant);
+    await this.login(this.profile.email, this.profile.password);
     this.changeStatus('Checking Email');
-    const checkEmailResponse = await this.checkEmail();
-    if (!checkEmailResponse) {
-      throw new Error('Email is not linked to an account');
-    }
-    const createCustomer = checkEmailResponse;
-    // if (!checkEmailResponse) {
-    //   console.log(checkEmailResponse);
-    //   this.changeStatus('Creating Customer');
-    //   const createCustomerResponse = await this.createCustomer();
-    //   createCustomer = JSON.parse(createCustomerResponse);
-    // } else {
-    //   createCustomer = checkEmailResponse;
-    // }
+    const createCustomer = await this.checkEmail();
     console.log(createCustomer);
     this.changeStatus('Submitting Raffle Info');
     const submitRaffleResponse = await this.submitRaffle(

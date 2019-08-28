@@ -105,7 +105,9 @@ export default class Homepage extends Component {
   };
 
   triggerDownload = () => {
+    const { setDowloading } = this.props;
     ipcRenderer.send(START_UPDATE);
+    setDowloading(true);
   };
 
   render() {
@@ -250,5 +252,6 @@ Homepage.propTypes = {
     rafflesEntered: PropTypes.number.isRequired,
     proxiesCreates: PropTypes.number.isRequired,
     accountsCreated: PropTypes.number.isRequired
-  }).isRequired
+  }).isRequired,
+  setDowloading: PropTypes.func.isRequired
 };
