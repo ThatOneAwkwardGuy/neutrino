@@ -7,6 +7,8 @@ const rp = require('request-promise').defaults({
   }
 });
 
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
 export const loadRaffleInfo = async (site, raffleLink) => {
   if (raffleLink !== '') {
     switch (site) {
@@ -166,26 +168,66 @@ const loadNakedCphRaffleInfo = async link => {
 };
 
 const loadFootpatrolUKRaffleInfo = async link => {
-  const response = await rp.get(link);
-  const $ = cheerio.load(response);
-  const styles = $('select[name="shoeColor"] option:not([disabled])')
-    .map((index, style) => ({
-      id: style.attribs.value,
-      name: style.attribs.value
-    }))
-    .toArray();
-  const sizes = $('select[name="shoeSize"] option:not([disabled])')
-    .map((index, size) => ({
-      id: size.attribs.value,
-      name: size.attribs.value
-    }))
-    .toArray();
-  return {
-    style: styles[0].id,
-    size: sizes[0].id,
-    styles,
-    sizes
-  };
+  return new Promise((resolve, reject) => {
+    try {
+      const win = new BrowserWindow({
+        width: 500,
+        height: 650,
+        show: true,
+        frame: true,
+        resizable: true,
+        focusable: true,
+        minimizable: true,
+        closable: true,
+        allowRunningInsecureContent: true,
+        webPreferences: {
+          webviewTag: true,
+          allowRunningInsecureContent: true,
+          nodeIntegration: true,
+          webSecurity: false
+        }
+      });
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.loadURL(link);
+      win.webContents.once('dom-ready', async () => {
+        await sleep(3000);
+        win.webContents.executeJavaScript(
+          'document.documentElement.innerHTML',
+          false,
+          innerHTML => {
+            const $ = cheerio.load(innerHTML);
+            const styles = $(
+              'select[placeholder="Colour"] option:not([disabled])'
+            )
+              .map((index, style) => ({
+                id: style.attribs.value,
+                name: style.children[0].data
+              }))
+              .toArray();
+            const sizes = $(
+              'select[placeholder="Shoe Size (UK/EU)"] option:not([disabled])'
+            )
+              .map((index, size) => ({
+                id: size.attribs.value,
+                name: size.attribs.value
+              }))
+              .toArray();
+            win.close();
+            resolve({
+              style: styles[0].id,
+              size: sizes[0].id,
+              styles,
+              sizes
+            });
+          }
+        );
+      });
+    } catch (e) {
+      reject(e);
+    }
+  });
 };
 
 const loadExtraButterRaffleInfo = async link => {

@@ -70,6 +70,7 @@ export default class FootpatrolUK {
         referrerPolicy: 'no-referrer-when-downgrade'
       },
       resolveWithFullResponse: true,
+      // url:`https://redeye.footpatrol.com/cgi-bin/rr/blank.gif?nourl=raffle&raf_name=Air%20Jordan%20I%20OG%20High%20Obsidian&raf_id=41863dd0-c989-11e9-b5ab-fb3f93aebdb8&email=${}&int_segment=GB&raf_firstname=${}&raf_lastname=${}&raf_house=${encodeURIComponent()}&raf_postcode=${encodeURIComponent()}&raf_mobile=${}&raf_size=UK%2011&raf_shoetype=0&sms_optout=0&emailpermit=0`,
       uri: `https://redeye.footpatrol.com/cgi-bin/rr/blank.gif?nourl=${tag}&firstName=${name}&email=${
         this.profile.email
       }&telephone=${this.profile.phoneNumber}&${shortTag}_shoetype=${
