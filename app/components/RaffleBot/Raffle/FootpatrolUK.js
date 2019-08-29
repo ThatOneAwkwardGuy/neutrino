@@ -1,4 +1,5 @@
 const rp = require('request-promise');
+const uuidv4 = require('uuid/v4');
 
 export default class FootpatrolUK {
   constructor(
@@ -56,32 +57,64 @@ export default class FootpatrolUK {
     this.forceUpdate();
   };
 
-  makeEntry = async () => {
-    this.changeStatus('Started');
-    const name = `${this.profile.deliveryFirstName}%20${this.profile.deliveryLastName}`;
-    const params = this.url.split('html')[1].split('?');
-    const tag = params[1].split('=')[1];
-    const shortTag = params[2].split('=')[1];
-    this.changeStatus('Submitting Raffle Entry');
-    const response = await this.rp({
+  submitEntry1 = token =>
+    this.rp({
+      uri: 'https://raffle-uat.cloud.jdplc.com/api/raffleEntry',
+      method: 'POST',
+      headers: {
+        accept: '*/*',
+        'accept-language': 'en-US,en;q=0.9',
+        'cache-control': 'no-cache',
+        'content-type': 'application/json',
+        pragma: 'no-cache',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-origin',
+        referrer: this.url,
+        referrerPolicy: 'no-referrer-when-downgrade'
+      },
+      strictSSL: false,
+      body: JSON.stringify({
+        campaign_name: this.raffleDetails.title,
+        raf_id: token,
+        timestamp: new Date().toGMTString(),
+        raf_size: this.size,
+        fascia: 'FOOTPATROL_GB'
+      })
+    });
+
+  submitEntry2 = token =>
+    this.rp({
       method: 'GET',
       headers: {
         referrer: this.url,
         referrerPolicy: 'no-referrer-when-downgrade'
       },
       resolveWithFullResponse: true,
-      // url:`https://redeye.footpatrol.com/cgi-bin/rr/blank.gif?nourl=raffle&raf_name=Air%20Jordan%20I%20OG%20High%20Obsidian&raf_id=41863dd0-c989-11e9-b5ab-fb3f93aebdb8&email=${}&int_segment=GB&raf_firstname=${}&raf_lastname=${}&raf_house=${encodeURIComponent()}&raf_postcode=${encodeURIComponent()}&raf_mobile=${}&raf_size=UK%2011&raf_shoetype=0&sms_optout=0&emailpermit=0`,
-      uri: `https://redeye.footpatrol.com/cgi-bin/rr/blank.gif?nourl=${tag}&firstName=${name}&email=${
+      uri: `https://redeye.footpatrol.com/cgi-bin/rr/blank.gif?nourl=raffle&raf_name=${encodeURIComponent(
+        this.raffleDetails.title
+      )}&raf_id=${token}&email=${
         this.profile.email
-      }&telephone=${this.profile.phoneNumber}&${shortTag}_shoetype=${
-        this.style
-      }&${shortTag}_shoesize=${this.size}&${shortTag}_cityofres=${
-        this.profile.city
-      }&yzemail=${tag}${shortTag}_countryofres=${encodeURIComponent(
-        this.profile.deliveryRegion
-      )}&emailpermit=0&sms_optout=0&site=FP&currency=GBP`
+      }&int_segment=GB&raf_firstname=${
+        this.profile.deliveryFirstName
+      }&raf_lastname=${
+        this.profile.deliveryLastName
+      }&raf_house=${encodeURIComponent(
+        this.profile.deliveryAddress
+      )}&raf_postcode=${encodeURIComponent(
+        this.profile.deliveryZip
+      )}&raf_mobile=${this.profile.phoneNumber}&raf_size=${encodeURIComponent(
+        this.size
+      )}&raf_shoetype=${this.style}&sms_optout=0&emailpermit=0`
     });
-    console.log(response);
+
+  makeEntry = async () => {
+    const token = uuidv4();
+    this.changeStatus('Submitting Raffle Token');
+    const response1 = await this.submitEntry1(token);
+    console.log(response1);
+    this.changeStatus('Submitting Raffle Entry');
+    const response2 = await this.submitEntry2(token);
+    console.log(response2);
     this.changeStatus('Successful Entry');
     this.incrementRaffles();
   };

@@ -10,7 +10,6 @@ import {
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 import { withToastManager } from 'react-toast-notifications';
-import { cardTypes } from '../../constants/constants';
 import { jigAddresses } from '../AddressJigger/functions';
 import {
   convertBaseToCybersole,
@@ -87,7 +86,8 @@ class ProfileCreator extends Component {
       billingCountry: '',
       billingRegion: '',
       billingZip: '',
-      password: ''
+      password: '',
+      instagram: ''
     };
   }
 
@@ -170,7 +170,6 @@ class ProfileCreator extends Component {
     const { clearProfileAttributes, toastManager } = this.props;
     clearProfileAttributes();
     this.setState({
-      cards: [],
       cardsInput: '',
       sameDeliveryBillingBool: false,
       oneCheckoutBool: false,
@@ -221,26 +220,10 @@ class ProfileCreator extends Component {
   };
 
   addCards = () => {
-    const { cardsInput, cards } = this.state;
-    const cardsArray = [];
-    const splitCardsArray = cardsInput.split(/\n/);
-    splitCardsArray.forEach(card => {
-      const cardArray = card.split(':');
-      if (
-        cardArray.length === 5 &&
-        cardTypes.includes(cardArray[1].toLowerCase())
-      ) {
-        cardsArray.push({
-          cardNumber: cardArray[0],
-          cardType: cardArray[1],
-          expMonth: cardArray[2],
-          expYear: cardArray[3],
-          cvv: cardArray[4]
-        });
-      }
-    });
+    const { addCards } = this.props;
+    const { cardsInput } = this.state;
+    addCards(cardsInput);
     this.setState({
-      cards: [...cards, ...cardsArray],
       cardsInput: ''
     });
   };
@@ -265,12 +248,6 @@ class ProfileCreator extends Component {
       billingCountry: deliveryCountry,
       billingRegion: deliveryRegion,
       billingZip: deliveryZip
-    });
-  };
-
-  clearCards = () => {
-    this.setState({
-      cards: []
     });
   };
 
@@ -318,7 +295,6 @@ class ProfileCreator extends Component {
       deliveryRegion,
       deliveryCountry,
       deliveryZip,
-      cards,
       fourCharPrefixBool,
       sameDeliveryBillingBool,
       oneCheckoutBool,
@@ -335,9 +311,11 @@ class ProfileCreator extends Component {
       billingZip,
       email,
       password,
+      instagram,
       phone,
       catchallEmail
     } = this.state;
+    const { cards } = this.props;
     const { toastManager } = this.props;
     const addresses = jigAddressesBool
       ? jigAddresses(
@@ -354,7 +332,7 @@ class ProfileCreator extends Component {
           `${deliveryAddress}\n${deliveryCity}\n${deliveryApt}\n${deliveryRegion}\n${deliveryCountry}\n${deliveryZip}`
         );
     const jiggedAddress =
-      addresses.length <= cards.length
+      addresses.length <= cards.length || cards.length === 0
         ? addresses
         : addresses.slice(0, cards.length);
     const convertedProfiles = jiggedAddress
@@ -393,10 +371,20 @@ class ProfileCreator extends Component {
           billingZip,
           email,
           password,
+          instagram,
           phone,
           catchallEmail
         };
-        const card = cards[index];
+        const card =
+          cards[index] !== undefined
+            ? cards[index]
+            : {
+                paymentCardholdersName: '',
+                cardNumber: '',
+                expMonth: '',
+                expYear: '',
+                cvv: ''
+              };
         const randomFirstName = randomNameBool ? randomName.first() : '';
         const randomLastName = randomNameBool ? randomName.last() : '';
         switch (bot) {
@@ -573,15 +561,16 @@ class ProfileCreator extends Component {
       catchallEmail,
       email,
       password,
+      instagram,
       randomPhoneNumberTemplate,
       phone,
-      cards,
       cardsInput,
       sameDeliveryBillingBool,
       oneCheckoutBool,
       jigAddressesBool,
       fourCharPrefixBool
     } = this.state;
+    const { cards, clearCards } = this.props;
     const columns = [
       {
         Header: '#',
@@ -675,6 +664,17 @@ class ProfileCreator extends Component {
                   name="password"
                   value={password}
                   placeholder="Password"
+                  onChange={this.handleChange}
+                />
+              </Col>
+              <Col xs="6">
+                <Label>Instagram</Label>
+                <Input
+                  type="text"
+                  id="instagram"
+                  name="instagram"
+                  value={instagram}
+                  placeholder="Instagram"
                   onChange={this.handleChange}
                 />
               </Col>
@@ -1025,7 +1025,7 @@ class ProfileCreator extends Component {
                 <Button onClick={this.addCards}>Add Cards</Button>
               </Col>
               <Col>
-                <Button onClick={this.clearCards}>Clear Cards</Button>
+                <Button onClick={clearCards}>Clear Cards</Button>
               </Col>
             </Row>
             <Row className="py-3 align-items-end noselect">
@@ -1082,7 +1082,10 @@ ProfileCreator.propTypes = {
   }).isRequired,
   clearProfileAttributes: PropTypes.func.isRequired,
   updateProfileAttribute: PropTypes.func.isRequired,
-  updateProfile: PropTypes.func.isRequired
+  updateProfile: PropTypes.func.isRequired,
+  addCards: PropTypes.func.isRequired,
+  clearCards: PropTypes.func.isRequired,
+  cards: PropTypes.arrayOf(PropTypes.any).isRequired
 };
 
 export default withToastManager(ProfileCreator);

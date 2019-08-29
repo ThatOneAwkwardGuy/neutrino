@@ -10,6 +10,10 @@ import footpatrol from '../../images/footpatrol.png';
 import nakedcph from '../../images/nakedcph.jpg';
 import oneblockdown from '../../images/oneblockdown.jpeg';
 import voostore from '../../images/voostore.png';
+// import kickz from '../../images/kickz.png';
+import cityblue from '../../images/cityblue.jpg';
+// import bstn from '../../images/bstn.png';
+import lapstoneandhammer from '../../images/lapstoneandhammer.jpg';
 import { loadRaffleInfo } from './functions';
 import { generateUEID } from '../../utils/utils';
 import { convertCSVToBase } from '../ProfileTaskEditorConverter/functions';
@@ -21,6 +25,9 @@ import END from './Raffle/END';
 import VooStore from './Raffle/VooStore';
 import Bodega from './Raffle/Bodega';
 import OneBlockDown from './Raffle/OneBlockDown';
+import CityBlue from './Raffle/CityBlue';
+import LapstoneAndHammer from './Raffle/LapstoneAndHammer';
+import BSTN from './Raffle/BSTN';
 
 const { dialog } = require('electron').remote;
 const fs = require('fs');
@@ -35,7 +42,11 @@ const sites = [
   { name: 'ExtraButter', img: extrabutter },
   { name: 'VooStore', img: voostore },
   { name: 'Bodega', img: bodega },
-  { name: 'OneBlockDown', img: oneblockdown }
+  { name: 'OneBlockDown', img: oneblockdown },
+  { name: 'CityBlue', img: cityblue },
+  { name: 'LapstoneAndHammer', img: lapstoneandhammer }
+  // { name: 'BSTN', img: bstn }
+  // { name: 'Kickz', img: kickz }
 ];
 
 export default class RaffleBot extends Component {
@@ -102,14 +113,18 @@ export default class RaffleBot extends Component {
   getRandomProxy = () => {
     const { proxies } = this.state;
     const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
-    if (randomProxy === undefined) {
+    const splitRandomProxy =
+      randomProxy !== undefined ? randomProxy.split(':') : undefined;
+    if (splitRandomProxy === undefined) {
       return '';
     }
-    if (randomProxy.length === 2) {
-      return `http://${randomProxy.ip}:${randomProxy.port}`;
+    if (splitRandomProxy.length === 2) {
+      return `http://${splitRandomProxy[0]}:${splitRandomProxy[1]}`;
     }
-    if (randomProxy.length === 4) {
-      return `http://${randomProxy.user}:${randomProxy.pass}@${randomProxy.ip}:${randomProxy.port}`;
+    if (splitRandomProxy.length === 4) {
+      return `http://${splitRandomProxy[2]}:${splitRandomProxy[3]}@${
+        splitRandomProxy[0]
+      }:${splitRandomProxy[1]}`;
     }
   };
 
@@ -184,124 +199,170 @@ export default class RaffleBot extends Component {
     } = this.state;
     const { incrementRaffles } = this.props;
     const newEntries = [];
-    this.setState({
-      proxies: proxiesInput.split('\n')
-    });
-    profiles.forEach(profile => {
-      let entry = false;
-      const sizeObject = sizes.find(
-        sizeOption => String(sizeOption.id) === size
-      );
-      const styleObject = styles.find(
-        styleOption => String(styleOption.id) === style
-      );
-      switch (site) {
-        case 'Footpatrol UK':
-          entry = new FootpatrolUK(
-            link,
-            profile,
-            site,
-            styleObject,
-            sizeObject,
-            'Not Started',
-            this.getRandomProxy(),
-            raffleDetails,
-            this.triggerRender,
-            incrementRaffles
+    this.setState(
+      {
+        proxies: proxiesInput.split('\n')
+      },
+      () => {
+        profiles.forEach(profile => {
+          let entry = false;
+          const sizeObject = sizes.find(
+            sizeOption => String(sizeOption.id) === size
           );
-          break;
-        case 'NakedCPH':
-          entry = new NakedCPH(
-            link,
-            profile,
-            site,
-            styleObject,
-            sizeObject,
-            'Not Started',
-            this.getRandomProxy(),
-            raffleDetails,
-            this.triggerRender,
-            incrementRaffles
+          const styleObject = styles.find(
+            styleOption => String(styleOption.id) === style
           );
-          break;
-        case 'ExtraButter':
-          entry = new ExtraButter(
-            link,
-            profile,
-            site,
-            styleObject,
-            sizeObject,
-            'Not Started',
-            this.getRandomProxy(),
-            raffleDetails,
-            this.triggerRender,
-            incrementRaffles
-          );
-          break;
-        case 'END':
-          entry = new END(
-            link,
-            profile,
-            site,
-            styleObject,
-            sizeObject,
-            'Not Started',
-            this.getRandomProxy(),
-            raffleDetails,
-            this.triggerRender,
-            incrementRaffles
-          );
-          break;
-        case 'VooStore':
-          entry = new VooStore(
-            link,
-            profile,
-            site,
-            styleObject,
-            sizeObject,
-            'Not Started',
-            this.getRandomProxy(),
-            raffleDetails,
-            this.triggerRender,
-            incrementRaffles
-          );
-          break;
-        case 'Bodega':
-          entry = new Bodega(
-            link,
-            profile,
-            site,
-            styleObject,
-            sizeObject,
-            'Not Started',
-            this.getRandomProxy(),
-            raffleDetails,
-            this.triggerRender,
-            incrementRaffles
-          );
-          break;
-        case 'OneBlockDown':
-          entry = new OneBlockDown(
-            link,
-            profile,
-            site,
-            styleObject,
-            sizeObject,
-            'Not Started',
-            this.getRandomProxy(),
-            raffleDetails,
-            this.triggerRender,
-            incrementRaffles
-          );
-          break;
-        default:
-          break;
+          switch (site) {
+            case 'Footpatrol UK':
+              entry = new FootpatrolUK(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'NakedCPH':
+              entry = new NakedCPH(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'ExtraButter':
+              entry = new ExtraButter(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'END':
+              entry = new END(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'VooStore':
+              entry = new VooStore(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'Bodega':
+              entry = new Bodega(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'OneBlockDown':
+              entry = new OneBlockDown(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'CityBlue':
+              entry = new CityBlue(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'LapstoneAndHammer':
+              entry = new LapstoneAndHammer(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'BSTN':
+              entry = new BSTN(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            default:
+              break;
+          }
+          if (entry) {
+            newEntries.push(entry);
+          }
+        });
+        this.setState({ entries: [...entries, ...newEntries] });
       }
-      if (entry) {
-        newEntries.push(entry);
-      }
-    });
-    this.setState({ entries: [...entries, ...newEntries] });
+    );
   };
 
   triggerRender = () => {
@@ -318,7 +379,11 @@ export default class RaffleBot extends Component {
 
   startAll = () => {
     const { entries } = this.state;
-    entries.forEach(entry => entry.start());
+    entries.forEach(entry => {
+      // eslint-disable-next-line no-param-reassign
+      entry.run = true;
+      entry.start();
+    });
   };
 
   stopAll = () => {
@@ -509,6 +574,7 @@ export default class RaffleBot extends Component {
                       {sites.map(raffleSite => (
                         <Col
                           xs="2"
+                          className="my-2"
                           onClick={() => {
                             this.handleRaffleSiteChange(raffleSite.name);
                           }}

@@ -40,12 +40,14 @@ export const convertBaseToCybersole = (
     email: baseProfile.useCatchallBool
       ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
       : baseProfile.email,
-    phone: baseProfile.randomPhoneNumberBool
-      ? baseProfile.randomPhoneNumberTemplate
-          .split('#')
-          .map(number => (number === '' ? getRandomInt(9) : number))
-          .join('')
-      : baseProfile.phone,
+    phone:
+      baseProfile.randomPhoneNumberBool &&
+      baseProfile.randomPhoneNumberTemplate !== ''
+        ? baseProfile.randomPhoneNumberTemplate
+            .split('#')
+            .map(number => (number === '' ? getRandomInt(9) : number))
+            .join('')
+        : baseProfile.phone,
     card: {
       name: `${baseProfile.deliveryFirstName} ${baseProfile.deliveryLastName}`,
       number: card.cardNumber.match(/.{1,4}/g).join(' '),
@@ -98,12 +100,14 @@ export const convertBaseToProjectDestroyer = (
     country: baseProfile.billingCountry,
     firstName: baseProfile.billingFirstName,
     lastName: baseProfile.billingLastName,
-    phone: baseProfile.randomPhoneNumberBool
-      ? baseProfile.randomPhoneNumberTemplate
-          .split('#')
-          .map(number => (number === '' ? getRandomInt(9) : number))
-          .join('')
-      : baseProfile.phone,
+    phone:
+      baseProfile.randomPhoneNumberBool &&
+      baseProfile.randomPhoneNumberTemplate !== ''
+        ? baseProfile.randomPhoneNumberTemplate
+            .split('#')
+            .map(number => (number === '' ? getRandomInt(9) : number))
+            .join('')
+        : baseProfile.phone,
     state: baseProfile.billingRegion,
     zipcode: baseProfile.billingZip
   },
@@ -132,12 +136,14 @@ export const convertBaseToProjectDestroyer = (
     lastName: baseProfile.randomName
       ? randomLastName
       : baseProfile.deliveryLastName,
-    phone: baseProfile.randomPhoneNumberBool
-      ? baseProfile.randomPhoneNumberTemplate
-          .split('#')
-          .map(number => (number === '' ? getRandomInt(9) : number))
-          .join('')
-      : baseProfile.phone,
+    phone:
+      baseProfile.randomPhoneNumberBool &&
+      baseProfile.randomPhoneNumberTemplate !== ''
+        ? baseProfile.randomPhoneNumberTemplate
+            .split('#')
+            .map(number => (number === '' ? getRandomInt(9) : number))
+            .join('')
+        : baseProfile.phone,
     state: baseProfile.deliveryRegion,
     zipcode: baseProfile.deliveryZip
   },
@@ -179,12 +185,14 @@ export const convertBaseToGhost = (
     State: baseProfile.billingRegion,
     Zip: baseProfile.billingZip
   },
-  Phone: baseProfile.randomPhoneNumberBool
-    ? baseProfile.randomPhoneNumberTemplate
-        .split('#')
-        .map(number => (number === '' ? getRandomInt(9) : number))
-        .join('')
-    : baseProfile.phone,
+  phone:
+    baseProfile.randomPhoneNumberBool &&
+    baseProfile.randomPhoneNumberTemplate !== ''
+      ? baseProfile.randomPhoneNumberTemplate
+          .split('#')
+          .map(number => (number === '' ? getRandomInt(9) : number))
+          .join('')
+      : baseProfile.phone,
   Name: `Profile - ${index}`,
   Country: baseProfile.deliveryCountry
 });
@@ -206,12 +214,14 @@ export const convertBaseToBalko = (
   email: baseProfile.useCatchallBool
     ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
     : baseProfile.email,
-  phone: baseProfile.randomPhoneNumberBool
-    ? baseProfile.randomPhoneNumberTemplate
-        .split('#')
-        .map(number => (number === '' ? getRandomInt(9) : number))
-        .join('')
-    : baseProfile.phone,
+  phone:
+    baseProfile.randomPhoneNumberBool &&
+    baseProfile.randomPhoneNumberTemplate !== ''
+      ? baseProfile.randomPhoneNumberTemplate
+          .split('#')
+          .map(number => (number === '' ? getRandomInt(9) : number))
+          .join('')
+      : baseProfile.phone,
   add1: baseProfile.deliveryAddress,
   add2: baseProfile.deliveryApt,
   state: baseProfile.deliveryRegion,
@@ -254,12 +264,14 @@ export const convertBaseToEVEAIO = (
       ? Countries[baseProfile.billingCountry].code
       : '',
   BillingZip: baseProfile.billingZip,
-  BillingPhone: baseProfile.randomPhoneNumberBool
-    ? baseProfile.randomPhoneNumberTemplate
-        .split('#')
-        .map(number => (number === '' ? getRandomInt(9) : number))
-        .join('')
-    : baseProfile.phone,
+  Billingphone:
+    baseProfile.randomPhoneNumberBool &&
+    baseProfile.randomPhoneNumberTemplate !== ''
+      ? baseProfile.randomPhoneNumberTemplate
+          .split('#')
+          .map(number => (number === '' ? getRandomInt(9) : number))
+          .join('')
+      : baseProfile.phone,
   BillingEmail: baseProfile.useCatchallBool
     ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
     : baseProfile.email,
@@ -278,12 +290,14 @@ export const convertBaseToEVEAIO = (
       ? Countries[baseProfile.deliveryCountry].code
       : '',
   ShippingZip: baseProfile.deliveryZip,
-  ShippingPhone: baseProfile.randomPhoneNumberBool
-    ? baseProfile.randomPhoneNumberTemplate
-        .split('#')
-        .map(number => (number === '' ? getRandomInt(9) : number))
-        .join('')
-    : baseProfile.phone,
+  Shippingphone:
+    baseProfile.randomPhoneNumberBool &&
+    baseProfile.randomPhoneNumberTemplate !== ''
+      ? baseProfile.randomPhoneNumberTemplate
+          .split('#')
+          .map(number => (number === '' ? getRandomInt(9) : number))
+          .join('')
+      : baseProfile.phone,
   ShippingEmail: baseProfile.useCatchallBool
     ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
     : baseProfile.email,
@@ -326,12 +340,14 @@ export const convertBaseToPhantom = (
   ExpMonth: card.expMonth,
   ExpYear: card.expYear,
   Name: `Profile - ${index}`,
-  Phone: baseProfile.randomPhoneNumberBool
-    ? baseProfile.randomPhoneNumberTemplate
-        .split('#')
-        .map(number => (number === '' ? getRandomInt(9) : number))
-        .join('')
-    : baseProfile.phone,
+  phone:
+    baseProfile.randomPhoneNumberBool &&
+    baseProfile.randomPhoneNumberTemplate !== ''
+      ? baseProfile.randomPhoneNumberTemplate
+          .split('#')
+          .map(number => (number === '' ? getRandomInt(9) : number))
+          .join('')
+      : baseProfile.phone,
   Same: baseProfile.sameDeliveryBillingBool,
   Shipping: {
     Address: baseProfile.deliveryAddress,
@@ -362,12 +378,14 @@ export const convertBaseToDashe = (
     country: baseProfile.billingCountry,
     firstName: baseProfile.billingFirstName,
     lastName: baseProfile.billingLastName,
-    phone: baseProfile.randomPhoneNumberBool
-      ? baseProfile.randomPhoneNumberTemplate
-          .split('#')
-          .map(number => (number === '' ? getRandomInt(9) : number))
-          .join('')
-      : baseProfile.phone,
+    phone:
+      baseProfile.randomPhoneNumberBool &&
+      baseProfile.randomPhoneNumberTemplate !== ''
+        ? baseProfile.randomPhoneNumberTemplate
+            .split('#')
+            .map(number => (number === '' ? getRandomInt(9) : number))
+            .join('')
+        : baseProfile.phone,
     state: baseProfile.billingRegion,
     zipcode: baseProfile.billingZip
   },
@@ -436,12 +454,14 @@ export const convertBaseToTKS = (
             baseProfile.billingRegion
           ]
         : '',
-    Phone: baseProfile.randomPhoneNumberBool
-      ? baseProfile.randomPhoneNumberTemplate
-          .split('#')
-          .map(number => (number === '' ? getRandomInt(9) : number))
-          .join('')
-      : baseProfile.phone
+    phone:
+      baseProfile.randomPhoneNumberBool &&
+      baseProfile.randomPhoneNumberTemplate !== ''
+        ? baseProfile.randomPhoneNumberTemplate
+            .split('#')
+            .map(number => (number === '' ? getRandomInt(9) : number))
+            .join('')
+        : baseProfile.phone
   },
   Shipping: {
     Pccc: null,
@@ -470,12 +490,14 @@ export const convertBaseToTKS = (
             baseProfile.deliveryRegion
           ]
         : '',
-    Phone: baseProfile.randomPhoneNumberBool
-      ? baseProfile.randomPhoneNumberTemplate
-          .split('#')
-          .map(number => (number === '' ? getRandomInt(9) : number))
-          .join('')
-      : baseProfile.phone
+    phone:
+      baseProfile.randomPhoneNumberBool &&
+      baseProfile.randomPhoneNumberTemplate !== ''
+        ? baseProfile.randomPhoneNumberTemplate
+            .split('#')
+            .map(number => (number === '' ? getRandomInt(9) : number))
+            .join('')
+        : baseProfile.phone
   },
   Payment: {
     CardHolder: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
@@ -622,12 +644,14 @@ export const convertBaseToNSB = (
           ]
         : '',
     zip: baseProfile.deliveryZip,
-    phone: baseProfile.randomPhoneNumberBool
-      ? baseProfile.randomPhoneNumberTemplate
-          .split('#')
-          .map(number => (number === '' ? getRandomInt(9) : number))
-          .join('')
-      : baseProfile.phone
+    phone:
+      baseProfile.randomPhoneNumberBool &&
+      baseProfile.randomPhoneNumberTemplate !== ''
+        ? baseProfile.randomPhoneNumberTemplate
+            .split('#')
+            .map(number => (number === '' ? getRandomInt(9) : number))
+            .join('')
+        : baseProfile.phone
   },
   name: `Profile - ${index}`,
   cc: {
@@ -657,12 +681,14 @@ export const convertBaseToSOLEAIO = (
   Email: baseProfile.useCatchallBool
     ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
     : baseProfile.email,
-  Phone: baseProfile.randomPhoneNumberBool
-    ? baseProfile.randomPhoneNumberTemplate
-        .split('#')
-        .map(number => (number === '' ? getRandomInt(9) : number))
-        .join('')
-    : baseProfile.phone,
+  phone:
+    baseProfile.randomPhoneNumberBool &&
+    baseProfile.randomPhoneNumberTemplate !== ''
+      ? baseProfile.randomPhoneNumberTemplate
+          .split('#')
+          .map(number => (number === '' ? getRandomInt(9) : number))
+          .join('')
+      : baseProfile.phone,
   ShippingFirstName: baseProfile.randomName
     ? randomFirstName
     : baseProfile.deliveryFirstName,
@@ -747,6 +773,7 @@ export const convertBaseToCSV = (
     ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
     : baseProfile.email,
   password: baseProfile.password,
+  instagram: baseProfile.instagram,
   paymentCardholdersName: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
   paymentCardnumber: card.cardNumber,
   paymentexpMonth: card.expMonth,

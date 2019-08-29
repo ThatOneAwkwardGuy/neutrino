@@ -46,6 +46,7 @@ import {
   UPDATE_DOWNLOADED,
   CHECK_FOR_UPDATES
 } from '../../constants/ipcConstants';
+import { cardTypes } from '../../constants/constants';
 
 library.add(fab);
 library.add(fas);
@@ -65,7 +66,8 @@ class Home extends Component {
       infoModalHeader: '',
       infoModalBody: '',
       infoModalFunction: false,
-      infoModalButtonText: ''
+      infoModalButtonText: '',
+      cards: []
     };
   }
 
@@ -97,6 +99,34 @@ class Home extends Component {
 
   setRaffleInfo = raffleInfo => {
     this.setState({ raffleInfo });
+  };
+
+  addCards = cardsInput => {
+    const { cards } = this.state;
+    const cardsArray = [];
+    const splitCardsArray = cardsInput.split(/\n/);
+    splitCardsArray.forEach(card => {
+      const cardArray = card.split(':');
+      if (
+        cardArray.length === 5 &&
+        cardTypes.includes(cardArray[1].toLowerCase())
+      ) {
+        cardsArray.push({
+          cardNumber: cardArray[0],
+          cardType: cardArray[1],
+          expMonth: cardArray[2],
+          expYear: cardArray[3],
+          cvv: cardArray[4]
+        });
+      }
+    });
+    this.setState({
+      cards: [...cards, ...cardsArray]
+    });
+  };
+
+  clearCards = () => {
+    this.setState({ cards: [] });
   };
 
   currentWindowToText = currentWindow => {
@@ -207,7 +237,8 @@ class Home extends Component {
       infoModalHeader,
       infoModalBody,
       infoModalFunction,
-      infoModalButtonText
+      infoModalButtonText,
+      cards
     } = this.state;
     const {
       addProxyProviderAccount,
@@ -237,7 +268,14 @@ class Home extends Component {
       clearProxies,
       history
     } = this.props;
-    const { setLoading, setRaffleInfo, setInfoModal, setDownloading } = this;
+    const {
+      setLoading,
+      setRaffleInfo,
+      setInfoModal,
+      setDownloading,
+      addCards,
+      clearCards
+    } = this;
     const appRoutes = [
       {
         path: routes.HOME,
@@ -249,7 +287,8 @@ class Home extends Component {
           setRaffleInfo,
           history,
           home,
-          setDownloading
+          setDownloading,
+          updateDownloading
         }
       },
       {
@@ -278,7 +317,8 @@ class Home extends Component {
           removeAllCreatedAccounts,
           accounts,
           incrementAccounts,
-          setInfoModal
+          setInfoModal,
+          cards
         }
       },
       {
@@ -321,7 +361,10 @@ class Home extends Component {
           profile,
           updateProfileAttribute,
           clearProfileAttributes,
-          updateProfile
+          updateProfile,
+          cards,
+          addCards,
+          clearCards
         }
       },
       {

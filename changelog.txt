@@ -27,6 +27,23 @@ Need to add animations
 - Account creator bug fixes
 - Downloading Update status more obvious
 
+2.0.5
+- ExtraButter Raffle fixes
+- Support for new FootPatrol raffle site
+- Profile Generator will now generate profiles without cards entered
+- Random Phone Template Fix for Profile converter
+- Cards added to Profile Generator will now also be stored in profiles exported from the Account Creator
+- Fixed Start button not working in Raffle Bot
+
+
+2.0.6
+- Proxy fixes for Raffle Bot
+
+2.0.7
+- Proxy fixes for Account Creator
+- Added Instagram account field to profile gen
+- Added CityBlue to Raffle Bot
+- Added LapstoneAndHammer to Raffle Bot
 
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a

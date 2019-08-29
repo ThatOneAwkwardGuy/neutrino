@@ -5146,9 +5146,9 @@ electron-updater@^4.1.2:
     pako "^1.0.10"
     semver "^6.2.0"
 
-electron@^6.0.1:
-  version "6.0.2"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-6.0.2.tgz#437f3ac2bcb42116d92a3f1084280e0b2cff1493"
+electron@^6.0.5:
+  version "6.0.5"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-6.0.5.tgz#f4c25126001b91be6e935005577eb5427f11a50e"
   dependencies:
     "@types/node" "^10.12.18"
     electron-download "^4.1.0"
@@ -10321,6 +10321,13 @@ pify@^4.0.0, pify@^4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/pify/-/pify-4.0.1.tgz#4b2cd25c50d598735c50292224fd8c6df41e3231"
 
+ping@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/ping/-/ping-0.2.2.tgz#180fb7508c1dc74793849bce35c8073f9965bce2"
+  dependencies:
+    q "1.x"
+    underscore "^1.8.3"
+
 pinkie-promise@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/pinkie-promise/-/pinkie-promise-1.0.0.tgz#d1da67f5482563bb7cf57f286ae2822ecfbf3670"
@@ -10998,7 +11005,7 @@ pure-color@^1.2.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/pure-color/-/pure-color-1.3.0.tgz#1fe064fb0ac851f0de61320a8bf796836422f33e"
 
-q@^1.1.2, q@~1.5.0:
+q@1.x, q@^1.1.2, q@~1.5.0:
   version "1.5.1"
   resolved "https://registry.yarnpkg.com/q/-/q-1.5.1.tgz#7e32f75b41381291d04611f1bf14109ac00651d7"
 
@@ -13707,7 +13714,7 @@ ultron@~1.1.0:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/ultron/-/ultron-1.1.1.tgz#9fe1536a10a664a65266a1e3ccf85fd36302bc9c"
 
-underscore@1.9.1:
+underscore@1.9.1, underscore@^1.8.3:
   version "1.9.1"
   resolved "https://registry.yarnpkg.com/underscore/-/underscore-1.9.1.tgz#06dce34a0e68a7babc29b365b8e74b8925203961"
 

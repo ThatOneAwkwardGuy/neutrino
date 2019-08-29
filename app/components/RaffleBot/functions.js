@@ -28,6 +28,14 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadBodegaRaffleInfo(raffleLink);
       case 'OneBlockDown':
         return loadOneBlockDownRaffleInfo(raffleLink);
+      // case 'Kickz':
+      // return loadKickzRaffleInfo(raffleLink);
+      case 'CityBlue':
+        return loadCityBlueRaffleInfo(raffleLink);
+      case 'LapstoneAndHammer':
+        return loadLapstoneAndHammerRaffleInfo(raffleLink);
+      case 'BSTN':
+        return loadBSTNRaffleInfo(raffleLink);
       default:
         return undefined;
     }
@@ -167,8 +175,8 @@ const loadNakedCphRaffleInfo = async link => {
   });
 };
 
-const loadFootpatrolUKRaffleInfo = async link => {
-  return new Promise((resolve, reject) => {
+const loadFootpatrolUKRaffleInfo = async link =>
+  new Promise((resolve, reject) => {
     try {
       const win = new BrowserWindow({
         width: 500,
@@ -214,12 +222,19 @@ const loadFootpatrolUKRaffleInfo = async link => {
                 name: size.attribs.value
               }))
               .toArray();
+            const title = $('#title')
+              .contents()
+              .first()
+              .text();
             win.close();
             resolve({
               style: styles[0].id,
               size: sizes[0].id,
               styles,
-              sizes
+              sizes,
+              raffleDetails: {
+                title
+              }
             });
           }
         );
@@ -228,7 +243,6 @@ const loadFootpatrolUKRaffleInfo = async link => {
       reject(e);
     }
   });
-};
 
 const loadExtraButterRaffleInfo = async link => {
   const response = await rp.get(`${link.split('?')[0]}.json`);
@@ -369,6 +383,132 @@ const loadOneBlockDownRaffleInfo = async link =>
             );
           }
         );
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+
+// const loadKickzRaffleInfo = raffleLink => {};
+
+const loadCityBlueRaffleInfo = async link => {
+  const response = await rp.get(link);
+  const $ = cheerio.load(response);
+  const formLink = $('#mc_embed_signup form').attr('action');
+  const id = $('#mc_embed_signup_scroll > div[aria-hidden=true] input').attr(
+    'name'
+  );
+  const sizes = $('select[name="MMERGE3"] option:not([value=""])')
+    .map((index, el) => ({ id: el.attribs.value, name: el.attribs.value }))
+    .toArray();
+  return {
+    styleInput: false,
+    sizeInput: true,
+    sizes,
+    size: sizes[0].id,
+    raffleDetails: {
+      formLink,
+      id
+    }
+  };
+};
+
+const loadLapstoneAndHammerRaffleInfo = async link => {
+  const response = await rp.get(link);
+  const $ = cheerio.load(response);
+  const formLink = $('#mc_embed_signup form').attr('action');
+  const id = $('#mc_embed_signup_scroll > div[aria-hidden=true] input').attr(
+    'name'
+  );
+  const sizes = $('select[name="MMERGE3"] option:not([value=""])')
+    .map((index, el) => ({ id: el.attribs.value, name: el.attribs.value }))
+    .toArray();
+  return {
+    styleInput: false,
+    sizeInput: true,
+    sizes,
+    size: sizes[0].id,
+    raffleDetails: {
+      formLink,
+      id
+    }
+  };
+};
+
+const processBSTNRaffleInfo = (body, cookies) => {
+  console.log(cookies);
+  const $ = cheerio.load(body);
+  const sizes = $(
+    '#registration-form > div > div > div > select:first-child option:not([value=""])'
+  )
+    .map((index, el) => ({ id: el.attribs.value, name: el.attribs.value }))
+    .toArray();
+  return {
+    styleInput: false,
+    sizeInput: true,
+    sizes,
+    size: sizes[0].id,
+    raffleDetails: {}
+  };
+};
+
+const loadBSTNRaffleInfo = async link =>
+  new Promise((resolve, reject) => {
+    try {
+      const win = new BrowserWindow({
+        width: 500,
+        height: 650,
+        show: true,
+        frame: true,
+        resizable: true,
+        focusable: true,
+        minimizable: true,
+        closable: true,
+        allowRunningInsecureContent: true,
+        webPreferences: {
+          webviewTag: true,
+          allowRunningInsecureContent: true,
+          nodeIntegration: true,
+          webSecurity: false
+        }
+      });
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.loadURL(link, {
+        userAgent:
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
+      });
+      win.webContents.once('dom-ready', async () => {
+        const result = await win.webContents.executeJavaScript(
+          'document.documentElement.innerHTML',
+          false
+        );
+        if (result.includes('Raffle registration ends in')) {
+          const cookies = await win.webContents.executeJavaScript(
+            'document.cookie',
+            true
+          );
+          win.close();
+          resolve(processBSTNRaffleInfo(result, cookies));
+        } else {
+          win.webContents.once('dom-ready', async () => {
+            const result2 = await win.webContents.executeJavaScript(
+              'document.documentElement.innerHTML',
+              false
+            );
+            if (result2.includes('Raffle registration ends in')) {
+              const cookies = await win.webContents.executeJavaScript(
+                'document.cookie',
+                true
+              );
+              win.close();
+              resolve(processBSTNRaffleInfo(result2, cookies));
+            } else {
+              reject(new Error('Unable To Load Raffle Info'));
+            }
+          });
+        }
       });
     } catch (error) {
       reject(error);

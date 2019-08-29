@@ -49,7 +49,17 @@ class AccountCreator extends Component {
   }
 
   exportAccountsAsProfiles = () => {
-    const { accounts, profile } = this.props;
+    const { accounts, profile, cards } = this.props;
+    const selectedCard =
+      cards.length === 0
+        ? {
+            paymentCardholdersName: '',
+            cardNumber: '',
+            expMonth: '',
+            expYear: '',
+            cvv: ''
+          }
+        : cards[Math.floor(Math.random() * cards.length)];
     const profiles = accounts.accounts.map(account => ({
       profileID: `${account.site}-${account.email}`,
       deliveryCountry: profile.deliveryCountry,
@@ -69,13 +79,7 @@ class AccountCreator extends Component {
       billingRegion: profile.billingRegion,
       billingApt: profile.billingApt,
       phone: profile.phone,
-      card: {
-        paymentCardholdersName: '',
-        cardNumber: '',
-        expMonth: '',
-        expYear: '',
-        cvv: ''
-      },
+      card: selectedCard,
       email: account.email,
       password: account.pass,
       sameDeliveryBillingBool: profile.sameDeliveryBillingBool,
@@ -207,7 +211,21 @@ class AccountCreator extends Component {
   getRandomProxy = () => {
     const { proxies } = this.state;
     const proxiesArray = proxies.split(/\n/);
-    return proxiesArray[Math.floor(Math.random() * proxiesArray.length)];
+    const randomProxy =
+      proxiesArray[Math.floor(Math.random() * proxiesArray.length)];
+    const splitRandomProxy =
+      randomProxy !== undefined ? randomProxy.split(':') : undefined;
+    if (splitRandomProxy === undefined) {
+      return '';
+    }
+    if (splitRandomProxy.length === 2) {
+      return `http://${splitRandomProxy[0]}:${splitRandomProxy[1]}`;
+    }
+    if (splitRandomProxy.length === 4) {
+      return `http://${splitRandomProxy[2]}:${splitRandomProxy[3]}@${
+        splitRandomProxy[0]
+      }:${splitRandomProxy[1]}`;
+    }
   };
 
   createOneBlockDownAccount = async () => {
@@ -229,7 +247,7 @@ class AccountCreator extends Component {
     const response = await request({
       method: 'POST',
       uri: 'https://www.oneblockdown.it/index.php',
-      proxy: useProxies ? `http://${this.getRandomProxy()}` : '',
+      proxy: useProxies ? this.getRandomProxy() : '',
       headers: {
         accept: 'application/json, text/javascript, */*; q=0.01',
         'accept-language': 'en-US,en;q=0.9',
@@ -295,7 +313,7 @@ class AccountCreator extends Component {
       method: 'POST',
       url: `${sites[site]}/account`,
       followRedirect: true,
-      proxy: useProxies ? `http://${this.getRandomProxy()}` : '',
+      proxy: useProxies ? this.getRandomProxy() : '',
       resolveWithFullResponse: true,
       followAllRedirects: true,
       jar: this.cookieJars[tokenID],
@@ -390,7 +408,7 @@ class AccountCreator extends Component {
       const accountFirstName = randomName ? random.first() : firstName;
       const accountLastName = randomName ? random.last() : lastName;
       const tokenID = uuidv4();
-      const proxy = useProxies ? `http://${this.getRandomProxy()}` : '';
+      const proxy = useProxies ? this.getRandomProxy() : '';
       const window = await createNewWindow(tokenID, proxy);
       window.webContents.on('close', () => {
         reject(new Error('Closed Window Before Finished'));
@@ -659,6 +677,7 @@ AccountCreator.propTypes = {
   setLoading: PropTypes.func.isRequired,
   incrementAccounts: PropTypes.func.isRequired,
   setInfoModal: PropTypes.func.isRequired,
+  cards: PropTypes.arrayOf(PropTypes.any).isRequired,
   profile: PropTypes.shape({
     sameDeliveryBillingBool: PropTypes.bool.isRequired,
     oneCheckoutBool: PropTypes.bool.isRequired,

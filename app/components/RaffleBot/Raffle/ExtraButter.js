@@ -22,6 +22,7 @@ export default class ExtraButter {
   ) {
     this.tokenID = uuidv4();
     this.url = url;
+    this.proxy = proxy;
     this.profile = profile;
     this.run = false;
     this.site = site;
@@ -48,13 +49,17 @@ export default class ExtraButter {
   };
 
   start = async () => {
+    console.log(this.proxy);
     while (this.run) {
       try {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
-        this.changeStatus(`Error Submitting Raffle - ${error.message}`);
+        if (error.statusCode === 400) {
+          this.changeStatus(`Try Again`);
+        } else {
+          this.changeStatus(`Error Submitting Raffle - ${error.message}`);
+        }
       }
       this.run = false;
     }
@@ -92,27 +97,40 @@ export default class ExtraButter {
       }
     });
 
-  submitRaffle = (variant, customerID) =>
-    this.rp({
+  submitRaffle = (variant, customerID) => {
+    const payload = {
+      shipping_first_name: this.profile.deliveryFirstName,
+      shipping_last_name: this.profile.deliveryLastName,
+      customer_id: customerID,
+      variant_id: variant.id,
+      street_address: this.profile.deliveryAddress,
+      city: this.profile.deliveryCity,
+      zip: this.profile.deliveryZip,
+      state:
+        longToShortStates[this.profile.deliveryRegion] !== undefined
+          ? longToShortStates[this.profile.deliveryRegion]
+          : 'none',
+      phone:
+        this.profile.phoneNumber !== undefined
+          ? this.profile.phoneNumber
+          : '12345678910',
+      country: this.profile.deliveryCountry,
+      delivery_method: 'online'
+    };
+    const queryString = new URLSearchParams(getFormData(payload)).toString();
+    return this.rp({
       method: 'POST',
       uri: 'https://eb-draw.herokuapp.com/draws/entries/new',
-      form: {
-        shipping_first_name: this.profile.deliveryFirstName,
-        shipping_last_name: this.profile.deliveryLastName,
-        customer_id: customerID,
-        variant_id: variant.id,
-        street_address: this.profile.deliveryAddress,
-        city: this.profile.deliveryCity,
-        zip: this.profile.deliveryZip,
-        state:
-          longToShortStates[this.profile.deliveryRegion] !== undefined
-            ? longToShortStates[this.profile.deliveryRegion]
-            : 'none',
-        phone: this.profile.phoneNumber,
-        country: this.profile.deliveryRegion,
-        delivery_method: 'online'
-      }
+      headers: {
+        accept: 'application/json, text/javascript, */*; q=0.01',
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        'sec-fetch-mode': 'cors',
+        referrer: this.url,
+        referrerPolicy: 'no-referrer-when-downgrade'
+      },
+      body: queryString
     });
+  };
 
   tokenizeCard = () =>
     this.rp({
@@ -158,6 +176,7 @@ export default class ExtraButter {
 
   checkEmail = async () => {
     this.changeStatus('Getting Captcha');
+    await this.rp.get(this.url);
     const captchaResponse = await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle
       cookiesObject: {},
@@ -177,10 +196,11 @@ export default class ExtraButter {
       method: 'POST',
       url: 'https://eb-draw.herokuapp.com/customers/validateEmail',
       headers: {
-        Accept: 'application/json, text/javascript, */*; q=0.01',
-        Referer: this.url,
+        accept: 'application/json, text/javascript, */*; q=0.01',
+        referrer: this.url,
         Origin: 'https://shop.extrabutterny.com',
         'sec-fetch-mode': 'cors',
+        referrerPolicy: 'no-referrer-when-downgrade',
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -223,24 +243,33 @@ export default class ExtraButter {
     });
   };
 
+  getCustomerID = async () => {
+    const body = await this.rp.get(this.url);
+    const regex = /(?:"|')(customerId)(?:"|')(?=:)(?::\s*)(?:"|')?(?<value>true|false|[0-9a-zA-Z+\-.$]*)/g;
+    const customerId = regex.exec(body);
+    if (customerId.length === 3) {
+      return customerId[2];
+    }
+    throw new Error('Unable to find Customer ID');
+  };
+
   makeEntry = async () => {
     this.changeStatus('Getting Variant ID For Size');
     const variant = await this.getIDForSize();
     await this.login(this.profile.email, this.profile.password);
+    const customerId = await this.getCustomerID();
+    console.log(customerId);
     this.changeStatus('Checking Email');
-    const createCustomer = await this.checkEmail();
-    console.log(createCustomer);
-    this.changeStatus('Submitting Raffle Info');
-    const submitRaffleResponse = await this.submitRaffle(
-      variant,
-      createCustomer.id
-    );
-    const submitRaffle = JSON.parse(submitRaffleResponse);
-    console.log(submitRaffle);
+    // const createCustomer = await this.checkEmail();
+    // console.log(createCustomer);
     this.changeStatus('Submitting Card Info');
     const tokenizeCardResponse = await this.tokenizeCard();
     const tokenizeCard = JSON.parse(tokenizeCardResponse);
     console.log(tokenizeCard);
+    this.changeStatus('Submitting Raffle Info');
+    const submitRaffleResponse = await this.submitRaffle(variant, customerId);
+    const submitRaffle = JSON.parse(submitRaffleResponse);
+    console.log(submitRaffle);
     this.changeStatus('Submitting Raffle Entry');
     const completeRaffleResponse = await this.completeRaffle(
       submitRaffle.id,

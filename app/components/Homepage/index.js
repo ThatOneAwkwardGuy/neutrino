@@ -112,7 +112,7 @@ export default class Homepage extends Component {
 
   render() {
     const { raffles } = this.state;
-    const { home } = this.props;
+    const { home, updateDownloading } = this.props;
     return (
       <Row className="h-100">
         <Col className="h-100 panel-left h-100">
@@ -170,7 +170,9 @@ export default class Homepage extends Component {
                   <Col>{this.returnUpdateStatus()}</Col>
                 </Row>
                 <Row>
-                  <Col className="mb-3">{this.returnUpdateButton()}</Col>
+                  <Col className="mb-3">
+                    {updateDownloading ? null : this.returnUpdateButton()}
+                  </Col>
                 </Row>
               </Container>
             </Row>
@@ -253,5 +255,6 @@ Homepage.propTypes = {
     proxiesCreates: PropTypes.number.isRequired,
     accountsCreated: PropTypes.number.isRequired
   }).isRequired,
-  setDowloading: PropTypes.func.isRequired
+  setDowloading: PropTypes.func.isRequired,
+  updateDownloading: PropTypes.bool.isRequired
 };
