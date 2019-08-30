@@ -55,6 +55,7 @@ export default class ExtraButter {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
+        console.log(error);
         if (error.statusCode === 400) {
           this.changeStatus(`Try Again`);
         } else {
@@ -259,7 +260,7 @@ export default class ExtraButter {
     await this.login(this.profile.email, this.profile.password);
     const customerId = await this.getCustomerID();
     console.log(customerId);
-    this.changeStatus('Checking Email');
+    // this.changeStatus('Checking Email');
     // const createCustomer = await this.checkEmail();
     // console.log(createCustomer);
     this.changeStatus('Submitting Card Info');

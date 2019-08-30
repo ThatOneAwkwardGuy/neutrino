@@ -40,7 +40,7 @@ One-Click Generator
 One-Click Tester
 Profile Generator (Currently supports Cybersole, Project Destroyer, Ghost, Balko, EVE AIO, Phantom, Dashe, TKS, Hastey, Kodai, NSB, SOLE AIO, Neutrino and CSV)
 Profile Converter (Currently supports Cybersole, Project Destroyer, Ghost, Balko, EVE AIO, Phantom, Dashe, TKS, Hastey, Kodai, NSB, SOLE AIO, Neutrino and CSV)
-Raffle Bot (Currently supporting Footpatrol UK, NakedCPH, ExtraButter, VooStore, Bodega and OneBlockDown)
+Raffle Bot (Currently supporting Footpatrol UK, NakedCPH, ExtraButter, VooStore, Bodega, OneBlockDown, CityBlue & LapstoneAndHammer)
 
 **GB Prices**
 Monthly: $20
