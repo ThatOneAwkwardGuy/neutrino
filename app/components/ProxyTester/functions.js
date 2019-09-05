@@ -45,7 +45,7 @@ export const copyProxies = (proxies, maxPing) => {
   const proxyString = filteredProxies
     .map(proxy => {
       if (proxy.user !== 'none' && proxy.pass !== 'none') {
-        return `${proxy.user}:${proxy.pass}:${proxy.ip}:${proxy.port}`;
+        return `${proxy.ip}:${proxy.port}:${proxy.user}:${proxy.pass}`;
       }
       return `${proxy.ip}:${proxy.port}`;
     })

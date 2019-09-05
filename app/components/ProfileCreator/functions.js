@@ -1,5 +1,8 @@
 import Countries from '../../constants/countries';
-import { tksCardMappings } from '../../constants/constants';
+import {
+  tksCardMappings,
+  longToShortCountries
+} from '../../constants/constants';
 
 const uuidv4 = require('uuid/v4');
 const randomName = require('random-name');
@@ -150,53 +153,6 @@ export const convertBaseToProjectDestroyer = (
   title: `Profile - ${index}`
 });
 
-export const convertBaseToGhost = (
-  index,
-  baseProfile,
-  card,
-  randomFirstName,
-  randomLastName
-) => ({
-  CCNumber: card.cardNumber,
-  CVV: card.cvv,
-  ExpMonth: card.expMonth,
-  ExpYear: card.expYear,
-  CardType: getCardType(card.cardNumber),
-  Same: baseProfile.sameDeliveryBillingBool,
-  Shipping: {
-    FirstName: baseProfile.randomName
-      ? randomFirstName
-      : baseProfile.deliveryFirstName,
-    LastName: baseProfile.randomName
-      ? randomLastName
-      : baseProfile.deliveryLastName,
-    Address: baseProfile.deliveryAddress,
-    Apt: baseProfile.deliveryApt,
-    City: baseProfile.deliveryCity,
-    State: baseProfile.deliveryRegion,
-    Zip: baseProfile.deliveryZip
-  },
-  Billing: {
-    FirstName: baseProfile.billingFirstName,
-    LastName: baseProfile.billingLastName,
-    Address: baseProfile.billingAddress,
-    Apt: baseProfile.billingApt,
-    City: baseProfile.billingCity,
-    State: baseProfile.billingRegion,
-    Zip: baseProfile.billingZip
-  },
-  phone:
-    baseProfile.randomPhoneNumberBool &&
-    baseProfile.randomPhoneNumberTemplate !== ''
-      ? baseProfile.randomPhoneNumberTemplate
-          .split('#')
-          .map(number => (number === '' ? getRandomInt(9) : number))
-          .join('')
-      : baseProfile.phone,
-  Name: `Profile - ${index}`,
-  Country: baseProfile.deliveryCountry
-});
-
 export const convertBaseToBalko = (
   index,
   baseProfile,
@@ -327,20 +283,30 @@ export const convertBaseToPhantom = (
     City: baseProfile.billingCity,
     FirstName: baseProfile.billingFirstName,
     LastName: baseProfile.billingLastName,
-    State: baseProfile.billingRegion,
-    Zipcode: baseProfile.billingZip
+    State:
+      Countries[baseProfile.billingCountry].province_codes[
+        baseProfile.billingRegion
+      ] !== undefined
+        ? Countries[baseProfile.billingCountry].province_codes[
+            baseProfile.billingRegion
+          ]
+        : '',
+    Zip: baseProfile.billingZip
   },
   CCNumber: card.cardNumber,
   CVV: card.cvv,
   CardType: getCardType(card.cardNumber),
-  Country: baseProfile.deliveryCountry,
+  Country:
+    longToShortCountries[baseProfile.deliveryCountry] !== undefined
+      ? longToShortCountries[baseProfile.deliveryCountry]
+      : '',
   Email: baseProfile.useCatchallBool
     ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
     : baseProfile.email,
   ExpMonth: card.expMonth,
   ExpYear: card.expYear,
   Name: `Profile - ${index}`,
-  phone:
+  Phone:
     baseProfile.randomPhoneNumberBool &&
     baseProfile.randomPhoneNumberTemplate !== ''
       ? baseProfile.randomPhoneNumberTemplate
@@ -359,8 +325,82 @@ export const convertBaseToPhantom = (
     LastName: baseProfile.randomName
       ? randomLastName
       : baseProfile.deliveryLastName,
-    State: baseProfile.deliveryRegion,
-    Zipcode: baseProfile.deliveryZip
+    State:
+      Countries[baseProfile.deliveryCountry].province_codes[
+        baseProfile.deliveryRegion
+      ] !== undefined
+        ? Countries[baseProfile.deliveryCountry].province_codes[
+            baseProfile.deliveryRegion
+          ]
+        : '',
+    Zip: baseProfile.deliveryZip
+  }
+});
+
+export const convertBaseToGhost = (
+  index,
+  baseProfile,
+  card,
+  randomFirstName,
+  randomLastName
+) => ({
+  Billing: {
+    Address: baseProfile.billingAddress,
+    Apt: baseProfile.billingApt,
+    City: baseProfile.billingCity,
+    FirstName: baseProfile.billingFirstName,
+    LastName: baseProfile.billingLastName,
+    State:
+      Countries[baseProfile.billingCountry].province_codes[
+        baseProfile.billingRegion
+      ] !== undefined
+        ? Countries[baseProfile.billingCountry].province_codes[
+            baseProfile.billingRegion
+          ]
+        : '',
+    Zip: baseProfile.billingZip
+  },
+  CCNumber: card.cardNumber,
+  CVV: card.cvv,
+  CardType: getCardType(card.cardNumber),
+  Country:
+    longToShortCountries[baseProfile.deliveryCountry] !== undefined
+      ? longToShortCountries[baseProfile.deliveryCountry]
+      : '',
+  Email: baseProfile.useCatchallBool
+    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
+    : baseProfile.email,
+  ExpMonth: card.expMonth,
+  ExpYear: card.expYear,
+  Name: `Profile - ${index}`,
+  Phone:
+    baseProfile.randomPhoneNumberBool &&
+    baseProfile.randomPhoneNumberTemplate !== ''
+      ? baseProfile.randomPhoneNumberTemplate
+          .split('#')
+          .map(number => (number === '' ? getRandomInt(9) : number))
+          .join('')
+      : baseProfile.phone,
+  Same: baseProfile.sameDeliveryBillingBool,
+  Shipping: {
+    Address: baseProfile.deliveryAddress,
+    Apt: baseProfile.deliveryApt,
+    City: baseProfile.deliveryCity,
+    FirstName: baseProfile.randomName
+      ? randomFirstName
+      : baseProfile.deliveryFirstName,
+    LastName: baseProfile.randomName
+      ? randomLastName
+      : baseProfile.deliveryLastName,
+    State:
+      Countries[baseProfile.deliveryCountry].province_codes[
+        baseProfile.deliveryRegion
+      ] !== undefined
+        ? Countries[baseProfile.deliveryCountry].province_codes[
+            baseProfile.deliveryRegion
+          ]
+        : '',
+    Zip: baseProfile.deliveryZip
   }
 });
 

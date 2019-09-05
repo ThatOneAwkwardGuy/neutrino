@@ -56,7 +56,7 @@ export const testAccount = (index, account, setAccountStatus) => {
                         characterData: true
                     })
                     `);
-        win.webContents.once('did-finish-load', () => {
+        win.webContents.on('did-finish-load', () => {
           win.webContents.executeJavaScript(
             'window.location',
             false,

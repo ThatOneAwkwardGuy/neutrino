@@ -96,7 +96,8 @@ export const translations = [
     'rouellee'
   ],
   ['roue', 'rroue', 'rooue', 'rouue', 'rouee'],
-  ['ruoe', 'rruoe', 'ruuoe', 'ruooe', 'ruoee']
+  ['ruoe', 'rruoe', 'ruuoe', 'ruooe', 'ruoee'],
+  ['court', 'ct', 'coourt', 'couurt', 'couurrt', 'courtt', 'ccourt', 'ccourtt']
 ];
 
 export const sites = {
