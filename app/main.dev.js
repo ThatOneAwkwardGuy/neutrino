@@ -258,3 +258,7 @@ app.on('ready', async () => {
     }, 60e3);
   });
 });
+
+app.on('login', event => {
+  event.preventDefault();
+});

@@ -67,13 +67,10 @@ export default class END {
     new Promise(resolve => {
       const proxyArray = proxy.split(/@|:/);
       if (proxyArray.length === 4) {
-        win.webContents.session.on(
-          'login',
-          (event, request, authInfo, callback) => {
-            event.preventDefault();
-            callback(proxyArray[0], proxyArray[1]);
-          }
-        );
+        win.webContents.on('login', (event, request, authInfo, callback) => {
+          event.preventDefault();
+          callback(proxyArray[0], proxyArray[1]);
+        });
       }
       const proxyIpAndPort = proxyArray.slice(-2);
       win.webContents.session.setProxy(

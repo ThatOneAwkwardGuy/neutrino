@@ -40,17 +40,21 @@ export const createNewWindow = async (tokenID, proxy) => {
 export const setProxyForWindow = (proxy, win) =>
   new Promise((resolve, reject) => {
     try {
-      const proxyArray = proxy.split(/@|:/);
+      const proxyArray = proxy.includes('http://')
+        ? proxy.split('http://')[1].split(/@|:/)
+        : proxy.split(/@|:/);
+      console.log(proxyArray);
       if (proxyArray.length === 4) {
-        win.webContents.session.on(
-          'login',
-          (event, request, authInfo, callback) => {
-            event.preventDefault();
-            callback(proxyArray[0], proxyArray[1]);
-          }
-        );
+        win.webContents.on('login', (event, request, authInfo, callback) => {
+          console.log(authInfo);
+          event.preventDefault();
+          console.log('logging in');
+          console.log(proxyArray[0], proxyArray[1]);
+          callback(proxyArray[0], proxyArray[1]);
+        });
       }
       const proxyIpAndPort = proxyArray.slice(-2);
+      console.log(proxyIpAndPort);
       win.webContents.session.setProxy(
         { proxyRules: `${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` },
         () => {

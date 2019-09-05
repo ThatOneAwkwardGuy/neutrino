@@ -409,11 +409,12 @@ class AccountCreator extends Component {
       const accountLastName = randomName ? random.last() : lastName;
       const tokenID = uuidv4();
       const proxy = useProxies ? this.getRandomProxy() : '';
+      console.log(proxy);
       const window = await createNewWindow(tokenID, proxy);
       window.webContents.on('close', () => {
         reject(new Error('Closed Window Before Finished'));
       });
-      window.loadURL('https://www.nakedcph.com/auth/view?op=register');
+      window.loadURL('http://www.nakedcph.com/auth/view?op=register');
       window.webContents.on('did-finish-load', () => {
         window.webContents.executeJavaScript(
           `

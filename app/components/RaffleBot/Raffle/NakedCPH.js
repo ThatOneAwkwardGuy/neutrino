@@ -95,13 +95,12 @@ export default class NakedCPH {
     payload[
       'form[language]'
     ] = this.raffleDetails.renderData.form.settings.language;
-
+    console.log(payload);
     const response = await this.rp({
       method: 'POST',
       uri: `https://nakedcph.typeform.com/app/form/submit/${this.raffleDetails.typeformCode}`,
       form: payload
     });
-
     return JSON.parse(response);
   };
 
@@ -111,7 +110,10 @@ export default class NakedCPH {
     const { token, landed_at } = await this.getRaffleToken(
       this.raffleDetails.typeformCode
     );
+    console.log(token);
+    console.log(landed_at);
     const submissionResponse = await this.submitRaffleEntry(token, landed_at);
+    console.log(submissionResponse);
     if (submissionResponse.message === 'success') {
       this.changeStatus('Successful Entry');
       this.incrementRaffles();
