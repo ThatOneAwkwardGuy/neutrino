@@ -196,32 +196,39 @@ class Home extends Component {
 
   watchForUpdates = () => {
     const { updateUpdateStatus } = this.props;
-    ipcRenderer.on(UPDATE_AVAILABLE, (event, arg) => {
-      const update = {};
-      update.status = 'Y';
-      update.releaseDate = arg.releaseDate;
-      update.lastChecked = new Date().getTime();
-      update.changelog = arg.releaseNotes;
-      update.version = arg.version;
-      updateUpdateStatus(update);
-      this.setLoading(false, '', false);
-      this.toggleUpdateModal();
-    });
-    ipcRenderer.on(NO_UPDATE_AVAILABLE, (event, arg) => {
-      const update = {};
-      update.status = 'N';
-      update.releaseDate = arg.releaseDate;
-      update.lastChecked = new Date().getTime();
-      update.changelog = arg.releaseNotes;
-      update.version = arg.version;
-      updateUpdateStatus(update);
-      this.setLoading(false, '', false);
-    });
-    ipcRenderer.on(UPDATE_DOWNLOADED, () => {
-      this.setState({
-        updateDownloading: false
+    const eventNames = ipcRenderer.eventNames();
+    if (!eventNames.includes(UPDATE_AVAILABLE)) {
+      ipcRenderer.on(UPDATE_AVAILABLE, (event, arg) => {
+        const update = {};
+        update.status = 'Y';
+        update.releaseDate = arg.releaseDate;
+        update.lastChecked = new Date().getTime();
+        update.changelog = arg.releaseNotes;
+        update.version = arg.version;
+        updateUpdateStatus(update);
+        this.setLoading(false, '', false);
+        this.toggleUpdateModal();
       });
-    });
+    }
+    if (!eventNames.includes(NO_UPDATE_AVAILABLE)) {
+      ipcRenderer.on(NO_UPDATE_AVAILABLE, (event, arg) => {
+        const update = {};
+        update.status = 'N';
+        update.releaseDate = arg.releaseDate;
+        update.lastChecked = new Date().getTime();
+        update.changelog = arg.releaseNotes;
+        update.version = arg.version;
+        updateUpdateStatus(update);
+        this.setLoading(false, '', false);
+      });
+    }
+    if (!eventNames.includes(UPDATE_DOWNLOADED)) {
+      ipcRenderer.on(UPDATE_DOWNLOADED, () => {
+        this.setState({
+          updateDownloading: false
+        });
+      });
+    }
     ipcRenderer.send(CHECK_FOR_UPDATES);
   };
 
@@ -377,7 +384,13 @@ class Home extends Component {
         path: routes.RAFFLE_BOT,
         component: RaffleBot,
         exact: true,
-        props: { setLoading, raffleInfo, setRaffleInfo, incrementRaffles }
+        props: {
+          settings,
+          setLoading,
+          raffleInfo,
+          setRaffleInfo,
+          incrementRaffles
+        }
       },
       {
         path: routes.SETTINGS,

@@ -7,7 +7,7 @@ import {
 const uuidv4 = require('uuid/v4');
 const randomName = require('random-name');
 
-const getRandomInt = max => Math.floor(Math.random() * Math.floor(max));
+export const getRandomInt = max => Math.floor(Math.random() * Math.floor(max));
 
 const getCardType = number => {
   let re = new RegExp('^4');

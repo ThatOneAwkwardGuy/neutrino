@@ -95,7 +95,7 @@ export default class VooStore {
         name: this.profile.deliveryFirstName,
         lastname: this.profile.deliveryLastName,
         email: this.profile.email,
-        contact_number: this.profile.phoneNumber,
+        contact_number: this.profile.phone,
         streetname: this.profile.deliveryAddress,
         housenumber: this.profile.deliveryAddress,
         postalcode: this.profile.deliveryZip,

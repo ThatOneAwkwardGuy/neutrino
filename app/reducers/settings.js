@@ -19,6 +19,8 @@ export default function settings(
     },
     activityDelayMin: '60000',
     activityDelayMax: '120000',
+    parallelRaffleEntries: '1',
+    raffleEntryDelay: '0',
     showAcitivtyWindows: false,
     activityGoogleSearch: true,
     activityGoogleNews: true,

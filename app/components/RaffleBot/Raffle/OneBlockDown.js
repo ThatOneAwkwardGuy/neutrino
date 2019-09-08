@@ -120,7 +120,7 @@ export default class OneBlockDown {
         'address[street_address]': this.profile.deliveryAddress,
         'address[zipcode]': this.profile.deliveryZip,
         'address[cityName]': this.profile.deliveryCity,
-        'address[phone_number]': this.profile.phoneNumber,
+        'address[phone_number]': this.profile.phone,
         'address[statecode]': this.profile.deliveryRegion,
         version: '103'
       }

@@ -7,7 +7,7 @@ const rp = require('request-promise').defaults({
   }
 });
 
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 export const loadRaffleInfo = async (site, raffleLink) => {
   if (raffleLink !== '') {
@@ -36,6 +36,10 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadLapstoneAndHammerRaffleInfo(raffleLink);
       case 'BSTN':
         return loadBSTNRaffleInfo(raffleLink);
+      case 'Renarts':
+        return loadRenartsRaffleInfo(raffleLink);
+      case 'SupplyStore':
+        return loadSupplyStoreRaffleInfo(raffleLink);
       default:
         return undefined;
     }
@@ -256,6 +260,53 @@ const loadExtraButterRaffleInfo = async link => {
     size: sizes[0].id.toString(),
     sizes,
     raffleDetails: { product: raffleInfo }
+  };
+};
+
+const loadRenartsRaffleInfo = async link => {
+  const response = await rp.get(`${link.split('?')[0]}.json`);
+  const raffleInfo = JSON.parse(response);
+  const sizes = raffleInfo.product.variants.map(size => ({
+    id: size.id,
+    name: size.title
+  }));
+  return {
+    styleInput: false,
+    size: sizes[0].id.toString(),
+    sizes,
+    raffleDetails: { product: raffleInfo }
+  };
+};
+
+const loadSupplyStoreRaffleInfo = async link => {
+  const response = await rp.get(link);
+  const $ = cheerio.load(response);
+  const raffleId = $('#raffleForm').data('id');
+  let sizes = [];
+  const selectFields = $('label').filter(
+    (index, element) => $(element).text() === 'Size'
+  );
+  const selectField = $(selectFields)
+    .siblings('select')
+    .children('option');
+  sizes = selectField
+    .map((index, size) => ({
+      id: size.attribs.value,
+      name: $(size).text()
+    }))
+    .toArray();
+  const formFields = {};
+  $('ul label').each((index, element) => {
+    const labelElement = $(element);
+    const labelFor = labelElement.attr('for');
+    const input = $(`#${labelFor}`).attr('name');
+    formFields[labelElement.text()] = input;
+  });
+  return {
+    styleInput: false,
+    size: sizes.length > 1 ? sizes[0].id.toString() : '',
+    sizes,
+    raffleDetails: { ...formFields, raffleId }
   };
 };
 

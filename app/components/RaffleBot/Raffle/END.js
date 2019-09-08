@@ -217,7 +217,7 @@ export default class END {
         postCode: this.profile.deliveryZip,
         street1: this.profile.deliveryAddress,
         street2: null,
-        telephone: this.profile.phoneNumber
+        telephone: this.profile.phone
       }
     });
   };

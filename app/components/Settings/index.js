@@ -518,6 +518,27 @@ export default class Settings extends Component {
                 />
               </Col>
             </Row>
+            <h6 className="font-weight-bold py-3">Raffle Bot</h6>
+            <Row className="panel-middle p-3 align-items-end">
+              <Col xs="3">
+                <Label>Parallel Entries</Label>
+                <Input
+                  type="number"
+                  name="parallelRaffleEntries"
+                  onChange={this.handleSettingsChange}
+                  value={settings.parallelRaffleEntries}
+                />
+              </Col>
+              <Col xs="3">
+                <Label>Raffle Entry Delay (ms)</Label>
+                <Input
+                  type="number"
+                  name="raffleEntryDelay"
+                  onChange={this.handleSettingsChange}
+                  value={settings.raffleEntryDelay}
+                />
+              </Col>
+            </Row>
             <h6 className="font-weight-bold py-3">Neutrino CSV Template</h6>
             <Row className="panel-middle p-3 align-items-end">
               <Col xs="3">

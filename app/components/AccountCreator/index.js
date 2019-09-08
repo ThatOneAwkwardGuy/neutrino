@@ -17,6 +17,7 @@ import { sites } from '../../constants/constants';
 import { upperCaseFirst, createNewWindow } from '../../utils/utils';
 import { getCaptchaResponse } from '../../screens/Captcha/functions';
 import { getFormData } from './functions';
+import { getRandomInt } from '../ProfileCreator/functions';
 
 const { clipboard } = require('electron');
 const { dialog } = require('electron').remote;
@@ -60,13 +61,19 @@ class AccountCreator extends Component {
             cvv: ''
           }
         : cards[Math.floor(Math.random() * cards.length)];
+    const accountFirstName = profile.randomNameBool
+      ? random.first()
+      : profile.deliveryFirstName;
+    const accountLastName = profile.randomNameBool
+      ? random.last()
+      : profile.deliveryLastName;
     const profiles = accounts.accounts.map(account => ({
       profileID: `${account.site}-${account.email}`,
       deliveryCountry: profile.deliveryCountry,
       deliveryAddress: profile.deliveryAddress,
       deliveryCity: profile.deliveryCity,
-      deliveryFirstName: profile.deliveryFirstName,
-      deliveryLastName: profile.deliveryLastName,
+      deliveryFirstName: accountFirstName,
+      deliveryLastName: accountLastName,
       deliveryRegion: profile.deliveryRegion,
       deliveryZip: profile.deliveryZip,
       deliveryApt: profile.deliveryApt,
@@ -78,7 +85,14 @@ class AccountCreator extends Component {
       billingLastName: profile.billingLastName,
       billingRegion: profile.billingRegion,
       billingApt: profile.billingApt,
-      phone: profile.phone,
+      phone:
+        profile.randomPhoneNumberBool &&
+        profile.randomPhoneNumberTemplate !== ''
+          ? profile.randomPhoneNumberTemplate
+              .split('#')
+              .map(number => (number === '' ? getRandomInt(9) : number))
+              .join('')
+          : profile.phone,
       card: selectedCard,
       email: account.email,
       password: account.pass,
@@ -703,7 +717,8 @@ AccountCreator.propTypes = {
     billingCountry: PropTypes.string.isRequired,
     billingRegion: PropTypes.string.isRequired,
     billingZip: PropTypes.string.isRequired,
-    phone: PropTypes.string.isRequired
+    phone: PropTypes.string.isRequired,
+    randomPhoneNumberTemplate: PropTypes.string.isRequired
   }).isRequired
 };
 

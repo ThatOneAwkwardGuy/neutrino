@@ -102,7 +102,7 @@ export default class FootpatrolUK {
         this.profile.deliveryAddress
       )}&raf_postcode=${encodeURIComponent(
         this.profile.deliveryZip
-      )}&raf_mobile=${this.profile.phoneNumber}&raf_size=${encodeURIComponent(
+      )}&raf_mobile=${this.profile.phone}&raf_size=${encodeURIComponent(
         this.size
       )}&raf_shoetype=${this.style}&sms_optout=0&emailpermit=0`
     });

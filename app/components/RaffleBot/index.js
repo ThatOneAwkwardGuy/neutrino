@@ -10,11 +10,13 @@ import footpatrol from '../../images/footpatrol.png';
 import nakedcph from '../../images/nakedcph.jpg';
 import oneblockdown from '../../images/oneblockdown.jpeg';
 import voostore from '../../images/voostore.png';
+import renarts from '../../images/renarts.jpg';
+// import supplystore from '../../images/supplystore.png';
 // import kickz from '../../images/kickz.png';
 import cityblue from '../../images/cityblue.jpg';
 // import bstn from '../../images/bstn.png';
 import lapstoneandhammer from '../../images/lapstoneandhammer.jpg';
-import { loadRaffleInfo } from './functions';
+import { sleep, loadRaffleInfo } from './functions';
 import { generateUEID } from '../../utils/utils';
 import { convertCSVToBase } from '../ProfileTaskEditorConverter/functions';
 import { convertBaseToNeutrino } from '../ProfileCreator/functions';
@@ -28,10 +30,13 @@ import OneBlockDown from './Raffle/OneBlockDown';
 import CityBlue from './Raffle/CityBlue';
 import LapstoneAndHammer from './Raffle/LapstoneAndHammer';
 import BSTN from './Raffle/BSTN';
+import Renarts from './Raffle/Renarts';
+import SupplyStore from './Raffle/SupplyStore';
 
 const { dialog } = require('electron').remote;
 const fs = require('fs');
 const csv = require('csvtojson');
+const chunk = require('lodash/chunk');
 
 const sites = [
   {
@@ -44,7 +49,9 @@ const sites = [
   { name: 'Bodega', img: bodega },
   { name: 'OneBlockDown', img: oneblockdown },
   { name: 'CityBlue', img: cityblue },
-  { name: 'LapstoneAndHammer', img: lapstoneandhammer }
+  { name: 'LapstoneAndHammer', img: lapstoneandhammer },
+  { name: 'Renarts', img: renarts }
+  // { name: 'SupplyStore', img: supplystore }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
 ];
@@ -353,6 +360,34 @@ export default class RaffleBot extends Component {
                 incrementRaffles
               );
               break;
+            case 'Renarts':
+              entry = new Renarts(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'SupplyStore':
+              entry = new SupplyStore(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
             default:
               break;
           }
@@ -377,13 +412,26 @@ export default class RaffleBot extends Component {
     this.setState({ entries: newEntries });
   };
 
-  startAll = () => {
+  startAll = async () => {
     const { entries } = this.state;
-    entries.forEach(entry => {
-      // eslint-disable-next-line no-param-reassign
-      entry.run = true;
-      entry.start();
-    });
+    const { settings } = this.props;
+    const chunkedEntries = chunk(
+      entries,
+      parseInt(settings.parallelRaffleEntries, 10)
+    );
+    // eslint-disable-next-line no-restricted-syntax
+    for (const chunkedEntryGroup of chunkedEntries) {
+      // eslint-disable-next-line no-await-in-loop
+      await Promise.all(
+        chunkedEntryGroup.map(entry => {
+          // eslint-disable-next-line no-param-reassign
+          entry.run = true;
+          return entry.start();
+        })
+      );
+      // eslint-disable-next-line no-await-in-loop
+      await sleep(parseInt(settings.raffleEntryDelay, 10));
+    }
   };
 
   stopAll = () => {
@@ -534,15 +582,19 @@ export default class RaffleBot extends Component {
                   </Container>
                 </Col>
                 <Col xs="4">
-                  <Label>Proxies</Label>
-                  <Input
-                    onChange={this.handleChange}
-                    name="proxiesInput"
-                    value={proxiesInput}
-                    type="textarea"
-                    rows="5"
-                    placeholder="ip:port or ip:port:user:pass"
-                  />
+                  <Container>
+                    <Row className="py-3">
+                      <Label>Proxies</Label>
+                      <Input
+                        onChange={this.handleChange}
+                        name="proxiesInput"
+                        value={proxiesInput}
+                        type="textarea"
+                        rows="5"
+                        placeholder="ip:port or ip:port:user:pass"
+                      />
+                    </Row>
+                  </Container>
                 </Col>
                 <Col xs="2" className="align-self-center">
                   <Button className="my-3" onClick={this.loadEntries}>
@@ -615,6 +667,7 @@ export default class RaffleBot extends Component {
 }
 
 RaffleBot.propTypes = {
+  settings: PropTypes.objectOf(PropTypes.any).isRequired,
   setLoading: PropTypes.func.isRequired,
   raffleInfo: PropTypes.shape({
     store: PropTypes.string.isRequired,

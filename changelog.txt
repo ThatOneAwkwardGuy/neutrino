@@ -52,5 +52,16 @@ Need to add animations
 - Fixed Phantom/Ghost Profile Generator
 - Fixed Proxy Tester format when copying to clipboard
 
+2.0.10
+- Fixed Account Generator Proxy Support
+- Fixed Account Generator export profiles where name fields would be empty even though randomName had been checked on main profile
+
+2.0.11
+- Added Renarts to Raffle Bot (Currently broken because they reached their email limit LMAO)
+- Added parallel raffle entries field in settings (How many raffle entries should be done at a time)
+
+2.0.12
+- Delay for raffle entries added in settings
+
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
