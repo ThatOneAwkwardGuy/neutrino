@@ -1,5 +1,5 @@
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
-import { getFormData } from '../../AccountCreator/functions';
+// import { getFormData } from '../../AccountCreator/functions';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
@@ -72,66 +72,63 @@ export default class DSM {
       site: this.site
     });
 
-  submitRaffle = (captchaToken, cookies) => {
+  submitRaffle = captchaToken => {
     const payload = {
-      form: this.raffleDetails.form,
+      form: parseInt(this.raffleDetails.form, 10),
       viewkey: this.raffleDetails.viewkey,
-      password: this.raffleDetails.password,
-      hidden_fields: this.raffleDetails.hidden_fields,
-      incomplete: this.raffleDetails.incomplete,
+      password: '',
+      hidden_fields: '',
+      incomplete: '',
       incomplete_password: '',
-      referrer: this.raffleDetails.referrer,
-      referrer_type: this.raffleDetails.referrer_type,
+      referrer: this.url,
+      referrer_type: 'js',
       // eslint-disable-next-line no-underscore-dangle
-      _submit: this.raffleDetails._submit,
-      style_version: this.raffleDetails.style_version,
-      viewparam: this.raffleDetails.viewparam,
+      _submit: 1,
+      style_version: 3,
+      viewparam: parseInt(this.raffleDetails.viewparam, 10),
       [this.raffleDetails
         .fullNameFormID]: `${this.profile.deliveryFirstName} ${this.profile.deliveryLastName}`,
       [this.raffleDetails.phoneFormID]: this.profile.phone,
       [this.raffleDetails.emailFormID]: this.profile.email,
       [this.raffleDetails.postcodeFormID]: this.profile.deliveryZip,
       [this.raffleDetails.colorFormID]: this.style.id,
-      [this.raffleDetails.sizeFormID]: this.size.id,
+      [this.raffleDetails.sizeFormID]: parseInt(this.size.id, 10),
       'g-recaptcha-response': captchaToken,
-      nonce: '8o4CrGt565ypDk9Y'
+      nonce: 'H6yDFGUYUErh£564'
     };
     console.log(payload);
 
     return this.rp({
       method: 'POST',
-      headers: {
-        authority: 'doverstreetmarketinternational.formstack.com',
-        'cache-control': 'max-age=0',
-        origin: 'https://london.doverstreetmarket.com',
-        'upgrade-insecure-requests': '1',
-        'content-type': 'application/x-www-form-urlencoded',
-        'user-agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
-        accept:
-          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-        cookie: `${this.cookieJar.getCookieString(
-          'https://doverstreetmarketinternational.formstack.com'
-        )};${cookies}`,
-        referer: this.url,
-        'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8'
-
-        // accept:
-        //   'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-        // 'accept-language': 'en-US,en;q=0.9',
-        // 'cache-control': 'no-cache',
-        // 'content-type': 'application/x-www-form-urlencoded',
-        // pragma: 'no-cache',
-        // 'sec-fetch-mode': 'navigate',
-        // 'sec-fetch-site': 'cross-site',
-        // 'sec-fetch-user': '?1',
-        // 'upgrade-insecure-requests': '1',
-        // referrer: this.url,
-        // referrerPolicy: 'no-referrer-when-downgrade'
-      },
-      uri:
+      // headers: {
+      //   authority: 'doverstreetmarketinternational.formstack.com',
+      //   'cache-control': 'max-age=0',
+      //   origin: 'https://london.doverstreetmarket.com',
+      //   'upgrade-insecure-requests': '1',
+      //   'content-type': 'application/x-www-form-urlencoded',
+      //   'user-agent':
+      //     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
+      //   accept:
+      //     'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+      //   referer: this.url,
+      //   'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8'
+      //   // accept:
+      //   //   'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+      //   // 'accept-language': 'en-US,en;q=0.9',
+      //   // 'cache-control': 'no-cache',
+      //   // 'content-type': 'application/x-www-form-urlencoded',
+      //   // pragma: 'no-cache',
+      //   // 'sec-fetch-mode': 'navigate',
+      //   // 'sec-fetch-site': 'cross-site',
+      //   // 'sec-fetch-user': '?1',
+      //   // 'upgrade-insecure-requests': '1',
+      //   // referrer: this.url,
+      //   // referrerPolicy: 'no-referrer-when-downgrade'
+      // },
+      url:
         'https://doverstreetmarketinternational.formstack.com/forms/index.php',
-      body: new URLSearchParams(getFormData(payload)).toString()
+      // body: new URLSearchParams(getFormData(payload)).toString()
+      form: payload
     });
   };
 
@@ -149,10 +146,7 @@ export default class DSM {
     this.changeStatus('Getting Captcha');
     const captchaResponse = await this.getCaptcha();
     console.log(captchaResponse);
-    const entryResponse = await this.submitRaffle(
-      captchaResponse.captchaToken,
-      captchaResponse.cookies
-    );
+    const entryResponse = await this.submitRaffle(captchaResponse.captchaToken);
     console.log(entryResponse);
   };
 }

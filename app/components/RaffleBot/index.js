@@ -55,7 +55,7 @@ const sites = [
   { name: 'CityBlue', img: cityblue },
   { name: 'LapstoneAndHammer', img: lapstoneandhammer },
   { name: 'Renarts', img: renarts }
-  // { name: 'DSM', img: dsm },
+  // { name: 'DSM', img: dsm }
   // { name: 'DSMNY', img: dsmny }
   // { name: 'SupplyStore', img: supplystore }
   // { name: 'BSTN', img: bstn }
