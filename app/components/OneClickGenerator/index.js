@@ -12,6 +12,7 @@ import {
 import PropTypes from 'prop-types';
 
 import { createActivityWindow, runAcitivitiesOnWindow } from './functions';
+import { setProxyForWindow } from '../../utils/utils';
 
 import Table from '../Table';
 
@@ -129,6 +130,9 @@ export default class OneClickGenerator extends Component {
       updateActivity,
       showAcitivtyWindows
     );
+    if (activity.proxy !== '') {
+      await setProxyForWindow(activity.proxy, this.windows[index]);
+    }
     runAcitivitiesOnWindow(
       this.windows[index],
       index,

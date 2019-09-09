@@ -11,10 +11,12 @@ import nakedcph from '../../images/nakedcph.jpg';
 import oneblockdown from '../../images/oneblockdown.jpeg';
 import voostore from '../../images/voostore.png';
 import renarts from '../../images/renarts.jpg';
+// import dsm from '../../images/dsm.png';
+// import dsmny from '../../images/dsmny.png';
 // import supplystore from '../../images/supplystore.png';
 // import kickz from '../../images/kickz.png';
-import cityblue from '../../images/cityblue.jpg';
 // import bstn from '../../images/bstn.png';
+import cityblue from '../../images/cityblue.jpg';
 import lapstoneandhammer from '../../images/lapstoneandhammer.jpg';
 import { sleep, loadRaffleInfo } from './functions';
 import { generateUEID } from '../../utils/utils';
@@ -32,6 +34,8 @@ import LapstoneAndHammer from './Raffle/LapstoneAndHammer';
 import BSTN from './Raffle/BSTN';
 import Renarts from './Raffle/Renarts';
 import SupplyStore from './Raffle/SupplyStore';
+import DSM from './Raffle/DSM';
+import DSMNY from './Raffle/DSMNY';
 
 const { dialog } = require('electron').remote;
 const fs = require('fs');
@@ -51,6 +55,8 @@ const sites = [
   { name: 'CityBlue', img: cityblue },
   { name: 'LapstoneAndHammer', img: lapstoneandhammer },
   { name: 'Renarts', img: renarts }
+  // { name: 'DSM', img: dsm },
+  // { name: 'DSMNY', img: dsmny }
   // { name: 'SupplyStore', img: supplystore }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
@@ -142,7 +148,9 @@ export default class RaffleBot extends Component {
       setLoading(true, 'Loading Raffle Info', false);
       const raffleInfo = await loadRaffleInfo(site, link);
       console.log(raffleInfo);
-      this.setState({ loadedRaffle: true, ...raffleInfo });
+      if (raffleInfo) {
+        this.setState({ loadedRaffle: true, ...raffleInfo });
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -376,6 +384,34 @@ export default class RaffleBot extends Component {
               break;
             case 'SupplyStore':
               entry = new SupplyStore(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'DSM':
+              entry = new DSM(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'DSMNY':
+              entry = new DSMNY(
                 link,
                 profile,
                 site,

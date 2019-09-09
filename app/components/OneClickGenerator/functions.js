@@ -24,55 +24,57 @@ export const createActivityWindow = (
     if (!showAcitivtyWindows) {
       win.minimize();
     }
-    win.webContents.once('close', () => {
-      updateActivity(index, { status: 'Not Started' });
-    });
-    win.loadURL('https://google.com');
-    win.webContents.setAudioMuted(true);
-    win.webContents.once('did-finish-load', () => {
-      win.webContents.executeJavaScript(
-        'document.querySelector(\'a[target="_top"]\').click();'
-      );
+    if (!win.isDestroyed()) {
+      win.webContents.once('close', () => {
+        updateActivity(index, { status: 'Not Started' });
+      });
+      win.loadURL('https://google.com');
+      win.webContents.setAudioMuted(true);
       win.webContents.once('did-finish-load', () => {
-        win.webContents.executeJavaScript(`
-                      document.getElementById("Email").value = "${activity.email}";
-                      document.getElementById("next").click();
-                      `);
-        win.webContents.once('did-navigate-in-page', () => {
+        win.webContents.executeJavaScript(
+          'document.querySelector(\'a[target="_top"]\').click();'
+        );
+        win.webContents.once('did-finish-load', () => {
           win.webContents.executeJavaScript(`
-                        var passwdObserver = new MutationObserver(function(mutations, me) {
-                          var canvas = document.getElementById("Passwd");
-                          if (canvas) {
-                            canvas.value = "${activity.pass}";
-                            document.getElementById("signIn").click();
-                            me.disconnect();
-                            return;
-                          }
-                        });
-                        passwdObserver.observe(document, {
-                            childList: true,
-                            attributes:true,
-                            subtree: true,
-                            characterData: true
-                        })
+                        document.getElementById("Email").value = "${activity.email}";
+                        document.getElementById("next").click();
                         `);
-          win.webContents.once('did-finish-load', () => {
-            win.webContents.executeJavaScript(
-              'window.location',
-              false,
-              windowLocation1 => {
-                if (windowLocation1.pathname === '/') {
-                  updateActivity(index, { status: 'Logged In' });
-                } else if (updateActivity) {
-                  updateActivity(index, { status: 'Stuck In Login' });
+          win.webContents.once('did-navigate-in-page', () => {
+            win.webContents.executeJavaScript(`
+                          var passwdObserver = new MutationObserver(function(mutations, me) {
+                            var canvas = document.getElementById("Passwd");
+                            if (canvas) {
+                              canvas.value = "${activity.pass}";
+                              document.getElementById("signIn").click();
+                              me.disconnect();
+                              return;
+                            }
+                          });
+                          passwdObserver.observe(document, {
+                              childList: true,
+                              attributes:true,
+                              subtree: true,
+                              characterData: true
+                          })
+                          `);
+            win.webContents.once('did-finish-load', () => {
+              win.webContents.executeJavaScript(
+                'window.location',
+                false,
+                windowLocation1 => {
+                  if (windowLocation1.pathname === '/') {
+                    updateActivity(index, { status: 'Logged In' });
+                  } else if (updateActivity) {
+                    updateActivity(index, { status: 'Stuck In Login' });
+                  }
+                  resolve();
                 }
-                resolve();
-              }
-            );
+              );
+            });
           });
         });
       });
-    });
+    }
   });
 
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -201,14 +203,16 @@ const runActivityOnWindow = async (
     const randomFunction = randomFromArray(functions);
     randomFunction.call(null, window, index, updateActivity, incrementActivity);
     await sleep(randTime);
-    runActivityOnWindow(
-      window,
-      index,
-      settings,
-      functions,
-      updateActivity,
-      incrementActivity
-    );
+    if (!window.isDestroyed()) {
+      runActivityOnWindow(
+        window,
+        index,
+        settings,
+        functions,
+        updateActivity,
+        incrementActivity
+      );
+    }
   } catch (error) {
     console.log(error);
   }

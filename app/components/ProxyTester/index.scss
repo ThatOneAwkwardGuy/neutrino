@@ -1,3 +1,7 @@
+#TableContainer {
+  overflow-wrap: break-word;
+}
+
 #TableContainer > div,
 #TableContainer > div > div {
   height: 100% !important;

@@ -12,8 +12,8 @@ export const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 export const loadRaffleInfo = async (site, raffleLink) => {
   if (raffleLink !== '') {
     switch (site) {
-      case 'DSML':
-        return loadDSMLRaffleInfo(raffleLink);
+      case 'DSM':
+        return loadDSMRaffleInfo(raffleLink);
       case 'Footpatrol UK':
         return loadFootpatrolUKRaffleInfo(raffleLink);
       case 'NakedCPH':
@@ -46,7 +46,7 @@ export const loadRaffleInfo = async (site, raffleLink) => {
   }
 };
 
-const loadDSMLRaffleInfo = async link => {
+const loadDSMRaffleInfo = async link => {
   const win = new BrowserWindow({
     width: 500,
     height: 650,
@@ -64,54 +64,83 @@ const loadDSMLRaffleInfo = async link => {
       webSecurity: false
     }
   });
-  win.loadURL(link);
-  win.webContents.once('did-finish-load', () => {
-    win.webContents.executeJavaScript('window.location.href', false, result => {
-      if (result === link) {
+  return new Promise((resolve, reject) => {
+    try {
+      win.loadURL(link);
+      win.webContents.once('did-finish-load', () => {
         win.webContents.executeJavaScript(
-          'document.documentElement.innerHTML',
+          'window.location.href',
           false,
-          windowResult => {
-            win.close();
-            const $ = cheerio.load(windowResult);
-            const styles = $('div[fs-field-validation-name="Colour"] option')
-              .map((index, style) => ({
-                id: style.attribs.value,
-                name: style.attribs.value
-              }))
-              .toArray();
-            const sizes = $('div[fs-field-validation-name="US Size"] option')
-              .map((index, size) => ({
-                id: size.attribs.value,
-                name: size.attribs.value
-              }))
-              .toArray();
-            const fullNameFormID = $(
-              'div[fs-field-validation-name="Full Name"] input'
-            ).attr('name');
-            const emailFormID = $(
-              'div[fs-field-validation-name="Email"] input'
-            ).attr('name');
-            const phoneFormID = $(
-              'div[fs-field-validation-name="Mobile Phone Number"] input'
-            ).attr('name');
-            const postcodeFormID = $(
-              'div[fs-field-validation-name="Postcode"] input'
-            ).attr('name');
-            return {
-              styles,
-              sizes,
-              raffleDetails: {
-                fullNameFormID,
-                emailFormID,
-                phoneFormID,
-                postcodeFormID
-              }
-            };
+          result => {
+            if (result === link) {
+              win.webContents.executeJavaScript(
+                'document.documentElement.innerHTML',
+                false,
+                windowResult => {
+                  win.close();
+                  const $ = cheerio.load(windowResult);
+                  const styles = $(
+                    'div[fs-field-validation-name="Colour"] option'
+                  )
+                    .map((index, style) => ({
+                      id: style.attribs.value,
+                      name: style.attribs.value
+                    }))
+                    .toArray();
+                  const sizes = $(
+                    'div[fs-field-validation-name="US Size"] option'
+                  )
+                    .map((index, size) => ({
+                      id: size.attribs.value,
+                      name: size.attribs.value
+                    }))
+                    .toArray();
+                  const fullNameFormID = $(
+                    'div[fs-field-validation-name="Full Name"] input'
+                  ).attr('name');
+                  const emailFormID = $(
+                    'div[fs-field-validation-name="Email"] input'
+                  ).attr('name');
+                  const phoneFormID = $(
+                    'div[fs-field-validation-name="Mobile Phone Number"] input'
+                  ).attr('name');
+                  const postcodeFormID = $(
+                    'div[fs-field-validation-name="Postcode"] input'
+                  ).attr('name');
+                  const colorFormID = $(
+                    'div[fs-field-validation-name="Colour"] select'
+                  ).attr('name');
+                  const sizeFormID = $(
+                    'div[fs-field-validation-name="US Size"] select'
+                  ).attr('name');
+                  const formFields = {};
+                  $('form input').each((index, element) => {
+                    console.log(element);
+                    const { name, value } = element.attribs;
+                    formFields[name] = value;
+                  });
+                  resolve({
+                    styles,
+                    sizes,
+                    raffleDetails: {
+                      fullNameFormID,
+                      emailFormID,
+                      phoneFormID,
+                      postcodeFormID,
+                      colorFormID,
+                      sizeFormID,
+                      ...formFields
+                    }
+                  });
+                }
+              );
+            }
           }
         );
-      }
-    });
+      });
+    } catch (error) {
+      reject(error);
+    }
   });
 };
 
