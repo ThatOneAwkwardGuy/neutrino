@@ -96,6 +96,12 @@ ipcRenderer.on(
 );
 
 if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
+  if (window.location.href.includes('doverstreetmarket')) {
+    window.addEventListener('DOMContentLoaded', () => {
+      document.querySelector('form').id = 'blahhhhh';
+      document.querySelector('form').action = 'http://google.com';
+    });
+  }
   captchaChecker = setInterval(checkCaptcha, 300);
 }
 

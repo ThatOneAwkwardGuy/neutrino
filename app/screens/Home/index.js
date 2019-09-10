@@ -415,7 +415,7 @@ class Home extends Component {
             }`}
           >
             <div>
-              <Link to={routes.HOME}>
+              <Link to={routes.HOME} alt="Home" title="Home">
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.HOME}`
@@ -431,7 +431,11 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.PROXY_CREATOR}>
+              <Link
+                to={routes.PROXY_CREATOR}
+                alt="Proxy Creator"
+                title="Proxy Creator"
+              >
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.PROXY_CREATOR}`
@@ -447,7 +451,11 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.PROXY_TESTER}>
+              <Link
+                to={routes.PROXY_TESTER}
+                alt="Proxy Tester"
+                title="Proxy Tester"
+              >
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.PROXY_TESTER}`
@@ -463,7 +471,11 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.ACCOUNT_CREATOR}>
+              <Link
+                to={routes.ACCOUNT_CREATOR}
+                alt="Account Creator"
+                title="Account Creator"
+              >
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.ACCOUNT_CREATOR}`
@@ -479,7 +491,11 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.ADDRESS_JIGGER}>
+              <Link
+                to={routes.ADDRESS_JIGGER}
+                alt="Address Jigger"
+                title="Address Jigger"
+              >
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.ADDRESS_JIGGER}`
@@ -495,7 +511,11 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.ONECLICK_GENERATOR}>
+              <Link
+                to={routes.ONECLICK_GENERATOR}
+                alt="OneClick Generator"
+                title="OneClick Generator"
+              >
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.ONECLICK_GENERATOR}`
@@ -513,7 +533,11 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.ONECLICK_TESTER}>
+              <Link
+                to={routes.ONECLICK_TESTER}
+                alt="OneClick Tester"
+                title="OneClick Tester"
+              >
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.ONECLICK_TESTER}`
@@ -529,7 +553,11 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.PROFILE_CREATOR}>
+              <Link
+                to={routes.PROFILE_CREATOR}
+                alt="Profile Creator"
+                title="Profile Creator"
+              >
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.PROFILE_CREATOR}`
@@ -545,7 +573,11 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.PROFILE_TASK_EDITOR_CONVERTER}>
+              <Link
+                to={routes.PROFILE_TASK_EDITOR_CONVERTER}
+                alt="Profile Converter"
+                title="Profile Converter"
+              >
                 <div
                   className={`sidebarIcon ${
                     window.location.hash ===
@@ -562,7 +594,7 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.RAFFLE_BOT}>
+              <Link to={routes.RAFFLE_BOT} alt="Raffle Bot" title="Raffle Bot">
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.RAFFLE_BOT}`
@@ -578,7 +610,7 @@ class Home extends Component {
               </Link>
             </div>
             <div>
-              <Link to={routes.SETTINGS}>
+              <Link to={routes.SETTINGS} alt="Settings" title="Settings">
                 <div
                   className={`sidebarIcon ${
                     window.location.hash === `#${routes.SETTINGS}`

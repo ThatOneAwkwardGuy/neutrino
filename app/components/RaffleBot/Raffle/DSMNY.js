@@ -1,3 +1,5 @@
+import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
 
@@ -14,6 +16,7 @@ export default class DSMNY {
     forceUpdate,
     incrementRaffles
   ) {
+    this.tokenID = uuidv4();
     this.url = url;
     this.profile = profile;
     this.run = false;
@@ -57,65 +60,72 @@ export default class DSMNY {
     this.forceUpdate();
   };
 
-  submitEntry1 = token =>
-    this.rp({
-      uri: 'https://raffle-uat.cloud.jdplc.com/api/raffleEntry',
-      method: 'POST',
-      headers: {
-        accept: '*/*',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        'content-type': 'application/json',
-        pragma: 'no-cache',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        referrer: this.url,
-        referrerPolicy: 'no-referrer-when-downgrade'
-      },
-      strictSSL: false,
-      body: JSON.stringify({
-        campaign_name: this.raffleDetails.title,
-        raf_id: token,
-        timestamp: new Date().toGMTString(),
-        raf_size: this.size,
-        fascia: 'FOOTPATROL_GB'
-      })
+  getCaptcha = () =>
+    getCaptchaResponse({
+      // eslint-disable-next-line no-underscore-dangle
+      cookiesObject: {},
+      url: this.url,
+      id: this.tokenID,
+      proxy: this.proxy,
+      baseURL: this.url,
+      site: this.site
     });
 
-  submitEntry2 = token =>
-    this.rp({
-      method: 'GET',
-      headers: {
-        referrer: this.url,
-        referrerPolicy: 'no-referrer-when-downgrade'
-      },
+  submitRaffle = captchaToken => {
+    const payload = {
+      form: parseInt(this.raffleDetails.form, 10),
+      viewkey: this.raffleDetails.viewkey,
+      password: '',
+      hidden_fields: '',
+      incomplete: '',
+      incomplete_password: '',
+      referrer: this.url,
+      referrer_type: 'js',
+      // eslint-disable-next-line no-underscore-dangle
+      _submit: 1,
+      style_version: 3,
+      viewparam: parseInt(this.raffleDetails.viewparam, 10),
+      [this.raffleDetails
+        .fullNameFormID]: `${this.profile.deliveryFirstName} ${this.profile.deliveryLastName}`,
+      [this.raffleDetails.phoneFormID]: this.profile.phone,
+      [this.raffleDetails.emailFormID]: this.profile.email,
+      [this.raffleDetails.postcodeFormID]: this.profile.deliveryZip,
+      [this.raffleDetails.colorFormID]: this.style.id,
+      [this.raffleDetails.sizeFormID]: parseInt(this.size.id, 10),
+      'g-recaptcha-response': captchaToken
+    };
+
+    return this.rp({
+      method: 'POST',
+      followAllRedirects: true,
       resolveWithFullResponse: true,
-      uri: `https://redeye.footpatrol.com/cgi-bin/rr/blank.gif?nourl=raffle&raf_name=${encodeURIComponent(
-        this.raffleDetails.title
-      )}&raf_id=${token}&email=${
-        this.profile.email
-      }&int_segment=GB&raf_firstname=${
-        this.profile.deliveryFirstName
-      }&raf_lastname=${
-        this.profile.deliveryLastName
-      }&raf_house=${encodeURIComponent(
-        this.profile.deliveryAddress
-      )}&raf_postcode=${encodeURIComponent(
-        this.profile.deliveryZip
-      )}&raf_mobile=${this.profile.phone}&raf_size=${encodeURIComponent(
-        this.size
-      )}&raf_shoetype=${this.style}&sms_optout=0&emailpermit=0`
+      url:
+        'https://doverstreetmarketinternational.formstack.com/forms/index.php',
+      form: payload
     });
+  };
 
   makeEntry = async () => {
-    const token = uuidv4();
-    this.changeStatus('Submitting Raffle Token');
-    const response1 = await this.submitEntry1(token);
-    console.log(response1);
-    this.changeStatus('Submitting Raffle Entry');
-    const response2 = await this.submitEntry2(token);
-    console.log(response2);
-    this.changeStatus('Successful Entry');
-    this.incrementRaffles();
+    this.changeStatus('Getting Captcha');
+    const captchaResponse = await this.getCaptcha();
+    console.log(captchaResponse);
+    try {
+      const entryResponse = await this.submitRaffle(
+        captchaResponse.captchaToken
+      );
+      if (entryResponse.body.includes('<title>Thank You</title>')) {
+        this.changeStatus('Successful Entry');
+      }
+    } catch (error) {
+      if (
+        error.message.includes(
+          'Each submission must have unique values for the following fields'
+        )
+      ) {
+        this.changeStatus('Email already entered');
+      } else {
+        this.changeStatus('Error');
+      }
+    }
   };
 }

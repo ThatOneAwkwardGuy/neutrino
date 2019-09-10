@@ -1,5 +1,4 @@
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
-// import { getFormData } from '../../AccountCreator/functions';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
@@ -93,13 +92,13 @@ export default class DSM {
       [this.raffleDetails.postcodeFormID]: this.profile.deliveryZip,
       [this.raffleDetails.colorFormID]: this.style.id,
       [this.raffleDetails.sizeFormID]: parseInt(this.size.id, 10),
-      'g-recaptcha-response': captchaToken,
-      nonce: 'H6yDFGUYUErh£564'
+      'g-recaptcha-response': captchaToken
     };
-    console.log(payload);
 
     return this.rp({
       method: 'POST',
+      followAllRedirects: true,
+      resolveWithFullResponse: true,
       // headers: {
       //   authority: 'doverstreetmarketinternational.formstack.com',
       //   'cache-control': 'max-age=0',
@@ -127,26 +126,31 @@ export default class DSM {
       // },
       url:
         'https://doverstreetmarketinternational.formstack.com/forms/index.php',
-      // body: new URLSearchParams(getFormData(payload)).toString()
       form: payload
     });
   };
 
   makeEntry = async () => {
-    // fetch(
-    //   'https://doverstreetmarketinternational.formstack.com/forms/index.php',
-    //   {
-    //     credentials: 'include',
-    //     body:
-    //       'form=3580197&viewkey=Tlfx7CgsF3&password=&hidden_fields=&incomplete=&incomplete_password=&referrer=https%3A%2F%2Flondon.doverstreetmarket.com%2Fnew-items%2Fnikelab&referrer_type=js&_submit=1&style_version=3&viewparam=766219&field82172077=Moyo+George&field82172078=moyogeorge%40outlook.com&field82172079=07427488747&field82172080=RM17+5BN&field82172081=Summit+White%2FWhite+Wolf&field82172082=10&g-recaptcha-response=03AOLTBLQJ5UMRcKO3AP_P2FEv8odftYKXwh1suDvCS3XpZGSE6eNXLe0hI6yzsLX23GdXXcArTXccfCSFlCbS3RlCu5nPJ0CqKplHzP2XbQ2zMnhyWl_6titRblyGDvGhnHg0trx0Du_FVMiGjPq6Qx_EPVkD6xeJLLa8Cn92c5wBrwFLlS5H6dO33AniEKBvo3ddVuKEvu1pfruKSl_9RLtI2wJlQ-pF73In7_1SjKCgS4HiVlORJE6-6-RsvtNWA7S_jemHZp8xQGJICDxxrpdJewmbkCfHc4nNv53Ul__MokdjAq8Z1rqbDzXERVZA7IcXzokIyu8_sI2m_Tf7Hn6hmvIdX0GjpQK5w9BkH46OPAHqZwn-DcrPRQII_UZCAVwwwmoIT2YzC8tsC9jUPeJ5iQqnnnP7ew&nonce=8o4CrGt565ypDk9Y',
-    //     method: 'POST',
-    //     mode: 'cors'
-    //   }
-    // );
     this.changeStatus('Getting Captcha');
     const captchaResponse = await this.getCaptcha();
     console.log(captchaResponse);
-    const entryResponse = await this.submitRaffle(captchaResponse.captchaToken);
-    console.log(entryResponse);
+    try {
+      const entryResponse = await this.submitRaffle(
+        captchaResponse.captchaToken
+      );
+      if (entryResponse.body.includes('<title>Thank You</title>')) {
+        this.changeStatus('Successful Entry');
+      }
+    } catch (error) {
+      if (
+        error.message.includes(
+          'Each submission must have unique values for the following fields'
+        )
+      ) {
+        this.changeStatus('Email already entered');
+      } else {
+        this.changeStatus('Error');
+      }
+    }
   };
 }

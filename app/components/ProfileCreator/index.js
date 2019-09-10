@@ -385,8 +385,8 @@ class ProfileCreator extends Component {
                 expYear: '',
                 cvv: ''
               };
-        const randomFirstName = randomNameBool ? randomName.first() : '';
-        const randomLastName = randomNameBool ? randomName.last() : '';
+        const randomFirstName = randomName.first();
+        const randomLastName = randomName.last();
         switch (bot) {
           case 'Cybersole':
             return convertBaseToCybersole(

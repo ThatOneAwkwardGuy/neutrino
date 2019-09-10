@@ -35,7 +35,6 @@ Need to add animations
 - Cards added to Profile Generator will now also be stored in profiles exported from the Account Creator
 - Fixed Start button not working in Raffle Bot
 
-
 2.0.6
 - Proxy fixes for Raffle Bot
 
@@ -67,6 +66,14 @@ Need to add animations
 - Fixed proxy support for One Click Generator
 - Fixed bug where Tasks in One Click Generator would go from not started to started again
 
+2.0.14
+- Raffle Bot - DSM (Tested)
+- Raffle Bot - DSM NY (Beta, wasnt able to test, will for next raffle)
+- Hovering over sidebar icons now tells you the name
+- Selecting "Use Catchall" in the profile generator will generate a random email without requiring you to select "Random Name"
+
+2.0.15
+- Fixed Activity Windows being stuck on logging in when minized straight away on windows.
 
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a

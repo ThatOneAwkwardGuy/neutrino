@@ -21,7 +21,7 @@ export const createActivityWindow = (
     if (updateActivity) {
       updateActivity(index, { status: 'Logging In' });
     }
-    if (!showAcitivtyWindows) {
+    if (!showAcitivtyWindows && !process.platform === 'win32') {
       win.minimize();
     }
     if (!win.isDestroyed()) {

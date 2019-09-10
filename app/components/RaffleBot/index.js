@@ -4,6 +4,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import PropTypes from 'prop-types';
 import Table from '../Table/index';
+// import supplystore from '../../images/supplystore.png';
+// import kickz from '../../images/kickz.png';
+// import bstn from '../../images/bstn.png';
 import bodega from '../../images/bodega.jpg';
 import extrabutter from '../../images/extrabutter.jpg';
 import footpatrol from '../../images/footpatrol.png';
@@ -11,11 +14,8 @@ import nakedcph from '../../images/nakedcph.jpg';
 import oneblockdown from '../../images/oneblockdown.jpeg';
 import voostore from '../../images/voostore.png';
 import renarts from '../../images/renarts.jpg';
-// import dsm from '../../images/dsm.png';
-// import dsmny from '../../images/dsmny.png';
-// import supplystore from '../../images/supplystore.png';
-// import kickz from '../../images/kickz.png';
-// import bstn from '../../images/bstn.png';
+import dsm from '../../images/dsm.png';
+import dsmny from '../../images/dsmny.png';
 import cityblue from '../../images/cityblue.jpg';
 import lapstoneandhammer from '../../images/lapstoneandhammer.jpg';
 import { sleep, loadRaffleInfo } from './functions';
@@ -54,9 +54,9 @@ const sites = [
   { name: 'OneBlockDown', img: oneblockdown },
   { name: 'CityBlue', img: cityblue },
   { name: 'LapstoneAndHammer', img: lapstoneandhammer },
-  { name: 'Renarts', img: renarts }
-  // { name: 'DSM', img: dsm }
-  // { name: 'DSMNY', img: dsmny }
+  { name: 'Renarts', img: renarts },
+  { name: 'DSM', img: dsm },
+  { name: 'DSMNY', img: dsmny }
   // { name: 'SupplyStore', img: supplystore }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }

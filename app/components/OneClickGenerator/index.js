@@ -133,6 +133,13 @@ export default class OneClickGenerator extends Component {
     if (activity.proxy !== '') {
       await setProxyForWindow(activity.proxy, this.windows[index]);
     }
+    if (
+      !showAcitivtyWindows &&
+      process.platform === 'win32' &&
+      !this.windows[index].isMinimized()
+    ) {
+      this.windows[index].minimize();
+    }
     runAcitivitiesOnWindow(
       this.windows[index],
       index,
