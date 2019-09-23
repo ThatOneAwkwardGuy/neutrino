@@ -39,7 +39,7 @@ import SupplyStore from './Raffle/SupplyStore';
 import DSM from './Raffle/DSM';
 import DSMNY from './Raffle/DSMNY';
 import Stress95 from './Raffle/Stress95';
-import FootShop from './Raffle/FootShop';
+// import FootShop from './Raffle/FootShop';
 
 const { dialog } = require('electron').remote;
 const fs = require('fs');
@@ -444,20 +444,20 @@ export default class RaffleBot extends Component {
                 incrementRaffles
               );
               break;
-            case 'FootShop':
-              entry = new FootShop(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
+            // case 'FootShop':
+            //   entry = new FootShop(
+            //     link,
+            //     profile,
+            //     site,
+            //     styleObject,
+            //     sizeObject,
+            //     'Not Started',
+            //     this.getRandomProxy(),
+            //     raffleDetails,
+            //     this.triggerRender,
+            //     incrementRaffles
+            //   );
+            //   break;
             default:
               break;
           }
