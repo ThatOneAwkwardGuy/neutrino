@@ -25,7 +25,8 @@ import {
   convertBaseToNSB,
   convertBaseToSOLEAIO,
   convertBaseToCSV,
-  convertBaseToNeutrino
+  convertBaseToNeutrino,
+  generateGmailDotTrick
 } from './functions';
 
 import Countries from '../../constants/countries';
@@ -300,6 +301,7 @@ class ProfileCreator extends Component {
       oneCheckoutBool,
       randomNameBool,
       randomPhoneNumberBool,
+      randomPhoneNumberTemplate,
       useCatchallBool,
       billingAddress,
       billingFirstName,
@@ -331,10 +333,14 @@ class ProfileCreator extends Component {
       : Array(cards.length).fill(
           `${deliveryAddress}\n${deliveryCity}\n${deliveryApt}\n${deliveryRegion}\n${deliveryCountry}\n${deliveryZip}`
         );
+
     const jiggedAddress =
       addresses.length <= cards.length || cards.length === 0
         ? addresses
         : addresses.slice(0, cards.length);
+    const emails = catchallEmail.includes('@gmail')
+      ? generateGmailDotTrick(jiggedAddress.length, email)
+      : [];
     const convertedProfiles = jiggedAddress
       .map((address, index) => {
         const [
@@ -360,6 +366,7 @@ class ProfileCreator extends Component {
           oneCheckoutBool,
           randomNameBool,
           randomPhoneNumberBool,
+          randomPhoneNumberTemplate,
           useCatchallBool,
           billingAddress,
           billingFirstName,
@@ -394,7 +401,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'Project Destroyer':
             return convertBaseToProjectDestroyer(
@@ -402,7 +410,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'Ghost':
             return convertBaseToGhost(
@@ -410,7 +419,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'EVE AIO':
             return convertBaseToEVEAIO(
@@ -418,7 +428,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'Phantom':
             return convertBaseToPhantom(
@@ -426,7 +437,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'Dashe':
             return convertBaseToDashe(
@@ -434,7 +446,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'Hastey':
             return convertBaseToHastey(
@@ -442,7 +455,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'Kodai':
             return convertBaseToKodai(
@@ -450,7 +464,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'TKS':
             return convertBaseToTKS(
@@ -458,7 +473,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'CSV':
             return convertBaseToCSV(
@@ -466,7 +482,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'NSB':
             return convertBaseToNSB(
@@ -474,7 +491,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'SOLE AIO':
             return convertBaseToSOLEAIO(
@@ -482,7 +500,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'Balko':
             return convertBaseToBalko(
@@ -490,7 +509,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           case 'Neutrino':
             return convertBaseToNeutrino(
@@ -498,7 +518,8 @@ class ProfileCreator extends Component {
               profile,
               card,
               randomFirstName,
-              randomLastName
+              randomLastName,
+              emails
             );
           default:
             return undefined;

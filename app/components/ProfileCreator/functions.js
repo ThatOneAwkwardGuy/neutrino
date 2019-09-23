@@ -5,7 +5,6 @@ import {
 } from '../../constants/constants';
 
 const uuidv4 = require('uuid/v4');
-const randomName = require('random-name');
 
 export const getRandomInt = max => Math.floor(Math.random() * Math.floor(max));
 
@@ -31,21 +30,84 @@ const capitalize = s => {
   return s.charAt(0).toUpperCase() + s.slice(1);
 };
 
+function* generate(email) {
+  if (email.length <= 1) {
+    yield email;
+  } else {
+    const head = email[0];
+    const tail = email.slice(1);
+    // eslint-disable-next-line no-restricted-syntax
+    for (const item of generate(tail)) {
+      yield head + item;
+      yield `${head}.${item}`;
+    }
+  }
+}
+
+export const shuffle = array => {
+  let counter = array.length;
+  while (counter > 0) {
+    const index = Math.floor(Math.random() * counter);
+    counter -= 1;
+    const temp = array[counter];
+    // eslint-disable-next-line no-param-reassign
+    array[counter] = array[index];
+    // eslint-disable-next-line no-param-reassign
+    array[index] = temp;
+  }
+
+  return array;
+};
+
+export const generateGmailDotTrick = (length, email) => {
+  const emails = [];
+  const generator = generate(email);
+  for (let i = 0; i < length * 100; i += 1) {
+    emails.push(generator.next().value);
+  }
+  console.log(shuffle(emails));
+  return shuffle(emails);
+};
+
+const returnGmailOrCatchall = (
+  index,
+  gmailEmails,
+  useCatchallBool,
+  baseProfile,
+  randomFirstName,
+  randomLastName
+) => {
+  if (gmailEmails.length > 0 && gmailEmails[index]) {
+    return gmailEmails[index];
+  }
+  if (useCatchallBool && !baseProfile.catchallEmail.includes('@gmail')) {
+    return `${randomFirstName}${randomLastName}@${
+      baseProfile.catchallEmail.split('@')[1]
+    }`;
+  }
+  return baseProfile.email;
+};
+
 export const convertBaseToCybersole = (
   index,
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   name: `Profile - ${index}`,
   payment: {
-    email: baseProfile.useCatchallBool
-      ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-      : baseProfile.email,
+    email: returnGmailOrCatchall(
+      index,
+      gmailEmails,
+      baseProfile.useCatchallBool,
+      baseProfile,
+      randomFirstName,
+      randomLastName
+    ),
     phone:
-      baseProfile.randomPhoneNumberBool &&
-      baseProfile.randomPhoneNumberTemplate !== ''
+      baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
         ? baseProfile.randomPhoneNumberTemplate
             .split('#')
             .map(number => (number === '' ? getRandomInt(9) : number))
@@ -60,10 +122,10 @@ export const convertBaseToCybersole = (
     }
   },
   delivery: {
-    first_name: baseProfile.randomName
+    first_name: baseProfile.randomNameBool
       ? randomFirstName
       : baseProfile.deliveryFirstName,
-    last_name: baseProfile.randomName
+    last_name: baseProfile.randomNameBool
       ? randomLastName
       : baseProfile.deliveryLastName,
     addr1: baseProfile.deliveryAddress,
@@ -94,7 +156,8 @@ export const convertBaseToProjectDestroyer = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   billing: {
     address1: baseProfile.billingAddress,
@@ -104,8 +167,7 @@ export const convertBaseToProjectDestroyer = (
     firstName: baseProfile.billingFirstName,
     lastName: baseProfile.billingLastName,
     phone:
-      baseProfile.randomPhoneNumberBool &&
-      baseProfile.randomPhoneNumberTemplate !== ''
+      baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
         ? baseProfile.randomPhoneNumberTemplate
             .split('#')
             .map(number => (number === '' ? getRandomInt(9) : number))
@@ -120,9 +182,14 @@ export const convertBaseToProjectDestroyer = (
     name: `${baseProfile.deliveryFirstName} ${baseProfile.deliveryLastName}`,
     number: card.cardNumber
   },
-  email: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   id: Math.random()
     .toString(36)
     .substring(2, 10),
@@ -133,15 +200,14 @@ export const convertBaseToProjectDestroyer = (
     address2: baseProfile.deliveryApt,
     city: baseProfile.deliveryCity,
     country: baseProfile.deliveryCountry,
-    firstName: baseProfile.randomName
+    firstName: baseProfile.randomNameBool
       ? randomFirstName
       : baseProfile.deliveryFirstName,
-    lastName: baseProfile.randomName
+    lastName: baseProfile.randomNameBool
       ? randomLastName
       : baseProfile.deliveryLastName,
     phone:
-      baseProfile.randomPhoneNumberBool &&
-      baseProfile.randomPhoneNumberTemplate !== ''
+      baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
         ? baseProfile.randomPhoneNumberTemplate
             .split('#')
             .map(number => (number === '' ? getRandomInt(9) : number))
@@ -158,21 +224,26 @@ export const convertBaseToBalko = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   id: `Profile - ${index}`,
-  firstname: baseProfile.randomName
+  firstname: baseProfile.randomNameBool
     ? randomFirstName
     : baseProfile.deliveryFirstName,
-  lastname: baseProfile.randomName
+  lastname: baseProfile.randomNameBool
     ? randomLastName
     : baseProfile.deliveryLastName,
-  email: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   phone:
-    baseProfile.randomPhoneNumberBool &&
-    baseProfile.randomPhoneNumberTemplate !== ''
+    baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
       ? baseProfile.randomPhoneNumberTemplate
           .split('#')
           .map(number => (number === '' ? getRandomInt(9) : number))
@@ -206,7 +277,8 @@ export const convertBaseToEVEAIO = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   ProfileName: `Profile - ${index}`,
   BillingFirstName: baseProfile.billingFirstName,
@@ -221,20 +293,24 @@ export const convertBaseToEVEAIO = (
       : '',
   BillingZip: baseProfile.billingZip,
   Billingphone:
-    baseProfile.randomPhoneNumberBool &&
-    baseProfile.randomPhoneNumberTemplate !== ''
+    baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
       ? baseProfile.randomPhoneNumberTemplate
           .split('#')
           .map(number => (number === '' ? getRandomInt(9) : number))
           .join('')
       : baseProfile.phone,
-  BillingEmail: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
-  ShippingFirstName: baseProfile.randomName
+  BillingEmail: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
+  ShippingFirstName: baseProfile.randomNameBool
     ? randomFirstName
     : baseProfile.deliveryFirstName,
-  ShippingLastName: baseProfile.randomName
+  ShippingLastName: baseProfile.randomNameBool
     ? randomLastName
     : baseProfile.deliveryLastName,
   ShippingAddressLine1: baseProfile.deliveryAddress,
@@ -247,16 +323,20 @@ export const convertBaseToEVEAIO = (
       : '',
   ShippingZip: baseProfile.deliveryZip,
   Shippingphone:
-    baseProfile.randomPhoneNumberBool &&
-    baseProfile.randomPhoneNumberTemplate !== ''
+    baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
       ? baseProfile.randomPhoneNumberTemplate
           .split('#')
           .map(number => (number === '' ? getRandomInt(9) : number))
           .join('')
       : baseProfile.phone,
-  ShippingEmail: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  ShippingEmail: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   NameOnCard: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
   CreditCardNumber: card.cardNumber,
   ExpirationMonth: card.expMonth,
@@ -275,7 +355,8 @@ export const convertBaseToPhantom = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   Billing: {
     Address: baseProfile.billingAddress,
@@ -300,15 +381,19 @@ export const convertBaseToPhantom = (
     longToShortCountries[baseProfile.deliveryCountry] !== undefined
       ? longToShortCountries[baseProfile.deliveryCountry]
       : '',
-  Email: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  Email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   ExpMonth: card.expMonth,
   ExpYear: card.expYear,
   Name: `Profile - ${index}`,
   Phone:
-    baseProfile.randomPhoneNumberBool &&
-    baseProfile.randomPhoneNumberTemplate !== ''
+    baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
       ? baseProfile.randomPhoneNumberTemplate
           .split('#')
           .map(number => (number === '' ? getRandomInt(9) : number))
@@ -319,10 +404,10 @@ export const convertBaseToPhantom = (
     Address: baseProfile.deliveryAddress,
     Apt: baseProfile.deliveryApt,
     City: baseProfile.deliveryCity,
-    FirstName: baseProfile.randomName
+    FirstName: baseProfile.randomNameBool
       ? randomFirstName
       : baseProfile.deliveryFirstName,
-    LastName: baseProfile.randomName
+    LastName: baseProfile.randomNameBool
       ? randomLastName
       : baseProfile.deliveryLastName,
     State:
@@ -342,7 +427,8 @@ export const convertBaseToGhost = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   Billing: {
     Address: baseProfile.billingAddress,
@@ -367,15 +453,19 @@ export const convertBaseToGhost = (
     longToShortCountries[baseProfile.deliveryCountry] !== undefined
       ? longToShortCountries[baseProfile.deliveryCountry]
       : '',
-  Email: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  Email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   ExpMonth: card.expMonth,
   ExpYear: card.expYear,
   Name: `Profile - ${index}`,
   Phone:
-    baseProfile.randomPhoneNumberBool &&
-    baseProfile.randomPhoneNumberTemplate !== ''
+    baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
       ? baseProfile.randomPhoneNumberTemplate
           .split('#')
           .map(number => (number === '' ? getRandomInt(9) : number))
@@ -386,10 +476,10 @@ export const convertBaseToGhost = (
     Address: baseProfile.deliveryAddress,
     Apt: baseProfile.deliveryApt,
     City: baseProfile.deliveryCity,
-    FirstName: baseProfile.randomName
+    FirstName: baseProfile.randomNameBool
       ? randomFirstName
       : baseProfile.deliveryFirstName,
-    LastName: baseProfile.randomName
+    LastName: baseProfile.randomNameBool
       ? randomLastName
       : baseProfile.deliveryLastName,
     State:
@@ -409,7 +499,8 @@ export const convertBaseToDashe = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   billing: {
     address: baseProfile.billingAddress,
@@ -419,8 +510,7 @@ export const convertBaseToDashe = (
     firstName: baseProfile.billingFirstName,
     lastName: baseProfile.billingLastName,
     phone:
-      baseProfile.randomPhoneNumberBool &&
-      baseProfile.randomPhoneNumberTemplate !== ''
+      baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
         ? baseProfile.randomPhoneNumberTemplate
             .split('#')
             .map(number => (number === '' ? getRandomInt(9) : number))
@@ -437,19 +527,24 @@ export const convertBaseToDashe = (
     number: card.cardNumber,
     year: card.expYear
   },
-  email: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   profileName: `Profile - ${index}`,
   shipping: {
     address: baseProfile.deliveryAddress,
     apt: baseProfile.deliveryApt,
     city: baseProfile.deliveryCity,
     country: baseProfile.deliveryCountry,
-    firstName: baseProfile.randomName
+    firstName: baseProfile.randomNameBool
       ? randomFirstName
       : baseProfile.deliveryFirstName,
-    lastName: baseProfile.randomName
+    lastName: baseProfile.randomNameBool
       ? randomLastName
       : baseProfile.deliveryLastName,
     phoneNumber: baseProfile.randomPhoneNumberBool
@@ -468,14 +563,20 @@ export const convertBaseToTKS = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   Id: uuidv4(),
   Name: `Profile - ${index}`,
   Billing: {
-    Email: baseProfile.useCatchallBool
-      ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-      : baseProfile.email,
+    Email: returnGmailOrCatchall(
+      index,
+      gmailEmails,
+      baseProfile.useCatchallBool,
+      baseProfile,
+      randomFirstName,
+      randomLastName
+    ),
     FirstName: baseProfile.billingFirstName,
     Lastname: baseProfile.billingLastName,
     AddressLine1: baseProfile.billingAddress,
@@ -495,8 +596,7 @@ export const convertBaseToTKS = (
           ]
         : '',
     phone:
-      baseProfile.randomPhoneNumberBool &&
-      baseProfile.randomPhoneNumberTemplate !== ''
+      baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
         ? baseProfile.randomPhoneNumberTemplate
             .split('#')
             .map(number => (number === '' ? getRandomInt(9) : number))
@@ -505,13 +605,18 @@ export const convertBaseToTKS = (
   },
   Shipping: {
     Pccc: null,
-    Email: baseProfile.useCatchallBool
-      ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-      : baseProfile.email,
-    FirstName: baseProfile.randomName
+    Email: returnGmailOrCatchall(
+      index,
+      gmailEmails,
+      baseProfile.useCatchallBool,
+      baseProfile,
+      randomFirstName,
+      randomLastName
+    ),
+    FirstName: baseProfile.randomNameBool
       ? randomFirstName
       : baseProfile.deliveryFirstName,
-    Lastname: baseProfile.randomName
+    Lastname: baseProfile.randomNameBool
       ? randomLastName
       : baseProfile.deliveryLastName,
     AddressLine1: baseProfile.deliveryAddress,
@@ -531,8 +636,7 @@ export const convertBaseToTKS = (
           ]
         : '',
     phone:
-      baseProfile.randomPhoneNumberBool &&
-      baseProfile.randomPhoneNumberTemplate !== ''
+      baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
         ? baseProfile.randomPhoneNumberTemplate
             .split('#')
             .map(number => (number === '' ? getRandomInt(9) : number))
@@ -562,7 +666,8 @@ export const convertBaseToHastey = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   __profile__name: `Profile - ${index}`,
   address: baseProfile.deliveryAddress,
@@ -574,9 +679,14 @@ export const convertBaseToHastey = (
   cc_year: card.expYear,
   city: baseProfile.deliveryCity,
   country: baseProfile.deliveryCountry,
-  email: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   id: `${Math.random()
     .toString(36)
     .substring(2, 10)}-${Math.random()
@@ -589,8 +699,10 @@ export const convertBaseToHastey = (
     .toString(36)
     .substring(2, 14)}`,
   name: `${
-    baseProfile.randomName ? randomFirstName : baseProfile.deliveryFirstName
-  } ${baseProfile.randomName ? randomLastName : baseProfile.deliveryLastName}`,
+    baseProfile.randomNameBool ? randomFirstName : baseProfile.deliveryFirstName
+  } ${
+    baseProfile.randomNameBool ? randomLastName : baseProfile.deliveryLastName
+  }`,
   state: baseProfile.deliveryRegion,
   tel: baseProfile.randomPhoneNumberBool
     ? baseProfile.randomPhoneNumberTemplate
@@ -606,7 +718,8 @@ export const convertBaseToKodai = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   billingAddress: {
     address: baseProfile.billingAddress,
@@ -645,9 +758,14 @@ export const convertBaseToKodai = (
     cardHolder: `${baseProfile.deliveryFirstName} ${baseProfile.deliveryLastName}`,
     cardNumber: card.cardNumber,
     cvv: card.cvv,
-    emailAddress: baseProfile.useCatchallBool
-      ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-      : baseProfile.email,
+    emailAddress: returnGmailOrCatchall(
+      index,
+      gmailEmails,
+      baseProfile.useCatchallBool,
+      baseProfile,
+      randomFirstName,
+      randomLastName
+    ),
     expirationDate: `${card.expMonth}/${card.expYear.slice(-2)}`
   },
   profileName: `Profile - ${index}`,
@@ -659,13 +777,14 @@ export const convertBaseToNSB = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   shipping: {
-    firstname: baseProfile.randomName
+    firstname: baseProfile.randomNameBool
       ? randomFirstName
       : baseProfile.deliveryFirstName,
-    lastname: baseProfile.randomName
+    lastname: baseProfile.randomNameBool
       ? randomLastName
       : baseProfile.deliveryLastName,
     country:
@@ -685,8 +804,7 @@ export const convertBaseToNSB = (
         : '',
     zip: baseProfile.deliveryZip,
     phone:
-      baseProfile.randomPhoneNumberBool &&
-      baseProfile.randomPhoneNumberTemplate !== ''
+      baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
         ? baseProfile.randomPhoneNumberTemplate
             .split('#')
             .map(number => (number === '' ? getRandomInt(9) : number))
@@ -700,9 +818,14 @@ export const convertBaseToNSB = (
     cvc: card.cvv,
     name: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`
   },
-  email: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   checkoutLimit: baseProfile.oneCheckoutBool ? 1 : 0,
   billingSame: baseProfile.sameDeliveryBillingBool,
   date: +new Date(),
@@ -714,25 +837,30 @@ export const convertBaseToSOLEAIO = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   ID: index,
   ProfileName: `Profile - ${index}`,
-  Email: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  Email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   phone:
-    baseProfile.randomPhoneNumberBool &&
-    baseProfile.randomPhoneNumberTemplate !== ''
+    baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
       ? baseProfile.randomPhoneNumberTemplate
           .split('#')
           .map(number => (number === '' ? getRandomInt(9) : number))
           .join('')
       : baseProfile.phone,
-  ShippingFirstName: baseProfile.randomName
+  ShippingFirstName: baseProfile.randomNameBool
     ? randomFirstName
     : baseProfile.deliveryFirstName,
-  ShippingLastName: baseProfile.randomName
+  ShippingLastName: baseProfile.randomNameBool
     ? randomLastName
     : baseProfile.deliveryLastName,
   ShippingAddress1: baseProfile.deliveryAddress,
@@ -780,16 +908,17 @@ export const convertBaseToCSV = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   profileID: `Profile - ${index}`,
   deliveryCountry: baseProfile.deliveryCountry,
   deliveryAddress: baseProfile.deliveryAddress,
   deliveryCity: baseProfile.deliveryCity,
-  deliveryFirstName: baseProfile.randomName
+  deliveryFirstName: baseProfile.randomNameBool
     ? randomFirstName
     : baseProfile.deliveryFirstName,
-  deliveryLastName: baseProfile.randomName
+  deliveryLastName: baseProfile.randomNameBool
     ? randomLastName
     : baseProfile.deliveryLastName,
   deliveryRegion: baseProfile.deliveryRegion,
@@ -809,9 +938,14 @@ export const convertBaseToCSV = (
         .map(number => (number === '' ? getRandomInt(9) : number))
         .join('')
     : baseProfile.phone,
-  paymentEmail: baseProfile.useCatchallBool
-    ? `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  paymentEmail: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   password: baseProfile.password,
   instagram: baseProfile.instagram,
   paymentCardholdersName: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
@@ -826,21 +960,25 @@ export const convertBaseToNeutrino = (
   baseProfile,
   card,
   randomFirstName,
-  randomLastName
+  randomLastName,
+  gmailEmails
 ) => ({
   ...baseProfile,
   profileID: `Profile - ${index}`,
-  deliveryFirstName: baseProfile.randomName
+  deliveryFirstName: baseProfile.randomNameBool
     ? randomFirstName
     : baseProfile.deliveryFirstName,
-  deliveryLastName: baseProfile.randomName
+  deliveryLastName: baseProfile.randomNameBool
     ? randomLastName
     : baseProfile.deliveryLastName,
-  email: baseProfile.useCatchallBool
-    ? `${randomFirstName !== '' ? randomFirstName : randomName.first()}${
-        randomLastName !== '' ? randomLastName : randomName.last()
-      }@${baseProfile.catchallEmail}`
-    : baseProfile.email,
+  email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
   card
 });
 

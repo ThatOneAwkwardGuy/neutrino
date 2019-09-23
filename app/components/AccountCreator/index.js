@@ -17,7 +17,10 @@ import { sites } from '../../constants/constants';
 import { upperCaseFirst, createNewWindow } from '../../utils/utils';
 import { getCaptchaResponse } from '../../screens/Captcha/functions';
 import { getFormData } from './functions';
-import { getRandomInt } from '../ProfileCreator/functions';
+import {
+  getRandomInt,
+  generateGmailDotTrick
+} from '../ProfileCreator/functions';
 
 const { clipboard } = require('electron');
 const { dialog } = require('electron').remote;
@@ -144,22 +147,29 @@ class AccountCreator extends Component {
   };
 
   createAccounts = async () => {
-    const { site, delay, quantity } = this.state;
+    const { catchall, site, delay, quantity } = this.state;
     const { setLoading, incrementAccounts, setInfoModal } = this.props;
+    const gmailEmails = catchall.includes('@gmail')
+      ? generateGmailDotTrick(quantity, catchall)
+      : [];
     const accountPromises = Array.from(Array(parseInt(quantity, 10))).map(
-      () => {
+      (value, index) => {
         switch (site) {
           case 'nakedcph':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createNakedCphAccount().catch(e => e)
+              this.createNakedCphAccount(gmailEmails[index]).catch(e => e)
+            );
+          case 'stress95':
+            return this.sleep(parseInt(delay, 10)).then(() =>
+              this.createStress95Account(gmailEmails[index]).catch(e => e)
             );
           case 'oneblockdown':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createOneBlockDownAccount().catch(e => e)
+              this.createOneBlockDownAccount(gmailEmails[index]).catch(e => e)
             );
           default:
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createShopifyAccount().catch(e => e)
+              this.createShopifyAccount(gmailEmails[index]).catch(e => e)
             );
         }
       }
@@ -242,7 +252,7 @@ class AccountCreator extends Component {
     }
   };
 
-  createOneBlockDownAccount = async () => {
+  createOneBlockDownAccount = async gmailEmail => {
     const {
       randomPass,
       randomName,
@@ -254,7 +264,7 @@ class AccountCreator extends Component {
       lastName
     } = this.state;
     const { addCreatedAccount } = this.props;
-    const email = randomEmail({ domain: catchall });
+    const email = gmailEmail || randomEmail({ domain: catchall });
     const accountPass = randomPass ? randomize('a', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const accountLastName = randomName ? random.last() : lastName;
@@ -296,7 +306,7 @@ class AccountCreator extends Component {
     }
   };
 
-  createShopifyAccount = async () => {
+  createShopifyAccount = async gmailEmail => {
     const {
       randomPass,
       randomName,
@@ -308,7 +318,7 @@ class AccountCreator extends Component {
       lastName
     } = this.state;
     const { addCreatedAccount } = this.props;
-    const email = randomEmail({ domain: catchall });
+    const email = gmailEmail || randomEmail({ domain: catchall });
     const accountPass = randomPass ? randomize('a', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const accountLastName = randomName ? random.last() : lastName;
@@ -404,7 +414,7 @@ class AccountCreator extends Component {
     }
   };
 
-  createNakedCphAccount = async () => {
+  createNakedCphAccount = async gmailEmail => {
     const {
       randomPass,
       randomName,
@@ -417,7 +427,7 @@ class AccountCreator extends Component {
     } = this.state;
     const { addCreatedAccount } = this.props;
     return new Promise(async (resolve, reject) => {
-      const email = randomEmail({ domain: catchall });
+      const email = gmailEmail || randomEmail({ domain: catchall });
       const accountPass = randomPass ? randomize('a', 10) : pass;
       const accountFirstName = randomName ? random.first() : firstName;
       const accountLastName = randomName ? random.last() : lastName;
@@ -439,7 +449,7 @@ class AccountCreator extends Component {
         `,
           false,
           () => {
-            window.webContents.on('did-finish-load', () => {
+            window.webContents.once('did-finish-load', () => {
               window.webContents.executeJavaScript(
                 'window.location',
                 false,
@@ -455,6 +465,68 @@ class AccountCreator extends Component {
                     window.close();
                     resolve();
                   }
+                }
+              );
+            });
+          }
+        );
+      });
+    });
+  };
+
+  createStress95Account = async gmailEmail => {
+    const {
+      randomPass,
+      randomName,
+      useProxies,
+      site,
+      catchall,
+      pass,
+      firstName,
+      lastName
+    } = this.state;
+    const { addCreatedAccount } = this.props;
+    return new Promise(async (resolve, reject) => {
+      const email = gmailEmail || randomEmail({ domain: catchall });
+      const accountPass = randomPass ? randomize('a', 10) : pass;
+      const accountFirstName = randomName ? random.first() : firstName;
+      const accountLastName = randomName ? random.last() : lastName;
+      const tokenID = uuidv4();
+      const proxy = useProxies ? this.getRandomProxy() : '';
+      console.log(proxy);
+      const window = await createNewWindow(tokenID, proxy);
+      window.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      window.loadURL('https://stress95.com/en/auth/view?op=register');
+      window.webContents.on('did-finish-load', () => {
+        window.webContents.executeJavaScript(
+          `
+        document.getElementById('firstNameInput').value = '${accountFirstName} ${accountLastName}';
+        document.getElementById('emailInput').value = '${email}';
+        document.getElementById('passwordInput').value = '${accountPass}';
+        document.querySelector('button[type="submit"]').click();
+        `,
+          false,
+          () => {
+            window.webContents.on('did-finish-load', () => {
+              window.webContents.executeJavaScript(
+                'document.documentElement.innerHTML',
+                false,
+                result => {
+                  if (result.includes('Account created!')) {
+                    window.webContents.removeAllListeners('close', () => {});
+                    addCreatedAccount({
+                      email,
+                      site,
+                      pass: accountPass,
+                      status: 'created'
+                    });
+                    resolve();
+                  } else {
+                    reject(new Error('Couldnt tell if account was created'));
+                  }
+                  window.close();
                 }
               );
             });

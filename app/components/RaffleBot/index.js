@@ -18,6 +18,8 @@ import dsm from '../../images/dsm.png';
 import dsmny from '../../images/dsmny.png';
 import cityblue from '../../images/cityblue.jpg';
 import lapstoneandhammer from '../../images/lapstoneandhammer.jpg';
+import stress95 from '../../images/stress95.png';
+// import footshop from '../../images/footshop.png';
 import { sleep, loadRaffleInfo } from './functions';
 import { generateUEID } from '../../utils/utils';
 import { convertCSVToBase } from '../ProfileTaskEditorConverter/functions';
@@ -36,6 +38,8 @@ import Renarts from './Raffle/Renarts';
 import SupplyStore from './Raffle/SupplyStore';
 import DSM from './Raffle/DSM';
 import DSMNY from './Raffle/DSMNY';
+import Stress95 from './Raffle/Stress95';
+import FootShop from './Raffle/FootShop';
 
 const { dialog } = require('electron').remote;
 const fs = require('fs');
@@ -56,7 +60,9 @@ const sites = [
   { name: 'LapstoneAndHammer', img: lapstoneandhammer },
   { name: 'Renarts', img: renarts },
   { name: 'DSM', img: dsm },
-  { name: 'DSMNY', img: dsmny }
+  { name: 'DSMNY', img: dsmny },
+  { name: 'Stress95', img: stress95 }
+  // { name: 'FootShop', img: footshop }
   // { name: 'SupplyStore', img: supplystore }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
@@ -424,6 +430,34 @@ export default class RaffleBot extends Component {
                 incrementRaffles
               );
               break;
+            case 'Stress95':
+              entry = new Stress95(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
+            case 'FootShop':
+              entry = new FootShop(
+                link,
+                profile,
+                site,
+                styleObject,
+                sizeObject,
+                'Not Started',
+                this.getRandomProxy(),
+                raffleDetails,
+                this.triggerRender,
+                incrementRaffles
+              );
+              break;
             default:
               break;
           }
@@ -658,7 +692,7 @@ export default class RaffleBot extends Component {
                 <Col xs="6">
                   <Label>Select a site*</Label>
                   <Container>
-                    <Row>
+                    <Row style={{ maxHeight: '150px', overflowY: 'scroll' }}>
                       {sites.map(raffleSite => (
                         <Col
                           xs="2"

@@ -505,7 +505,7 @@ export const convertNeutrinoToBase = profile => ({
 
 export const convertToBase = (bot, profile) => {
   switch (bot) {
-    case 'Cybersole':
+    case 'CyberSole':
       return convertCybersoleToBase(profile);
     case 'Project Destroyer':
       return convertProjectDestroyerToBase(profile);

@@ -200,6 +200,7 @@ export const sites = {
   soleclassics: 'https://soleclassics.com',
   solefly: 'https://www.solefly.com',
   solestop: 'https://www.solestop.com',
+  stress95: 'https://stress95.com',
   'suede-store': 'https://suede-store.com',
   super7: 'https://super7.com',
   sukamii: 'https://www.sukamii.com',

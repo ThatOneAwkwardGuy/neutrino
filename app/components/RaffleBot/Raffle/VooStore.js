@@ -4,6 +4,7 @@ import { STOP_CAPTCHA_JOB } from '../../../constants/ipcConstants';
 
 const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
+const cheerio = require('cheerio');
 
 export default class VooStore {
   constructor(
@@ -33,7 +34,7 @@ export default class VooStore {
     this.cookieJar = rp.jar();
     this.headers = {
       'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
     };
     this.rp = rp.defaults({
       headers: this.headers,
@@ -72,45 +73,83 @@ export default class VooStore {
     return formData;
   };
 
-  submitRaffle = captchaToken =>
-    this.rp({
+  submitRaffle = (token, captchaToken) => {
+    const payload = {
+      token,
+      page_id: this.raffleDetails.pageID,
+      shoes_size: this.size.id,
+      action: 'send_request',
+      fax: '',
+      name: this.profile.deliveryFirstName,
+      lastname: this.profile.deliveryLastName,
+      email: this.profile.email,
+      contact_number: this.profile.phone,
+      streetname: this.profile.deliveryAddress,
+      housenumber: this.profile.deliveryApt,
+      postalcode: this.profile.deliveryZip,
+      city: this.profile.deliveryCity,
+      country: this.profile.deliveryCountry,
+      countryhidden: '',
+      'g-recaptcha-response': captchaToken
+    };
+    return this.rp({
       method: 'POST',
       uri: 'https://raffle.vooberlin.com/ajax.php',
       headers: {
-        origin: 'https://raffle.vooberlin.com',
         'accept-language': 'en-GB,en-US;q=0.9,en;q=0.8',
         'user-agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 Safari/537.36',
-        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        referer: this.url,
         authority: 'raffle.vooberlin.com',
-        'x-requested-with': 'XMLHttpRequest'
+        accept: '*/*',
+        'cache-control': 'no-cache',
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        origin: 'https://raffle.vooberlin.com',
+        'x-requested-with': 'XMLHttpRequest',
+        referrer: this.url,
+        referrerPolicy: '1no-referrer-when-downgrade'
       },
-      form: {
-        token: this.raffleDetails.token,
-        page_id: this.raffleDetails.page_id,
-        shoes_size: this.size.id,
-        action: 'send_request',
-        fax: '',
-        name: this.profile.deliveryFirstName,
-        lastname: this.profile.deliveryLastName,
-        email: this.profile.email,
-        contact_number: this.profile.phone,
-        streetname: this.profile.deliveryAddress,
-        housenumber: this.profile.deliveryAddress,
-        postalcode: this.profile.deliveryZip,
-        city: this.profile.deliveryCity,
-        country: this.profile.deliveryRegion,
-        countryhidden: '',
-        'g-recaptcha-response': captchaToken
-      }
+      resolveWithFullResponse: true,
+      body:
+        'token=' +
+        token +
+        '&page_id=' +
+        this.raffleDetails.pageID +
+        '&shoes_size=' +
+        this.size.id +
+        '&action=send_request&fax=&name=' +
+        this.profile.deliveryFirstName +
+        '&lastname=' +
+        this.profile.deliveryLastName +
+        '&email=' +
+        this.profile.email +
+        '&contact_number=' +
+        this.profile.phone +
+        '&streetname=' +
+        this.profile.deliveryAddress +
+        '&housenumber=' +
+        this.profile.deliveryApt +
+        '&postalcode=' +
+        this.profile.deliveryZip +
+        '&city=' +
+        this.profile.deliveryCity +
+        '&country=' +
+        this.profile.deliveryCountry +
+        '&countryhidden=&g-recaptcha-response=' +
+        captchaToken
     });
+  };
 
-  getRafflePage = () => this.rp.get(this.url);
+  getRafflePageToken = async () => {
+    const body = await this.rp.get(this.url);
+    const $ = cheerio.load(body);
+    const token = $('input[name="token"]').attr('value');
+    console.log(token);
+    return token;
+  };
 
   makeEntry = async () => {
     this.changeStatus(`Getting Raffle Page`);
-    await this.getRafflePage();
+    const token = await this.getRafflePageToken();
     this.changeStatus(`Getting Captcha Token`);
     const capthcaResponse = await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle
@@ -123,9 +162,11 @@ export default class VooStore {
     });
     this.changeStatus(`Submitting Raffle Entry`);
     const submitRaffleResponse = await this.submitRaffle(
+      token,
       capthcaResponse.captchaToken
     );
-    const submitRaffle = JSON.parse(submitRaffleResponse);
+    console.log(submitRaffleResponse);
+    const submitRaffle = JSON.parse(submitRaffleResponse.body);
     if (submitRaffle.error) {
       throw new Error(submitRaffle.msg);
     } else {

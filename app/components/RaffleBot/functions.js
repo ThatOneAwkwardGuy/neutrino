@@ -42,6 +42,10 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadRenartsRaffleInfo(raffleLink);
       case 'SupplyStore':
         return loadSupplyStoreRaffleInfo(raffleLink);
+      case 'Stress95':
+        return loadStress95RaffleInfo(raffleLink);
+      case 'FootShop':
+        return loadFootShopRaffleInfo(raffleLink);
       default:
         return undefined;
     }
@@ -237,6 +241,52 @@ const loadDSMNYRaffleInfo = async link => {
             }
           }
         );
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+const loadStress95RaffleInfo = async link => {
+  const win = await createNewWindow('', '');
+  win.loadURL(link);
+  return new Promise((resolve, reject) => {
+    try {
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.webContents.on('dom-ready', async () => {
+        const currentURL = await win.webContents.executeJavaScript(
+          'window.location.href',
+          false
+        );
+        if (currentURL === link) {
+          const innerHTML = await win.webContents.executeJavaScript(
+            'document.documentElement.innerHTML',
+            false
+          );
+          const renderData = await win.webContents.executeJavaScript(
+            'window.rendererData',
+            true
+          );
+          let typeformCode;
+          if (currentURL.includes('typeform.com')) {
+            typeformCode = renderData.form.id;
+          } else {
+            const $ = cheerio.load(innerHTML);
+            // eslint-disable-next-line prefer-destructuring
+            typeformCode = $('.typeform-widget')
+              .attr('data-url')
+              .split('/to/')[1];
+          }
+          resolve({
+            sizeInput: false,
+            styleInput: false,
+            raffleDetails: { typeformCode, renderData }
+          });
+          win.close();
+        }
       });
     } catch (error) {
       reject(error);
@@ -531,38 +581,95 @@ const loadOneBlockDownRaffleInfo = async link =>
         reject(new Error('Closed Window Before Finished'));
       });
       win.loadURL(link);
-      win.webContents.once('did-finish-load', () => {
-        win.webContents.executeJavaScript(
-          'preloadedStock',
-          false,
-          preloadedStock => {
-            win.webContents.executeJavaScript(
-              `document.querySelector('#raffle-id').value`,
-              false,
-              raffleID => {
-                if (preloadedStock) {
-                  const sizes = preloadedStock.map(size => ({
-                    id: size.id,
-                    name: size.variant
-                  }));
-                  win.close();
-                  resolve({
-                    styleInput: false,
-                    sizeInput: true,
-                    sizes,
-                    size: sizes[0].id,
-                    raffleDetails: {
-                      itemId: preloadedStock[0].itemId,
-                      stockItemId: preloadedStock[0].stockItemId,
-                      raffleID
-                    }
-                  });
-                }
-                reject(new Error('Unable to find OneBlockDown Raffle Details'));
-              }
-            );
-          }
+      win.webContents.once('did-finish-load', async () => {
+        const mwMotivatorObjects = await win.webContents.executeJavaScript(
+          'mwMotivatorObjects',
+          false
         );
+        if (mwMotivatorObjects) {
+          const sizes = mwMotivatorObjects.product.variants.map(size => ({
+            id: size.option1,
+            name: size.option1
+          }));
+          const raffleLink = mwMotivatorObjects.product.content.split(
+            /src\s*=\s*"(.+?)"/gm
+          )[1];
+          win.webContents.loadURL(raffleLink);
+          win.webContents.once('did-finish-load', async () => {
+            const googleFormDetails = await win.webContents.executeJavaScript(
+              'FB_PUBLIC_LOAD_DATA_',
+              false
+            );
+            if (googleFormDetails) {
+              resolve({
+                styleInput: false,
+                sizeInput: true,
+                sizes,
+                size: sizes[0].id,
+                raffleDetails: {
+                  mwMotivatorObjects,
+                  googleFormDetails,
+                  raffleLink
+                }
+              });
+            }
+            reject(new Error('Unable to find OneBlockDown Raffle Details'));
+            win.close();
+          });
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+
+const loadFootShopRaffleInfo = async link =>
+  new Promise((resolve, reject) => {
+    try {
+      const win = new BrowserWindow({
+        width: 500,
+        height: 650,
+        show: true,
+        frame: true,
+        resizable: true,
+        focusable: true,
+        minimizable: true,
+        closable: true,
+        allowRunningInsecureContent: true,
+        webPreferences: {
+          webviewTag: true,
+          allowRunningInsecureContent: true,
+          nodeIntegration: true,
+          webSecurity: false
+        }
+      });
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.loadURL(link);
+      win.webContents.once('did-finish-load', async () => {
+        const raffleInfo = await win.webContents.executeJavaScript(
+          '__INITIAL_STATE__',
+          false
+        );
+        const id = raffleInfo.raffleDetail.raffle.id;
+        win.close();
+        if (raffleInfo && id) {
+          const sizes = raffleInfo.raffleDetail.raffle.sizeSets.Unisex.sizes.map(
+            size => ({ name: size.us, id: size.id })
+          );
+          resolve({
+            styleInput: false,
+            sizeInput: true,
+            sizes,
+            size: sizes[0].id,
+            raffleDetails: {
+              raffleInfo,
+              id
+            }
+          });
+        }
+        reject(new Error('Unable to find OneBlockDown Raffle Details'));
       });
     } catch (error) {
       reject(error);
@@ -735,3 +842,9 @@ export const setProxyForWindow = async (proxy, win) =>
       }
     );
   });
+
+export const getRandomIntInRange = (min, max) => {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min)) + min;
+};

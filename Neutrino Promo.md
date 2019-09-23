@@ -18,7 +18,7 @@ Neutrino is the ultimate toolset providing all your sneaker bot needs in one pla
 
 **Profile Converter** - Convert your profiles into other bot's formats or into a CSV quickly and easily. (Currently supports Cybersole, Project Destroyer, Ghost, Balko, EVE AIO, Phantom, Dashe, TKS, Hastey, Kodai, NSB, SOLE AIO, Neutrino and CSV)
 
-**Raffle Bot** - Enter multiple entries into raffles to drastically increase your chances of winning. (Currently supporting Footpatrol UK, NakedCPH, ExtraButter, VooStore, Bodega, OneBlockDown, CityBlue & LapstoneAndHammer) with more to come!
+**Raffle Bot** - Enter multiple entries into raffles to drastically increase your chances of winning. (Currently supporting DSML, DSMNY, Footpatrol UK, NakedCPH, ExtraButter, VooStore, Bodega, CityBlue & LapstoneAndHammer) with more to come!
 
 **Prices**
 Monthly: $20

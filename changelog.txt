@@ -74,6 +74,21 @@ Need to add animations
 
 2.0.15
 - Fixed Activity Windows being stuck on logging in when minized straight away on windows.
+- Account Creator - Stress95
+- Raffle Bot - Stress95 (Tested) (You need accounts to enter raffles)
+
+2.0.16
+- Profile Gen bug fixes
+- Profile Converter bug fixes
+
+2.0.17
+- Fixed windows not closing for Stress95 account creator
+- VooBerlin bug fixes
+
+2.0.18
+- Gmail Catchall support for Profile Generator and Account Creator
 
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
+
+4242424242424242:Visa:03:2020:123
