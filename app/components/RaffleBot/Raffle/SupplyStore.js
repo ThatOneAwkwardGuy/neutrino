@@ -19,13 +19,15 @@ export default class SupplyStore {
     proxy,
     raffleDetails,
     forceUpdate,
-    incrementRaffles
+    incrementRaffles,
+    settings
   ) {
     this.tokenID = uuidv4();
     this.url = url;
     this.proxy = proxy;
     this.profile = profile;
     this.run = false;
+    this.settings = settings;
     this.site = site;
     this.style = style;
     this.size = size;
@@ -217,7 +219,8 @@ export default class SupplyStore {
       id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.url,
-      site: this.site
+      site: this.site,
+      settings: this.settings
     });
     this.changeStatus('Making Entry');
     const submissionResponse = await this.submitRaffle(

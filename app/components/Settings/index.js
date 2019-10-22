@@ -519,7 +519,7 @@ export default class Settings extends Component {
               </Col>
             </Row>
             <h6 className="font-weight-bold py-3">Raffle Bot</h6>
-            <Row className="panel-middle p-3 align-items-end">
+            <Row className="p-3 panel-middle align-items-end">
               <Col xs="3">
                 <Label>Parallel Entries</Label>
                 <Input
@@ -539,10 +539,55 @@ export default class Settings extends Component {
                 />
               </Col>
             </Row>
+            {/* <Row className="p-3 align-items-end">
+              <Col xs="3">
+                <Label>2Captcha API Key</Label>
+                <Input
+                  type="text"
+                  name="2CaptchaAPIKey"
+                  onChange={this.handleSettingsChange}
+                  value={settings['2CaptchaAPIKey']}
+                />
+              </Col>
+              <Col xs="3">
+                <Label>AntiCaptcha API Key</Label>
+                <Input
+                  type="text"
+                  name="AntiCaptchaAPIKey"
+                  onChange={this.handleSettingsChange}
+                  value={settings.AntiCaptchaAPIKey}
+                />
+              </Col>
+              <Col xs="3">
+                <Label>ImageTypers API Key</Label>
+                <Input
+                  type="text"
+                  name="ImageTypersAPIKey"
+                  onChange={this.handleSettingsChange}
+                  value={settings.ImageTypersAPIKey}
+                />
+              </Col>
+            </Row>
+            <Row className="p-3 panel-middle align-items-end">
+              <Col xs="3">
+                <Label>Captcha API</Label>
+                <Input
+                  type="select"
+                  name="CaptchaAPI"
+                  onChange={this.handleSettingsChange}
+                  value={settings.CaptchaAPI}
+                >
+                  <option value="">Manual</option>
+                  <option value="2Captcha">2Captcha</option>
+                  <option value="AntiCaptcha">AntiCaptcha</option>
+                  <option value="ImageTypers">ImageTypers</option>
+                </Input>
+              </Col>
+            </Row> */}
             <h6 className="font-weight-bold py-3">Neutrino CSV Template</h6>
             <Row className="panel-middle p-3 align-items-end">
               <Col xs="3">
-                <Button onClick={this.saveCSVTemplate}>Save</Button>
+                <Button onClick={this.saveCSVTemplate}>Download</Button>
               </Col>
             </Row>
             <h6 className="font-weight-bold py-3">Account</h6>

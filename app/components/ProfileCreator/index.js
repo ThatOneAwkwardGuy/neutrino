@@ -26,6 +26,7 @@ import {
   convertBaseToSOLEAIO,
   convertBaseToCSV,
   convertBaseToNeutrino,
+  convertBaseToAdept,
   generateGmailDotTrick
 } from './functions';
 
@@ -51,6 +52,7 @@ const bots = [
   'NSB',
   'SOLE AIO',
   'Neutrino',
+  'Adept',
   'CSV'
 ];
 
@@ -521,6 +523,15 @@ class ProfileCreator extends Component {
               randomLastName,
               emails
             );
+          case 'Adept':
+            return convertBaseToAdept(
+              index,
+              profile,
+              card,
+              randomFirstName,
+              randomLastName,
+              emails
+            );
           default:
             return undefined;
         }
@@ -621,7 +632,7 @@ class ProfileCreator extends Component {
     ];
     return (
       <Row className="h-100 p-0">
-        <Col className="panel-left h-100" xs="6">
+        <Col className="panel-left h-100 display-scrollbar" xs="6">
           <h5 className="my-3">Main Profile</h5>
           <Container fluid className="px-0 noselect">
             <Row className="px-0">

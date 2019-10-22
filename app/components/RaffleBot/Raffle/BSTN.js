@@ -17,11 +17,13 @@ export default class BSTN {
     proxy,
     raffleDetails,
     forceUpdate,
-    incrementRaffles
+    incrementRaffles,
+    settings
   ) {
     this.url = url;
     this.tokenID = uuidv4();
     this.proxy = proxy;
+    this.settings = settings;
     this.profile = profile;
     this.run = false;
     this.site = site;
@@ -92,7 +94,8 @@ export default class BSTN {
       id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.url,
-      site: this.site
+      site: this.site,
+      settings: this.settings
     });
 
   getCookies = () =>

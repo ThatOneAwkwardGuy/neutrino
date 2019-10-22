@@ -317,6 +317,7 @@ class Home extends Component {
         component: AccountCreator,
         exact: true,
         props: {
+          settings,
           profile,
           setLoading,
           addCreatedAccount,
@@ -389,6 +390,7 @@ class Home extends Component {
           setLoading,
           raffleInfo,
           setRaffleInfo,
+          setInfoModal,
           incrementRaffles
         }
       },

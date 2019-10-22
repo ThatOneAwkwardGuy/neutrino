@@ -157,21 +157,33 @@ export const convertBalkoToBase = profile => ({
 
 export const convertEveaioToBase = profile => ({
   profileID: profile.ProfileName,
-  deliveryCountry: shortToLongCountries[profile.ShippingCountryCode] || '',
+  deliveryCountry:
+    shortToLongCountries[profile.ShippingCountryCode] !== undefined
+      ? shortToLongCountries[profile.ShippingCountryCode]
+      : '',
   deliveryAddress: profile.ShippingAddressLine1,
   deliveryCity: profile.ShippingCity,
   deliveryFirstName: profile.ShippingFirstName,
   deliveryLastName: profile.ShippingLastName,
-  deliveryRegion: shortToLongStates[profile.ShippingState] || '',
+  deliveryRegion:
+    shortToLongStates[profile.ShippingState] !== undefined
+      ? shortToLongStates[profile.ShippingState]
+      : '',
   deliveryZip: profile.ShippingZip,
   deliveryApt: profile.ShippingAddressLine2,
   billingZip: profile.BillingZip,
-  billingCountry: shortToLongCountries[profile.BillingCountryCode] || '',
+  billingCountry:
+    shortToLongCountries[profile.BillingCountryCode] !== undefined
+      ? shortToLongCountries[profile.BillingCountryCode]
+      : '',
   billingAddress: profile.BillingAddressLine1,
   billingCity: profile.BillingCity,
   billingFirstName: profile.BillingFirstName,
   billingLastName: profile.BillingLastName,
-  billingRegion: shortToLongStates[profile.BillingState] || '',
+  billingRegion:
+    shortToLongStates[profile.BillingState] !== undefined
+      ? shortToLongStates[profile.BillingState]
+      : '',
   billingApt: profile.BillingAddressLine2,
   phone: profile.ShippingPhone,
   card: {
@@ -349,7 +361,10 @@ export const convertKodaiToBase = profile => ({
 
 export const convertNsbToBase = profile => ({
   profileID: profile.name,
-  deliveryCountry: shortToLongCountries[profile.shipping.country] || '',
+  deliveryCountry:
+    shortToLongCountries[profile.shipping.country] !== undefined
+      ? shortToLongCountries[profile.shipping.country]
+      : '',
   deliveryAddress: profile.shipping.address,
   deliveryCity: profile.shipping.city,
   deliveryFirstName: profile.shipping.firstname,
@@ -358,12 +373,18 @@ export const convertNsbToBase = profile => ({
   deliveryZip: profile.shipping.zip,
   deliveryApt: profile.shipping.address2,
   billingZip: profile.shipping.zip,
-  billingCountry: shortToLongCountries[profile.shipping.country] || '',
+  billingCountry:
+    shortToLongCountries[profile.shipping.country] !== undefined
+      ? shortToLongCountries[profile.shipping.country]
+      : '',
   billingAddress: profile.shipping.address,
   billingCity: profile.shipping.city,
   billingFirstName: profile.shipping.firstname,
   billingLastName: profile.shipping.lastname,
-  billingRegion: shortToLongStates[profile.shipping.state] || '',
+  billingRegion:
+    shortToLongStates[profile.shipping.state] !== undefined
+      ? shortToLongStates[profile.shipping.state]
+      : '',
   billingApt: profile.shipping.address2,
   card: {
     paymentCardholdersName: profile.cc.name,
@@ -392,7 +413,10 @@ export const convertSoleAioToBase = profile => ({
   deliveryCity: profile.ShippingCity,
   deliveryFirstName: profile.ShippingFirstName,
   deliveryLastName: profile.ShippingLastName,
-  deliveryRegion: shortToLongStates[profile.ShippingState],
+  deliveryRegion:
+    shortToLongStates[profile.ShippingState] !== undefined
+      ? shortToLongStates[profile.ShippingState]
+      : '',
   deliveryZip: profile.ShippingZip,
   deliveryApt: profile.ShippingAddress2,
   billingZip: profile.BillingZip,
@@ -401,14 +425,17 @@ export const convertSoleAioToBase = profile => ({
   billingCity: profile.BillingCity,
   billingFirstName: profile.BillingFirstName,
   billingLastName: profile.BillingLastName,
-  billingRegion: shortToLongStates[profile.BillingState],
+  billingRegion:
+    shortToLongStates[profile.BillingState] !== undefined
+      ? shortToLongStates[profile.BillingState]
+      : '',
   billingApt: profile.BillingAddress2,
   card: {
     paymentCardholdersName: profile.CardName,
-    cardNumber: profile.paymentCardnumber,
-    expMonth: profile.paymentCardExpiryMonth,
-    expYear: `20${profile.paymentCardExpiryYear}`,
-    cvv: profile.paymentCVV
+    cardNumber: profile.CardNumber,
+    expMonth: profile.CardExpiryMonth,
+    expYear: `20${profile.CardExpiryYear}`,
+    cvv: profile.CardCvv
   },
   email: profile.Email,
   password: '',
@@ -533,7 +560,69 @@ export const convertToBase = (bot, profile) => {
       return convertNeutrinoToBase(profile);
     case 'CSV':
       return convertCSVToBase(profile);
+    case 'Adept':
+      return convertAdeptToBase(profile);
     default:
       return undefined;
   }
 };
+
+export const convertAdeptToBase = profile => ({
+  profileID: profile.profileName,
+  deliveryCountry:
+    shortToLongCountries[profile.order_billing_country] !== undefined
+      ? shortToLongCountries[profile.order_billing_country]
+      : '',
+  deliveryAddress: profile.bo,
+  deliveryCity: profile.order_billing_city,
+  deliveryFirstName: profile.order_billing_name.split(' ')[0],
+  deliveryLastName:
+    profile.order_billing_name.split(' ').length > 1
+      ? profile.order_billing_name
+          .split(' ')
+          .slice(1)
+          .join(' ')
+      : '',
+  deliveryRegion: shortToLongStates[profile.order_billing_state]
+    ? shortToLongStates[profile.order_billing_state]
+    : '',
+  deliveryZip: profile.order_billing_zip,
+  deliveryApt: profile.order_billing_address_3,
+  billingZip: profile.order_billing_zip,
+  billingCountry:
+    shortToLongCountries[profile.order_billing_country] !== undefined
+      ? shortToLongCountries[profile.order_billing_country]
+      : '',
+  billingAddress: profile.bo,
+  billingCity: profile.order_billing_city,
+  billingFirstName: profile.order_billing_name.split(' ')[0],
+  billingLastName:
+    profile.order_billing_name.split(' ').length > 1
+      ? profile.order_billing_name
+          .split(' ')
+          .slice(1)
+          .join(' ')
+      : '',
+  billingRegion: shortToLongStates[profile.order_billing_state]
+    ? shortToLongStates[profile.order_billing_state]
+    : '',
+  billingApt: profile.oba3,
+  card: {
+    paymentCardholdersName: profile.order_billing_name,
+    cardNumber: profile.cnb,
+    expMonth: profile.credit_card_month,
+    expYear: profile.credit_card_year,
+    cvv: profile.vval
+  },
+  email: profile.order_email,
+  password: '',
+  instagram: '',
+  phone: profile.order_tel,
+  sameDeliveryBillingBool: false,
+  oneCheckoutBool: false,
+  randomNameBool: false,
+  randomPhoneNumberBool: false,
+  useCatchallBool: false,
+  jigAddressesBool: false,
+  fourCharPrefixBool: false
+});

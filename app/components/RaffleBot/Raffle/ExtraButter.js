@@ -18,13 +18,15 @@ export default class ExtraButter {
     proxy,
     raffleDetails,
     forceUpdate,
-    incrementRaffles
+    incrementRaffles,
+    settings
   ) {
     this.tokenID = uuidv4();
     this.url = url;
     this.proxy = proxy;
     this.profile = profile;
     this.run = false;
+    this.settings = settings;
     this.site = site;
     this.style = style;
     this.size = size;
@@ -56,7 +58,17 @@ export default class ExtraButter {
         await this.makeEntry();
       } catch (error) {
         console.log(error);
-        if (error.statusCode === 400) {
+        if (
+          error &&
+          error.options &&
+          error.options.url === 'https://api.stripe.com/v1/tokens'
+        ) {
+          const parsedError = JSON.parse(error.error);
+          console.log(parsedError);
+          this.changeStatus(
+            `Error Submitting Raffle - ${parsedError.error.message}`
+          );
+        } else if (error.statusCode === 400) {
           this.changeStatus(`Try Again`);
         } else {
           this.changeStatus(`Error Submitting Raffle - ${error.message}`);
@@ -183,7 +195,8 @@ export default class ExtraButter {
       id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.url,
-      site: this.site
+      site: this.site,
+      settings: this.settings
     });
     const payload = {
       email: this.profile.email,
@@ -246,10 +259,10 @@ export default class ExtraButter {
     const body = await this.rp.get(this.url);
     const regex = /(?:"|')(customerId)(?:"|')(?=:)(?::\s*)(?:"|')?(?<value>true|false|[0-9a-zA-Z+\-.$]*)/g;
     const customerId = regex.exec(body);
-    if (customerId.length === 3) {
+    if (customerId !== null && customerId.length === 3) {
       return customerId[2];
     }
-    throw new Error('Unable to find Customer ID');
+    throw new Error('Unable to find Customer ID (Cant Find Account)');
   };
 
   makeEntry = async () => {

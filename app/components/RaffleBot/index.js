@@ -19,6 +19,7 @@ import dsmny from '../../images/dsmny.png';
 import cityblue from '../../images/cityblue.jpg';
 import lapstoneandhammer from '../../images/lapstoneandhammer.jpg';
 import stress95 from '../../images/stress95.png';
+import fearofgod from '../../images/fearofgod.png';
 // import footshop from '../../images/footshop.png';
 import { sleep, loadRaffleInfo } from './functions';
 import { generateUEID } from '../../utils/utils';
@@ -27,19 +28,20 @@ import { convertBaseToNeutrino } from '../ProfileCreator/functions';
 import FootpatrolUK from './Raffle/FootpatrolUK';
 import NakedCPH from './Raffle/NakedCPH';
 import ExtraButter from './Raffle/ExtraButter';
-import END from './Raffle/END';
+// import END from './Raffle/END';
 import VooStore from './Raffle/VooStore';
 import Bodega from './Raffle/Bodega';
 import OneBlockDown from './Raffle/OneBlockDown';
 import CityBlue from './Raffle/CityBlue';
 import LapstoneAndHammer from './Raffle/LapstoneAndHammer';
-import BSTN from './Raffle/BSTN';
+// import BSTN from './Raffle/BSTN';
 import Renarts from './Raffle/Renarts';
-import SupplyStore from './Raffle/SupplyStore';
+// import SupplyStore from './Raffle/SupplyStore';
 import DSM from './Raffle/DSM';
 import DSMNY from './Raffle/DSMNY';
 import Stress95 from './Raffle/Stress95';
 // import FootShop from './Raffle/FootShop';
+import FearOfGod from './Raffle/FearOfGod';
 
 const { dialog } = require('electron').remote;
 const fs = require('fs');
@@ -61,12 +63,29 @@ const sites = [
   { name: 'Renarts', img: renarts },
   { name: 'DSM', img: dsm },
   { name: 'DSMNY', img: dsmny },
-  { name: 'Stress95', img: stress95 }
+  { name: 'Stress95', img: stress95 },
+  { name: 'Fear Of God', img: fearofgod }
   // { name: 'FootShop', img: footshop }
   // { name: 'SupplyStore', img: supplystore }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
 ];
+
+const Classes = {
+  'Footpatrol UK': FootpatrolUK,
+  NakedCPH,
+  ExtraButter,
+  VooStore,
+  Bodega,
+  OneBlockDown,
+  CityBlue,
+  LapstoneAndHammer,
+  Renarts,
+  DSM,
+  DSMNY,
+  Stress95,
+  'Fear Of God': FearOfGod
+};
 
 export default class RaffleBot extends Component {
   constructor(props) {
@@ -112,7 +131,21 @@ export default class RaffleBot extends Component {
   };
 
   goBack = () => {
-    this.setState({ loadedRaffle: false });
+    this.setState({
+      site: '',
+      link: '',
+      loadedRaffle: false,
+      proxiesInput: '',
+      style: '',
+      size: '',
+      sizes: [],
+      styles: [],
+      profiles: [],
+      styleInput: true,
+      sizeInput: true,
+      entries: [],
+      raffleDetails: {}
+    });
   };
 
   returnOptions = (name, array) => {
@@ -149,7 +182,7 @@ export default class RaffleBot extends Component {
 
   loadRaffle = async () => {
     const { site, link } = this.state;
-    const { setLoading } = this.props;
+    const { setLoading, setInfoModal } = this.props;
     try {
       setLoading(true, 'Loading Raffle Info', false);
       const raffleInfo = await loadRaffleInfo(site, link);
@@ -158,6 +191,13 @@ export default class RaffleBot extends Component {
         this.setState({ loadedRaffle: true, ...raffleInfo });
       }
     } catch (error) {
+      setInfoModal({
+        infoModalShowing: true,
+        infoModalHeader: `Errors`,
+        infoModalBody: <div>{JSON.stringify(error.message)}</div>,
+        infoModalFunction: '',
+        infoModalButtonText: ''
+      });
       console.log(error);
     } finally {
       setLoading(false, 'Loading Raffle Info', false);
@@ -218,7 +258,7 @@ export default class RaffleBot extends Component {
       entries,
       proxiesInput
     } = this.state;
-    const { incrementRaffles } = this.props;
+    const { incrementRaffles, settings } = this.props;
     const newEntries = [];
     this.setState(
       {
@@ -233,234 +273,19 @@ export default class RaffleBot extends Component {
           const styleObject = styles.find(
             styleOption => String(styleOption.id) === style
           );
-          switch (site) {
-            case 'Footpatrol UK':
-              entry = new FootpatrolUK(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'NakedCPH':
-              entry = new NakedCPH(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'ExtraButter':
-              entry = new ExtraButter(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'END':
-              entry = new END(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'VooStore':
-              entry = new VooStore(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'Bodega':
-              entry = new Bodega(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'OneBlockDown':
-              entry = new OneBlockDown(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'CityBlue':
-              entry = new CityBlue(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'LapstoneAndHammer':
-              entry = new LapstoneAndHammer(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'BSTN':
-              entry = new BSTN(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'Renarts':
-              entry = new Renarts(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'SupplyStore':
-              entry = new SupplyStore(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'DSM':
-              entry = new DSM(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'DSMNY':
-              entry = new DSMNY(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            case 'Stress95':
-              entry = new Stress95(
-                link,
-                profile,
-                site,
-                styleObject,
-                sizeObject,
-                'Not Started',
-                this.getRandomProxy(),
-                raffleDetails,
-                this.triggerRender,
-                incrementRaffles
-              );
-              break;
-            // case 'FootShop':
-            //   entry = new FootShop(
-            //     link,
-            //     profile,
-            //     site,
-            //     styleObject,
-            //     sizeObject,
-            //     'Not Started',
-            //     this.getRandomProxy(),
-            //     raffleDetails,
-            //     this.triggerRender,
-            //     incrementRaffles
-            //   );
-            //   break;
-            default:
-              break;
-          }
+          entry = new Classes[site](
+            link,
+            profile,
+            site,
+            styleObject,
+            sizeObject,
+            'Not Started',
+            this.getRandomProxy(),
+            raffleDetails,
+            this.triggerRender,
+            incrementRaffles,
+            settings
+          );
           if (entry) {
             newEntries.push(entry);
           }
@@ -692,7 +517,10 @@ export default class RaffleBot extends Component {
                 <Col xs="6">
                   <Label>Select a site*</Label>
                   <Container>
-                    <Row style={{ maxHeight: '150px', overflowY: 'scroll' }}>
+                    <Row
+                      className="display-scrollbar"
+                      style={{ maxHeight: '150px', overflowY: 'scroll' }}
+                    >
                       {sites.map(raffleSite => (
                         <Col
                           xs="2"
@@ -739,6 +567,7 @@ export default class RaffleBot extends Component {
 RaffleBot.propTypes = {
   settings: PropTypes.objectOf(PropTypes.any).isRequired,
   setLoading: PropTypes.func.isRequired,
+  setInfoModal: PropTypes.func.isRequired,
   raffleInfo: PropTypes.shape({
     store: PropTypes.string.isRequired,
     link: PropTypes.string.isRequired

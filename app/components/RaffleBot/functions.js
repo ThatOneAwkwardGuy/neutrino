@@ -46,6 +46,8 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadStress95RaffleInfo(raffleLink);
       case 'FootShop':
         return loadFootShopRaffleInfo(raffleLink);
+      case 'Fear Of God':
+        return loadFearOfGodRaffleInfo(raffleLink);
       default:
         return undefined;
     }
@@ -623,6 +625,75 @@ const loadOneBlockDownRaffleInfo = async link =>
     }
   });
 
+const loadFearOfGodRaffleInfo = async link =>
+  new Promise((resolve, reject) => {
+    try {
+      const win = new BrowserWindow({
+        width: 500,
+        height: 650,
+        show: true,
+        frame: true,
+        resizable: true,
+        focusable: true,
+        minimizable: true,
+        closable: true,
+        allowRunningInsecureContent: true,
+        webPreferences: {
+          webviewTag: true,
+          allowRunningInsecureContent: true,
+          nodeIntegration: true,
+          webSecurity: false
+        }
+      });
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.loadURL(link);
+      win.webContents.once('dom-ready', async () => {
+        const iframeSrc = await win.webContents.executeJavaScript(
+          'document.querySelector("#vs_full_frame").src',
+          false
+        );
+        if (iframeSrc.includes('http')) {
+          win.loadURL(iframeSrc);
+          win.webContents.once('dom-ready', async () => {
+            const id = await win.webContents.executeJavaScript(
+              `document.querySelector('#entry-form input[name="id"]').value`,
+              false
+            );
+            const entrySource = await win.webContents.executeJavaScript(
+              `document.querySelector('#entry_source').value`,
+              false
+            );
+            const sizeDropDown = await win.webContents.executeJavaScript(
+              `document.querySelector('select[data-error="Select your size!"]').name`,
+              false
+            );
+            const sizes = await win.webContents.executeJavaScript(
+              `[...document.querySelectorAll('select[data-error="Select your size!"] option:not([value=""])')].map((el) => ({id:el.value,name:el.value}))`,
+              false
+            );
+            win.close();
+            resolve({
+              styleInput: false,
+              sizeInput: true,
+              sizes,
+              size: sizes[0].id,
+              raffleDetails: {
+                iframeSrc,
+                id,
+                entrySource,
+                sizeDropDown
+              }
+            });
+          });
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+
 const loadFootShopRaffleInfo = async link =>
   new Promise((resolve, reject) => {
     try {
@@ -652,7 +723,10 @@ const loadFootShopRaffleInfo = async link =>
           '__INITIAL_STATE__',
           false
         );
-        const id = raffleInfo.raffleDetail.raffle.id;
+        // const id = raffleInfo.raffleDetail.raffle.id;
+        const {
+          raffleDetail: { raffle: id }
+        } = raffleInfo;
         win.close();
         if (raffleInfo && id) {
           const sizes = raffleInfo.raffleDetail.raffle.sizeSets.Unisex.sizes.map(
@@ -669,7 +743,7 @@ const loadFootShopRaffleInfo = async link =>
             }
           });
         }
-        reject(new Error('Unable to find OneBlockDown Raffle Details'));
+        reject(new Error('Unable to find FootShop Raffle Details'));
       });
     } catch (error) {
       reject(error);
@@ -844,7 +918,7 @@ export const setProxyForWindow = async (proxy, win) =>
   });
 
 export const getRandomIntInRange = (min, max) => {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min)) + min;
+  const roundedMin = Math.ceil(min);
+  const roundedMax = Math.floor(max);
+  return Math.floor(Math.random() * (roundedMax - roundedMin)) + min;
 };

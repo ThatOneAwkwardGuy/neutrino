@@ -2,3 +2,7 @@
   transition: 0.2s;
   border: solid 5px $mainColour;
 }
+
+#TableContainer > div > div > div:nth-child(2) > div > div {
+  position: relative !important;
+}

@@ -79,29 +79,46 @@ export default class Stress95 {
   submitRaffleEntry = async (token, landedAt) => {
     this.changeStatus('Submitting Raffle Entry');
     const payload = {};
+    const formObj = {};
     this.raffleDetails.renderData.form.fields.forEach(row => {
       if (row.title.includes('first name')) {
-        payload[`form[textfield:${row.id}]`] = this.profile.deliveryFirstName;
+        formObj['1'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryFirstName,
+          type: 'text'
+        };
       } else if (row.title.includes('surname')) {
-        payload[`form[textfield:${row.id}]`] = this.profile.deliveryLastName;
+        formObj['2'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryLastName,
+          type: 'text'
+        };
       } else if (row.title.includes('email')) {
-        payload[`form[${row.type}:${row.id}]`] = this.profile.email;
+        formObj['3'] = {
+          field: { id: row.id, type: row.type },
+          email: this.profile.email,
+          type: 'email'
+        };
       } else if (row.title.includes('country')) {
-        payload[`form[${row.type}:${row.id}]`] = this.profile.deliveryRegion;
+        formObj['5'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryCountry,
+          type: 'text'
+        };
       }
     });
-    payload['form[token]'] = token;
-    payload['form[landed_at]'] = landedAt;
-    payload[
-      'form[language]'
-    ] = this.raffleDetails.renderData.form.settings.language;
+    payload.answers = Object.values(formObj);
+    payload.form_id = this.raffleDetails.typeformCode;
+    payload.signature = token;
+    payload.landed_at = parseInt(landedAt, 10);
     console.log(payload);
     const response = await this.rp({
       method: 'POST',
       uri: `https://stress95.typeform.com/app/form/submit/${this.raffleDetails.typeformCode}`,
-      form: payload
+      body: payload,
+      json: true
     });
-    return JSON.parse(response);
+    return response;
   };
 
   makeEntry = async () => {

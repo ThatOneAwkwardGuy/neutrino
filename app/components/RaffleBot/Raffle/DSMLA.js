@@ -14,11 +14,13 @@ export default class DSMLA {
     proxy,
     raffleDetails,
     forceUpdate,
-    incrementRaffles
+    incrementRaffles,
+    settings
   ) {
     this.tokenID = uuidv4();
     this.url = url;
     this.profile = profile;
+    this.settings = settings;
     this.run = false;
     this.site = site;
     this.style = style;
@@ -68,7 +70,8 @@ export default class DSMLA {
       id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.url,
-      site: this.site
+      site: this.site,
+      settings: this.settings
     });
 
   submitRaffle = captchaToken => {

@@ -263,44 +263,93 @@ class AccountCreator extends Component {
       firstName,
       lastName
     } = this.state;
-    const { addCreatedAccount } = this.props;
+    const { addCreatedAccount, settings } = this.props;
     const email = gmailEmail || randomEmail({ domain: catchall });
     const accountPass = randomPass ? randomize('a', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const accountLastName = randomName ? random.last() : lastName;
+    const tokenID = uuidv4();
+    this.cookieJars[tokenID] = request.jar();
     const response = await request({
       method: 'POST',
-      uri: 'https://www.oneblockdown.it/index.php',
+      uri: 'https://eu.oneblockdown.it/account',
       proxy: useProxies ? this.getRandomProxy() : '',
       headers: {
-        accept: 'application/json, text/javascript, */*; q=0.01',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        pragma: 'no-cache',
-        'x-requested-with': 'XMLHttpRequest'
+        Accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+        'Accept-Language': 'en-US,en;q=0.9',
+        Authority: 'eu.oneblockdown.it',
+        'Cache-Control': 'no-cache',
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Pragma: 'no-cache',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'same-origin',
+        'Sec-Fetch-User': '?1',
+        'Upgrade-Insecure-Requests': '1',
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
       },
-      form: {
-        controller: 'auth',
-        action: 'register',
-        extension: 'obd',
-        email,
-        password: accountPass,
-        accountFirstName,
-        accountLastName,
-        birthDate: '1990-4-7',
-        sex: 'MALE',
-        'privacy[1]': '1',
-        'privacy[2]': '0',
-        version: '106'
-      }
+      jar: this.cookieJars[tokenID],
+      resolveWithFullResponse: true,
+      followAllRedirects: true,
+      body: `form_type=create_customer&utf8=%E2%9C%93&customer%5Bfirst_name%5D=${accountFirstName}&customer%5Blast_name%5D=${accountLastName}&customer%5Bemail%5D=${encodeURIComponent(
+        email
+      )}&customer%5Bpassword%5D=${accountPass}&customer%5Btags%5D=gender_man`
     });
-    const responseJSON = JSON.parse(response);
-    if (responseJSON.success) {
+    if (response.request.href && response.request.href.includes('challenge')) {
+      const captchaResponse = await getCaptchaResponse({
+        cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
+        url: response.request.href,
+        id: tokenID,
+        proxy: useProxies ? this.getRandomProxy() : '',
+        baseURL: sites[site],
+        site,
+        accountPass,
+        settings
+      });
+      const payloadChallenge = {
+        authenticity_token: captchaResponse.authToken,
+        'g-recaptcha-response': captchaResponse.captchaToken
+      };
+      console.log(payloadChallenge);
+      await request({
+        method: 'POST',
+        url: `https://eu.oneblockdown.it/account`,
+        followRedirect: true,
+        proxy: useProxies ? this.getRandomProxy() : '',
+        resolveWithFullResponse: true,
+        followAllRedirects: true,
+        headers: {
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+          'Accept-Language': 'en-US,en;q=0.9',
+          Authority: 'eu.oneblockdown.it',
+          'Cache-Control': 'no-cache',
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Pragma: 'no-cache',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'same-origin',
+          'Sec-Fetch-User': '?1',
+          'Upgrade-Insecure-Requests': '1',
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
+        },
+        jar: this.cookieJars[captchaResponse.id],
+        form: payloadChallenge
+      });
       addCreatedAccount({
         email,
         site,
-        pass,
+        pass: accountPass,
+        status: 'created'
+      });
+      return;
+    }
+    if (!response.request.href.includes('register')) {
+      addCreatedAccount({
+        email,
+        site,
+        pass: accountPass,
         status: 'created'
       });
     }
@@ -317,7 +366,7 @@ class AccountCreator extends Component {
       firstName,
       lastName
     } = this.state;
-    const { addCreatedAccount } = this.props;
+    const { addCreatedAccount, settings } = this.props;
     const email = gmailEmail || randomEmail({ domain: catchall });
     const accountPass = randomPass ? randomize('a', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
@@ -342,7 +391,6 @@ class AccountCreator extends Component {
       followAllRedirects: true,
       jar: this.cookieJars[tokenID],
       headers: {
-        authority: 'cncpts.com',
         pragma: 'no-cache',
         'cache-control': 'no-cache',
         origin: sites[site],
@@ -353,11 +401,11 @@ class AccountCreator extends Component {
         accept:
           'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
         referer: `${sites[site]}/account/login`,
-        'accept-encoding': 'gzip, deflate, br',
         'accept-language': 'en-US,en;q=0.9'
       },
       body: queryString
     });
+    console.log(response);
     if (response.request.href && response.request.href.includes('challenge')) {
       const captchaResponse = await getCaptchaResponse({
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
@@ -366,14 +414,15 @@ class AccountCreator extends Component {
         proxy: useProxies ? this.getRandomProxy() : '',
         baseURL: sites[site],
         site,
-        accountPass
+        accountPass,
+        settings
       });
       const payloadChallenge = {
         utf8: '✓',
         authenticity_token: captchaResponse.authToken,
         'g-recaptcha-response': captchaResponse.captchaToken
       };
-      await request({
+      const signup = await request({
         method: 'POST',
         url: `${sites[site]}/account`,
         followRedirect: true,
@@ -396,15 +445,24 @@ class AccountCreator extends Component {
         jar: this.cookieJars[captchaResponse.id],
         form: payloadChallenge
       });
-      addCreatedAccount({
-        email,
-        site,
-        pass: accountPass,
-        status: 'created'
-      });
-      return;
+      console.log(signup);
+      if (!response.body.includes('Email contains an invalid domain name')) {
+        addCreatedAccount({
+          email,
+          site,
+          pass: accountPass,
+          status: 'created'
+        });
+        return;
+      }
+      return new Error(
+        'There was an error creating your account. this could be due to a banned catchall'
+      );
     }
-    if (!response.request.href.includes('register')) {
+    if (
+      !response.request.href.includes('register') &&
+      !response.body.includes('Email contains an invalid domain name')
+    ) {
       addCreatedAccount({
         email,
         site,
@@ -756,6 +814,7 @@ AccountCreator.propTypes = {
   accounts: PropTypes.shape({
     accounts: PropTypes.array
   }).isRequired,
+  settings: PropTypes.objectOf(PropTypes.any).isRequired,
   toastManager: PropTypes.shape({
     add: PropTypes.func,
     remove: PropTypes.func,

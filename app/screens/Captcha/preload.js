@@ -102,6 +102,13 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
       document.querySelector('form').action = 'http://google.com';
     });
   }
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('body > :not(.g-recaptcha)').forEach(box => {
+      // eslint-disable-next-line no-param-reassign
+      box.style.display = 'none';
+    });
+    document.body.appendChild(document.querySelector('div.g-recaptcha'));
+  });
   captchaChecker = setInterval(checkCaptcha, 300);
 }
 

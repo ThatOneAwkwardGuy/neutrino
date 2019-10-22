@@ -17,12 +17,14 @@ export default class VooStore {
     proxy,
     raffleDetails,
     forceUpdate,
-    incrementRaffles
+    incrementRaffles,
+    settings
   ) {
     this.tokenID = uuidv4();
     this.url = url;
     this.profile = profile;
     this.run = false;
+    this.settings = settings;
     this.site = site;
     this.style = style;
     this.size = size;
@@ -73,26 +75,26 @@ export default class VooStore {
     return formData;
   };
 
-  submitRaffle = (token, captchaToken) => {
-    const payload = {
-      token,
-      page_id: this.raffleDetails.pageID,
-      shoes_size: this.size.id,
-      action: 'send_request',
-      fax: '',
-      name: this.profile.deliveryFirstName,
-      lastname: this.profile.deliveryLastName,
-      email: this.profile.email,
-      contact_number: this.profile.phone,
-      streetname: this.profile.deliveryAddress,
-      housenumber: this.profile.deliveryApt,
-      postalcode: this.profile.deliveryZip,
-      city: this.profile.deliveryCity,
-      country: this.profile.deliveryCountry,
-      countryhidden: '',
-      'g-recaptcha-response': captchaToken
-    };
-    return this.rp({
+  submitRaffle = (token, captchaToken) =>
+    // const payload = {
+    //   token,
+    //   page_id: this.raffleDetails.pageID,
+    //   shoes_size: this.size.id,
+    //   action: 'send_request',
+    //   fax: '',
+    //   name: this.profile.deliveryFirstName,
+    //   lastname: this.profile.deliveryLastName,
+    //   email: this.profile.email,
+    //   contact_number: this.profile.phone,
+    //   streetname: this.profile.deliveryAddress,
+    //   housenumber: this.profile.deliveryApt,
+    //   postalcode: this.profile.deliveryZip,
+    //   city: this.profile.deliveryCity,
+    //   country: this.profile.deliveryCountry,
+    //   countryhidden: '',
+    //   'g-recaptcha-response': captchaToken
+    // };
+    this.rp({
       method: 'POST',
       uri: 'https://raffle.vooberlin.com/ajax.php',
       headers: {
@@ -109,35 +111,8 @@ export default class VooStore {
         referrerPolicy: '1no-referrer-when-downgrade'
       },
       resolveWithFullResponse: true,
-      body:
-        'token=' +
-        token +
-        '&page_id=' +
-        this.raffleDetails.pageID +
-        '&shoes_size=' +
-        this.size.id +
-        '&action=send_request&fax=&name=' +
-        this.profile.deliveryFirstName +
-        '&lastname=' +
-        this.profile.deliveryLastName +
-        '&email=' +
-        this.profile.email +
-        '&contact_number=' +
-        this.profile.phone +
-        '&streetname=' +
-        this.profile.deliveryAddress +
-        '&housenumber=' +
-        this.profile.deliveryApt +
-        '&postalcode=' +
-        this.profile.deliveryZip +
-        '&city=' +
-        this.profile.deliveryCity +
-        '&country=' +
-        this.profile.deliveryCountry +
-        '&countryhidden=&g-recaptcha-response=' +
-        captchaToken
+      body: `token=${token}&page_id=${this.raffleDetails.pageID}&shoes_size=${this.size.id}&action=send_request&fax=&name=${this.profile.deliveryFirstName}&lastname=${this.profile.deliveryLastName}&email=${this.profile.email}&contact_number=${this.profile.phone}&streetname=${this.profile.deliveryAddress}&housenumber=${this.profile.deliveryApt}&postalcode=${this.profile.deliveryZip}&city=${this.profile.deliveryCity}&country=${this.profile.deliveryCountry}&countryhidden=&g-recaptcha-response=${captchaToken}`
     });
-  };
 
   getRafflePageToken = async () => {
     const body = await this.rp.get(this.url);
@@ -158,7 +133,8 @@ export default class VooStore {
       id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.site,
-      site: this.site
+      site: this.site,
+      settings: this.settings
     });
     this.changeStatus(`Submitting Raffle Entry`);
     const submitRaffleResponse = await this.submitRaffle(

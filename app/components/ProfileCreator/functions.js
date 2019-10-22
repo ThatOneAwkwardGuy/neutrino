@@ -1,7 +1,8 @@
 import Countries from '../../constants/countries';
 import {
   tksCardMappings,
-  longToShortCountries
+  longToShortCountries,
+  longToShortStates
 } from '../../constants/constants';
 
 const uuidv4 = require('uuid/v4');
@@ -77,13 +78,11 @@ const returnGmailOrCatchall = (
   randomFirstName,
   randomLastName
 ) => {
-  if (gmailEmails.length > 0 && gmailEmails[index]) {
+  if (gmailEmails && gmailEmails.length > 0 && gmailEmails[index]) {
     return gmailEmails[index];
   }
   if (useCatchallBool && !baseProfile.catchallEmail.includes('@gmail')) {
-    return `${randomFirstName}${randomLastName}@${
-      baseProfile.catchallEmail.split('@')[1]
-    }`;
+    return `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`;
   }
   return baseProfile.email;
 };
@@ -894,9 +893,9 @@ export const convertBaseToSOLEAIO = (
       : '',
   CardNumber: card.cardNumber,
   CardName: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
-  cvv: card.cvv,
-  expMonth: card.expMonth,
-  expYear: card.expYear.slice(-2),
+  CardCvv: card.cvv,
+  CardExpiryMonth: card.expMonth,
+  CardExpiryYear: card.expYear.slice(-2),
   CardType: capitalize(getCardType(card.cardNumber)),
   CheckoutLimit: baseProfile.oneCheckoutBool
     ? '1 checkout per site'
@@ -982,6 +981,49 @@ export const convertBaseToNeutrino = (
   card
 });
 
+export const convertBaseToAdept = (
+  index,
+  baseProfile,
+  card,
+  randomFirstName,
+  randomLastName,
+  gmailEmails
+) => ({
+  profileName: `Profile - ${index}`,
+  order_billing_name: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
+  order_email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
+  order_tel: baseProfile.randomPhoneNumberBool
+    ? baseProfile.randomPhoneNumberTemplate
+        .split('#')
+        .map(number => (number === '' ? getRandomInt(9) : number))
+        .join('')
+    : baseProfile.phone,
+  bo: baseProfile.billingAddress,
+  oba3: '',
+  order_billing_address_3: baseProfile.billingApt,
+  order_billing_city: baseProfile.billingCity,
+  order_billing_zip: baseProfile.billingZip,
+  order_billing_state: longToShortStates[baseProfile.billingRegion]
+    ? longToShortStates[baseProfile.billingRegion]
+    : '',
+  order_billing_country:
+    longToShortCountries[baseProfile.billingCountry] !== undefined
+      ? longToShortCountries[baseProfile.billingCountry]
+      : '',
+  credit_card_type: getCardType(card.cardNumber),
+  cnb: card.cardNumber,
+  credit_card_month: card.expMonth,
+  credit_card_year: card.expYear,
+  vval: card.cvv
+});
+
 export const convertFromBase = (index, bot, profile) => {
   switch (bot) {
     case 'CyberSole':
@@ -1018,6 +1060,8 @@ export const convertFromBase = (index, bot, profile) => {
       return convertBaseToBalko(index, profile, profile.card, '', '');
     case 'Neutrino':
       return convertBaseToNeutrino(index, profile, profile.card, '', '');
+    case 'Adept':
+      return convertBaseToAdept(index, profile, profile.card, '', '');
     default:
       return undefined;
   }

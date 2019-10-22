@@ -31,6 +31,12 @@ export default class Login extends Component {
     });
   };
 
+  handleKeyPress = event => {
+    if (event.key === 'Enter') {
+      this.login();
+    }
+  };
+
   login = async () => {
     const { email, pass } = this.state;
     const { setAuthAndMessage } = this.props;
@@ -84,6 +90,7 @@ export default class Login extends Component {
                     name="email"
                     type="text"
                     onChange={this.handleChange}
+                    onKeyPress={this.handleKeyPress}
                   />
                 </FormGroup>
                 <FormGroup className="my-4">
@@ -92,6 +99,7 @@ export default class Login extends Component {
                     name="pass"
                     type="password"
                     onChange={this.handleChange}
+                    onKeyPress={this.handleKeyPress}
                   />
                 </FormGroup>
                 <FormGroup>

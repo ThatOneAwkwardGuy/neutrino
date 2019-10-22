@@ -79,29 +79,62 @@ export default class NakedCPH {
   submitRaffleEntry = async (token, landedAt) => {
     this.changeStatus('Submitting Raffle Entry');
     const payload = {};
+    const formObj = {};
     this.raffleDetails.renderData.form.fields.forEach(row => {
       if (row.title.includes('first name')) {
-        payload[`form[textfield:${row.id}]`] = this.profile.deliveryFirstName;
+        formObj['1'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryFirstName,
+          type: 'text'
+        };
       } else if (row.title.includes('last name')) {
-        payload[`form[textfield:${row.id}]`] = this.profile.deliveryLastName;
+        formObj['2'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryLastName,
+          type: 'text'
+        };
       } else if (row.title.includes('email')) {
-        payload[`form[${row.type}:${row.id}]`] = this.profile.email;
-      } else if (row.title.includes('country')) {
-        payload[`form[${row.type}:${row.id}]`] = this.profile.deliveryRegion;
+        formObj['3'] = {
+          field: { id: row.id, type: row.type },
+          email: this.profile.email,
+          type: 'email'
+        };
+      } else if (row.title.includes('postal code')) {
+        formObj['4'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryZip,
+          type: 'text'
+        };
+      } else if (row.title.includes('country are you')) {
+        formObj['5'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryCountry,
+          type: 'text'
+        };
+      } else if (row.title.includes('Our Captcha is')) {
+        const { ref } = row;
+        const matchingLogic = this.raffleDetails.renderData.form.logic.find(
+          logic => logic.ref === ref
+        );
+        formObj['0'] = {
+          field: { id: row.id, type: row.type },
+          text: matchingLogic.actions[0].condition.vars[1].value,
+          type: 'text'
+        };
       }
     });
-    payload['form[token]'] = token;
-    payload['form[landed_at]'] = landedAt;
-    payload[
-      'form[language]'
-    ] = this.raffleDetails.renderData.form.settings.language;
+    payload.answers = Object.values(formObj);
+    payload.form_id = this.raffleDetails.typeformCode;
+    payload.signature = token;
+    payload.landed_at = parseInt(landedAt, 10);
     console.log(payload);
     const response = await this.rp({
       method: 'POST',
+      json: true,
       uri: `https://nakedcph.typeform.com/app/form/submit/${this.raffleDetails.typeformCode}`,
-      form: payload
+      body: payload
     });
-    return JSON.parse(response);
+    return response;
   };
 
   makeEntry = async () => {

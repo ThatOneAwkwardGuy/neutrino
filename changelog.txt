@@ -87,6 +87,36 @@ Need to add animations
 
 2.0.18
 - Gmail Catchall support for Profile Generator and Account Creator, simple enter your gmail in the catchall field.
+- When logging in you can now press enter to login
+
+2.0.19
+- NakedCPH bug fixes
+
+2.0.20
+- DSM bug fix to support raffles where you cant select color of shoe.
+
+2.0.21
+- Profile creator bug fix for catchall emails returning undefined
+
+2.0.22
+- Profile converter bug fixes
+
+2.0.23
+- Added xml parsing support for EVE AIO profiles in profile converter
+- fix for profile converter converting from some bots
+- fix for profile converter converting to EVE AIO
+
+2.0.24
+- Fixed OneBlockDown account creation
+- Added Adept to Profile Converter
+- Added Adept to Profile Creator
+- Added Fear Of God Raffle To site
+- Captcha window now hides everything except the captcha
+
+2.0.25
+- Fixed Stress95 Raffle Entry
+- Fixed overlapping table text
+- Better account creator error handling for banned shopify emails
 
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a

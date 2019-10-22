@@ -1,2 +1,2 @@
 profileID,deliveryCountry,deliveryAddress,deliveryCity,deliveryFirstName,deliveryLastName,deliveryRegion,deliveryZip,deliveryApt,billingZip,billingCountry,billingAddress,billingCity,billingFirstName,billingLastName,billingRegion,billingApt,phoneNumber,paymentEmail,password,paymentCardholdersName,paymentCardnumber,paymentexpMonth,paymentexpYear,paymentCVV
-,,,,,,,,,,,,,,,,,,,,,,,,
+0,United States,123 Test Street,Test,John,Doe,California,123456,123,123,United States,123 Test Street,Test,John,Doe,California,123,123456789,test@example.com,password,John Doe,4242424242424242,3,2020,123

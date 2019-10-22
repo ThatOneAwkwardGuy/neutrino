@@ -21,11 +21,13 @@ import dashe from '../../images/dashe.jpg';
 import kodai from '../../images/kodai.jpg';
 import tks from '../../images/tks.jpg';
 import neutrino from '../../images/icon.png';
+import adept from '../../images/adept.jpg';
 
 const { dialog } = require('electron').remote;
 const fsPromises = require('fs').promises;
 const csv = require('csvtojson');
 const fs = require('fs');
+const xml2js = require('xml2js');
 
 const profileConversionOptions = [
   'CyberSole',
@@ -41,7 +43,8 @@ const profileConversionOptions = [
   'Dashe',
   'Kodai',
   'TKS',
-  'Neutrino'
+  'Neutrino',
+  'Adept'
 ];
 
 const profileConversionOptionsMapping = {
@@ -59,6 +62,7 @@ const profileConversionOptionsMapping = {
   Kodai: kodai,
   TKS: tks,
   Neutrino: neutrino,
+  Adept: adept,
   Unknown: unknownImage
 };
 
@@ -97,7 +101,7 @@ class ProfileTaskEditorConverter extends Component {
       null,
       {
         filters: [
-          { name: 'Profiles', extensions: ['csv', 'json', 'txt'] },
+          { name: 'Profiles', extensions: ['csv', 'xml', 'json', 'txt'] },
           { name: 'All Files', extensions: ['*'] }
         ]
       },
@@ -105,7 +109,20 @@ class ProfileTaskEditorConverter extends Component {
         const filePath = filePaths[0];
         const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
         let processedFile = null;
-        if (
+        if (filePath.split('.').slice(-1)[0] === 'csv') {
+          const csvToJSON = await csv().fromString(file);
+          processedFile = csvToJSON;
+        } else if (filePath.split('.').slice(-1)[0] === 'xml') {
+          const xmlFile = await xml2js.parseStringPromise(file, {
+            trim: true,
+            childkey: 'Profile',
+            explicitArray: false
+          });
+          processedFile =
+            xmlFile.ArrayOfProfile.Profile.length === undefined
+              ? [xmlFile.ArrayOfProfile.Profile]
+              : xmlFile.ArrayOfProfile.Profile;
+        } else if (
           [
             'Project Destroyer',
             'Hastey',
@@ -116,9 +133,13 @@ class ProfileTaskEditorConverter extends Component {
           ].includes(fromBot)
         ) {
           processedFile = JSON.parse(file);
-        } else if (filePath.split('.').slice(-1)[0] === 'csv') {
-          const csvToJSON = await csv().fromString(file);
-          processedFile = csvToJSON;
+        } else if (fromBot === 'Adept') {
+          const parsedFile = JSON.parse(file);
+          if (parsedFile.length === undefined) {
+            processedFile = [parsedFile];
+          } else {
+            processedFile = parsedFile;
+          }
         } else {
           processedFile = Object.values(JSON.parse(file));
         }
@@ -129,8 +150,23 @@ class ProfileTaskEditorConverter extends Component {
     );
   };
 
+  convertToXML = profiles => {
+    const builder = new xml2js.Builder({ explicitArray: true });
+    const xml = builder.buildObject({
+      ArrayOfProfile: {
+        $: {
+          'xmlns:xsi': 'http://www.w3.org/2001/XMLSchema-instance',
+          'xmlns:xsd': 'http://www.w3.org/2001/XMLSchema'
+        },
+        Profile: profiles
+      }
+    });
+    return xml;
+  };
+
   exportFile = async () => {
     const { profiles, fromBot, toBot } = this.state;
+    console.log(profiles);
     const baseProfiles = profiles.map(profile =>
       convertToBase(fromBot, profile)
     );
@@ -146,6 +182,10 @@ class ProfileTaskEditorConverter extends Component {
     } else if (toBot === 'CSV') {
       extension = 'csv';
       file = this.convertToCSVString(convertedProfiles);
+    } else if (toBot === 'EVE AIO') {
+      extension = 'xml';
+      console.log(convertedProfiles);
+      file = this.convertToXML(convertedProfiles);
     } else {
       file = JSON.stringify(convertedProfiles);
     }

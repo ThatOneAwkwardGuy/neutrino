@@ -14,12 +14,14 @@ export default class DSMS {
     proxy,
     raffleDetails,
     forceUpdate,
-    incrementRaffles
+    incrementRaffles,
+    settings
   ) {
     this.tokenID = uuidv4();
     this.url = url;
     this.profile = profile;
     this.run = false;
+    this.settings = settings;
     this.site = site;
     this.style = style;
     this.size = size;
@@ -68,7 +70,8 @@ export default class DSMS {
       id: this.tokenID,
       proxy: this.proxy,
       baseURL: this.url,
-      site: this.site
+      site: this.site,
+      settings: this.settings
     });
 
   submitRaffle = captchaToken => {
