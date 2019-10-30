@@ -8,8 +8,23 @@
   overflow: visible !important;
 }
 
+.table {
+  color: white !important;
+}
+
+.td,
+.th,
+.tr {
+  min-width: 150px;
+  width: 100% !important;
+}
+
 #TableContainer > div > div > div:nth-child(2) {
   height: calc(100% - 50px) !important;
+}
+
+#TableContainer > div > div > div:nth-child(2) > div {
+  width: 100% !important;
 }
 
 .neutrinoModal .modal-content {

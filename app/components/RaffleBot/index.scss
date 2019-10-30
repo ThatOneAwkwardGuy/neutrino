@@ -6,3 +6,12 @@
 #TableContainer > div > div > div:nth-child(2) > div > div {
   position: relative !important;
 }
+
+#TableContainer .tr .td:not(:first-child) {
+  word-break: break-all;
+}
+
+#TableContainer .tr {
+  position: relative !important;
+  height: auto !important;
+}

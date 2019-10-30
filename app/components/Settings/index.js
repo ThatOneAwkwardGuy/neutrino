@@ -539,7 +539,7 @@ export default class Settings extends Component {
                 />
               </Col>
             </Row>
-            {/* <Row className="p-3 align-items-end">
+            <Row className="p-3 align-items-end">
               <Col xs="3">
                 <Label>2Captcha API Key</Label>
                 <Input
@@ -558,7 +558,7 @@ export default class Settings extends Component {
                   value={settings.AntiCaptchaAPIKey}
                 />
               </Col>
-              <Col xs="3">
+              {/* <Col xs="3">
                 <Label>ImageTypers API Key</Label>
                 <Input
                   type="text"
@@ -566,7 +566,7 @@ export default class Settings extends Component {
                   onChange={this.handleSettingsChange}
                   value={settings.ImageTypersAPIKey}
                 />
-              </Col>
+              </Col> */}
             </Row>
             <Row className="p-3 panel-middle align-items-end">
               <Col xs="3">
@@ -583,7 +583,7 @@ export default class Settings extends Component {
                   <option value="ImageTypers">ImageTypers</option>
                 </Input>
               </Col>
-            </Row> */}
+            </Row>
             <h6 className="font-weight-bold py-3">Neutrino CSV Template</h6>
             <Row className="panel-middle p-3 align-items-end">
               <Col xs="3">

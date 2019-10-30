@@ -196,7 +196,8 @@ export default class ExtraButter {
       proxy: this.proxy,
       baseURL: this.url,
       site: this.site,
-      settings: this.settings
+      settings: this.settings,
+      siteKey: '6LdnDpgUAAAAAFp50woveqE_jH9n3gsXJasjwufq'
     });
     const payload = {
       email: this.profile.email,
@@ -271,9 +272,6 @@ export default class ExtraButter {
     await this.login(this.profile.email, this.profile.password);
     const customerId = await this.getCustomerID();
     console.log(customerId);
-    // this.changeStatus('Checking Email');
-    // const createCustomer = await this.checkEmail();
-    // console.log(createCustomer);
     this.changeStatus('Submitting Card Info');
     const tokenizeCardResponse = await this.tokenizeCard();
     const tokenizeCard = JSON.parse(tokenizeCardResponse);

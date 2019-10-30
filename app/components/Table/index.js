@@ -1,153 +1,89 @@
-import React, { useRef, useState, useEffect, useLayoutEffect } from 'react';
+import React from 'react';
+import { useTable, useBlockLayout } from 'react-table';
+import { FixedSizeList } from 'react-window';
 import PropTypes from 'prop-types';
-import { FixedSizeList as List } from 'react-window';
-import {
-  useTable,
-  useColumns,
-  useRows,
-  useGroupBy,
-  useFilters,
-  useSortBy,
-  useExpanded,
-  usePagination,
-  useFlexLayout
-} from 'react-table';
+import { Styles } from './Styles';
 
-import { Table, Row, HeaderRow, Header, Cell } from './Styles';
+export default function Table({ columns, data }) {
+  // Use the state and functions returned from useTable to build your UI
 
-const useInfiniteScroll = ({ enabled, sortBy, groupBy, filters }) => {
-  const listRef = useRef();
-  const [scrollToIndex, setScrollToIndex] = useState(0);
-  const [rowHeight, setRowHeight] = useState(40);
-  const [height, setHeight] = useState(500);
-  const [overscan, setOverscan] = useState(25);
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-    if (listRef.current) {
-      listRef.current.scrollToItem(scrollToIndex, 'start');
-    }
-  }, [scrollToIndex]);
-
-  useEffect(() => {}, []);
-
-  useLayoutEffect(() => {
-    if (!enabled) {
-      return;
-    }
-    if (listRef.current) {
-      listRef.current.scrollToItem(0, 'start');
-    }
-  }, [sortBy, groupBy, filters]);
-
-  return {
-    listRef,
-    scrollToIndex,
-    setScrollToIndex,
-    rowHeight,
-    setRowHeight,
-    height,
-    setHeight,
-    overscan,
-    setOverscan
-  };
-};
-
-export default function MyTable({ loading, infinite, ...props }) {
-  const instance = useTable(
-    {
-      ...props
-    },
-    useColumns,
-    useRows,
-    useGroupBy,
-    useFilters,
-    useSortBy,
-    useExpanded,
-    usePagination,
-    useFlexLayout
+  const defaultColumn = React.useMemo(
+    () => ({
+      width: 150
+    }),
+    []
   );
 
   const {
     getTableProps,
+    getTableBodyProps,
     headerGroups,
     rows,
-    getRowProps,
-    state: [{ pageIndex, pageSize, sortBy, groupBy, filters }],
+    totalColumnsWidth,
     prepareRow
-  } = instance;
-
-  const { listRef, rowHeight, overscan } = useInfiniteScroll({
-    enabled: infinite,
-    sortBy,
-    groupBy,
-    filters,
-    pageIndex,
-    pageSize
-  });
-
-  const renderRow = (row, index, style = {}) => {
-    if (!row) {
-      return <span />;
-    }
-    prepareRow(row);
-    return (
-      <Row {...row.getRowProps({ style, even: index % 2 })}>
-        {row.cells.map(cell => (
-          <Cell {...cell.getCellProps()}>{cell.render('Cell')}</Cell>
-        ))}
-      </Row>
-    );
-  };
-
-  const tableBody = (
-    <List
-      ref={listRef}
-      height={500}
-      itemCount={rows.length + 1}
-      itemSize={rowHeight}
-      overscanCount={overscan}
-      scrollToAlignment="start"
-      {...getRowProps()}
-    >
-      {({ index, style }) => {
-        const row = rows[index];
-        return renderRow(row, index, style);
-      }}
-    </List>
+  } = useTable(
+    {
+      columns,
+      data,
+      defaultColumn
+    },
+    useBlockLayout
   );
 
+  const RenderRow = React.useCallback(
+    ({ index, style }) => {
+      const row = rows[index];
+      console.log(row);
+      prepareRow(row);
+      return (
+        <div
+          {...row.getRowProps({
+            style
+          })}
+          className="tr"
+        >
+          {row.cells.map(cell => (
+            <div {...cell.getCellProps()} className="td">
+              {cell.render('Cell')}
+            </div>
+          ))}
+        </div>
+      );
+    },
+    [prepareRow, rows]
+  );
+
+  // Render the UI for your table
   return (
-    <div>
-      <Table {...getTableProps()}>
-        {headerGroups.map(headerGroup => (
-          <HeaderRow {...headerGroup.getRowProps()}>
-            {headerGroup.headers.map(column => (
-              <Header
-                {...column.getHeaderProps()}
-                sorted={column.sorted}
-                sortedDesc={column.sortedDesc}
-                sortedIndex={column.sortedIndex}
-              >
-                <div>
-                  <span {...column.getSortByToggleProps()}>
-                    {column.render('Header')}
-                  </span>
+    <Styles>
+      <div {...getTableProps()} className="table">
+        <div>
+          {headerGroups.map(headerGroup => (
+            <div {...headerGroup.getHeaderGroupProps()} className="tr">
+              {headerGroup.headers.map(column => (
+                <div {...column.getHeaderProps()} className="th">
+                  {column.render('Header')}
                 </div>
-                {column.canFilter ? <div>{column.render('Filter')}</div> : null}
-              </Header>
-            ))}
-          </HeaderRow>
-        ))}
-        {tableBody}
-      </Table>
-    </div>
+              ))}
+            </div>
+          ))}
+        </div>
+
+        <div {...getTableBodyProps()}>
+          <FixedSizeList
+            height={400}
+            itemCount={rows.length}
+            itemSize={35}
+            width={totalColumnsWidth}
+          >
+            {RenderRow}
+          </FixedSizeList>
+        </div>
+      </div>
+    </Styles>
   );
 }
-
-MyTable.propTypes = {
-  loading: PropTypes.bool.isRequired,
-  infinite: PropTypes.bool.isRequired
+Table.propTypes = {
+  columns: PropTypes.arrayOf(PropTypes.object).isRequired,
+  data: PropTypes.arrayOf(PropTypes.object).isRequired
 };

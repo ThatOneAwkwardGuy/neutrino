@@ -116,7 +116,8 @@ export default class Bodega {
       proxy: this.proxy,
       baseURL: this.url,
       site: this.site,
-      settings: this.settings
+      settings: this.settings,
+      siteKey: '6LeoeSkTAAAAAA9rkZs5oS82l69OEYjKRZAiKdaF'
     });
     this.changeStatus(`Submitting Raffle Entry`);
     const submitRaffleResponse = await this.submitRaffle(captchaResponse);

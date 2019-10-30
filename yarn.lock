@@ -11272,9 +11272,9 @@ react-spinners@^0.5.8:
     prop-types "^15.5.10"
     recompose "0.27.1 - 0.30.0"
 
-react-table@7.0.0-alpha.6:
-  version "7.0.0-alpha.6"
-  resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.0.0-alpha.6.tgz#64dc1ccdcbeb260822dc652a3c1f20eb8f7dda64"
+react-table@7.0.0-beta.12:
+  version "7.0.0-beta.12"
+  resolved "https://registry.yarnpkg.com/react-table/-/react-table-7.0.0-beta.12.tgz#ae54b398fbdb527b9fad82e52c4d829c00fdd5dc"
 
 react-test-renderer@^16.0.0-0, react-test-renderer@^16.6.3:
   version "16.9.0"

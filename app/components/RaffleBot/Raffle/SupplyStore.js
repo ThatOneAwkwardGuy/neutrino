@@ -220,7 +220,8 @@ export default class SupplyStore {
       proxy: this.proxy,
       baseURL: this.url,
       site: this.site,
-      settings: this.settings
+      settings: this.settings,
+      siteKey: '6Ld3LlIUAAAAAFQKMyuyt3helWlMf7JdmEUqWrPA'
     });
     this.changeStatus('Making Entry');
     const submissionResponse = await this.submitRaffle(

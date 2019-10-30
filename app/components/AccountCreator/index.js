@@ -25,6 +25,7 @@ import {
 const { clipboard } = require('electron');
 const { dialog } = require('electron').remote;
 
+const cheerio = require('cheerio');
 const randomEmail = require('random-email');
 const randomize = require('randomatic');
 const request = require('request-promise');
@@ -297,6 +298,8 @@ class AccountCreator extends Component {
       )}&customer%5Bpassword%5D=${accountPass}&customer%5Btags%5D=gender_man`
     });
     if (response.request.href && response.request.href.includes('challenge')) {
+      const regex = /sitekey: "(.*)"/gm;
+      const siteKey = regex.exec(response.body)[1];
       const captchaResponse = await getCaptchaResponse({
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
         url: response.request.href,
@@ -305,10 +308,19 @@ class AccountCreator extends Component {
         baseURL: sites[site],
         site,
         accountPass,
-        settings
+        settings,
+        siteKey
       });
+      let authToken;
+      if (settings.CaptchaAPI !== '') {
+        const $ = cheerio.load(response.body);
+        authToken = $('input[name="authenticity_token"]').attr('value');
+        console.log(authToken);
+      }
+
       const payloadChallenge = {
-        authenticity_token: captchaResponse.authToken,
+        authenticity_token:
+          settings.CaptchaAPI !== '' ? authToken : captchaResponse.authToken,
         'g-recaptcha-response': captchaResponse.captchaToken
       };
       console.log(payloadChallenge);
@@ -334,7 +346,10 @@ class AccountCreator extends Component {
           'User-Agent':
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
         },
-        jar: this.cookieJars[captchaResponse.id],
+        jar:
+          settings.CaptchaAPI !== ''
+            ? this.cookieJars[tokenID]
+            : this.cookieJars[captchaResponse.id],
         form: payloadChallenge
       });
       addCreatedAccount({
@@ -397,7 +412,7 @@ class AccountCreator extends Component {
         'upgrade-insecure-requests': '1',
         'content-type': 'application/x-www-form-urlencoded',
         'user-agent':
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36',
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36',
         accept:
           'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
         referer: `${sites[site]}/account/login`,
@@ -407,6 +422,8 @@ class AccountCreator extends Component {
     });
     console.log(response);
     if (response.request.href && response.request.href.includes('challenge')) {
+      const regex = /sitekey: "(.*)"/gm;
+      const siteKey = regex.exec(response.body)[1];
       const captchaResponse = await getCaptchaResponse({
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
         url: response.request.href,
@@ -415,13 +432,46 @@ class AccountCreator extends Component {
         baseURL: sites[site],
         site,
         accountPass,
-        settings
+        settings,
+        siteKey
       });
+      console.log(captchaResponse);
+
+      let authToken;
+      if (settings.CaptchaAPI !== '') {
+        const $ = cheerio.load(response.body);
+        authToken = $('input[name="authenticity_token"]').attr('value');
+        console.log(authToken);
+      }
+
       const payloadChallenge = {
-        utf8: '✓',
-        authenticity_token: captchaResponse.authToken,
+        authenticity_token:
+          settings.CaptchaAPI !== '' ? authToken : captchaResponse.authToken,
         'g-recaptcha-response': captchaResponse.captchaToken
       };
+
+      console.log(payloadChallenge);
+      // fetch('https://undefeated.com/account', {
+      //   credentials: 'include',
+      //   headers: {
+      //     accept:
+      //       'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+      //     'accept-language': 'en-US,en;q=0.9',
+      //     'cache-control': 'no-cache',
+      //     'content-type': 'application/x-www-form-urlencoded',
+      //     pragma: 'no-cache',
+      //     'sec-fetch-mode': 'navigate',
+      //     'sec-fetch-site': 'same-origin',
+      //     'sec-fetch-user': '?1',
+      //     'upgrade-insecure-requests': '1'
+      //   },
+      //   referrer: 'https://undefeated.com/challenge',
+      //   referrerPolicy: 'no-referrer-when-downgrade',
+      //   body:
+      //     'authenticity_token=bofZfxeMpkK3PKvfWModYtgsRFzvp7P%2FpbzL%2BtNqN%2FomtmHCbfYVRApHDSre1M0idSXyB9q4QhAdKbxm1Z6A3A%3D%3D&g-recaptcha-response=03AOLTBLRkOGMJ78KGBorb7VdMVWGlwBw1dAyx20Q5NrrXJ3lLvj6SXzP6TbWfRmdgBM5hn4EK0zDdD2vICqPhwM3tg09APr5s2P34_0CIKKsn0GWQww-y-USO42IjLx3HsH6y8VZaYcRNQPi2f6kYDrGT58O1i0otJJr1Bcawj6dHxcpK5TpXQUtF9_DRKKMe4QM7vlM7UnSj-85C-N-xHdrW8SSMrDcoMPO92rrNbAQ3SIg5MFW8uf_KkqXgNcPfOsPDe2qtN-Hdo0KE8zCV1sRMpEx1xvLAaatJMsHSr1n5u66TrZnZB77VPVDnz14rbwJ2-6eJds7NPy1gd6avu7UUTVDM4FEkBLa5CWVNLW2TZOkOsXJhTruf-yxwZsetT678bC11SCH-kcOXA0VCugWEDtzzD39xyrOTm6BiLyE4Ovzj_t1g8XMbBLccL_H0u-Avn_Cwhoa_nv3qpX4C5GPcwFXhHbatOqBZZczzhU8MWmCjQsdIuaoHjoIpdymxImPEXlNtzmC5',
+      //   method: 'POST',
+      //   mode: 'cors'
+      // });
       const signup = await request({
         method: 'POST',
         url: `${sites[site]}/account`,
@@ -430,20 +480,31 @@ class AccountCreator extends Component {
         resolveWithFullResponse: true,
         followAllRedirects: true,
         headers: {
+          authority: 'undefeated.com',
+          pragma: 'no-cache',
+          'cache-control': 'no-cache',
+          origin: 'https://undefeated.com',
+          'upgrade-insecure-requests': '1',
+          'content-type': 'application/x-www-form-urlencoded',
+          'user-agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36',
+          'sec-fetch-mode': 'navigate',
+          'sec-fetch-user': '?1',
           accept:
             'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
+          'sec-fetch-site': 'same-origin',
+          'accept-encoding': 'gzip, deflate, br',
           'accept-language': 'en-US,en;q=0.9',
-          'cache-control': 'no-cache',
-          'content-type': 'application/x-www-form-urlencoded',
-          pragma: 'no-cache',
-          referrer: `${sites[site]}/challenge`,
-          referrerPolicy: 'no-referrer-when-downgrade',
-          'upgrade-insecure-requests': '1',
-          'User-Agent':
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36'
+          referrer: `${sites[site]}/challenge`
         },
-        jar: this.cookieJars[captchaResponse.id],
-        form: payloadChallenge
+        jar:
+          settings.CaptchaAPI !== ''
+            ? this.cookieJars[tokenID]
+            : this.cookieJars[captchaResponse.id],
+        // form: payloadChallenge
+        body: `authenticity_token=${
+          settings.CaptchaAPI !== '' ? authToken : captchaResponse.authToken
+        }&g-recaptcha-response=${captchaResponse.captchaToken}`
       });
       console.log(signup);
       if (!response.body.includes('Email contains an invalid domain name')) {

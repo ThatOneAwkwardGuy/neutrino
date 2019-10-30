@@ -67,8 +67,8 @@ export default class LapstoneAndHammer {
       )}&FNAME=${encodeURIComponent(
         this.profile.deliveryFirstName
       )}&LNAME=${encodeURIComponent(this.profile.deliveryLastName)}&MMERGE3=${
-        this.size.id
-      }&MMERGE4=&MMERGE5=&MMERGE6=${
+        this.style.id
+      }&MMERGE4=${this.size.id}&MMERGE5=&MMERGE6=${
         this.profile.instagram !== undefined ? this.profile.instagram : ''
       }&${this.raffleDetails.id}=&subscribe=Submit&_=1567090992894`,
       headers: {
@@ -79,6 +79,8 @@ export default class LapstoneAndHammer {
       method: 'GET',
       resolveWithFullResponse: true
     });
+
+  // https://lapstoneandhammer.us10.list-manage.com/subscribe/post-json?u=3dd44920c3e2410d48d7462fc&id=0322480296&c=jQuery19001958476886307381_1572100031612&&MMERGE3=Men+(7.5-14)&MMERGE4=13&MMERGE6=&MMERGE5=&b_3dd44920c3e2410d48d7462fc_0322480296=&subscribe=Submit&_=1572100031613
 
   makeEntry = async () => {
     this.changeStatus('Making Entry');

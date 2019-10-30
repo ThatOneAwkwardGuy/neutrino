@@ -781,12 +781,38 @@ const loadLapstoneAndHammerRaffleInfo = async link => {
   const id = $('#mc_embed_signup_scroll > div[aria-hidden=true] input').attr(
     'name'
   );
-  const sizes = $('select[name="MMERGE3"] option:not([value=""])')
+  const styles = $('select[name="MMERGE3"] option:not([value=""])')
     .map((index, el) => ({ id: el.attribs.value, name: el.attribs.value }))
     .toArray();
+
+  const sizes = [
+    { id: '4', name: '4' },
+    { id: '4.5', name: '4.5' },
+    { id: '5', name: '5' },
+    { id: '5.5', name: '5.5' },
+    { id: '6', name: '6' },
+    { id: '6.5', name: '6.5' },
+    { id: '7', name: '7' },
+    { id: '7.5', name: '7.5' },
+    { id: '8', name: '8' },
+    { id: '8.5', name: '8.5' },
+    { id: '9', name: '9' },
+    { id: '9.5', name: '9.5' },
+    { id: '10', name: '10' },
+    { id: '10.5', name: '10.5' },
+    { id: '11', name: '11' },
+    { id: '11.5', name: '11.5' },
+    { id: '12', name: '12' },
+    { id: '12.5', name: '12.5' },
+    { id: '13', name: '13' },
+    { id: '13.5', name: '13.5' },
+    { id: '14', name: '14' }
+  ];
+
   return {
-    styleInput: false,
+    styleInput: true,
     sizeInput: true,
+    styles,
     sizes,
     size: sizes[0].id,
     raffleDetails: {

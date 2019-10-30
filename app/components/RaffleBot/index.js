@@ -341,6 +341,7 @@ export default class RaffleBot extends Component {
   };
 
   render() {
+    console.log('rerendering');
     const {
       site,
       link,
@@ -417,18 +418,19 @@ export default class RaffleBot extends Component {
             <Row className="flex-1 overflow-hidden panel-middle">
               <Col id="TableContainer" className="h-100">
                 <Table
-                  {...{
-                    data: entries,
-                    columns,
-                    loading: false,
-                    infinite: true,
-                    manualSorting: false,
-                    manualFilters: false,
-                    manualPagination: false,
-                    disableMultiSort: true,
-                    disableGrouping: true,
-                    debug: false
-                  }}
+                  data={entries}
+                  columns={columns}
+                  // {...{
+
+                  //   loading: false,
+                  //   infinite: true,
+                  //   manualSorting: false,
+                  //   manualFilters: false,
+                  //   manualPagination: false,
+                  //   disableMultiSort: true,
+                  //   disableGrouping: true,
+                  //   debug: false
+                  // }}
                 />
               </Col>
             </Row>
