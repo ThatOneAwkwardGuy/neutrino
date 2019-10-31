@@ -30,7 +30,7 @@ html {
   background-color: $dark1Colour;
   font-family: 'Montserrat', Arial, Helvetica, Helvetica Neue, serif;
   /* stylelint-disable */
-  @include fluid-type(font-size, 320px, 1366px, 10px, 14px);
+  @include fluid-type(font-size, 320px, 1366px, 4px, 14px);
   /* stylelint-enable */
   overflow-y: hidden;
 }
