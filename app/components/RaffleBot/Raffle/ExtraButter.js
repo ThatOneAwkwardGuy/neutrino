@@ -51,20 +51,19 @@ export default class ExtraButter {
   };
 
   start = async () => {
-    console.log(this.proxy);
     while (this.run) {
       try {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         if (
           error &&
           error.options &&
           error.options.url === 'https://api.stripe.com/v1/tokens'
         ) {
           const parsedError = JSON.parse(error.error);
-          console.log(parsedError);
+
           this.changeStatus(
             `Error Submitting Raffle - ${parsedError.error.message}`
           );
@@ -271,21 +270,18 @@ export default class ExtraButter {
     const variant = await this.getIDForSize();
     await this.login(this.profile.email, this.profile.password);
     const customerId = await this.getCustomerID();
-    console.log(customerId);
+
     this.changeStatus('Submitting Card Info');
     const tokenizeCardResponse = await this.tokenizeCard();
     const tokenizeCard = JSON.parse(tokenizeCardResponse);
-    console.log(tokenizeCard);
+
     this.changeStatus('Submitting Raffle Info');
     const submitRaffleResponse = await this.submitRaffle(variant, customerId);
     const submitRaffle = JSON.parse(submitRaffleResponse);
-    console.log(submitRaffle);
+
     this.changeStatus('Submitting Raffle Entry');
-    const completeRaffleResponse = await this.completeRaffle(
-      submitRaffle.id,
-      tokenizeCard.id
-    );
-    console.log(completeRaffleResponse);
+    await this.completeRaffle(submitRaffle.id, tokenizeCard.id);
+
     this.changeStatus('Completed Entry');
     this.incrementRaffles();
   };

@@ -338,7 +338,7 @@ class ProxyCreator extends Component {
       }
       clearProxies(`${provider} - ${providerAccount.name}`);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(
         false,

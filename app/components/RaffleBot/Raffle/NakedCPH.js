@@ -45,7 +45,7 @@ export default class NakedCPH {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         this.changeStatus('Error Submitting Raffle');
       }
       this.run = false;
@@ -127,7 +127,7 @@ export default class NakedCPH {
     payload.form_id = this.raffleDetails.typeformCode;
     payload.signature = token;
     payload.landed_at = parseInt(landedAt, 10);
-    console.log(payload);
+    
     const response = await this.rp({
       method: 'POST',
       json: true,
@@ -143,10 +143,10 @@ export default class NakedCPH {
     const { token, landed_at } = await this.getRaffleToken(
       this.raffleDetails.typeformCode
     );
-    console.log(token);
-    console.log(landed_at);
+    
+    
     const submissionResponse = await this.submitRaffleEntry(token, landed_at);
-    console.log(submissionResponse);
+    
     if (submissionResponse.message === 'success') {
       this.changeStatus('Successful Entry');
       this.incrementRaffles();

@@ -55,7 +55,7 @@ export default class BSTN {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         this.changeStatus(`Error Submitting Raffle - ${error.message}`);
       }
       this.run = false;
@@ -153,14 +153,14 @@ export default class BSTN {
   makeEntry = async () => {
     this.changeStatus('Getting Captcha');
     const captchaResponse = await this.getCaptcha();
-    console.log(captchaResponse);
+
     await this.getCookies();
     this.changeStatus('Submitting Raffle Entry');
-    const raffleResponse = await this.submitRaffle(
+    await this.submitRaffle(
       captchaResponse.captchaToken,
       captchaResponse.cookies
     );
-    console.log(raffleResponse);
+
     // if (!raffleResponse.body.includes('"result":"success"')) {
     //   throw new Error('Failed To Enter Raffle');
     // }

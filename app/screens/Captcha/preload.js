@@ -48,7 +48,7 @@ const checkCaptcha = async () => {
       authToken = document.querySelector('input[name="authenticity_token"]')
         .value;
     } catch (error) {
-      // console.log(error);
+      // console.error(error);
     }
     if (captchaJob) {
       try {
@@ -57,11 +57,10 @@ const checkCaptcha = async () => {
         try {
           await grecaptcha.execute();
         } catch (error) {
-          // console.log(error);
+          // console.error(error);
         }
         const captchaToken = grecaptcha.getResponse();
         if (captchaToken !== '') {
-          // console.log(tokenID);
           ipcRenderer.send('send-captcha-token-from-preload-to-captcha', {
             ...captchaJob,
             url: document.location.href,
@@ -73,11 +72,11 @@ const checkCaptcha = async () => {
           clearInterval(captchaChecker);
         }
       } catch (error) {
-        // console.log(error);
+        // console.error(error);
       }
     }
   } catch (error) {
-    // console.log(error);
+    // console.error(error);
   }
 };
 
@@ -85,11 +84,7 @@ ipcRenderer.on(
   `captcha-details-${focusedWebContents.id}`,
   async (event, args) => {
     console.log(JSON.stringify(args));
-    const cookiesSet = await setCookiesInWindow(
-      focusedWebContents,
-      args.cookiesObject
-    );
-    console.log(cookiesSet);
+    await setCookiesInWindow(focusedWebContents, args.cookiesObject);
     ipcRenderer.send('store-captcha-job', focusedWebContents.id, args);
     window.location.href = args.url;
   }

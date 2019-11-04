@@ -166,11 +166,11 @@ class ProfileTaskEditorConverter extends Component {
 
   exportFile = async () => {
     const { profiles, fromBot, toBot } = this.state;
-    console.log(profiles);
+    
     const baseProfiles = profiles.map(profile =>
       convertToBase(fromBot, profile)
     );
-    console.log(baseProfiles);
+    
     const convertedProfiles = baseProfiles.map((profile, index) =>
       convertFromBase(index, toBot, profile)
     );
@@ -184,7 +184,7 @@ class ProfileTaskEditorConverter extends Component {
       file = this.convertToCSVString(convertedProfiles);
     } else if (toBot === 'EVE AIO') {
       extension = 'xml';
-      console.log(convertedProfiles);
+      
       file = this.convertToXML(convertedProfiles);
     } else {
       file = JSON.stringify(convertedProfiles);
@@ -205,7 +205,7 @@ class ProfileTaskEditorConverter extends Component {
           return;
         }
         fs.writeFile(fileName, file, err => {
-          if (err) console.log(err);
+          if (err) console.error(err);
         });
       }
     );

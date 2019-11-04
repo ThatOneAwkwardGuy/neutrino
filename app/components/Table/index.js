@@ -33,7 +33,6 @@ export default function Table({ columns, data }) {
   const RenderRow = React.useCallback(
     ({ index, style }) => {
       const row = rows[index];
-      console.log(row);
       prepareRow(row);
       return (
         <div

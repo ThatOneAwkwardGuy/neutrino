@@ -55,7 +55,7 @@ export default class Bodega {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         this.changeStatus(`Error Submitting Raffle - ${error.message}`);
       }
       this.run = false;

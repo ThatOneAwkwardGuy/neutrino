@@ -51,7 +51,7 @@ export default class END {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         this.changeStatus(`Error Submitting Raffle - ${error.message}`);
       }
       this.run = false;
@@ -84,7 +84,7 @@ export default class END {
   loginToAccount = async () =>
     new Promise(async (resolve, reject) => {
       const tokenID = uuidv4();
-      console.log(tokenID);
+      
       const win = new BrowserWindow({
         width: 500,
         height: 650,
@@ -179,8 +179,8 @@ export default class END {
     });
 
   addNewAddress = (customer, token) => {
-    console.log(customer);
-    console.log(token);
+    
+    
     // fetch('https://launches-api.endclothing.com/api/addresses', {
     //   credentials: 'include',
     //   headers: {
@@ -253,7 +253,7 @@ export default class END {
           )}000000+0000&merchant_id=s3qf7btpbbghkdyp&public_key=6t9dpqt857v6mpbz`
       }
     });
-    console.log(braintreeResponse);
+    
     // return this.rp({
     //   method: 'POST',
     //   uri: 'https://launches-api.endclothing.com/api/payment-methods',
@@ -286,14 +286,14 @@ export default class END {
 
   makeEntry = async () => {
     const loginResponse = await this.loginToAccount();
-    console.log(loginResponse);
+    
     this.headers.Authorization = `Bearer ${loginResponse}`;
-    console.log(this.headers);
-    console.log(this.rp.defaults);
+    
+    
     const customer = await this.getAccount(loginResponse);
-    console.log(customer);
+    
     const paymentMethods = await this.getPaymentMethods(loginResponse);
-    console.log(paymentMethods);
+    
     let addressId;
     let paymentId;
     const addNewAddressResponse = await this.addNewAddress(
@@ -303,7 +303,7 @@ export default class END {
 
     // if (customer.addresses.length === 0) {
     //   const addNewAddressResponse = await this.addNewAddress(customer, token);
-    //   console.log(addNewAddressResponse);
+    //   
     // } else {
     //   addressId = customer.addresses[0].id;
     // }

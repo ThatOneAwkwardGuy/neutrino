@@ -49,13 +49,13 @@ export default class FearOfGod {
   };
 
   start = async () => {
-    console.log(this.proxy);
+    
     while (this.run) {
       try {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         if (error.statusCode === 400) {
           this.changeStatus(`Try Again`);
         } else {

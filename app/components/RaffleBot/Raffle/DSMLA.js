@@ -46,7 +46,7 @@ export default class DSMLA {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
       this.run = false;
     }
@@ -111,7 +111,7 @@ export default class DSMLA {
   makeEntry = async () => {
     this.changeStatus('Getting Captcha');
     const captchaResponse = await this.getCaptcha();
-    console.log(captchaResponse);
+    
     try {
       const entryResponse = await this.submitRaffle(
         captchaResponse.captchaToken

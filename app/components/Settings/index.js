@@ -347,14 +347,14 @@ export default class Settings extends Component {
   };
 
   saveCSVTemplate = () => {
-    console.log(appPath);
+    
     fs.readFile(
       process.env.NODE_ENV === 'development'
         ? `${appPath}/constants/Neutrino_CSV_Template.csv`
         : `${appPath}/app/constants/Neutrino_CSV_Template.csv`,
       'UTF-8',
       (err, data) => {
-        console.log(err);
+        
         if (!err) {
           dialog.showSaveDialog(
             {

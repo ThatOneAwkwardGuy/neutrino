@@ -11,7 +11,7 @@ import bodega from '../../images/bodega.jpg';
 import extrabutter from '../../images/extrabutter.jpg';
 import footpatrol from '../../images/footpatrol.png';
 import nakedcph from '../../images/nakedcph.jpg';
-import oneblockdown from '../../images/oneblockdown.jpeg';
+// import oneblockdown from '../../images/oneblockdown.jpeg';
 import voostore from '../../images/voostore.png';
 import renarts from '../../images/renarts.jpg';
 import dsm from '../../images/dsm.png';
@@ -57,9 +57,9 @@ const sites = [
   { name: 'ExtraButter', img: extrabutter },
   { name: 'VooStore', img: voostore },
   { name: 'Bodega', img: bodega },
-  { name: 'OneBlockDown', img: oneblockdown },
+  // { name: 'OneBlockDown', img: oneblockdown },
   { name: 'CityBlue', img: cityblue },
-  { name: 'LapstoneAndHammer', img: lapstoneandhammer },
+  { name: 'Lapstone And Hammer', img: lapstoneandhammer },
   { name: 'Renarts', img: renarts },
   { name: 'DSM', img: dsm },
   { name: 'DSMNY', img: dsmny },
@@ -79,7 +79,7 @@ const Classes = {
   Bodega,
   OneBlockDown,
   CityBlue,
-  LapstoneAndHammer,
+  'Lapstone And Hammer': LapstoneAndHammer,
   Renarts,
   DSM,
   DSMNY,
@@ -186,7 +186,7 @@ export default class RaffleBot extends Component {
     try {
       setLoading(true, 'Loading Raffle Info', false);
       const raffleInfo = await loadRaffleInfo(site, link);
-      console.log(raffleInfo);
+
       if (raffleInfo) {
         this.setState({ loadedRaffle: true, ...raffleInfo });
       }
@@ -198,7 +198,7 @@ export default class RaffleBot extends Component {
         infoModalFunction: '',
         infoModalButtonText: ''
       });
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(false, 'Loading Raffle Info', false);
     }
@@ -233,12 +233,12 @@ export default class RaffleBot extends Component {
               const contents = fs.readFileSync(fileNames[0]);
               jsonContent = JSON.parse(contents);
             }
-            console.log(jsonContent);
+
             this.setState({
               profiles: Object.values(jsonContent)
             });
           } catch (error) {
-            console.log(error);
+            console.error(error);
           }
         }
       }
@@ -341,7 +341,6 @@ export default class RaffleBot extends Component {
   };
 
   render() {
-    console.log('rerendering');
     const {
       site,
       link,
@@ -526,7 +525,7 @@ export default class RaffleBot extends Component {
                       {sites.map(raffleSite => (
                         <Col
                           xs="2"
-                          className="my-2"
+                          className="my-2 text-center"
                           onClick={() => {
                             this.handleRaffleSiteChange(raffleSite.name);
                           }}
@@ -540,6 +539,7 @@ export default class RaffleBot extends Component {
                             }`}
                             src={raffleSite.img}
                           />
+                          <p style={{ fontSize: '10px' }}>{raffleSite.name}</p>
                         </Col>
                       ))}
                     </Row>

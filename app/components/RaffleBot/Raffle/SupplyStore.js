@@ -60,13 +60,13 @@ export default class SupplyStore {
     //   method: 'POST',
     //   mode: 'cors'
     // });
-    console.log(this.proxy);
+
     while (this.run) {
       try {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         if (error.statusCode === 400) {
           this.changeStatus(`Try Again`);
         } else {
@@ -133,7 +133,7 @@ export default class SupplyStore {
       terms: 'Yes',
       'cm-f-djihluid': 'Yes'
     };
-    console.log(payload);
+
     return this.rp({
       headers: {
         accept:
@@ -211,7 +211,7 @@ export default class SupplyStore {
     // });
     this.changeStatus('Getting Link');
     const subscribeLink = await this.getSubscribeLink();
-    console.log(subscribeLink);
+
     this.changeStatus('Getting Captcha');
     const captchaResponse = await getCaptchaResponse({
       cookiesObject: {},
@@ -224,11 +224,8 @@ export default class SupplyStore {
       siteKey: '6Ld3LlIUAAAAAFQKMyuyt3helWlMf7JdmEUqWrPA'
     });
     this.changeStatus('Making Entry');
-    const submissionResponse = await this.submitRaffle(
-      subscribeLink,
-      captchaResponse.captchaToken
-    );
-    console.log(submissionResponse);
+    await this.submitRaffle(subscribeLink, captchaResponse.captchaToken);
+
     // const captchaResponse2 = await getCaptchaResponse({
     //   cookiesObject: {},
     //   url: this.url,
@@ -244,6 +241,5 @@ export default class SupplyStore {
     //   subscribeLink,
     //   captchaResponse2.captchaToken
     // );
-    // console.log(emailConfirmation);
   };
 }

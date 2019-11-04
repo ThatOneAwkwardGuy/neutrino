@@ -41,7 +41,7 @@ export default class FootpatrolUK {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
       this.run = false;
     }
@@ -110,11 +110,11 @@ export default class FootpatrolUK {
   makeEntry = async () => {
     const token = uuidv4();
     this.changeStatus('Submitting Raffle Token');
-    const response1 = await this.submitEntry1(token);
-    console.log(response1);
+    await this.submitEntry1(token);
+
     this.changeStatus('Submitting Raffle Entry');
-    const response2 = await this.submitEntry2(token);
-    console.log(response2);
+    await this.submitEntry2(token);
+
     this.changeStatus('Successful Entry');
     this.incrementRaffles();
   };

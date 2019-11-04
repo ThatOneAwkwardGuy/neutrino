@@ -46,7 +46,7 @@ export default class Login extends Component {
       const auth = getAuth();
       await auth.signInWithEmailAndPassword(email, pass);
     } catch (error) {
-      console.log(error);
+      console.error(error);
       let message = 'There was an error logging you in.';
       if (error.code === 'auth/wrong-password') {
         message =

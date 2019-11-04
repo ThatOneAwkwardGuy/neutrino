@@ -82,7 +82,7 @@ class Home extends Component {
         checkUserAuth(uid);
         this.setDiscordRichPresence(location.pathname);
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
     }
   }
@@ -696,7 +696,7 @@ const mapStateToProps = state => ({
 });
 
 // const mapDispatchToProps = dispatch => {
-//   console.log({ ...SettingsActions, ...AccountActions });
+//   
 //   bindActionCreators({ ...SettingsActions, ...AccountActions }, dispatch);
 // };
 

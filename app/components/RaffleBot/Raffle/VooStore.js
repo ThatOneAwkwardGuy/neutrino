@@ -56,7 +56,7 @@ export default class VooStore {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         this.changeStatus(`Error Submitting Raffle - ${error.message}`);
       }
       this.run = false;
@@ -118,7 +118,7 @@ export default class VooStore {
     const body = await this.rp.get(this.url);
     const $ = cheerio.load(body);
     const token = $('input[name="token"]').attr('value');
-    console.log(token);
+    
     return token;
   };
 
@@ -141,7 +141,7 @@ export default class VooStore {
       token,
       capthcaResponse.captchaToken
     );
-    console.log(submitRaffleResponse);
+    
     const submitRaffle = JSON.parse(submitRaffleResponse.body);
     if (submitRaffle.error) {
       throw new Error(submitRaffle.msg);

@@ -46,7 +46,7 @@ export default class DSM {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
       }
       this.run = false;
     }
@@ -99,7 +99,7 @@ export default class DSM {
     if (this.style) {
       payload[this.raffleDetails.colorFormID] = this.style.id;
     }
-    console.log(payload);
+    
     return this.rp({
       method: 'POST',
       followAllRedirects: true,
@@ -123,7 +123,7 @@ export default class DSM {
         this.changeStatus('Successful Entry');
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
       if (
         error.message.includes(
           'Each submission must have unique values for the following fields'

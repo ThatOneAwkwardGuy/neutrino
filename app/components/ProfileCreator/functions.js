@@ -364,6 +364,7 @@ export const convertBaseToPhantom = (
     FirstName: baseProfile.billingFirstName,
     LastName: baseProfile.billingLastName,
     State:
+      Countries[baseProfile.billingCountry] !== undefined &&
       Countries[baseProfile.billingCountry].province_codes[
         baseProfile.billingRegion
       ] !== undefined
@@ -410,6 +411,7 @@ export const convertBaseToPhantom = (
       ? randomLastName
       : baseProfile.deliveryLastName,
     State:
+      Countries[baseProfile.deliveryCountry] !== undefined &&
       Countries[baseProfile.deliveryCountry].province_codes[
         baseProfile.deliveryRegion
       ] !== undefined
@@ -436,6 +438,7 @@ export const convertBaseToGhost = (
     FirstName: baseProfile.billingFirstName,
     LastName: baseProfile.billingLastName,
     State:
+      Countries[baseProfile.billingCountry] !== undefined &&
       Countries[baseProfile.billingCountry].province_codes[
         baseProfile.billingRegion
       ] !== undefined
@@ -482,6 +485,7 @@ export const convertBaseToGhost = (
       ? randomLastName
       : baseProfile.deliveryLastName,
     State:
+      Countries[baseProfile.deliveryCountry] !== undefined &&
       Countries[baseProfile.deliveryCountry].province_codes[
         baseProfile.deliveryRegion
       ] !== undefined
@@ -587,6 +591,7 @@ export const convertBaseToTKS = (
         ? Countries[baseProfile.billingCountry].code
         : '',
     StateCode:
+      Countries[baseProfile.billingCountry] !== undefined &&
       Countries[baseProfile.billingCountry].province_codes[
         baseProfile.billingRegion
       ] !== undefined
@@ -627,6 +632,7 @@ export const convertBaseToTKS = (
         ? Countries[baseProfile.deliveryCountry].code
         : '',
     StateCode:
+      Countries[baseProfile.deliveryCountry] !== undefined &&
       Countries[baseProfile.deliveryCountry].province_codes[
         baseProfile.deliveryRegion
       ] !== undefined
@@ -794,6 +800,7 @@ export const convertBaseToNSB = (
     address: baseProfile.deliveryAddress,
     address2: baseProfile.deliveryApt,
     state:
+      Countries[baseProfile.deliveryCountry] !== undefined &&
       Countries[baseProfile.deliveryCountry].province_codes[
         baseProfile.deliveryRegion
       ] !== undefined
@@ -868,6 +875,7 @@ export const convertBaseToSOLEAIO = (
   ShippingZip: baseProfile.deliveryZip,
   ShippingCountry: baseProfile.deliveryCountry,
   ShippingState:
+    Countries[baseProfile.deliveryCountry] !== undefined &&
     Countries[baseProfile.deliveryCountry].province_codes[
       baseProfile.deliveryRegion
     ] !== undefined
@@ -884,6 +892,7 @@ export const convertBaseToSOLEAIO = (
   BillingZip: baseProfile.billingZip,
   BillingCountry: baseProfile.billingCountry,
   BillingState:
+    Countries[baseProfile.deliveryCountry] !== undefined &&
     Countries[baseProfile.deliveryCountry].province_codes[
       baseProfile.billingRegion
     ] !== undefined

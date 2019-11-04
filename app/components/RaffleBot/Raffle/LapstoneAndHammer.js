@@ -85,6 +85,7 @@ export default class LapstoneAndHammer {
   makeEntry = async () => {
     this.changeStatus('Making Entry');
     const raffleResponse = await this.submitRaffle();
+    console.log(raffleResponse)
     if (!raffleResponse.body.includes('"result":"success"')) {
       throw new Error('Failed To Enter Raffle');
     }

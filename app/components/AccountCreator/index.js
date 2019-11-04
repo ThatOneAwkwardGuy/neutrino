@@ -25,6 +25,7 @@ import {
 const { clipboard } = require('electron');
 const { dialog } = require('electron').remote;
 
+const fsPromises = require('fs').promises;
 const cheerio = require('cheerio');
 const randomEmail = require('random-email');
 const randomize = require('randomatic');
@@ -49,9 +50,34 @@ class AccountCreator extends Component {
       pass: '',
       firstName: '',
       lastName: '',
-      proxies: ''
+      proxies: '',
+      emails: []
     };
   }
+
+  loadEmails = () => {
+    dialog.showOpenDialog(
+      null,
+      {
+        filters: [{ name: 'Emails Text File', extensions: ['txt'] }]
+      },
+      async filePaths => {
+        const filePath = filePaths[0];
+        const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
+        if (filePath.split('.').slice(-1)[0] === 'txt') {
+          const emails = file.split('\n');
+          this.setState({ emails, quantity: emails.length });
+        }
+      }
+    );
+  };
+
+  clearEmails = () => {
+    this.setState({
+      emails: [],
+      quantity: 1
+    });
+  };
 
   exportAccountsAsProfiles = () => {
     const { accounts, profile, cards } = this.props;
@@ -148,11 +174,14 @@ class AccountCreator extends Component {
   };
 
   createAccounts = async () => {
-    const { catchall, site, delay, quantity } = this.state;
+    const { catchall, site, delay, quantity, emails } = this.state;
     const { setLoading, incrementAccounts, setInfoModal } = this.props;
-    const gmailEmails = catchall.includes('@gmail')
-      ? generateGmailDotTrick(quantity, catchall)
-      : [];
+    let gmailEmails = [];
+    if (catchall.includes('@gmail')) {
+      gmailEmails = generateGmailDotTrick(quantity, catchall);
+    } else if (emails.length > 0) {
+      gmailEmails = emails;
+    }
     const accountPromises = Array.from(Array(parseInt(quantity, 10))).map(
       (value, index) => {
         switch (site) {
@@ -315,7 +344,6 @@ class AccountCreator extends Component {
       if (settings.CaptchaAPI !== '') {
         const $ = cheerio.load(response.body);
         authToken = $('input[name="authenticity_token"]').attr('value');
-        console.log(authToken);
       }
 
       const payloadChallenge = {
@@ -323,7 +351,7 @@ class AccountCreator extends Component {
           settings.CaptchaAPI !== '' ? authToken : captchaResponse.authToken,
         'g-recaptcha-response': captchaResponse.captchaToken
       };
-      console.log(payloadChallenge);
+
       await request({
         method: 'POST',
         url: `https://eu.oneblockdown.it/account`,
@@ -420,7 +448,7 @@ class AccountCreator extends Component {
       },
       body: queryString
     });
-    console.log(response);
+
     if (response.request.href && response.request.href.includes('challenge')) {
       const regex = /sitekey: "(.*)"/gm;
       const siteKey = regex.exec(response.body)[1];
@@ -435,44 +463,14 @@ class AccountCreator extends Component {
         settings,
         siteKey
       });
-      console.log(captchaResponse);
 
       let authToken;
       if (settings.CaptchaAPI !== '') {
         const $ = cheerio.load(response.body);
         authToken = $('input[name="authenticity_token"]').attr('value');
-        console.log(authToken);
       }
 
-      const payloadChallenge = {
-        authenticity_token:
-          settings.CaptchaAPI !== '' ? authToken : captchaResponse.authToken,
-        'g-recaptcha-response': captchaResponse.captchaToken
-      };
-
-      console.log(payloadChallenge);
-      // fetch('https://undefeated.com/account', {
-      //   credentials: 'include',
-      //   headers: {
-      //     accept:
-      //       'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
-      //     'accept-language': 'en-US,en;q=0.9',
-      //     'cache-control': 'no-cache',
-      //     'content-type': 'application/x-www-form-urlencoded',
-      //     pragma: 'no-cache',
-      //     'sec-fetch-mode': 'navigate',
-      //     'sec-fetch-site': 'same-origin',
-      //     'sec-fetch-user': '?1',
-      //     'upgrade-insecure-requests': '1'
-      //   },
-      //   referrer: 'https://undefeated.com/challenge',
-      //   referrerPolicy: 'no-referrer-when-downgrade',
-      //   body:
-      //     'authenticity_token=bofZfxeMpkK3PKvfWModYtgsRFzvp7P%2FpbzL%2BtNqN%2FomtmHCbfYVRApHDSre1M0idSXyB9q4QhAdKbxm1Z6A3A%3D%3D&g-recaptcha-response=03AOLTBLRkOGMJ78KGBorb7VdMVWGlwBw1dAyx20Q5NrrXJ3lLvj6SXzP6TbWfRmdgBM5hn4EK0zDdD2vICqPhwM3tg09APr5s2P34_0CIKKsn0GWQww-y-USO42IjLx3HsH6y8VZaYcRNQPi2f6kYDrGT58O1i0otJJr1Bcawj6dHxcpK5TpXQUtF9_DRKKMe4QM7vlM7UnSj-85C-N-xHdrW8SSMrDcoMPO92rrNbAQ3SIg5MFW8uf_KkqXgNcPfOsPDe2qtN-Hdo0KE8zCV1sRMpEx1xvLAaatJMsHSr1n5u66TrZnZB77VPVDnz14rbwJ2-6eJds7NPy1gd6avu7UUTVDM4FEkBLa5CWVNLW2TZOkOsXJhTruf-yxwZsetT678bC11SCH-kcOXA0VCugWEDtzzD39xyrOTm6BiLyE4Ovzj_t1g8XMbBLccL_H0u-Avn_Cwhoa_nv3qpX4C5GPcwFXhHbatOqBZZczzhU8MWmCjQsdIuaoHjoIpdymxImPEXlNtzmC5',
-      //   method: 'POST',
-      //   mode: 'cors'
-      // });
-      const signup = await request({
+      await request({
         method: 'POST',
         url: `${sites[site]}/account`,
         followRedirect: true,
@@ -501,12 +499,11 @@ class AccountCreator extends Component {
           settings.CaptchaAPI !== ''
             ? this.cookieJars[tokenID]
             : this.cookieJars[captchaResponse.id],
-        // form: payloadChallenge
         body: `authenticity_token=${
           settings.CaptchaAPI !== '' ? authToken : captchaResponse.authToken
         }&g-recaptcha-response=${captchaResponse.captchaToken}`
       });
-      console.log(signup);
+
       if (!response.body.includes('Email contains an invalid domain name')) {
         addCreatedAccount({
           email,
@@ -552,7 +549,7 @@ class AccountCreator extends Component {
       const accountLastName = randomName ? random.last() : lastName;
       const tokenID = uuidv4();
       const proxy = useProxies ? this.getRandomProxy() : '';
-      console.log(proxy);
+
       const window = await createNewWindow(tokenID, proxy);
       window.webContents.on('close', () => {
         reject(new Error('Closed Window Before Finished'));
@@ -612,7 +609,7 @@ class AccountCreator extends Component {
       const accountLastName = randomName ? random.last() : lastName;
       const tokenID = uuidv4();
       const proxy = useProxies ? this.getRandomProxy() : '';
-      console.log(proxy);
+
       const window = await createNewWindow(tokenID, proxy);
       window.webContents.on('close', () => {
         reject(new Error('Closed Window Before Finished'));
@@ -763,6 +760,11 @@ class AccountCreator extends Component {
                 <Col>
                   <Button onClick={this.copyAllAccounts}>Copy All</Button>
                 </Col>
+                <Col>
+                  <Button onClick={this.exportAccountsAsProfiles}>
+                    Export as Profiles
+                  </Button>
+                </Col>
               </Row>
             ) : (
               <Row className="py-3 align-items-end noselect">
@@ -851,9 +853,10 @@ class AccountCreator extends Component {
                   </Col>
                 ) : null}
                 <Col>
-                  <Button onClick={this.exportAccountsAsProfiles}>
-                    Export as Profiles
-                  </Button>
+                  <Button onClick={this.loadEmails}>Load Emails</Button>
+                </Col>
+                <Col>
+                  <Button onClick={this.clearEmails}>Clear Emails</Button>
                 </Col>
                 <Col>
                   <Button color="danger" onClick={removeAllCreatedAccounts}>

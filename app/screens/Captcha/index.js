@@ -63,12 +63,12 @@ export default class Captcha extends Component {
       });
       this.setListeners();
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   }
 
   setListeners = () => {
-    console.log('setting listeners');
+    
     ipcRenderer.on(SEND_CAPTCHA_TOKEN_FROM_MAIN, (event, arg) => {
       this.handleCaptchaJob(arg);
     });
@@ -105,7 +105,7 @@ export default class Captcha extends Component {
       }
       return false;
     });
-    console.log(captchaJobOperation);
+    
     if (!captchaJobOperation) {
       this.captchaQueue.push(captchaJob);
     }
@@ -120,7 +120,7 @@ export default class Captcha extends Component {
         return true;
       }
     });
-    console.log(this.captchaQueue);
+    
     if (this.captchaQueue.length >= 1) {
       this.handleCaptchaJob(this.captchaQueue.pop());
     }

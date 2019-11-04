@@ -53,7 +53,7 @@ export default class OneBlockDown {
         // eslint-disable-next-line no-await-in-loop
         await this.makeEntry();
       } catch (error) {
-        console.log(error);
+        console.error(error);
         this.changeStatus(`Error Submitting Raffle - ${error.message}`);
       }
       this.run = false;
@@ -128,8 +128,7 @@ export default class OneBlockDown {
     });
 
   makeEntry = async () => {
-    const captchaCode = await this.getCaptchaCode();
-    console.log(captchaCode);
+    await this.getCaptchaCode();
   };
 
   // makeEntry = async () => {

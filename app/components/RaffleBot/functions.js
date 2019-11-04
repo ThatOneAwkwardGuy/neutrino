@@ -34,7 +34,7 @@ export const loadRaffleInfo = async (site, raffleLink) => {
       // return loadKickzRaffleInfo(raffleLink);
       case 'CityBlue':
         return loadCityBlueRaffleInfo(raffleLink);
-      case 'LapstoneAndHammer':
+      case 'Lapstone And Hammer':
         return loadLapstoneAndHammerRaffleInfo(raffleLink);
       case 'BSTN':
         return loadBSTNRaffleInfo(raffleLink);
@@ -123,7 +123,6 @@ const loadDSMRaffleInfo = async link => {
                   ).attr('name');
                   const formFields = {};
                   $('form input').each((index, element) => {
-                    console.log(element);
                     const { name, value } = element.attribs;
                     formFields[name] = value;
                   });
@@ -221,7 +220,6 @@ const loadDSMNYRaffleInfo = async link => {
                   ).attr('name');
                   const formFields = {};
                   $('form input').each((index, element) => {
-                    console.log(element);
                     const { name, value } = element.attribs;
                     formFields[name] = value;
                   });
@@ -822,8 +820,7 @@ const loadLapstoneAndHammerRaffleInfo = async link => {
   };
 };
 
-const processBSTNRaffleInfo = (body, cookies) => {
-  console.log(cookies);
+const processBSTNRaffleInfo = body => {
   const $ = cheerio.load(body);
   const sizes = $(
     '#registration-form > div > div > div > select:first-child option:not([value=""])'
