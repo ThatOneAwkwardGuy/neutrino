@@ -3,12 +3,24 @@
   border: solid 5px $mainColour;
 }
 
+#TableContainer > div > div > div:nth-child(2) > div {
+  width: 100% !important;
+}
+
 #TableContainer > div > div > div:nth-child(2) > div > div {
   position: relative !important;
 }
 
+.td:not(:first-child) {
+  text-align: center;
+}
+
 #TableContainer .tr .td:not(:first-child) {
   word-break: break-all;
+  text-overflow: ellipsis;
+  max-height: 150px;
+  overflow: hidden;
+  // min-width: 150px;
 }
 
 #TableContainer .tr {

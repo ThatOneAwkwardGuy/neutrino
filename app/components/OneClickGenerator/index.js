@@ -145,7 +145,8 @@ export default class OneClickGenerator extends Component {
       index,
       settings,
       updateActivity,
-      incrementActivity
+      incrementActivity,
+      activity
     );
   };
 
@@ -208,8 +209,13 @@ export default class OneClickGenerator extends Component {
         accessor: 'status'
       },
       {
+        Header: 'One Click',
+        accessor: 'oneClickStatus'
+      },
+      {
         Header: 'Email',
-        accessor: 'email'
+        accessor: 'email',
+        width: 250
       },
       {
         Header: 'Proxy',

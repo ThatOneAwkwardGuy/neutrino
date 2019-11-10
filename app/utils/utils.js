@@ -11,6 +11,17 @@ export const generateUEID = () => {
   return first + second;
 };
 
+export const generateRandomNLengthString = length => {
+  let result = '';
+  const characters =
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  const charactersLength = characters.length;
+  for (let i = 0; i < length; i += 1) {
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
+  }
+  return result;
+};
+
 export const createNewWindow = async (tokenID, proxy) => {
   const { BrowserWindow } = remote;
   const win = new BrowserWindow({
@@ -33,7 +44,7 @@ export const createNewWindow = async (tokenID, proxy) => {
   if (proxy !== '' && proxy !== undefined) {
     await setProxyForWindow(proxy, win);
   }
-  
+
   return win;
 };
 
@@ -43,18 +54,16 @@ export const setProxyForWindow = (proxy, win) =>
       const proxyArray = proxy.includes('http://')
         ? proxy.split('http://')[1].split(/@|:/)
         : proxy.split(/@|:/);
-      
+
       if (proxyArray.length === 4) {
         win.webContents.on('login', (event, request, authInfo, callback) => {
-          
           event.preventDefault();
-          
-          
+
           callback(proxyArray[0], proxyArray[1]);
         });
       }
       const proxyIpAndPort = proxyArray.slice(-2);
-      
+
       win.webContents.session.setProxy(
         { proxyRules: `${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` },
         () => {

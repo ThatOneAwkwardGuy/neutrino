@@ -1,3 +1,5 @@
+import { ValidateSchema, LapstoneAndHammerSchema } from '../schemas';
+
 const rp = require('request-promise');
 
 export default class LapstoneAndHammer {
@@ -83,9 +85,11 @@ export default class LapstoneAndHammer {
   // https://lapstoneandhammer.us10.list-manage.com/subscribe/post-json?u=3dd44920c3e2410d48d7462fc&id=0322480296&c=jQuery19001958476886307381_1572100031612&&MMERGE3=Men+(7.5-14)&MMERGE4=13&MMERGE6=&MMERGE5=&b_3dd44920c3e2410d48d7462fc_0322480296=&subscribe=Submit&_=1572100031613
 
   makeEntry = async () => {
+    ValidateSchema(LapstoneAndHammerSchema, this.profile);
+
     this.changeStatus('Making Entry');
     const raffleResponse = await this.submitRaffle();
-    console.log(raffleResponse)
+    console.log(raffleResponse);
     if (!raffleResponse.body.includes('"result":"success"')) {
       throw new Error('Failed To Enter Raffle');
     }

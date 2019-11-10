@@ -4,6 +4,7 @@
  */
 $fa-font-path: '~font-awesome/fonts';
 @import '~font-awesome/scss/font-awesome.scss';
+@import '~react-tippy/dist/tippy.css';
 @import './styles/constants.scss';
 @import './fonts/stylesheet.css';
 @import '~bootstrap/dist/css/bootstrap.css';
@@ -271,4 +272,28 @@ div:first-of-type > div.NeutrinoToast {
 
 .text-break {
   word-break: break-all;
+}
+
+.tippy-tooltip {
+  // border: solid 1px $mainColourDarker2;
+  border-radius: 0 !important;
+  padding: 10px;
+  background: $dark1Colour;
+  font-weight: bold;
+}
+
+.tooltip-inner {
+  border: solid 1px $mainColourDarker2;
+  border-radius: 0 !important;
+  padding: 10px;
+  background: $dark1Colour;
+  font-weight: bold;
+}
+
+.tooltip .arrow::before {
+  border-top-color: $mainColourDarker2 !important;
+}
+
+.tooltip.show {
+  opacity: 1;
 }

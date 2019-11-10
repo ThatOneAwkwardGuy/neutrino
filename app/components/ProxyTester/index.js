@@ -1,9 +1,14 @@
 import React, { Component } from 'react';
 import { Container, Row, Col, Input, Label, Button } from 'reactstrap';
 import { withToastManager } from 'react-toast-notifications';
+import { Tooltip } from 'react-tippy';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import PropTypes from 'prop-types';
-import Table from '../Table';
+
 import { testProxy, copyProxies } from './functions';
+
+import Table from '../Table';
 
 const log = require('electron-log');
 
@@ -131,7 +136,16 @@ class ProxyTester extends Component {
                 <Container fluid>
                   <Row>
                     <Col xs="6" className="py-3">
-                      <Label>Proxies*</Label>
+                      <Label>
+                        Proxies*{' '}
+                        <Tooltip
+                          arrow
+                          distance={20}
+                          title="The proxies you want to test."
+                        >
+                          <FontAwesomeIcon icon="question-circle" />
+                        </Tooltip>
+                      </Label>
                       <Input
                         rows="4"
                         type="textarea"
@@ -142,7 +156,16 @@ class ProxyTester extends Component {
                       />
                     </Col>
                     <Col xs="3" className="py-3">
-                      <Label>Website*</Label>
+                      <Label>
+                        Website*{' '}
+                        <Tooltip
+                          arrow
+                          distance={20}
+                          title="The website you want to test your proxies on. If you get a ping of -1 then the proxy is unable to connect to the site and may be blocked."
+                        >
+                          <FontAwesomeIcon icon="question-circle" />
+                        </Tooltip>
+                      </Label>
                       <Input
                         type="text"
                         value={proxySite}
@@ -160,7 +183,16 @@ class ProxyTester extends Component {
                       </Button>
                     </Col>
                     <Col xs="3" className="py-3">
-                      <Label>Max Ping</Label>
+                      <Label>
+                        Max Ping{' '}
+                        <Tooltip
+                          arrow
+                          distance={20}
+                          title="The maximum ping of the proxies you wish to copy to your clipboard. Proxies with pings lower than this will be copied then you click 'Copy Proxies'"
+                        >
+                          <FontAwesomeIcon icon="question-circle" />
+                        </Tooltip>
+                      </Label>
                       <Input
                         type="number"
                         value={maxPing}

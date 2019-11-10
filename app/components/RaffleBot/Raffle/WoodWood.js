@@ -1,7 +1,6 @@
 import { ipcRenderer } from 'electron';
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
 import { STOP_CAPTCHA_JOB } from '../../../constants/ipcConstants';
-import { ValidateSchema, BodegaSchema } from '../schemas';
 
 const uuidv4 = require('uuid/v4');
 const rp = require('request-promise');
@@ -108,10 +107,8 @@ export default class Bodega {
   getRafflePage = () => this.rp.get(this.url);
 
   makeEntry = async () => {
-    ValidateSchema(BodegaSchema, this.profile);
-
     this.changeStatus(`Getting Captcha Token`);
-    const captchaResponse = await getCaptchaResponse({
+    await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle
       cookiesObject: this.cookieJar._jar.store.idx,
       url: `https://app.viralsweep.com/vrlswp/widget/${this.raffleDetails.widgetCode}?framed=1`,
@@ -122,14 +119,5 @@ export default class Bodega {
       settings: this.settings,
       siteKey: '6LeoeSkTAAAAAA9rkZs5oS82l69OEYjKRZAiKdaF'
     });
-    this.changeStatus(`Submitting Raffle Entry`);
-    const submitRaffleResponse = await this.submitRaffle(captchaResponse);
-    const submitRaffle = JSON.parse(submitRaffleResponse);
-    if (submitRaffle.success === 1) {
-      this.changeStatus(`Successful Entry`);
-      this.incrementRaffles();
-    } else {
-      this.changeStatus(`Error Submitting Entry`);
-    }
   };
 }

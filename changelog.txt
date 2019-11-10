@@ -131,6 +131,14 @@ Need to add animations
 - Removal of OneBlockDown for now, while we fix it to avoid confusion
 - You can now load your own emails for account creation
 
+2.0.29
+- Removed VooStore from Raffle Bot, dont even know if they do raffles anymore lol :/
+- Added Tooltips for settings page and others to provide more details on what each input does
+- Changed Account creator to generate more random emails
+- One click generator now auto checks one click status
+- Profiles now validated before entering raffle to prevent mistaken entries
+- Fixed NakedCPH Account creation (Not for when you get IP banned :/)
+- Added FootDistrict To Raffle Bot
 
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a

@@ -58,7 +58,9 @@ export default class Captcha extends Component {
           nodeintegration: true,
           webSecurity: false,
           allowRunningInsecureContent: true,
-          javascript: true
+          javascript: true,
+          useragent:
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
         }
       });
       this.setListeners();
@@ -68,7 +70,6 @@ export default class Captcha extends Component {
   }
 
   setListeners = () => {
-    
     ipcRenderer.on(SEND_CAPTCHA_TOKEN_FROM_MAIN, (event, arg) => {
       this.handleCaptchaJob(arg);
     });
@@ -105,7 +106,7 @@ export default class Captcha extends Component {
       }
       return false;
     });
-    
+
     if (!captchaJobOperation) {
       this.captchaQueue.push(captchaJob);
     }
@@ -120,7 +121,7 @@ export default class Captcha extends Component {
         return true;
       }
     });
-    
+
     if (this.captchaQueue.length >= 1) {
       this.handleCaptchaJob(this.captchaQueue.pop());
     }

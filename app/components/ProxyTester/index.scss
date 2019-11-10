@@ -1,5 +1,6 @@
 #TableContainer {
   overflow-wrap: break-word;
+  text-align: center;
 }
 
 #TableContainer > div,
@@ -12,8 +13,8 @@
   color: white !important;
 }
 
-.td,
-.th,
+.td:not(:first-child),
+.th:not(:first-child),
 .tr {
   width: 100% !important;
 }
@@ -23,7 +24,7 @@
 }
 
 #TableContainer > div > div > div:nth-child(2) > div {
-  width: 100% !important;
+  max-width: 100% !important;
 }
 
 .neutrinoModal .modal-content {

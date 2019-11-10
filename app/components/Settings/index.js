@@ -8,6 +8,7 @@ import {
   CustomInput,
   Button
 } from 'reactstrap';
+import { Tooltip } from 'react-tippy';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { remote } from 'electron';
 
@@ -347,14 +348,12 @@ export default class Settings extends Component {
   };
 
   saveCSVTemplate = () => {
-    
     fs.readFile(
       process.env.NODE_ENV === 'development'
         ? `${appPath}/constants/Neutrino_CSV_Template.csv`
         : `${appPath}/app/constants/Neutrino_CSV_Template.csv`,
       'UTF-8',
       (err, data) => {
-        
         if (!err) {
           dialog.showSaveDialog(
             {
@@ -383,7 +382,20 @@ export default class Settings extends Component {
             <h6 className="font-weight-bold">Proxy Provider Accounts</h6>
             <Row className="p-3 align-items-end">
               <Col xs="3">
-                <Label>Provider</Label>
+                <Label>
+                  Provider{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Which Proxy provider would you like to enter the details for?"
+                    target="parallelRaffleEntriesLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="parallelRaffleEntriesLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="select"
                   name="selectedProxyProvider"
@@ -448,7 +460,46 @@ export default class Settings extends Component {
             <h6 className="font-weight-bold py-3">One Click Generator</h6>
             <Row className="p-3 align-items-end">
               <Col xs="3">
-                <Label>Min Delay</Label>
+                <Label>
+                  One Click Check Timing (m){' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="How often, in minutes, to check if your Gmail account passes
+                  one-click tests."
+                    target="oneClickCheckTimingLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="oneClickCheckTimingLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
+                <Input
+                  type="number"
+                  name="oneClickCheckTiming"
+                  onChange={this.handleSettingsChange}
+                  value={settings.oneClickCheckTiming}
+                />
+              </Col>
+            </Row>
+            <Row className="p-3 align-items-end">
+              <Col xs="3">
+                <Label>
+                  Min Delay (ms){' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="The minimum time, in miliseconds, the one click generator
+                  should wait before performing an activity."
+                    target="activityDelayMinLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="activityDelayMinLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="number"
                   name="activityDelayMin"
@@ -457,7 +508,21 @@ export default class Settings extends Component {
                 />
               </Col>
               <Col xs="3">
-                <Label>Max Delay</Label>
+                <Label>
+                  Max Delay (ms){' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="The maxiumum time, in miliseconds, the one click generator
+                  should wait before performing an activity."
+                    target="activityDelayMaxLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="activityDelayMaxLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="number"
                   name="activityDelayMax"
@@ -468,7 +533,21 @@ export default class Settings extends Component {
             </Row>
             <Row className="panel-middle p-3 align-items-end">
               <Col>
-                <Label>Show Activity Windows</Label>
+                <Label>
+                  Show Activity Windows{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Whether the windows of the one click generator should be
+                    shown."
+                    target="showAcitivtyWindowsLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="showAcitivtyWindowsLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <CustomInput
                   type="switch"
                   id="showAcitivtyWindows"
@@ -478,7 +557,21 @@ export default class Settings extends Component {
                 />
               </Col>
               <Col>
-                <Label>Google Search</Label>
+                <Label>
+                  Google Search{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Whether the one click generator windows should perform Google
+                  searches."
+                    target="activityGoogleSearchLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="activityGoogleSearchLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <CustomInput
                   type="switch"
                   id="activityGoogleSearch"
@@ -488,7 +581,21 @@ export default class Settings extends Component {
                 />
               </Col>
               <Col>
-                <Label>Google News</Label>
+                <Label>
+                  Google News{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Whether the one click generator windows should perform Google
+                  News searches."
+                    target="activityGoogleNewsLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="activityGoogleSearchLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <CustomInput
                   type="switch"
                   id="activityGoogleNews"
@@ -498,7 +605,21 @@ export default class Settings extends Component {
                 />
               </Col>
               <Col>
-                <Label>Google Shopping</Label>
+                <Label>
+                  Google Shopping{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Whether the one click generator windows should perform Google
+                  Shopping searches."
+                    target="activityGoogleShoppingLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="activityGoogleShoppingLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <CustomInput
                   type="switch"
                   id="activityGoogleShopping"
@@ -508,7 +629,21 @@ export default class Settings extends Component {
                 />
               </Col>
               <Col>
-                <Label>Youtube</Label>
+                <Label>
+                  Youtube{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Whether the one click generator windows should watch Youtube
+                  videos."
+                    target="activityYoutubeLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="activityYoutubeLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <CustomInput
                   type="switch"
                   id="activityYoutube"
@@ -521,7 +656,20 @@ export default class Settings extends Component {
             <h6 className="font-weight-bold py-3">Raffle Bot</h6>
             <Row className="p-3 panel-middle align-items-end">
               <Col xs="3">
-                <Label>Parallel Entries</Label>
+                <Label>
+                  Parallel Entries{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="How many raffle entries should be started at the same time."
+                    target="parallelRaffleEntriesLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="parallelRaffleEntriesLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="number"
                   name="parallelRaffleEntries"
@@ -530,7 +678,20 @@ export default class Settings extends Component {
                 />
               </Col>
               <Col xs="3">
-                <Label>Raffle Entry Delay (ms)</Label>
+                <Label>
+                  Raffle Entry Delay (ms){' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Delay between each number of parallel raffle entries."
+                    target="raffleEntryDelayLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="raffleEntryDelayLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="number"
                   name="raffleEntryDelay"
@@ -541,7 +702,20 @@ export default class Settings extends Component {
             </Row>
             <Row className="p-3 align-items-end">
               <Col xs="3">
-                <Label>2Captcha API Key</Label>
+                <Label>
+                  2Captcha API Key{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Your 2Capthca API Key"
+                    target="TwoCaptchaAPIKeyLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="TwoCaptchaAPIKeyLabel"
+                      icon="question-circle"
+                    />{' '}
+                  </Tooltip>
+                </Label>
                 <Input
                   type="text"
                   name="2CaptchaAPIKey"
@@ -550,7 +724,20 @@ export default class Settings extends Component {
                 />
               </Col>
               <Col xs="3">
-                <Label>AntiCaptcha API Key</Label>
+                <Label>
+                  AntiCaptcha API Key{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Your AntiCaptcha API Key"
+                    target="AntiCaptchaAPIKeyLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="AntiCaptchaAPIKeyLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="text"
                   name="AntiCaptchaAPIKey"
@@ -570,7 +757,18 @@ export default class Settings extends Component {
             </Row>
             <Row className="p-3 panel-middle align-items-end">
               <Col xs="3">
-                <Label>Captcha API</Label>
+                <Label>Captcha API</Label>{' '}
+                <Tooltip
+                  arrow
+                  distance={20}
+                  title="Which Captcha API should be used when a Google CAPTCHA is needed"
+                  target="parallelRaffleEntriesLabel"
+                >
+                  <FontAwesomeIcon
+                    id="parallelRaffleEntriesLabel"
+                    icon="question-circle"
+                  />
+                </Tooltip>
                 <Input
                   type="select"
                   name="CaptchaAPI"
@@ -580,11 +778,24 @@ export default class Settings extends Component {
                   <option value="">Manual</option>
                   <option value="2Captcha">2Captcha</option>
                   <option value="AntiCaptcha">AntiCaptcha</option>
-                  <option value="ImageTypers">ImageTypers</option>
+                  {/* <option value="ImageTypers">ImageTypers</option> */}
                 </Input>
               </Col>
             </Row>
-            <h6 className="font-weight-bold py-3">Neutrino CSV Template</h6>
+            <h6 className="font-weight-bold py-3">
+              Neutrino CSV Template{' '}
+              <Tooltip
+                arrow
+                distance={20}
+                title="The Neutrino CSV template for mass conversion, editing and/or creating of profiles."
+                target="parallelRaffleEntriesLabel"
+              >
+                <FontAwesomeIcon
+                  id="parallelRaffleEntriesLabel"
+                  icon="question-circle"
+                />
+              </Tooltip>
+            </h6>
             <Row className="panel-middle p-3 align-items-end">
               <Col xs="3">
                 <Button onClick={this.saveCSVTemplate}>Download</Button>

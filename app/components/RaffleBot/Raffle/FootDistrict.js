@@ -1,8 +1,8 @@
-import { ValidateSchema, NakedCPHSchema } from '../schemas';
+import { ValidateSchema, FootDistrictSchema } from '../schemas';
 
 const rp = require('request-promise');
 
-export default class NakedCPH {
+export default class FootDistrict {
   constructor(
     url,
     profile,
@@ -69,10 +69,10 @@ export default class NakedCPH {
         'cache-control': 'no-cache',
         'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
         pragma: 'no-cache',
-        referrer: `https://nakedcph.typeform.com/to/${raffleId}`,
+        referrer: `https://footdistrict.typeform.com/to/${raffleId}`,
         referrerPolicy: 'no-referrer-when-downgrade'
       },
-      uri: `https://nakedcph.typeform.com/app/form/result/token/${raffleId}/default`,
+      uri: `https://footdistrict.typeform.com/app/form/result/token/${raffleId}/default`,
       form: {}
     });
     return JSON.parse(response);
@@ -83,45 +83,44 @@ export default class NakedCPH {
     const payload = {};
     const formObj = {};
     this.raffleDetails.renderData.form.fields.forEach(row => {
-      if (row.title.includes('first name')) {
+      if (row.title.includes('Choose your language')) {
+        const choice = row.properties.choices.find(
+          elem => elem.label === 'English'
+        );
+        formObj['0'] = {
+          field: { id: row.id, type: row.type },
+          choices: [{ id: choice.id, label: choice.label }],
+          type: 'choices'
+        };
+      } else if (row.title.includes('your complete name')) {
         formObj['1'] = {
           field: { id: row.id, type: row.type },
-          text: this.profile.deliveryFirstName,
+          text: `${this.profile.deliveryFirstName} ${this.profile.deliveryLastName}`,
           type: 'text'
         };
-      } else if (row.title.includes('last name')) {
+      } else if (row.title.includes('a valid email')) {
         formObj['2'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryLastName,
-          type: 'text'
-        };
-      } else if (row.title.includes('email')) {
-        formObj['3'] = {
           field: { id: row.id, type: row.type },
           email: this.profile.email,
           type: 'email'
         };
-      } else if (row.title.includes('postal code')) {
+      } else if (row.title.includes('your Size')) {
+        formObj['3'] = {
+          field: { id: row.id, type: row.type },
+          text: this.size.id,
+          type: 'text'
+        };
+      } else if (row.title.includes('accept our Terms and')) {
         formObj['4'] = {
           field: { id: row.id, type: row.type },
-          text: this.profile.deliveryZip,
-          type: 'text'
+          boolean: true,
+          type: 'boolean'
         };
-      } else if (row.title.includes('country are you')) {
+      } else if (row.title.includes('you consent that')) {
         formObj['5'] = {
           field: { id: row.id, type: row.type },
-          text: this.profile.deliveryCountry,
-          type: 'text'
-        };
-      } else if (row.title.includes('Our Captcha is')) {
-        const { ref } = row;
-        const matchingLogic = this.raffleDetails.renderData.form.logic.find(
-          logic => logic.ref === ref
-        );
-        formObj['0'] = {
-          field: { id: row.id, type: row.type },
-          text: matchingLogic.actions[0].condition.vars[1].value,
-          type: 'text'
+          boolean: true,
+          type: 'boolean'
         };
       }
     });
@@ -133,14 +132,14 @@ export default class NakedCPH {
     const response = await this.rp({
       method: 'POST',
       json: true,
-      uri: `https://nakedcph.typeform.com/app/form/submit/${this.raffleDetails.typeformCode}`,
+      uri: `https://footdistrict.typeform.com/app/form/submit/${this.raffleDetails.typeformCode}`,
       body: payload
     });
     return response;
   };
 
   makeEntry = async () => {
-    ValidateSchema(NakedCPHSchema, this.profile);
+    ValidateSchema(FootDistrictSchema, this.profile);
     this.changeStatus('Started');
     // eslint-disable-next-line camelcase
     const { token, landed_at } = await this.getRaffleToken(

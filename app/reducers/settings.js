@@ -17,6 +17,7 @@ export default function settings(
       linode: [],
       aws: []
     },
+    oneClickCheckTiming: '60',
     activityDelayMin: '60000',
     activityDelayMax: '120000',
     parallelRaffleEntries: '1',

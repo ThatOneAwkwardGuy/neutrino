@@ -1,3 +1,5 @@
+import { ValidateSchema, CityBlueSchema } from '../schemas';
+
 const rp = require('request-promise');
 
 export default class CityBlue {
@@ -81,6 +83,8 @@ export default class CityBlue {
     });
 
   makeEntry = async () => {
+    ValidateSchema(CityBlueSchema, this.profile);
+
     this.changeStatus('Making Entry');
     const raffleResponse = await this.submitRaffle();
     if (!raffleResponse.body.includes('"result":"success"')) {

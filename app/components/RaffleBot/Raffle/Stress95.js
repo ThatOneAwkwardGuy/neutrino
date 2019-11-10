@@ -1,3 +1,5 @@
+import { ValidateSchema, Stress95Schema } from '../schemas';
+
 const rp = require('request-promise');
 
 export default class Stress95 {
@@ -46,7 +48,7 @@ export default class Stress95 {
         await this.makeEntry();
       } catch (error) {
         console.error(error);
-        this.changeStatus('Error Submitting Raffle');
+        this.changeStatus(`Error Submitting Raffle - ${error.message}`);
       }
       this.run = false;
     }
@@ -111,7 +113,7 @@ export default class Stress95 {
     payload.form_id = this.raffleDetails.typeformCode;
     payload.signature = token;
     payload.landed_at = parseInt(landedAt, 10);
-    
+
     const response = await this.rp({
       method: 'POST',
       uri: `https://stress95.typeform.com/app/form/submit/${this.raffleDetails.typeformCode}`,
@@ -122,15 +124,15 @@ export default class Stress95 {
   };
 
   makeEntry = async () => {
+    ValidateSchema(Stress95Schema, this.profile);
     this.changeStatus('Started');
     // eslint-disable-next-line camelcase
     const { token, landed_at } = await this.getRaffleToken(
       this.raffleDetails.typeformCode
     );
-    
-    
+
     const submissionResponse = await this.submitRaffleEntry(token, landed_at);
-    
+
     if (submissionResponse.message === 'success') {
       this.changeStatus('Successful Entry');
       this.incrementRaffles();

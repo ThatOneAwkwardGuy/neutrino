@@ -3,6 +3,7 @@ import { getCaptchaResponse } from '../../../screens/Captcha/functions';
 import { STOP_CAPTCHA_JOB } from '../../../constants/ipcConstants';
 import { getFormData } from '../../AccountCreator/functions';
 import { longToShortStates } from '../../../constants/constants';
+import { ValidateSchema, ExtraButterSchema } from '../schemas';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
@@ -266,6 +267,8 @@ export default class ExtraButter {
   };
 
   makeEntry = async () => {
+    ValidateSchema(ExtraButterSchema, this.profile);
+
     this.changeStatus('Getting Variant ID For Size');
     const variant = await this.getIDForSize();
     await this.login(this.profile.email, this.profile.password);

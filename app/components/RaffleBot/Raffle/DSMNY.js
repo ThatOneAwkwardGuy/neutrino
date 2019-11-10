@@ -1,4 +1,5 @@
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+import { ValidateSchema, DSMNYSchema } from '../schemas';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
@@ -109,9 +110,11 @@ export default class DSMNY {
   };
 
   makeEntry = async () => {
+    ValidateSchema(DSMNYSchema, this.profile);
+
     this.changeStatus('Getting Captcha');
     const captchaResponse = await this.getCaptcha();
-    
+
     try {
       const entryResponse = await this.submitRaffle(
         captchaResponse.captchaToken

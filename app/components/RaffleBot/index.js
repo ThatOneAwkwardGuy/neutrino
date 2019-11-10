@@ -1,18 +1,17 @@
 import React, { Component } from 'react';
 import { Row, Col, Container, Label, Button, Input } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import PropTypes from 'prop-types';
+import { sleep, loadRaffleInfo } from './functions';
+import { generateUEID } from '../../utils/utils';
+import { convertCSVToBase } from '../ProfileTaskEditorConverter/functions';
+import { convertBaseToNeutrino } from '../ProfileCreator/functions';
+
 import Table from '../Table/index';
-// import supplystore from '../../images/supplystore.png';
-// import kickz from '../../images/kickz.png';
-// import bstn from '../../images/bstn.png';
 import bodega from '../../images/bodega.jpg';
 import extrabutter from '../../images/extrabutter.jpg';
 import footpatrol from '../../images/footpatrol.png';
 import nakedcph from '../../images/nakedcph.jpg';
-// import oneblockdown from '../../images/oneblockdown.jpeg';
-import voostore from '../../images/voostore.png';
 import renarts from '../../images/renarts.jpg';
 import dsm from '../../images/dsm.png';
 import dsmny from '../../images/dsmny.png';
@@ -20,28 +19,33 @@ import cityblue from '../../images/cityblue.jpg';
 import lapstoneandhammer from '../../images/lapstoneandhammer.jpg';
 import stress95 from '../../images/stress95.png';
 import fearofgod from '../../images/fearofgod.png';
+import footdistrict from '../../images/footdistrict.png';
 // import footshop from '../../images/footshop.png';
-import { sleep, loadRaffleInfo } from './functions';
-import { generateUEID } from '../../utils/utils';
-import { convertCSVToBase } from '../ProfileTaskEditorConverter/functions';
-import { convertBaseToNeutrino } from '../ProfileCreator/functions';
+// import woodwood from '../../images/woodwood.jpg';
+// import oneblockdown from '../../images/oneblockdown.jpeg';
+// import voostore from '../../images/voostore.png';
+// import supplystore from '../../images/supplystore.png';
+// import kickz from '../../images/kickz.png';
+// import bstn from '../../images/bstn.png';
+
 import FootpatrolUK from './Raffle/FootpatrolUK';
 import NakedCPH from './Raffle/NakedCPH';
 import ExtraButter from './Raffle/ExtraButter';
-// import END from './Raffle/END';
-import VooStore from './Raffle/VooStore';
 import Bodega from './Raffle/Bodega';
-import OneBlockDown from './Raffle/OneBlockDown';
 import CityBlue from './Raffle/CityBlue';
 import LapstoneAndHammer from './Raffle/LapstoneAndHammer';
-// import BSTN from './Raffle/BSTN';
 import Renarts from './Raffle/Renarts';
-// import SupplyStore from './Raffle/SupplyStore';
 import DSM from './Raffle/DSM';
 import DSMNY from './Raffle/DSMNY';
 import Stress95 from './Raffle/Stress95';
-// import FootShop from './Raffle/FootShop';
 import FearOfGod from './Raffle/FearOfGod';
+import FootDistrict from './Raffle/FootDistrict';
+// import END from './Raffle/END';
+// import VooStore from './Raffle/VooStore';
+// import FootShop from './Raffle/FootShop';
+// import SupplyStore from './Raffle/SupplyStore';
+// import OneBlockDown from './Raffle/OneBlockDown';
+// import BSTN from './Raffle/BSTN';
 
 const { dialog } = require('electron').remote;
 const fs = require('fs');
@@ -55,36 +59,37 @@ const sites = [
   },
   { name: 'NakedCPH', img: nakedcph },
   { name: 'ExtraButter', img: extrabutter },
-  { name: 'VooStore', img: voostore },
   { name: 'Bodega', img: bodega },
-  // { name: 'OneBlockDown', img: oneblockdown },
   { name: 'CityBlue', img: cityblue },
   { name: 'Lapstone And Hammer', img: lapstoneandhammer },
   { name: 'Renarts', img: renarts },
   { name: 'DSM', img: dsm },
   { name: 'DSMNY', img: dsmny },
   { name: 'Stress95', img: stress95 },
-  { name: 'Fear Of God', img: fearofgod }
-  // { name: 'FootShop', img: footshop }
-  // { name: 'SupplyStore', img: supplystore }
+  { name: 'Fear Of God', img: fearofgod },
+  { name: 'FootDistrict', img: footdistrict }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
+  // { name: 'WoodWood', img: woodwood }
+  // { name: 'FootShop', img: footshop }
+  // { name: 'SupplyStore', img: supplystore }
+  // { name: 'OneBlockDown', img: oneblockdown }
+  // { name: 'VooStore', img: voostore }
 ];
 
 const Classes = {
   'Footpatrol UK': FootpatrolUK,
   NakedCPH,
   ExtraButter,
-  VooStore,
   Bodega,
-  OneBlockDown,
   CityBlue,
   'Lapstone And Hammer': LapstoneAndHammer,
   Renarts,
   DSM,
   DSMNY,
   Stress95,
-  'Fear Of God': FearOfGod
+  'Fear Of God': FearOfGod,
+  FootDistrict
 };
 
 export default class RaffleBot extends Component {

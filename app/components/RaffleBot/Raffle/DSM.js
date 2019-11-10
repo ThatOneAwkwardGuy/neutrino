@@ -1,4 +1,5 @@
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+import { ValidateSchema, DSMSchema } from '../schemas';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
@@ -99,7 +100,7 @@ export default class DSM {
     if (this.style) {
       payload[this.raffleDetails.colorFormID] = this.style.id;
     }
-    
+
     return this.rp({
       method: 'POST',
       followAllRedirects: true,
@@ -111,6 +112,8 @@ export default class DSM {
   };
 
   makeEntry = async () => {
+    ValidateSchema(DSMSchema, this.profile);
+
     this.changeStatus('Getting Captcha');
     const captchaResponse = await this.getCaptcha();
     try {

@@ -1,3 +1,5 @@
+import { ValidateSchema, FootpatrolUKSchema } from '../schemas';
+
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
 
@@ -108,6 +110,7 @@ export default class FootpatrolUK {
     });
 
   makeEntry = async () => {
+    ValidateSchema(FootpatrolUKSchema, this.profile);
     const token = uuidv4();
     this.changeStatus('Submitting Raffle Token');
     await this.submitEntry1(token);

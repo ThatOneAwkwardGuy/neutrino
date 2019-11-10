@@ -1,6 +1,7 @@
 import { ipcRenderer } from 'electron';
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
 import { STOP_CAPTCHA_JOB } from '../../../constants/ipcConstants';
+import { ValidateSchema, FearOfGodSchema } from '../schemas';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
@@ -49,7 +50,6 @@ export default class FearOfGod {
   };
 
   start = async () => {
-    
     while (this.run) {
       try {
         // eslint-disable-next-line no-await-in-loop
@@ -109,6 +109,7 @@ export default class FearOfGod {
     });
 
   makeEntry = async () => {
+    ValidateSchema(FearOfGodSchema, this.profile);
     this.changeStatus('Getting Captcha');
     const captchaResponse = await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle

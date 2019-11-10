@@ -10,11 +10,19 @@ import {
   CustomInput
 } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import PropTypes from 'prop-types';
 import { withToastManager } from 'react-toast-notifications';
+import { Tooltip } from 'react-tippy';
+
+import PropTypes from 'prop-types';
+
 import Table from '../Table/index';
+
 import { sites } from '../../constants/constants';
-import { upperCaseFirst, createNewWindow } from '../../utils/utils';
+import {
+  upperCaseFirst,
+  createNewWindow,
+  generateRandomNLengthString
+} from '../../utils/utils';
 import { getCaptchaResponse } from '../../screens/Captcha/functions';
 import { getFormData } from './functions';
 import {
@@ -27,7 +35,6 @@ const { dialog } = require('electron').remote;
 
 const fsPromises = require('fs').promises;
 const cheerio = require('cheerio');
-const randomEmail = require('random-email');
 const randomize = require('randomatic');
 const request = require('request-promise');
 const random = require('random-name');
@@ -294,7 +301,8 @@ class AccountCreator extends Component {
       lastName
     } = this.state;
     const { addCreatedAccount, settings } = this.props;
-    const email = gmailEmail || randomEmail({ domain: catchall });
+    const email =
+      gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
     const accountPass = randomPass ? randomize('a', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const accountLastName = randomName ? random.last() : lastName;
@@ -410,7 +418,8 @@ class AccountCreator extends Component {
       lastName
     } = this.state;
     const { addCreatedAccount, settings } = this.props;
-    const email = gmailEmail || randomEmail({ domain: catchall });
+    const email =
+      gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
     const accountPass = randomPass ? randomize('a', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const accountLastName = randomName ? random.last() : lastName;
@@ -543,7 +552,8 @@ class AccountCreator extends Component {
     } = this.state;
     const { addCreatedAccount } = this.props;
     return new Promise(async (resolve, reject) => {
-      const email = gmailEmail || randomEmail({ domain: catchall });
+      const email =
+        gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
       const accountPass = randomPass ? randomize('a', 10) : pass;
       const accountFirstName = randomName ? random.first() : firstName;
       const accountLastName = randomName ? random.last() : lastName;
@@ -555,37 +565,41 @@ class AccountCreator extends Component {
         reject(new Error('Closed Window Before Finished'));
       });
       window.loadURL('http://www.nakedcph.com/auth/view?op=register');
-      window.webContents.on('did-finish-load', () => {
-        window.webContents.executeJavaScript(
-          `
-        document.getElementById('firstNameInput').value = '${accountFirstName} ${accountLastName}';
-        document.getElementById('emailInput').value = '${email}';
-        document.getElementById('passwordInput').value = '${accountPass}';
-        document.querySelector('button[type="submit"]').click();
-        `,
-          false,
-          () => {
-            window.webContents.once('did-finish-load', () => {
-              window.webContents.executeJavaScript(
-                'window.location',
-                false,
-                result => {
-                  if (result.pathname === '/auth/success') {
-                    window.webContents.removeAllListeners('close', () => {});
-                    addCreatedAccount({
-                      email,
-                      site,
-                      pass: accountPass,
-                      status: 'created'
-                    });
-                    window.close();
-                    resolve();
-                  }
-                }
-              );
-            });
-          }
+      window.webContents.on('did-finish-load', async () => {
+        const botOrNotPage = await window.webContents.executeJavaScript(
+          'document.documentElement.innerHTML',
+          false
         );
+        if (!botOrNotPage.includes('BOT or NOT?!')) {
+          await window.webContents.executeJavaScript(
+            `
+          document.getElementById('firstNameInput').value = '${accountFirstName} ${accountLastName}';
+          document.getElementById('emailInput').value = '${email}';
+          document.getElementById('passwordInput').value = '${accountPass}';
+          document.querySelector('button[type="submit"]').click();
+          `,
+            false
+          );
+          window.webContents.once('did-finish-load', async () => {
+            const result = await window.webContents.executeJavaScript(
+              'document.documentElement.innerHTML',
+              false
+            );
+            if (result.includes('Account created!')) {
+              window.webContents.removeAllListeners('close', () => {});
+              addCreatedAccount({
+                email,
+                site,
+                pass: accountPass,
+                status: 'created'
+              });
+              resolve();
+            } else {
+              reject(new Error('Couldnt tell if account was created'));
+            }
+            window.close();
+          });
+        }
       });
     });
   };
@@ -603,13 +617,13 @@ class AccountCreator extends Component {
     } = this.state;
     const { addCreatedAccount } = this.props;
     return new Promise(async (resolve, reject) => {
-      const email = gmailEmail || randomEmail({ domain: catchall });
+      const email =
+        gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
       const accountPass = randomPass ? randomize('a', 10) : pass;
       const accountFirstName = randomName ? random.first() : firstName;
       const accountLastName = randomName ? random.last() : lastName;
       const tokenID = uuidv4();
       const proxy = useProxies ? this.getRandomProxy() : '';
-
       const window = await createNewWindow(tokenID, proxy);
       window.webContents.on('close', () => {
         reject(new Error('Closed Window Before Finished'));
@@ -719,7 +733,16 @@ class AccountCreator extends Component {
             {!advancedSettings ? (
               <Row className="py-3 align-items-end noselect">
                 <Col>
-                  <Label>Site*</Label>
+                  <Label>
+                    Site*{' '}
+                    <Tooltip
+                      arrow
+                      distance={20}
+                      title="The site you want to create accounts on."
+                    >
+                      <FontAwesomeIcon icon="question-circle" />
+                    </Tooltip>
+                  </Label>
                   <Input
                     type="select"
                     name="site"
@@ -734,7 +757,16 @@ class AccountCreator extends Component {
                 </Col>
                 {!randomPass ? (
                   <Col>
-                    <Label>Password*</Label>
+                    <Label>
+                      Password*{' '}
+                      <Tooltip
+                        arrow
+                        distance={20}
+                        title="The password you want to use for the accounts you will be generating."
+                      >
+                        <FontAwesomeIcon icon="question-circle" />
+                      </Tooltip>
+                    </Label>
                     <Input
                       type="text"
                       name="pass"
@@ -745,7 +777,16 @@ class AccountCreator extends Component {
                 ) : null}
                 {!randomName ? (
                   <Col>
-                    <Label>First Name*</Label>
+                    <Label>
+                      First Name*{' '}
+                      <Tooltip
+                        arrow
+                        distance={20}
+                        title="The first name you want to use for the accounts you will be generating."
+                      >
+                        <FontAwesomeIcon icon="question-circle" />
+                      </Tooltip>
+                    </Label>
                     <Input
                       type="text"
                       name="firstName"
@@ -822,7 +863,16 @@ class AccountCreator extends Component {
             {!advancedSettings ? (
               <Row className="py-3 align-items-end noselect">
                 <Col>
-                  <Label>Quantity*</Label>
+                  <Label>
+                    Quantity*{' '}
+                    <Tooltip
+                      arrow
+                      distance={20}
+                      title="The number of accounts you want to create."
+                    >
+                      <FontAwesomeIcon icon="question-circle" />
+                    </Tooltip>
+                  </Label>
                   <Input
                     type="number"
                     name="quantity"
@@ -832,7 +882,16 @@ class AccountCreator extends Component {
                   />
                 </Col>
                 <Col>
-                  <Label>Catchall*</Label>
+                  <Label>
+                    Catchall*{' '}
+                    <Tooltip
+                      arrow
+                      distance={20}
+                      title="The catchall you will be using to create accounts. If you do no know what a catchall is, read the guide."
+                    >
+                      <FontAwesomeIcon icon="question-circle" />
+                    </Tooltip>
+                  </Label>
                   <Input
                     type="text"
                     name="catchall"
@@ -843,7 +902,16 @@ class AccountCreator extends Component {
                 </Col>
                 {!randomName ? (
                   <Col>
-                    <Label>Last Name*</Label>
+                    <Label>
+                      Last Name*{' '}
+                      <Tooltip
+                        arrow
+                        distance={20}
+                        title="The last name you want to use for the accounts you will be generating."
+                      >
+                        <FontAwesomeIcon icon="question-circle" />
+                      </Tooltip>
+                    </Label>
                     <Input
                       type="text"
                       name="lastName"

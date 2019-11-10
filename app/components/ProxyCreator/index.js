@@ -2,6 +2,8 @@ import React, { Component } from 'react';
 import { Container, Row, Col, Label, Input, Button } from 'reactstrap';
 import { withToastManager } from 'react-toast-notifications';
 import PropTypes from 'prop-types';
+import { Tooltip } from 'react-tippy';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   loadGoogleCloudApiRegions,
   loadGoogleCloudApiMachineTypes,
@@ -599,7 +601,16 @@ class ProxyCreator extends Component {
             </Row>
             <Row className="pt-3 align-items-end noselect">
               <Col>
-                <Label>Account*</Label>
+                <Label>
+                  Account*{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="The account you wish to create proxies using."
+                  >
+                    <FontAwesomeIcon icon="question-circle" />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="select"
                   name="providerAccount"
@@ -615,7 +626,16 @@ class ProxyCreator extends Component {
                 </Input>
               </Col>
               <Col>
-                <Label>Proxy Name*</Label>
+                <Label>
+                  Proxy Name*{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="The name of the proxies you want to create. e.g a name of 'test' will create proxies 'test-0', 'test-1', 'test-2'..."
+                  >
+                    <FontAwesomeIcon icon="question-circle" />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="text"
                   placeholder="proxy-group-1"
@@ -625,7 +645,16 @@ class ProxyCreator extends Component {
                 />
               </Col>
               <Col>
-                <Label>Region*</Label>
+                <Label>
+                  Region*{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="The location of the proxies you want to create. The closer the proxies are to the location of the website's servers, the lower the ping. Shopify -> Oregon."
+                  >
+                    <FontAwesomeIcon icon="question-circle" />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="select"
                   name="region"
@@ -639,7 +668,16 @@ class ProxyCreator extends Component {
                 </Input>
               </Col>
               <Col>
-                <Label>Machine*</Label>
+                <Label>
+                  Machine*{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="The machine type you want to create the proxies on. If you don't have experience with this then choose the cheapest option.Google Cloud -> f1-micro."
+                  >
+                    <FontAwesomeIcon icon="question-circle" />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="select"
                   name="machineType"
@@ -653,7 +691,16 @@ class ProxyCreator extends Component {
                 </Input>
               </Col>
               <Col>
-                <Label>Quantity*</Label>
+                <Label>
+                  Quantity*{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="How many proxies you want to create."
+                  >
+                    <FontAwesomeIcon icon="question-circle" />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="number"
                   name="quantity"
@@ -667,17 +714,35 @@ class ProxyCreator extends Component {
             </Row>
             <Row className="py-3 align-items-end">
               <Col>
-                <Label>Username*</Label>
+                <Label>
+                  Username*{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="The username you want to use for authentication for proxies"
+                  >
+                    <FontAwesomeIcon icon="question-circle" />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="text"
                   placeholder="user"
                   value={proxyUser}
                   name="proxyUser"
-                  onChange={this.handleChange}
+                  onChange={this.handleChangeTrimmed}
                 />
               </Col>
               <Col>
-                <Label>Password*</Label>
+                <Label>
+                  Password*{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="The password you want to use for authentication for proxies"
+                  >
+                    <FontAwesomeIcon icon="question-circle" />
+                  </Tooltip>
+                </Label>
                 <Input
                   type="text"
                   placeholder="pass"

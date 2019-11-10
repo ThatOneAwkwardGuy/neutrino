@@ -6,6 +6,8 @@ import {
   actionVerbList
 } from './constants';
 
+import { testAccountPromise } from '../OneClickTester/functions';
+
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 
@@ -155,12 +157,13 @@ const randomTrendingYoutubeVideo = async (
   incrementActivity(index, 'youtube');
 };
 
-export const runAcitivitiesOnWindow = (
+export const runAcitivitiesOnWindow = async (
   window,
   index,
   settings,
   updateActivity,
-  incrementActivity
+  incrementActivity,
+  activity
 ) => {
   const functions = [];
   if (settings.activityGoogleSearch) {
@@ -183,6 +186,23 @@ export const runAcitivitiesOnWindow = (
     updateActivity,
     incrementActivity
   );
+
+  const oneClickStatusPre = await testActivityWindow(index, activity);
+  updateActivity(index, { oneClickStatus: oneClickStatusPre });
+
+  const testInterval = setInterval(async () => {
+    if (window.isDestroyed()) {
+      clearInterval(testInterval);
+      return;
+    }
+    const oneClickStatus = await testActivityWindow(index, activity);
+    updateActivity(index, { oneClickStatus });
+  }, settings.oneClickCheckTiming * 60000);
+};
+
+export const testActivityWindow = async (index, activity) => {
+  const accountTestResponse = await testAccountPromise(index, activity);
+  return accountTestResponse;
 };
 
 const runActivityOnWindow = async (
@@ -202,6 +222,7 @@ const runActivityOnWindow = async (
       ) + parseInt(settings.activityDelayMin, 10);
     const randomFunction = randomFromArray(functions);
     randomFunction.call(null, window, index, updateActivity, incrementActivity);
+
     await sleep(randTime);
     if (!window.isDestroyed()) {
       runActivityOnWindow(

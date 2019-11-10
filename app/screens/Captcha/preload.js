@@ -11,6 +11,13 @@ document.addEventListener('DOMNodeInserted', () => {
 });
 /* eslint-enable */
 
+// const setWindowCookiesInWindow = (webContents, windowCookies) =>
+//   Promise.all(
+//     windowCookies.map(windowCookie =>
+//       webContents.session.cookies.set(windowCookie).catch(e => e)
+//     )
+//   );
+
 const setCookiesInWindow = (webContents, cookies) =>
   new Promise(resolve => {
     if (cookies) {
@@ -85,21 +92,31 @@ ipcRenderer.on(
   async (event, args) => {
     console.log(JSON.stringify(args));
     await setCookiesInWindow(focusedWebContents, args.cookiesObject);
+    // if (args.windowCookies) {
+    //   await setWindowCookiesInWindow(focusedWebContents, args.windowCookies);
+    // }
     ipcRenderer.send('store-captcha-job', focusedWebContents.id, args);
+    // document.referrer = args.url;
     window.location.href = args.url;
   }
 );
 
 if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
-  if (window.location.href.includes('doverstreetmarket')) {
+  if (
+    window.location.href.includes('doverstreetmarket') ||
+    window.location.href.includes('bstn')
+  ) {
     window.addEventListener('DOMContentLoaded', () => {
-      document.querySelector('form').id = 'blahhhhh';
+      if (!window.location.href.includes('bstn')) {
+        document.querySelector('form').id = 'blahhhhh';
+      }
       document.querySelector('form').action = 'http://google.com';
     });
   }
   if (
     !window.location.href.includes('youtube.') &&
-    !window.location.href.includes('google.')
+    !window.location.href.includes('google.') &&
+    !window.location.href.includes('bstn.')
   ) {
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('body > :not(.g-recaptcha)').forEach(box => {
@@ -112,6 +129,6 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
   captchaChecker = setInterval(checkCaptcha, 300);
 }
 
-// if (process.env.NODE_ENV === 'development') {
-//   focusedWebContents.openDevTools();
-// }
+if (process.env.NODE_ENV === 'development') {
+  focusedWebContents.openDevTools();
+}

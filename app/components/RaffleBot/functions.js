@@ -48,6 +48,10 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadFootShopRaffleInfo(raffleLink);
       case 'Fear Of God':
         return loadFearOfGodRaffleInfo(raffleLink);
+      case 'WoodWood':
+        return loadWoodWoodRaffleInfo(raffleLink);
+      case 'FootDistrict':
+        return loadFootDistrctRaffleInfo(raffleLink);
       default:
         return undefined;
     }
@@ -282,6 +286,76 @@ const loadStress95RaffleInfo = async link => {
           }
           resolve({
             sizeInput: false,
+            styleInput: false,
+            raffleDetails: { typeformCode, renderData }
+          });
+          win.close();
+        }
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
+export const loadFootDistrctRaffleInfo = async link => {
+  const win = await createNewWindow('', '');
+  win.loadURL(link);
+  return new Promise((resolve, reject) => {
+    try {
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.webContents.on('dom-ready', async () => {
+        const currentURL = await win.webContents.executeJavaScript(
+          'window.location.href',
+          false
+        );
+        if (currentURL === link) {
+          const innerHTML = await win.webContents.executeJavaScript(
+            'document.documentElement.innerHTML',
+            false
+          );
+          const renderData = await win.webContents.executeJavaScript(
+            'window.rendererData',
+            true
+          );
+          let typeformCode;
+          if (currentURL.includes('typeform.com')) {
+            typeformCode = renderData.form.id;
+          } else {
+            const $ = cheerio.load(innerHTML);
+            // eslint-disable-next-line prefer-destructuring
+            typeformCode = $('.typeform-widget')
+              .attr('data-url')
+              .split('/to/')[1];
+          }
+          const sizes = [
+            { id: '4 US - 36 EU', name: '4 US - 36 EU' },
+            { id: '4.5 US - 36.5 EU', name: '4.5 US - 36.5 EU' },
+            { id: '5 US - 37.5 EU', name: '5 US - 37.5 EU' },
+            { id: '5.5 US - 38 EU', name: '5.5 US - 38 EU' },
+            { id: '6 US - 38.5 EU', name: '6 US - 38.5 EU' },
+            { id: '6.5 US - 39 EU', name: '6.5 US - 39 EU' },
+            { id: '7 US - 40 EU', name: '7 US - 40 EU' },
+            { id: '7.5 US - 40.5 EU', name: '7.5 US - 40.5 EU' },
+            { id: '8 US - 41 EU', name: '8 US - 41 EU' },
+            { id: '8.5 US - 42 EU', name: '8.5 US - 42 EU' },
+            { id: '9 US - 42.5 EU', name: '9 US - 42.5 EU' },
+            { id: '9.5 US - 43 EU', name: '9.5 US - 43 EU' },
+            { id: '10 US - 44 EU', name: '10 US - 44 EU' },
+            { id: '10.5 US - 44.5 EU', name: '10.5 US - 44.5 EU' },
+            { id: '11 US - 45 EU', name: '11 US - 45 EU' },
+            { id: '11.5 US - 45.5 EU', name: '11.5 US - 45.5 EU' },
+            { id: '12 US - 46 EU', name: '12 US - 46 EU' },
+            { id: '13 US - 47.5 EU', name: '13 US - 47.5 EU' },
+            { id: '14 US - 48.5 EU', name: '14 US - 48.5 EU' }
+          ];
+
+          resolve({
+            sizes,
+            size: sizes[0].id,
+            sizeInput: true,
             styleInput: false,
             raffleDetails: { typeformCode, renderData }
           });
@@ -820,12 +894,30 @@ const loadLapstoneAndHammerRaffleInfo = async link => {
   };
 };
 
-const processBSTNRaffleInfo = body => {
+const processBSTNRaffleInfo = (body, cookies, windowCookies) => {
   const $ = cheerio.load(body);
   const sizes = $(
     '#registration-form > div > div > div > select:first-child option:not([value=""])'
   )
     .map((index, el) => ({ id: el.attribs.value, name: el.attribs.value }))
+    .toArray();
+  return {
+    styleInput: false,
+    sizeInput: true,
+    sizes,
+    size: sizes[0].id,
+    raffleDetails: { cookies, windowCookies }
+  };
+};
+
+export const loadWoodWoodRaffleInfo = async link => {
+  const body = await rp.get(link);
+  const $ = cheerio.load(body);
+  const sizes = $('#MERGE7 option')
+    .map((index, size) => ({
+      id: size.attribs.value,
+      name: size.attribs.value
+    }))
     .toArray();
   return {
     styleInput: false,
@@ -873,8 +965,12 @@ const loadBSTNRaffleInfo = async link =>
             'document.cookie',
             true
           );
+          const windowCookies = await win.webContents.session.cookies.get({
+            domain: 'bstn.com'
+          });
+          console.log(windowCookies);
           win.close();
-          resolve(processBSTNRaffleInfo(result, cookies));
+          resolve(processBSTNRaffleInfo(result, cookies, windowCookies));
         } else {
           win.webContents.once('dom-ready', async () => {
             const result2 = await win.webContents.executeJavaScript(
@@ -886,8 +982,12 @@ const loadBSTNRaffleInfo = async link =>
                 'document.cookie',
                 true
               );
+              const windowCookies2 = await win.webContents.session.cookies.get({
+                domain: 'bstn.com'
+              });
+              console.log(windowCookies2);
               win.close();
-              resolve(processBSTNRaffleInfo(result2, cookies));
+              resolve(processBSTNRaffleInfo(result2, cookies, windowCookies2));
             } else {
               reject(new Error('Unable To Load Raffle Info'));
             }
