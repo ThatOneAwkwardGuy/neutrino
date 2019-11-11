@@ -7,6 +7,7 @@ import Countries from '../../../constants/countries';
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
 const cheerio = require('cheerio');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 export default class SupplyStore {
   constructor(
@@ -41,7 +42,7 @@ export default class SupplyStore {
       //   'User-Agent':
       //     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/76.0.3809.132 Safari/537.36'
       // },
-      proxy: proxy !== '' ? proxy : null,
+      agent: proxy !== '' ? new HttpsProxyAgent(proxy) : null,
       jar: this.cookieJar
     });
   }

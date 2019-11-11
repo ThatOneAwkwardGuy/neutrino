@@ -110,7 +110,7 @@ export default class FootpatrolUK {
     });
 
   makeEntry = async () => {
-    ValidateSchema(FootpatrolUKSchema, this.profile);
+    ValidateSchema(FootpatrolUKSchema, {...this.profile});
     const token = uuidv4();
     this.changeStatus('Submitting Raffle Token');
     await this.submitEntry1(token);

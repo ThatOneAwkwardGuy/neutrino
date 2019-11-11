@@ -140,7 +140,7 @@ export default class NakedCPH {
   };
 
   makeEntry = async () => {
-    ValidateSchema(NakedCPHSchema, this.profile);
+    ValidateSchema(NakedCPHSchema, { ...this.profile });
     this.changeStatus('Started');
     // eslint-disable-next-line camelcase
     const { token, landed_at } = await this.getRaffleToken(

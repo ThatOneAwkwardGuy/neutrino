@@ -92,7 +92,7 @@ const loadDSMRaffleInfo = async link => {
                   win.close();
                   const $ = cheerio.load(windowResult);
                   const styles = $(
-                    'div[fs-field-validation-name="Colour"] option'
+                    'div[fs-field-validation-name*="List"] option'
                   )
                     .map((index, style) => ({
                       id: style.attribs.value,
@@ -100,7 +100,7 @@ const loadDSMRaffleInfo = async link => {
                     }))
                     .toArray();
                   const sizes = $(
-                    'div[fs-field-validation-name="US Size"] option'
+                    'div[fs-field-validation-name*="Size"] option'
                   )
                     .map((index, size) => ({
                       id: size.attribs.value,
@@ -120,10 +120,10 @@ const loadDSMRaffleInfo = async link => {
                     'div[fs-field-validation-name="Postcode"] input'
                   ).attr('name');
                   const colorFormID = $(
-                    'div[fs-field-validation-name="Colour"] select'
+                    'div[fs-field-validation-name*="List"] select'
                   ).attr('name');
                   const sizeFormID = $(
-                    'div[fs-field-validation-name="US Size"] select'
+                    'div[fs-field-validation-name*="Size"] select'
                   ).attr('name');
                   const formFields = {};
                   $('form input').each((index, element) => {
@@ -189,7 +189,7 @@ const loadDSMNYRaffleInfo = async link => {
                   win.close();
                   const $ = cheerio.load(windowResult);
                   const styles = $(
-                    'div[fs-field-validation-name="Colour"] option'
+                    'div[fs-field-validation-name*="Color"] option'
                   )
                     .map((index, style) => ({
                       id: style.attribs.value,
@@ -197,7 +197,7 @@ const loadDSMNYRaffleInfo = async link => {
                     }))
                     .toArray();
                   const sizes = $(
-                    'div[fs-field-validation-name="US Size"] option'
+                    'div[fs-field-validation-name*="Size"] option'
                   )
                     .map((index, size) => ({
                       id: size.attribs.value,
@@ -217,10 +217,10 @@ const loadDSMNYRaffleInfo = async link => {
                     'div[fs-field-validation-name="Postcode"] input'
                   ).attr('name');
                   const colorFormID = $(
-                    'div[fs-field-validation-name="Colour"] select'
+                    'div[fs-field-validation-name*="Color"] select'
                   ).attr('name');
                   const sizeFormID = $(
-                    'div[fs-field-validation-name="US Size"] select'
+                    'div[fs-field-validation-name*="Size"] select'
                   ).attr('name');
                   const formFields = {};
                   $('form input').each((index, element) => {

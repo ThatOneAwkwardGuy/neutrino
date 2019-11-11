@@ -4,6 +4,7 @@ const DigitalOcean = require('do-wrapper').default;
 const rp = require('request-promise');
 const Linode = require('linode-api-node');
 const AWS = require('aws-sdk');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 // Google Cloud
 export const createGoogleCloudInstance = async (
@@ -583,18 +584,19 @@ export const pingIP = async (ip, port, user, pass, website, maxTries) => {
   while (count <= maxTries) {
     count += 1;
     try {
+      const proxy =
+        user !== ''
+          ? `http://${user}:${pass}@${ip}:${port}`
+          : `http://${ip}:${port}`;
       res = await rp({
         method: 'GET',
         headers: {
           'user-agent':
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36'
         },
+        agent: new HttpsProxyAgent(proxy),
         uri: website,
         time: true,
-        proxy:
-          user !== ''
-            ? `http://${user}:${pass}@${ip}:${port}`
-            : `http://${ip}:${port}`,
         resolveWithFullResponse: true,
         followAllRedirects: true
       });

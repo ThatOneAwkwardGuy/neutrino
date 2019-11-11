@@ -72,10 +72,12 @@ export default class DSMNY {
       proxy: this.proxy,
       baseURL: this.url,
       site: this.site,
-      settings: this.settings
+      settings: this.settings,
+      siteKey: '6LetKEIUAAAAAPk-uUXqq9E82MG3e40OMt_74gjS'
     });
 
   submitRaffle = captchaToken => {
+    console.log(this.raffleDetails);
     const payload = {
       form: parseInt(this.raffleDetails.form, 10),
       viewkey: this.raffleDetails.viewkey,
@@ -96,9 +98,10 @@ export default class DSMNY {
       [this.raffleDetails.postcodeFormID]: this.profile.deliveryZip,
       [this.raffleDetails.colorFormID]: this.style.id,
       [this.raffleDetails.sizeFormID]: parseInt(this.size.id, 10),
-      'g-recaptcha-response': captchaToken
+      'g-recaptcha-response': captchaToken,
+      nonce: 'vEJQMJIDnQjW7sv6'
     };
-
+    console.log(payload);
     return this.rp({
       method: 'POST',
       followAllRedirects: true,
@@ -110,7 +113,7 @@ export default class DSMNY {
   };
 
   makeEntry = async () => {
-    ValidateSchema(DSMNYSchema, this.profile);
+    ValidateSchema(DSMNYSchema, { ...this.profile });
 
     this.changeStatus('Getting Captcha');
     const captchaResponse = await this.getCaptcha();
@@ -123,6 +126,7 @@ export default class DSMNY {
         this.changeStatus('Successful Entry');
       }
     } catch (error) {
+      console.log(error);
       if (
         error.message.includes(
           'Each submission must have unique values for the following fields'

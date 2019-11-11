@@ -72,7 +72,8 @@ export default class DSM {
       proxy: this.proxy,
       baseURL: this.url,
       site: this.site,
-      settings: this.settings
+      settings: this.settings,
+      siteKey: '6LetKEIUAAAAAPk-uUXqq9E82MG3e40OMt_74gjS'
     });
 
   submitRaffle = captchaToken => {
@@ -112,7 +113,7 @@ export default class DSM {
   };
 
   makeEntry = async () => {
-    ValidateSchema(DSMSchema, this.profile);
+    ValidateSchema(DSMSchema, { ...this.profile });
 
     this.changeStatus('Getting Captcha');
     const captchaResponse = await this.getCaptcha();

@@ -1421,9 +1421,13 @@
   version "12.7.7"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-12.7.7.tgz#f9bd8c00fa9e1a8129af910fc829f6139c397d6c"
 
-"@types/node@^10.1.0", "@types/node@^10.12.18":
+"@types/node@^10.1.0":
   version "10.14.19"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-10.14.19.tgz#f52742c7834a815dedf66edfc8a51547e2a67342"
+
+"@types/node@^10.12.18":
+  version "10.17.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-10.17.5.tgz#c1920150f7b90708a7d0f3add12a06bc9123c055"
 
 "@types/prop-types@*":
   version "15.7.3"
@@ -7113,6 +7117,13 @@ https-browserify@^1.0.0:
 https-proxy-agent@^2.2.0, https-proxy-agent@^2.2.1:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-2.2.2.tgz#271ea8e90f836ac9f119daccd39c19ff7dfb0793"
+  dependencies:
+    agent-base "^4.3.0"
+    debug "^3.1.0"
+
+https-proxy-agent@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/https-proxy-agent/-/https-proxy-agent-3.0.1.tgz#b8c286433e87602311b01c8ea34413d856a4af81"
   dependencies:
     agent-base "^4.3.0"
     debug "^3.1.0"

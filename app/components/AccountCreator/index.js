@@ -40,6 +40,7 @@ const request = require('request-promise');
 const random = require('random-name');
 const uuidv4 = require('uuid/v4');
 const fs = require('fs');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 class AccountCreator extends Component {
   constructor(props) {
@@ -311,7 +312,7 @@ class AccountCreator extends Component {
     const response = await request({
       method: 'POST',
       uri: 'https://eu.oneblockdown.it/account',
-      proxy: useProxies ? this.getRandomProxy() : '',
+      agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
       headers: {
         Accept:
           'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
@@ -341,7 +342,7 @@ class AccountCreator extends Component {
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
         url: response.request.href,
         id: tokenID,
-        proxy: useProxies ? this.getRandomProxy() : '',
+        agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
         baseURL: sites[site],
         site,
         accountPass,
@@ -364,7 +365,7 @@ class AccountCreator extends Component {
         method: 'POST',
         url: `https://eu.oneblockdown.it/account`,
         followRedirect: true,
-        proxy: useProxies ? this.getRandomProxy() : '',
+        agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
         resolveWithFullResponse: true,
         followAllRedirects: true,
         headers: {
@@ -438,7 +439,7 @@ class AccountCreator extends Component {
       method: 'POST',
       url: `${sites[site]}/account`,
       followRedirect: true,
-      proxy: useProxies ? this.getRandomProxy() : '',
+      agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
       resolveWithFullResponse: true,
       followAllRedirects: true,
       jar: this.cookieJars[tokenID],
@@ -465,7 +466,7 @@ class AccountCreator extends Component {
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
         url: response.request.href,
         id: tokenID,
-        proxy: useProxies ? this.getRandomProxy() : '',
+        agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
         baseURL: sites[site],
         site,
         accountPass,
@@ -483,7 +484,7 @@ class AccountCreator extends Component {
         method: 'POST',
         url: `${sites[site]}/account`,
         followRedirect: true,
-        proxy: useProxies ? this.getRandomProxy() : '',
+        agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
         resolveWithFullResponse: true,
         followAllRedirects: true,
         headers: {

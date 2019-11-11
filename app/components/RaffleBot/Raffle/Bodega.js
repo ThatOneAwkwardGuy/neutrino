@@ -108,7 +108,7 @@ export default class Bodega {
   getRafflePage = () => this.rp.get(this.url);
 
   makeEntry = async () => {
-    ValidateSchema(BodegaSchema, this.profile);
+    ValidateSchema(BodegaSchema, { ...this.profile });
 
     this.changeStatus(`Getting Captcha Token`);
     const captchaResponse = await getCaptchaResponse({

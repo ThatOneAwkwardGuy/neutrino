@@ -1,6 +1,7 @@
 import { ValidateSchema, LapstoneAndHammerSchema } from '../schemas';
 
 const rp = require('request-promise');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 export default class LapstoneAndHammer {
   constructor(
@@ -32,7 +33,7 @@ export default class LapstoneAndHammer {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
       },
-      proxy: proxy !== '' ? proxy : null,
+      agent: proxy !== '' ? new HttpsProxyAgent(proxy) : null,
       jar: this.cookieJar
     });
   }
@@ -85,7 +86,7 @@ export default class LapstoneAndHammer {
   // https://lapstoneandhammer.us10.list-manage.com/subscribe/post-json?u=3dd44920c3e2410d48d7462fc&id=0322480296&c=jQuery19001958476886307381_1572100031612&&MMERGE3=Men+(7.5-14)&MMERGE4=13&MMERGE6=&MMERGE5=&b_3dd44920c3e2410d48d7462fc_0322480296=&subscribe=Submit&_=1572100031613
 
   makeEntry = async () => {
-    ValidateSchema(LapstoneAndHammerSchema, this.profile);
+    ValidateSchema(LapstoneAndHammerSchema, { ...this.profile });
 
     this.changeStatus('Making Entry');
     const raffleResponse = await this.submitRaffle();

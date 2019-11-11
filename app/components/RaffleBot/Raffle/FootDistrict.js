@@ -139,7 +139,7 @@ export default class FootDistrict {
   };
 
   makeEntry = async () => {
-    ValidateSchema(FootDistrictSchema, this.profile);
+    ValidateSchema(FootDistrictSchema, { ...this.profile });
     this.changeStatus('Started');
     // eslint-disable-next-line camelcase
     const { token, landed_at } = await this.getRaffleToken(

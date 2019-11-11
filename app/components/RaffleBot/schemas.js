@@ -459,7 +459,15 @@ export const DSMSchema = new Schema({
     },
     length: { min: 1 }
   },
-  //   phone: { type: String, required: true, length: { min: 1 } },
+  phone: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Phone Number must be a string.',
+      required: 'Phone Number is required.'
+    },
+    length: { min: 1 }
+  },
   email: {
     type: String,
     required: true,
@@ -499,7 +507,15 @@ export const DSMNYSchema = new Schema({
     },
     length: { min: 1 }
   },
-  //   phone: { type: String, required: true, length: { min: 1 } },
+  phone: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Phone Number must be a string.',
+      required: 'Phone Number is required.'
+    },
+    length: { min: 1 }
+  },
   email: {
     type: String,
     required: true,

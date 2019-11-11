@@ -124,7 +124,7 @@ export default class Stress95 {
   };
 
   makeEntry = async () => {
-    ValidateSchema(Stress95Schema, this.profile);
+    ValidateSchema(Stress95Schema, { ...this.profile });
     this.changeStatus('Started');
     // eslint-disable-next-line camelcase
     const { token, landed_at } = await this.getRaffleToken(

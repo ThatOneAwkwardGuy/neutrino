@@ -5,6 +5,7 @@ import { ValidateSchema, FearOfGodSchema } from '../schemas';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 export default class FearOfGod {
   constructor(
@@ -39,7 +40,7 @@ export default class FearOfGod {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
       },
-      proxy: proxy !== '' ? proxy : null,
+      agent: proxy !== '' ? new HttpsProxyAgent(proxy) : null,
       jar: this.cookieJar
     });
   }
@@ -109,7 +110,7 @@ export default class FearOfGod {
     });
 
   makeEntry = async () => {
-    ValidateSchema(FearOfGodSchema, this.profile);
+    ValidateSchema(FearOfGodSchema, { ...this.profile });
     this.changeStatus('Getting Captcha');
     const captchaResponse = await getCaptchaResponse({
       // eslint-disable-next-line no-underscore-dangle

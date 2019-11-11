@@ -1,4 +1,5 @@
 const rp = require('request-promise');
+const HttpsProxyAgent = require('https-proxy-agent');
 const { clipboard } = require('electron');
 
 export const testProxy = async (proxyString, proxySite) => {
@@ -14,6 +15,10 @@ export const testProxy = async (proxyString, proxySite) => {
     [ip, port, user, pass] = splitProxy;
   }
   try {
+    const proxy =
+      splitProxy.length === 4
+        ? `http://${user}:${pass}@${ip}:${port}`
+        : `http://${ip}:${port}`;
     responsePing = await rp({
       headers: {
         'user-agent':
@@ -23,12 +28,11 @@ export const testProxy = async (proxyString, proxySite) => {
       time: true,
       resolveWithFullResponse: true,
       uri: proxySite,
-      proxy:
-        splitProxy.length === 4
-          ? `http://${user}:${pass}@${ip}:${port}`
-          : `http://${ip}:${port}`
+      agent: new HttpsProxyAgent(proxy)
     });
+    console.log(responsePing);
   } catch (error) {
+    console.log(error);
     responsePing = { timings: { response: -1 } };
   }
   return {

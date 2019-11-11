@@ -1,6 +1,7 @@
 import { ValidateSchema, CityBlueSchema } from '../schemas';
 
 const rp = require('request-promise');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 export default class CityBlue {
   constructor(
@@ -32,7 +33,7 @@ export default class CityBlue {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
       },
-      proxy: proxy !== '' ? proxy : null,
+      agent: proxy !== '' ? new HttpsProxyAgent(proxy) : null,
       jar: this.cookieJar
     });
   }
@@ -83,7 +84,7 @@ export default class CityBlue {
     });
 
   makeEntry = async () => {
-    ValidateSchema(CityBlueSchema, this.profile);
+    ValidateSchema(CityBlueSchema, { ...this.profile });
 
     this.changeStatus('Making Entry');
     const raffleResponse = await this.submitRaffle();
