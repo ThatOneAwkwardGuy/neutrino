@@ -153,6 +153,7 @@ textarea:focus {
 .display-scrollbar::-webkit-scrollbar {
   display: block !important;
   width: 0.2em !important;
+  height: 0.2em !important;
 }
 
 *::-webkit-scrollbar {
