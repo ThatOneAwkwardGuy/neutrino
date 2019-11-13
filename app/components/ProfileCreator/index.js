@@ -8,8 +8,10 @@ import {
   Button,
   CustomInput
 } from 'reactstrap';
+import { Tooltip } from 'react-tippy';
 import PropTypes from 'prop-types';
 import { withToastManager } from 'react-toast-notifications';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { jigAddresses } from '../AddressJigger/functions';
 import {
   convertBaseToCybersole,
@@ -62,6 +64,7 @@ class ProfileCreator extends Component {
     this.state = {
       cards: [],
       cardsInput: '',
+      profileQty: 1,
       sameDeliveryBillingBool: false,
       oneCheckoutBool: false,
       randomNameBool: false,
@@ -289,6 +292,7 @@ class ProfileCreator extends Component {
   exportProfiles = async () => {
     const {
       bot,
+      profileQty,
       jigAddressesBool,
       deliveryFirstName,
       deliveryLastName,
@@ -321,6 +325,24 @@ class ProfileCreator extends Component {
     } = this.state;
     const { cards } = this.props;
     const { toastManager } = this.props;
+    if (bot === '') {
+      toastManager.add('Select a bot to export profiles for.', {
+        appearance: 'error',
+        autoDismiss: true,
+        pauseOnHover: true
+      });
+      return;
+    }
+    const usableCards =
+      cards.length > 0
+        ? cards
+        : Array(parseInt(profileQty, 10)).fill({
+            cardNumber: '4111111111111111',
+            cardType: 'Visa',
+            expMonth: '03',
+            expYear: '2020',
+            cvv: '123'
+          });
     const addresses = jigAddressesBool
       ? jigAddresses(
           deliveryAddress,
@@ -330,16 +352,16 @@ class ProfileCreator extends Component {
           deliveryCountry,
           deliveryZip,
           fourCharPrefixBool,
-          cards.length
+          usableCards.length
         )
-      : Array(cards.length).fill(
+      : Array(usableCards.length).fill(
           `${deliveryAddress}\n${deliveryCity}\n${deliveryApt}\n${deliveryRegion}\n${deliveryCountry}\n${deliveryZip}`
         );
 
     const jiggedAddress =
-      addresses.length <= cards.length || cards.length === 0
+      addresses.length <= usableCards.length || usableCards.length === 0
         ? addresses
-        : addresses.slice(0, cards.length);
+        : addresses.slice(0, usableCards.length);
     const emails = catchallEmail.includes('@gmail')
       ? generateGmailDotTrick(jiggedAddress.length, email)
       : [];
@@ -385,8 +407,8 @@ class ProfileCreator extends Component {
           catchallEmail
         };
         const card =
-          cards[index] !== undefined
-            ? cards[index]
+          usableCards[index] !== undefined
+            ? usableCards[index]
             : {
                 paymentCardholdersName: '',
                 cardNumber: '',
@@ -597,6 +619,7 @@ class ProfileCreator extends Component {
       randomPhoneNumberTemplate,
       phone,
       cardsInput,
+      profileQty,
       sameDeliveryBillingBool,
       oneCheckoutBool,
       jigAddressesBool,
@@ -1052,7 +1075,7 @@ class ProfileCreator extends Component {
                 />
               </Col>
             </Row>
-            <Row className="py-3 align-items-end noselect">
+            <Row className="py-3 align-items-end noselect panel-middle">
               <Col>
                 <Button onClick={this.addCards}>Add Cards</Button>
               </Col>
@@ -1061,6 +1084,25 @@ class ProfileCreator extends Component {
               </Col>
             </Row>
             <Row className="py-3 align-items-end noselect">
+              <Col>
+                <Label>
+                  Qty{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="If you want to create profiles without using cards, simply enter the number of profiles you want here."
+                  >
+                    <FontAwesomeIcon icon="question-circle" />
+                  </Tooltip>
+                </Label>
+                <Input
+                  type="number"
+                  id="profileQty"
+                  name="profileQty"
+                  onChange={this.handleChange}
+                  value={profileQty}
+                />
+              </Col>
               <Col>
                 <Input
                   type="select"

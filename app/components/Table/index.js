@@ -30,27 +30,24 @@ export default function Table({ columns, data }) {
     useBlockLayout
   );
 
-  const RenderRow = React.useCallback(
-    ({ index, style }) => {
-      const row = rows[index];
-      prepareRow(row);
-      return (
-        <div
-          {...row.getRowProps({
-            style
-          })}
-          className="tr"
-        >
-          {row.cells.map(cell => (
-            <div {...cell.getCellProps()} className="td">
-              {cell.render('Cell')}
-            </div>
-          ))}
-        </div>
-      );
-    },
-    [prepareRow, rows]
-  );
+  const RenderRow = ({ index, style }) => {
+    const row = rows[index];
+    prepareRow(row);
+    return (
+      <div
+        {...row.getRowProps({
+          style
+        })}
+        className="tr"
+      >
+        {row.cells.map(cell => (
+          <div {...cell.getCellProps()} className="td">
+            {cell.render('Cell')}
+          </div>
+        ))}
+      </div>
+    );
+  };
 
   // Render the UI for your table
   return (
@@ -67,13 +64,13 @@ export default function Table({ columns, data }) {
             </div>
           ))}
         </div>
-
         <div {...getTableBodyProps()}>
           <FixedSizeList
-            height={400}
+            height={1000}
             itemCount={rows.length}
-            itemSize={35}
+            itemSize={100}
             width={totalColumnsWidth}
+            overscanCount={100}
           >
             {RenderRow}
           </FixedSizeList>
@@ -83,6 +80,8 @@ export default function Table({ columns, data }) {
   );
 }
 Table.propTypes = {
+  index: PropTypes.number.isRequired,
+  style: PropTypes.objectOf(PropTypes.object).isRequired,
   columns: PropTypes.arrayOf(PropTypes.object).isRequired,
   data: PropTypes.arrayOf(PropTypes.object).isRequired
 };
