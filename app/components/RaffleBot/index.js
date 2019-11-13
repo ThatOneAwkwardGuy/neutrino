@@ -23,7 +23,7 @@ import footdistrict from '../../images/footdistrict.png';
 // import footshop from '../../images/footshop.png';
 // import woodwood from '../../images/woodwood.jpg';
 // import oneblockdown from '../../images/oneblockdown.jpeg';
-// import voostore from '../../images/voostore.png';
+import voostore from '../../images/voostore.png';
 // import supplystore from '../../images/supplystore.png';
 // import kickz from '../../images/kickz.png';
 // import bstn from '../../images/bstn.png';
@@ -41,7 +41,7 @@ import Stress95 from './Raffle/Stress95';
 import FearOfGod from './Raffle/FearOfGod';
 import FootDistrict from './Raffle/FootDistrict';
 // import END from './Raffle/END';
-// import VooStore from './Raffle/VooStore';
+import VooStore from './Raffle/VooStore';
 // import FootShop from './Raffle/FootShop';
 // import SupplyStore from './Raffle/SupplyStore';
 // import OneBlockDown from './Raffle/OneBlockDown';
@@ -67,14 +67,14 @@ const sites = [
   { name: 'DSMNY', img: dsmny },
   { name: 'Stress95', img: stress95 },
   { name: 'Fear Of God', img: fearofgod },
-  { name: 'FootDistrict', img: footdistrict }
+  { name: 'FootDistrict', img: footdistrict },
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
   // { name: 'WoodWood', img: woodwood }
   // { name: 'FootShop', img: footshop }
   // { name: 'SupplyStore', img: supplystore }
   // { name: 'OneBlockDown', img: oneblockdown }
-  // { name: 'VooStore', img: voostore }
+  { name: 'VooStore', img: voostore }
 ];
 
 const Classes = {
@@ -89,7 +89,7 @@ const Classes = {
   DSMNY,
   Stress95,
   'Fear Of God': FearOfGod,
-  FootDistrict
+  FootDistrict,VooStore
 };
 
 export default class RaffleBot extends Component {
@@ -172,9 +172,6 @@ export default class RaffleBot extends Component {
     const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
     const splitRandomProxy =
       randomProxy !== undefined ? randomProxy.split(':') : undefined;
-    if (splitRandomProxy === undefined) {
-      return '';
-    }
     if (splitRandomProxy.length === 2) {
       return `http://${splitRandomProxy[0]}:${splitRandomProxy[1]}`;
     }
@@ -183,6 +180,7 @@ export default class RaffleBot extends Component {
         splitRandomProxy[0]
       }:${splitRandomProxy[1]}`;
     }
+    return '';
   };
 
   loadRaffle = async () => {

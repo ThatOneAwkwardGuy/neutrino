@@ -1,32 +1,3 @@
-#TableContainer {
-  overflow-wrap: break-word;
-  text-align: center;
-}
-
-#TableContainer > div,
-#TableContainer > div > div {
-  height: 100% !important;
-  overflow: visible !important;
-}
-
-.table {
-  color: white !important;
-}
-
-.td:not(:first-child),
-.th:not(:first-child),
-.tr {
-  width: 100% !important;
-}
-
-#TableContainer > div > div > div:nth-child(2) {
-  height: calc(100% - 50px) !important;
-}
-
-#TableContainer > div > div > div:nth-child(2) > div {
-  max-width: 100% !important;
-}
-
 .neutrinoModal .modal-content {
   background-color: $dark1Colour;
 }

@@ -1,0 +1,53 @@
+#TableContainer {
+  //   overflow-wrap: break-word;
+  text-align: center;
+}
+
+#TableContainer > div,
+#TableContainer > div > div {
+  height: 100% !important;
+  overflow: visible !important;
+}
+
+#TableContainer > div > div > div:nth-child(2) > div {
+  width: 100% !important;
+}
+
+.table {
+  color: white !important;
+}
+
+.td:not(:first-child),
+.th:not(:first-child),
+.tr {
+  width: 100% !important;
+}
+
+// #TableContainer > div > div > div:nth-child(2) > div > div {
+//   position: relative !important;
+// }
+
+// .td:not(:first-child) {
+//   text-align: center;
+// }
+
+// #TableContainer .tr .td:not(:first-child) {
+//   word-break: break-all;
+//   text-overflow: ellipsis;
+//   max-height: 150px;
+//   overflow: hidden;
+//   // min-width: 150px;
+// }
+
+// #TableContainer .tr {
+//   position: relative !important;
+//   height: auto !important;
+// }
+
+// #TableContainer > div > div > div:nth-child(2) {
+//   height: calc(100% - 50px) !important;
+// }
+
+// #TableContainer > div > div > div:nth-child(2) > div {
+//   max-width: 100% !important;
+// }
