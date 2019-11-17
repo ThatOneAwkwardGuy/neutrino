@@ -82,7 +82,7 @@ export default class NakedCPH {
     this.changeStatus('Submitting Raffle Entry');
     const payload = {};
     const formObj = {};
-    this.raffleDetails.renderData.form.fields.forEach(row => {
+    this.raffleDetails.renderData.form.fields.forEach((row, index) => {
       if (row.title.includes('first name')) {
         formObj['1'] = {
           field: { id: row.id, type: row.type },
@@ -96,21 +96,31 @@ export default class NakedCPH {
           type: 'text'
         };
       } else if (row.title.includes('email')) {
-        formObj['3'] = {
+        formObj['5'] = {
           field: { id: row.id, type: row.type },
           email: this.profile.email,
           type: 'email'
         };
       } else if (row.title.includes('postal code')) {
-        formObj['4'] = {
+        formObj['6'] = {
           field: { id: row.id, type: row.type },
           text: this.profile.deliveryZip,
           type: 'text'
         };
       } else if (row.title.includes('country are you')) {
-        formObj['5'] = {
+        formObj['7'] = {
           field: { id: row.id, type: row.type },
           text: this.profile.deliveryCountry,
+          type: 'text'
+        };
+      } else if (row.title.includes('Our Captcha is') && index === 0) {
+        const { ref } = row;
+        const matchingLogic = this.raffleDetails.renderData.form.logic.find(
+          logic => logic.ref === ref
+        );
+        formObj['0'] = {
+          field: { id: row.id, type: row.type },
+          text: matchingLogic.actions[0].condition.vars[1].value,
           type: 'text'
         };
       } else if (row.title.includes('Our Captcha is')) {
@@ -118,7 +128,7 @@ export default class NakedCPH {
         const matchingLogic = this.raffleDetails.renderData.form.logic.find(
           logic => logic.ref === ref
         );
-        formObj['0'] = {
+        formObj['3'] = {
           field: { id: row.id, type: row.type },
           text: matchingLogic.actions[0].condition.vars[1].value,
           type: 'text'
