@@ -608,7 +608,7 @@ export const pingIP = async (ip, port, user, pass, website, maxTries) => {
         ping: Math.round(res.timings.response)
       };
     } catch (err) {
-      if (err.error.code !== 'ECONNREFUSED' || err.error.code !== 'ETIMEDOUT') {
+      if (err.error.code !== 'ECONNREFUSED' && err.error.code !== 'ETIMEDOUT') {
         return {
           user,
           pass,
