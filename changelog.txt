@@ -152,7 +152,7 @@ Need to add animations
 - VootStore fixed and added back
 
 2.0.32
-- Fixed Naked CPH Raffle to handle second Captcha they added.
+- Fixed NakedCPH Raffle to handle second Captcha they added.
 - Fixed Proxy Generation -1 ping bug
 
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e

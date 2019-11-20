@@ -28,7 +28,7 @@ import voostore from '../../images/voostore.png';
 // import kickz from '../../images/kickz.png';
 // import bstn from '../../images/bstn.png';
 
-import FootpatrolUK from './Raffle/FootpatrolUK';
+import Footpatrol from './Raffle/Footpatrol';
 import NakedCPH from './Raffle/NakedCPH';
 import ExtraButter from './Raffle/ExtraButter';
 import Bodega from './Raffle/Bodega';
@@ -54,7 +54,7 @@ const chunk = require('lodash/chunk');
 
 const sites = [
   {
-    name: 'Footpatrol UK',
+    name: 'Footpatrol',
     img: footpatrol
   },
   { name: 'NakedCPH', img: nakedcph },
@@ -78,7 +78,7 @@ const sites = [
 ];
 
 const Classes = {
-  'Footpatrol UK': FootpatrolUK,
+  Footpatrol,
   NakedCPH,
   ExtraButter,
   Bodega,
@@ -89,7 +89,8 @@ const Classes = {
   DSMNY,
   Stress95,
   'Fear Of God': FearOfGod,
-  FootDistrict,VooStore
+  FootDistrict,
+  VooStore
 };
 
 export default class RaffleBot extends Component {

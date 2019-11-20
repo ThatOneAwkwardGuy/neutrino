@@ -7,6 +7,55 @@ export const ValidateSchema = (schema, object) => {
   }
 };
 
+export const FootpatrolSchema = new Schema({
+  deliveryFirstName: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery First Name must be a string.',
+      required: 'Delivery First Name is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryLastName: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Last Name must be a string.',
+      required: 'Delivery Last Name is required.'
+    },
+    length: { min: 1 }
+  },
+  email: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Email must be a string.',
+      required: 'Email is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryAddress: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Address must be a string.',
+      required: 'Delivery Address is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryZip: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Zip must be a string.',
+      required: 'Delivery Zip is required.'
+    },
+    length: { min: 1 }
+  }
+  //   phone: { type: String, required: true, length: { min: 1 } }
+});
+
 export const FootpatrolUKSchema = new Schema({
   deliveryFirstName: {
     type: String,
