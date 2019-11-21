@@ -210,7 +210,7 @@ export const ExtraButterSchema = new Schema({
   },
   deliveryRegion: {
     type: String,
-    required: true,
+    required: false,
     message: {
       type: 'Delivery Region must be a string.',
       required: 'Delivery Region is required.'
@@ -431,7 +431,7 @@ export const RenartsSchema = new Schema({
   },
   deliveryRegion: {
     type: String,
-    required: true,
+    required: false,
     message: {
       type: 'Delivery Region must be a string.',
       required: 'Delivery Region is required.'
