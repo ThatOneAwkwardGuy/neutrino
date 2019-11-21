@@ -214,8 +214,7 @@ export const ExtraButterSchema = new Schema({
     message: {
       type: 'Delivery Region must be a string.',
       required: 'Delivery Region is required.'
-    },
-    length: { min: 1 }
+    }
   },
   //   phone: { type: String, required: true, length: { min: 1 } },
   deliveryCountry: {
@@ -436,8 +435,7 @@ export const RenartsSchema = new Schema({
     message: {
       type: 'Delivery Region must be a string.',
       required: 'Delivery Region is required.'
-    },
-    length: { min: 1 }
+    }
   },
   //   phone: { type: String, required: true, length: { min: 1 } },
   deliveryCountry: {

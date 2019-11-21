@@ -1080,7 +1080,7 @@ class ProfileCreator extends Component {
                 <Button onClick={this.addCards}>Add Cards</Button>
               </Col>
               <Col>
-                <Button onClick={clearCards}>Clear Cards</Button>
+                <Button color="danger" onClick={clearCards}>Clear Cards</Button>
               </Col>
             </Row>
             <Row className="py-3 align-items-end noselect">

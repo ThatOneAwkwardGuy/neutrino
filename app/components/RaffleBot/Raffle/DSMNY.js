@@ -96,11 +96,13 @@ export default class DSMNY {
       [this.raffleDetails.phoneFormID]: this.profile.phone,
       [this.raffleDetails.emailFormID]: this.profile.email,
       [this.raffleDetails.postcodeFormID]: this.profile.deliveryZip,
-      [this.raffleDetails.colorFormID]: this.style.id,
       [this.raffleDetails.sizeFormID]: parseInt(this.size.id, 10),
       'g-recaptcha-response': captchaToken,
       nonce: 'vEJQMJIDnQjW7sv6'
     };
+    if (this.style !== undefined) {
+      payload[this.raffleDetails.colorFormID] = this.style.id;
+    }
     console.log(payload);
     return this.rp({
       method: 'POST',

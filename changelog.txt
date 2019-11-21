@@ -155,6 +155,12 @@ Need to add animations
 - Fixed NakedCPH Raffle to handle second Captcha they added.
 - Fixed Proxy Generation -1 ping bug
 
+2.0.33
+- Fixed DSMNY raffle entry bug
+- Reduced Delivery Region validation requirements
+- More fixes for tables all around the app
+
+
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
 

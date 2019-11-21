@@ -461,6 +461,30 @@ export default class Settings extends Component {
             <Row className="p-3 align-items-end">
               <Col xs="3">
                 <Label>
+                  One Click Check{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Whether the one click generator should check if your Gmail account passes
+                  one-click tests."
+                    target="oneClickCheckTimingBoolLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="oneClickCheckTimingBoolLabel"
+                      icon="question-circle"
+                    />
+                  </Tooltip>
+                </Label>
+                <CustomInput
+                  type="switch"
+                  id="oneClickCheckTimingBool"
+                  name="oneClickCheckTimingBool"
+                  checked={settings.oneClickCheckTimingBool}
+                  onChange={this.handleSettingsToggleChange}
+                />
+              </Col>
+              <Col xs="3">
+                <Label>
                   One Click Check Timing (m){' '}
                   <Tooltip
                     arrow

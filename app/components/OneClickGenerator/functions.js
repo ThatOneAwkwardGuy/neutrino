@@ -190,14 +190,16 @@ export const runAcitivitiesOnWindow = async (
   const oneClickStatusPre = await testActivityWindow(index, activity);
   updateActivity(index, { oneClickStatus: oneClickStatusPre });
 
-  const testInterval = setInterval(async () => {
-    if (window.isDestroyed()) {
-      clearInterval(testInterval);
-      return;
-    }
-    const oneClickStatus = await testActivityWindow(index, activity);
-    updateActivity(index, { oneClickStatus });
-  }, settings.oneClickCheckTiming * 60000);
+  if (settings.oneClickCheckTimingBool) {
+    const testInterval = setInterval(async () => {
+      if (window.isDestroyed()) {
+        clearInterval(testInterval);
+        return;
+      }
+      const oneClickStatus = await testActivityWindow(index, activity);
+      updateActivity(index, { oneClickStatus });
+    }, settings.oneClickCheckTiming * 60000);
+  }
 };
 
 export const testActivityWindow = async (index, activity) => {

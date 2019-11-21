@@ -230,6 +230,8 @@ const loadDSMNYRaffleInfo = async link => {
                     formFields[name] = value;
                   });
                   resolve({
+                    sizeInput: sizeFormID !== undefined,
+                    styleInput: colorFormID !== undefined,
                     styles,
                     sizes,
                     raffleDetails: {
