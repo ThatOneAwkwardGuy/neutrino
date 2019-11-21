@@ -66,7 +66,7 @@ export default function Table({ columns, data }) {
         </div>
         <div {...getTableBodyProps()}>
           <FixedSizeList
-            height={1000}
+            height={600}
             itemCount={rows.length}
             itemSize={100}
             width={totalColumnsWidth}

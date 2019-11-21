@@ -10,7 +10,7 @@ import { convertBaseToNeutrino } from '../ProfileCreator/functions';
 import Table from '../Table/index';
 import bodega from '../../images/bodega.jpg';
 import extrabutter from '../../images/extrabutter.jpg';
-import footpatrol from '../../images/footpatrol.png';
+// import footpatrol from '../../images/footpatrol.png';
 import nakedcph from '../../images/nakedcph.jpg';
 import renarts from '../../images/renarts.jpg';
 import dsm from '../../images/dsm.png';
@@ -28,7 +28,7 @@ import voostore from '../../images/voostore.png';
 // import kickz from '../../images/kickz.png';
 // import bstn from '../../images/bstn.png';
 
-import Footpatrol from './Raffle/Footpatrol';
+// import Footpatrol from './Raffle/Footpatrol';
 import NakedCPH from './Raffle/NakedCPH';
 import ExtraButter from './Raffle/ExtraButter';
 import Bodega from './Raffle/Bodega';
@@ -53,10 +53,10 @@ const csv = require('csvtojson');
 const chunk = require('lodash/chunk');
 
 const sites = [
-  {
-    name: 'Footpatrol',
-    img: footpatrol
-  },
+  // {
+  //   name: 'Footpatrol',
+  //   img: footpatrol
+  // },
   { name: 'NakedCPH', img: nakedcph },
   { name: 'ExtraButter', img: extrabutter },
   { name: 'Bodega', img: bodega },
@@ -78,7 +78,6 @@ const sites = [
 ];
 
 const Classes = {
-  Footpatrol,
   NakedCPH,
   ExtraButter,
   Bodega,

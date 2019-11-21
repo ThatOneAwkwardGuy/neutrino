@@ -41,7 +41,7 @@ export const get2CaptchaResponse = async captchaJob => {
   }`;
   const response = await rp.get(requestUrl);
   const [status, id] = response.split('|');
-  
+
   if (status === 'OK') {
     for (let index = 0; index < 20; index += 1) {
       // eslint-disable-next-line no-await-in-loop
@@ -51,7 +51,7 @@ export const get2CaptchaResponse = async captchaJob => {
         }&action=get&id=${id}`
       );
       const [captchaStatus, captchaCode] = checkResponse.split('|');
-      
+
       if (captchaStatus === 'OK') {
         return { captchaToken: captchaCode };
       }
@@ -67,7 +67,6 @@ export const get2CaptchaResponse = async captchaJob => {
 export const getImageTypersResponse = captchaJob => captchaJob;
 
 export const getCaptchaResponse = captchaJob => {
-  
   switch (captchaJob.settings.CaptchaAPI) {
     case 'AntiCaptcha':
       return getAntiCaptchaResponse(captchaJob);

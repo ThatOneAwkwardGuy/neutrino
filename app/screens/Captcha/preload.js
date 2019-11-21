@@ -60,13 +60,25 @@ const checkCaptcha = async () => {
     if (captchaJob) {
       try {
         const tokenID = captchaJob.id;
+        let captchaToken = '';
+        let captchaWidget = null;
         const { grecaptcha } = window;
         try {
           await grecaptcha.execute();
         } catch (error) {
           // console.error(error);
         }
-        const captchaToken = grecaptcha.getResponse();
+        try {
+          captchaWidget = document.querySelector('#recaptcha-token');
+          if (captchaWidget !== null) {
+            captchaToken = captchaWidget.value;
+          }
+        } catch (error) {
+          // console.error(error);
+        }
+        if (captchaWidget === null) {
+          captchaToken = grecaptcha.getResponse();
+        }
         if (captchaToken !== '') {
           ipcRenderer.send('send-captcha-token-from-preload-to-captcha', {
             ...captchaJob,

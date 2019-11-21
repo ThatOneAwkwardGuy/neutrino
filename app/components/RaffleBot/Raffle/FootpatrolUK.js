@@ -2,6 +2,7 @@ import { ValidateSchema, FootpatrolUKSchema } from '../schemas';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 export default class FootpatrolUK {
   constructor(
@@ -14,11 +15,15 @@ export default class FootpatrolUK {
     proxy,
     raffleDetails,
     forceUpdate,
-    incrementRaffles
+    incrementRaffles,
+    settings
   ) {
+    this.tokenID = uuidv4();
     this.url = url;
+    this.proxy = proxy;
     this.profile = profile;
     this.run = false;
+    this.settings = settings;
     this.site = site;
     this.style = style;
     this.size = size;
@@ -32,7 +37,7 @@ export default class FootpatrolUK {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
       },
-      proxy,
+      agent: proxy !== '' ? new HttpsProxyAgent(proxy) : null,
       jar: this.cookieJar
     });
   }
@@ -110,7 +115,7 @@ export default class FootpatrolUK {
     });
 
   makeEntry = async () => {
-    ValidateSchema(FootpatrolUKSchema, {...this.profile});
+    ValidateSchema(FootpatrolUKSchema, { ...this.profile });
     const token = uuidv4();
     this.changeStatus('Submitting Raffle Token');
     await this.submitEntry1(token);

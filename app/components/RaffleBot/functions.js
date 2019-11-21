@@ -16,6 +16,8 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadDSMRaffleInfo(raffleLink);
       case 'DSMNY':
         return loadDSMNYRaffleInfo(raffleLink);
+      case 'Footpatrol':
+        return loadFootpatrolRaffleInfo(raffleLink);
       case 'Footpatrol UK':
         return loadFootpatrolUKRaffleInfo(raffleLink);
       case 'NakedCPH':
@@ -430,6 +432,27 @@ const loadNakedCphRaffleInfo = async link => {
       reject(error);
     }
   });
+};
+
+const loadFootpatrolRaffleInfo = async link => {
+  const response = await rp.get(link);
+  const $ = cheerio.load(response);
+  const sizes = $('#shoesize option:not([value=""])')
+    .map((index, size) => ({
+      id: size.attribs.value,
+      name: $(size).text()
+    }))
+    .toArray();
+  const rafflesId = $('#raffles_id').attr('value');
+  // const token = $('input[name="token"]').val();
+  // const pageID = $('input[name="page_id"]').val();
+  return {
+    styleInput: false,
+    sizeInput: true,
+    sizes,
+    size: sizes[0].id,
+    raffleDetails: { rafflesId }
+  };
 };
 
 const loadFootpatrolUKRaffleInfo = async link =>

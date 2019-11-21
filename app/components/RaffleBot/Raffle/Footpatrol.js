@@ -1,7 +1,10 @@
-import { ValidateSchema, FootpatrolSchema } from '../schemas';
+// import { ValidateSchema, FootpatrolSchema } from '../schemas';
+import { longToShortCountries } from '../../../constants/constants';
+import { getCaptchaResponse } from '../../../screens/Captcha/functions';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
+const HttpsProxyAgent = require('https-proxy-agent');
 
 export default class Footpatrol {
   constructor(
@@ -14,11 +17,15 @@ export default class Footpatrol {
     proxy,
     raffleDetails,
     forceUpdate,
-    incrementRaffles
+    incrementRaffles,
+    settings
   ) {
+    this.tokenID = uuidv4();
     this.url = url;
+    this.proxy = proxy;
     this.profile = profile;
     this.run = false;
+    this.settings = settings;
     this.site = site;
     this.style = style;
     this.size = size;
@@ -32,7 +39,7 @@ export default class Footpatrol {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
       },
-      proxy,
+      agent: proxy !== '' ? new HttpsProxyAgent(proxy) : null,
       jar: this.cookieJar
     });
   }
@@ -59,66 +66,80 @@ export default class Footpatrol {
     this.forceUpdate();
   };
 
-  submitEntry1 = token =>
-    this.rp({
-      uri: 'https://raffle-uat.cloud.jdplc.com/api/raffleEntry',
-      method: 'POST',
-      headers: {
-        accept: '*/*',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        'content-type': 'application/json',
-        pragma: 'no-cache',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-origin',
-        referrer: this.url,
-        referrerPolicy: 'no-referrer-when-downgrade'
-      },
-      strictSSL: false,
-      body: JSON.stringify({
-        campaign_name: this.raffleDetails.title,
-        raf_id: token,
-        timestamp: new Date().toGMTString(),
-        raf_size: this.size,
-        fascia: 'FOOTPATROL_GB'
-      })
-    });
-
-  submitEntry2 = token =>
-    this.rp({
-      method: 'GET',
-      headers: {
-        referrer: this.url,
-        referrerPolicy: 'no-referrer-when-downgrade'
-      },
-      resolveWithFullResponse: true,
-      uri: `https://redeye.footpatrol.com/cgi-bin/rr/blank.gif?nourl=raffle&raf_name=${encodeURIComponent(
-        this.raffleDetails.title
-      )}&raf_id=${token}&email=${
-        this.profile.email
-      }&int_segment=GB&raf_firstname=${
-        this.profile.deliveryFirstName
-      }&raf_lastname=${
-        this.profile.deliveryLastName
-      }&raf_house=${encodeURIComponent(
-        this.profile.deliveryAddress
-      )}&raf_postcode=${encodeURIComponent(
-        this.profile.deliveryZip
-      )}&raf_mobile=${this.profile.phone}&raf_size=${encodeURIComponent(
-        this.size
-      )}&raf_shoetype=${this.style}&sms_optout=0&emailpermit=0`
-    });
+  submitEntry = async captchaResponse => {
+    const payload = {
+      address1: this.profile.deliveryAddress,
+      address2: '',
+      city: this.profile.deliveryCity,
+      country:
+        longToShortCountries[this.profile.deliveryCountry] !== undefined
+          ? longToShortCountries[this.profile.deliveryCountry]
+          : '',
+      county: this.profile.deliveryRegion,
+      dateofBirth: '13/02/1996',
+      email: this.profile.email,
+      email_optin: 1,
+      firstName: this.profile.deliveryFirstName,
+      hostname: 'https://raffles.footpatrol.com',
+      lastName: this.profile.deliveryLastName,
+      mobile: this.profile.phone,
+      paypalEmail: this.profile.email,
+      postCode: this.profile.deliveryZip,
+      rafflesID: this.raffleDetails.rafflesId,
+      shoeSize: this.size.id,
+      sms_optin: 1,
+      token: captchaResponse.captchaToken
+    };
+    console.log(payload);
+    try {
+      const response = await this.rp({
+        method: 'POST',
+        headers: {
+          accept: 'text/plain, */*; q=0.01',
+          'accept-language': 'en-US,en;q=0.9',
+          'cache-control': 'no-cache',
+          'content-type': 'application/json',
+          pragma: 'no-cache',
+          'sec-fetch-mode': 'cors',
+          'sec-fetch-site': 'cross-site',
+          referrer: this.url,
+          referrerPolicy: 'no-referrer-when-downgrade'
+        },
+        uri:
+          'https://rq06iiykwb.execute-api.eu-west-1.amazonaws.com/entries/prod',
+        body: payload,
+        json: true
+      });
+      return response;
+    } catch (e) {
+      return e.error;
+    }
+  };
 
   makeEntry = async () => {
-    ValidateSchema(FootpatrolSchema, { ...this.profile });
-    const token = uuidv4();
-    this.changeStatus('Submitting Raffle Token');
-    await this.submitEntry1(token);
-
+    // ValidateSchema(FootpatrolSchema, { ...this.profile });
+    this.changeStatus('Getting Captcha Token');
+    const captchaResponse = await getCaptchaResponse({
+      // eslint-disable-next-line no-underscore-dangle
+      cookiesObject: {},
+      url:
+        'https://www.google.com/recaptcha/api2/anchor?ar=1&k=6LfIUL8UAAAAAMvYieKAMgh4e9qQFpLiLdqLLJG4&co=aHR0cHM6Ly9yYWZmbGVzLmZvb3RwYXRyb2wuY29tOjQ0Mw..&hl=en&v=75nbHAdFrusJCwoMVGTXoHoM&size=invisible&cb=wl7ulm6un9ab',
+      id: this.tokenID,
+      proxy: this.proxy,
+      baseURL: this.url,
+      site: this.site,
+      settings: this.settings,
+      windowCookies: this.raffleDetails.windowCookies,
+      siteKey: '6LfIUL8UAAAAAMvYieKAMgh4e9qQFpLiLdqLLJG4'
+    });
     this.changeStatus('Submitting Raffle Entry');
-    await this.submitEntry2(token);
-
-    this.changeStatus('Successful Entry');
-    this.incrementRaffles();
+    const entryResponse = await this.submitEntry(captchaResponse);
+    console.log(entryResponse);
+    if (entryResponse.success) {
+      this.changeStatus('Successful Entry');
+      this.incrementRaffles();
+    } else {
+      this.changeStatus(`Error Submitting Entry`);
+    }
   };
 }
