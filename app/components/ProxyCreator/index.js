@@ -272,7 +272,7 @@ class ProxyCreator extends Component {
         newProxy.providerAccountID = `${provider} - ${providerAccount.name}`;
         return newProxy;
       });
-    successfulProxies.forEach(() => incrementProxies());
+    successfulProxies.forEach(() => incrementProxies({ provider }));
     const unsuccessfulProxies = resolvedProxyInstances.filter(
       proxy => proxy instanceof Error
     );

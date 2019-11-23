@@ -137,7 +137,12 @@ export default class Footpatrol {
     console.log(entryResponse);
     if (entryResponse.success) {
       this.changeStatus('Successful Entry');
-      this.incrementRaffles();
+      this.incrementRaffles({
+        url: this.url,
+        site: this.site,
+        size: this.size ? this.size.name : '',
+        style: this.style ? this.style.name : ''
+      });;
     } else {
       this.changeStatus(`Error Submitting Entry`);
     }

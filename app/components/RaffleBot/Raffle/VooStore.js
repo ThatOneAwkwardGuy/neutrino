@@ -146,7 +146,12 @@ export default class VooStore {
       throw new Error(submitRaffle.msg);
     } else {
       this.changeStatus(`Raffle Entry Successful`);
-      this.incrementRaffles();
+      this.incrementRaffles({
+        url: this.url,
+        site: this.site,
+        size: this.size ? this.size.name : '',
+        style: this.style ? this.style.name : ''
+      });;
     }
   };
 }

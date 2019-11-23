@@ -2,6 +2,7 @@ import * as firebase from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
 import 'firebase/firestore';
+import 'firebase/analytics';
 
 import { machineIdSync } from 'node-machine-id';
 
@@ -11,12 +12,16 @@ const prodConfig = {
   databaseURL: 'https://neutrino-tools.firebaseio.com',
   projectId: 'neutrino-tools',
   storageBucket: 'neutrino-tools.appspot.com',
-  messagingSenderId: '683216035842'
+  messagingSenderId: '683216035842',
+  appId: '1:683216035842:web:a413cfe580477f2469c71b',
+  measurementId: 'G-DV9GV5TWHR'
 };
 
 firebase.initializeApp(prodConfig);
 
 const auth = firebase.auth();
+const analytics = firebase.analytics();
+
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 const firestore = firebase.firestore();
@@ -27,6 +32,8 @@ export const doSignInWithEmailAndPassword = (email, password) =>
 export const signOut = () => auth.signOut();
 
 export const getAuth = () => auth;
+
+export const getAnalytics = () => analytics;
 
 export const getFirestore = () => firestore;
 

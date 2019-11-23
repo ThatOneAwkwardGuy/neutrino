@@ -127,7 +127,12 @@ export default class FearOfGod {
     const parsedRaffleResponse = JSON.parse(raffleResponse.body);
     if (parsedRaffleResponse.success === 1) {
       this.changeStatus(`Successful Entry`);
-      this.incrementRaffles();
+      this.incrementRaffles({
+        url: this.url,
+        site: this.site,
+        size: this.size ? this.size.name : '',
+        style: this.style ? this.style.name : ''
+      });;
     } else {
       this.changeStatus(`Error Submitting Entry`);
     }

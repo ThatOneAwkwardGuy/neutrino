@@ -46,6 +46,7 @@ export default class Routes extends Component {
   checkAuthChange() {
     const auth = getAuth();
     auth.onAuthStateChanged(async user => {
+      console.log(user)
       if (user) {
         await setUserMachineIDOnFirstLoad(user.uid);
         this.checkUserAuth(user.uid);

@@ -32,11 +32,11 @@ import {
 const DiscordRPC = require('discord-rpc');
 
 const clientId = '575360564767752194';
-const rpc = new DiscordRPC.Client({ transport: 'ipc' });
-let discordRPCState = '';
-const startTimestamp = new Date();
-const version = app.getVersion();
 DiscordRPC.register(clientId);
+const rpc = new DiscordRPC.Client({ transport: 'ipc' });
+const startTimestamp = new Date();
+let discordRPCState = '';
+const version = app.getVersion();
 
 export default class AppUpdater {
   constructor() {
@@ -150,6 +150,8 @@ app.on('ready', async () => {
   ) {
     await installExtensions();
   }
+
+  rpc.login({ clientId }).catch(console.log);
 
   mainWindow = Splashscreen.initSplashScreen({
     windowOpts: {

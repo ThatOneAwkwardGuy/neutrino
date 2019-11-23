@@ -8,6 +8,7 @@ import { ValidateSchema, ExtraButterSchema } from '../schemas';
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
 const HttpsProxyAgent = require('https-proxy-agent');
+const cheerio = require('cheerio');
 
 export default class ExtraButter {
   constructor(
@@ -225,9 +226,10 @@ export default class ExtraButter {
     return JSONparsed.customers[0];
   };
 
-  login = (email, pass) => {
+  login = async (email, pass) => {
+    const { settings } = this;
     this.changeStatus('Logging In');
-    return this.rp({
+    const loginResponse = await this.rp({
       method: 'POST',
       url: 'https://shop.extrabutterny.com/account/login',
       headers: {
@@ -246,6 +248,7 @@ export default class ExtraButter {
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
+      resolveWithFullResponse: true,
       followRedirect: true,
       followAllRedirects: true,
       form: {
@@ -255,6 +258,51 @@ export default class ExtraButter {
         'customer[password]': pass
       }
     });
+    if (loginResponse.body.includes('<title>Challenge</title>')) {
+      const captchaResponse = await getCaptchaResponse({
+        // eslint-disable-next-line no-underscore-dangle
+        cookiesObject: this.cookieJar._jar.store.idx,
+        url: loginResponse.request.href,
+        id: this.tokenID,
+        proxy: this.proxy,
+        baseURL: this.url,
+        site: this.site,
+        settings: this.settings,
+        siteKey: '6LdnDpgUAAAAAFp50woveqE_jH9n3gsXJasjwufq'
+      });
+      let authToken;
+      if (settings.CaptchaAPI !== '') {
+        const $ = cheerio.load(loginResponse.body);
+        authToken = $('input[name="authenticity_token"]').attr('value');
+      }
+      await this.rp({
+        method: 'POST',
+        url: 'https://shop.extrabutterny.com/account/login',
+        headers: {
+          'accept-language': 'en-US,en;q=0.9',
+          'cache-control': 'no-cache',
+          'content-type': 'application/x-www-form-urlencoded',
+          pragma: 'no-cache',
+          'sec-fetch-mode': 'navigate',
+          'sec-fetch-site': 'same-origin',
+          'sec-fetch-user': '?1',
+          'upgrade-insecure-requests': '1',
+          Accept: 'application/json, text/javascript, */*; q=0.01',
+          Referer: 'https://shop.extrabutterny.com/account/login',
+          Origin: 'https://shop.extrabutterny.com',
+          'User-Agent':
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        followRedirect: true,
+        followAllRedirects: true,
+        form: {
+          authenticity_token:
+            settings.CaptchaAPI !== '' ? authToken : captchaResponse.authToken,
+          'g-recaptcha-response': captchaResponse.captchaToken
+        }
+      });
+    }
   };
 
   getCustomerID = async () => {
@@ -268,7 +316,7 @@ export default class ExtraButter {
   };
 
   makeEntry = async () => {
-    ValidateSchema(ExtraButterSchema, {...this.profile});
+    ValidateSchema(ExtraButterSchema, { ...this.profile });
 
     this.changeStatus('Getting Variant ID For Size');
     const variant = await this.getIDForSize();
@@ -287,6 +335,11 @@ export default class ExtraButter {
     await this.completeRaffle(submitRaffle.id, tokenizeCard.id);
 
     this.changeStatus('Completed Entry');
-    this.incrementRaffles();
+    this.incrementRaffles({
+        url: this.url,
+        site: this.site,
+        size: this.size ? this.size.name : '',
+        style: this.style ? this.style.name : ''
+      });;
   };
 }

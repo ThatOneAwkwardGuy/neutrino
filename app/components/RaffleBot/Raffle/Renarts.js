@@ -288,6 +288,11 @@ export default class Renarts {
     await this.completeRaffle(submitRaffle.id, tokenizeCard.id);
 
     this.changeStatus('Completed Entry');
-    this.incrementRaffles();
+    this.incrementRaffles({
+        url: this.url,
+        site: this.site,
+        size: this.size ? this.size.name : '',
+        style: this.style ? this.style.name : ''
+      });;
   };
 }

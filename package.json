@@ -6,7 +6,7 @@
     "name": "ThatOneAwkwardGuy",
     "email": "support@neutrino.app"
   },
-  "version": "2.0.34",
+  "version": "2.0.35",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dev": "concurrently \"yarn build-main\" \"yarn build-renderer-dev\"",
@@ -244,7 +244,7 @@
     "core-js": "3",
     "csvtojson": "^2.0.10",
     "devtron": "^1.4.0",
-    "discord-rpc": "^3.0.2",
+    "discord-rpc": "3.1.0",
     "do-wrapper": "^3.25.2",
     "electron-debug": "^2.0.0",
     "electron-log": "^3.0.6",
@@ -253,7 +253,7 @@
     "electron-tabs": "^0.9.5",
     "electron-updater": "^4.1.2",
     "expose-loader": "^0.7.5",
-    "firebase": "^6.2.4",
+    "firebase": "7.5.0",
     "font-awesome": "^4.7.0",
     "history": "^4.9.0",
     "html-react-parser": "^0.9.1",
@@ -289,6 +289,7 @@
     "source-map-support": "^0.5.9",
     "styled-components": "^4.3.2",
     "superagent": "^5.1.0",
+    "universal-analytics": "^0.4.20",
     "uuid": "^3.3.2",
     "validate": "^5.1.0",
     "xml2js": "^0.4.22"

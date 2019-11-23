@@ -253,7 +253,7 @@ class AccountCreator extends Component {
         infoModalButtonText: ''
       });
     }
-    successes.forEach(() => incrementAccounts());
+    successes.forEach(() => incrementAccounts({ site }));
   };
 
   copyAllAccounts = () => {
@@ -312,7 +312,7 @@ class AccountCreator extends Component {
     const response = await request({
       method: 'POST',
       uri: 'https://eu.oneblockdown.it/account',
-      agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
+      agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
       headers: {
         Accept:
           'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
@@ -342,7 +342,7 @@ class AccountCreator extends Component {
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
         url: response.request.href,
         id: tokenID,
-        agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
+        agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
         baseURL: sites[site],
         site,
         accountPass,
@@ -365,7 +365,7 @@ class AccountCreator extends Component {
         method: 'POST',
         url: `https://eu.oneblockdown.it/account`,
         followRedirect: true,
-        agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
+        agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
         resolveWithFullResponse: true,
         followAllRedirects: true,
         headers: {
@@ -439,7 +439,7 @@ class AccountCreator extends Component {
       method: 'POST',
       url: `${sites[site]}/account`,
       followRedirect: true,
-      agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
+      agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
       resolveWithFullResponse: true,
       followAllRedirects: true,
       jar: this.cookieJars[tokenID],
@@ -466,7 +466,7 @@ class AccountCreator extends Component {
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
         url: response.request.href,
         id: tokenID,
-        agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
+        agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
         baseURL: sites[site],
         site,
         accountPass,
@@ -484,7 +484,7 @@ class AccountCreator extends Component {
         method: 'POST',
         url: `${sites[site]}/account`,
         followRedirect: true,
-        agent: useProxies?new HttpsProxyAgent(this.getRandomProxy()) : null,
+        agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
         resolveWithFullResponse: true,
         followAllRedirects: true,
         headers: {
@@ -884,11 +884,11 @@ class AccountCreator extends Component {
                 </Col>
                 <Col>
                   <Label>
-                    Catchall*{' '}
+                    Gmail/Catchall*{' '}
                     <Tooltip
                       arrow
                       distance={20}
-                      title="The catchall you will be using to create accounts. If you do no know what a catchall is, read the guide."
+                      title="The catchall you will be using to create accounts. You can also enter a gmail account here and use that as your catchall. If you do no know what a catchall is, read the guide."
                     >
                       <FontAwesomeIcon icon="question-circle" />
                     </Tooltip>

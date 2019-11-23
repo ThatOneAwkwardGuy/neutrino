@@ -4,6 +4,7 @@ import {
   longToShortCountries,
   longToShortStates
 } from '../../constants/constants';
+import { generateRandomNLengthString } from '../../utils/utils';
 
 const uuidv4 = require('uuid/v4');
 
@@ -74,15 +75,13 @@ const returnGmailOrCatchall = (
   index,
   gmailEmails,
   useCatchallBool,
-  baseProfile,
-  randomFirstName,
-  randomLastName
+  baseProfile
 ) => {
   if (gmailEmails && gmailEmails.length > 0 && gmailEmails[index]) {
     return gmailEmails[index];
   }
   if (useCatchallBool && !baseProfile.catchallEmail.includes('@gmail')) {
-    return `${randomFirstName}${randomLastName}@${baseProfile.catchallEmail}`;
+    return `${generateRandomNLengthString(10)}@${baseProfile.catchallEmail}`;
   }
   return baseProfile.email;
 };
@@ -185,9 +184,7 @@ export const convertBaseToProjectDestroyer = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   id: Math.random()
     .toString(36)
@@ -237,9 +234,7 @@ export const convertBaseToBalko = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   phone:
     baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
@@ -302,9 +297,7 @@ export const convertBaseToEVEAIO = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   ShippingFirstName: baseProfile.randomNameBool
     ? randomFirstName
@@ -332,9 +325,7 @@ export const convertBaseToEVEAIO = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   NameOnCard: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
   CreditCardNumber: card.cardNumber,
@@ -385,9 +376,7 @@ export const convertBaseToPhantom = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   ExpMonth: card.expMonth,
   ExpYear: card.expYear,
@@ -459,9 +448,7 @@ export const convertBaseToGhost = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   ExpMonth: card.expMonth,
   ExpYear: card.expYear,
@@ -534,9 +521,7 @@ export const convertBaseToDashe = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   profileName: `Profile - ${index}`,
   shipping: {
@@ -688,9 +673,7 @@ export const convertBaseToHastey = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   id: `${Math.random()
     .toString(36)
@@ -828,9 +811,7 @@ export const convertBaseToNSB = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   checkoutLimit: baseProfile.oneCheckoutBool ? 1 : 0,
   billingSame: baseProfile.sameDeliveryBillingBool,
@@ -852,9 +833,7 @@ export const convertBaseToSOLEAIO = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   phone:
     baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
@@ -950,9 +929,7 @@ export const convertBaseToCSV = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   password: baseProfile.password,
   instagram: baseProfile.instagram,
@@ -983,9 +960,7 @@ export const convertBaseToNeutrino = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   card
 });
@@ -1004,9 +979,7 @@ export const convertBaseToAdept = (
     index,
     gmailEmails,
     baseProfile.useCatchallBool,
-    baseProfile,
-    randomFirstName,
-    randomLastName
+    baseProfile
   ),
   order_tel: baseProfile.randomPhoneNumberBool
     ? baseProfile.randomPhoneNumberTemplate
