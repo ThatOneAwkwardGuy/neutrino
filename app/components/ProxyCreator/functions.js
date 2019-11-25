@@ -365,8 +365,13 @@ export const createLinodeInstance = async (
 export const deleteAllLinodeInstances = async apiKey => {
   const linode = new Linode(apiKey);
   const { data } = await linode.listLinodeInstances();
+  console.log(data);
   const removedInstances = data
-    .filter(instance => instance.tags.includes('neutrinoproxy'))
+    .filter(
+      instance =>
+        instance.tags.includes('neutrinoProxy') ||
+        instance.tags.includes('neutrinoproxy')
+    )
     .map(instance => linode.removeLinodeInstance(instance.id));
   return Promise.all(removedInstances);
 };

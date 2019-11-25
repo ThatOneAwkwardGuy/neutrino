@@ -318,27 +318,29 @@ class ProxyCreator extends Component {
         providerAccount.name
       }`
     );
+    let responses = [];
     try {
       switch (provider) {
         case 'google':
-          await deleteAllGoogleCloudInstances(providerAccount);
+          responses = await deleteAllGoogleCloudInstances(providerAccount);
           break;
         case 'digitalocean':
-          await deleteAllDigitalOceanInstances(providerAccount);
+          responses = await deleteAllDigitalOceanInstances(providerAccount);
           break;
         case 'vultr':
-          await deleteAllVultrInstances(providerAccount.apiKey);
+          responses = await deleteAllVultrInstances(providerAccount.apiKey);
           break;
         case 'linode':
-          await deleteAllLinodeInstances(providerAccount.apiKey);
+          responses = await deleteAllLinodeInstances(providerAccount.apiKey);
           break;
         case 'aws':
-          await deleteAllAWSInstances(providerAccount, region);
+          responses = await deleteAllAWSInstances(providerAccount, region);
           break;
         default:
           break;
       }
       clearProxies(`${provider} - ${providerAccount.name}`);
+      console.log(responses);
     } catch (error) {
       console.error(error);
     } finally {
