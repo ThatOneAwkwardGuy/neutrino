@@ -140,11 +140,18 @@ class ProfileTaskEditorConverter extends Component {
           } else {
             processedFile = parsedFile;
           }
+        } else if (fromBot === 'TKS') {
+          processedFile = JSON.parse(file).Profiles;
         } else {
           processedFile = Object.values(JSON.parse(file));
         }
         this.setState({
-          profiles: processedFile
+          profiles: processedFile.filter(
+            profile =>
+              profile !== undefined &&
+              profile !== null &&
+              typeof profile === 'object'
+          )
         });
       }
     );
@@ -166,11 +173,11 @@ class ProfileTaskEditorConverter extends Component {
 
   exportFile = async () => {
     const { profiles, fromBot, toBot } = this.state;
-    
+
     const baseProfiles = profiles.map(profile =>
       convertToBase(fromBot, profile)
     );
-    
+
     const convertedProfiles = baseProfiles.map((profile, index) =>
       convertFromBase(index, toBot, profile)
     );
@@ -184,7 +191,7 @@ class ProfileTaskEditorConverter extends Component {
       file = this.convertToCSVString(convertedProfiles);
     } else if (toBot === 'EVE AIO') {
       extension = 'xml';
-      
+
       file = this.convertToXML(convertedProfiles);
     } else {
       file = JSON.stringify(convertedProfiles);

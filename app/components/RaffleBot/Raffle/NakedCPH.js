@@ -133,6 +133,12 @@ export default class NakedCPH {
           text: matchingLogic.actions[0].condition.vars[1].value,
           type: 'text'
         };
+      } else if (row.title.includes('Newsletter')) {
+        formObj['8'] = {
+          field: { id: row.id, type: row.type },
+          text: 'Yes',
+          type: 'text'
+        };
       }
     });
     payload.answers = Object.values(formObj);
@@ -166,7 +172,7 @@ export default class NakedCPH {
         site: this.site,
         size: this.size ? this.size.name : '',
         style: this.style ? this.style.name : ''
-      });;
+      });
     }
   };
 }

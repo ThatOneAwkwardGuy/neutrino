@@ -334,27 +334,37 @@ export const loadFootDistrctRaffleInfo = async link => {
               .attr('data-url')
               .split('/to/')[1];
           }
-          const sizes = [
-            { id: '4 US - 36 EU', name: '4 US - 36 EU' },
-            { id: '4.5 US - 36.5 EU', name: '4.5 US - 36.5 EU' },
-            { id: '5 US - 37.5 EU', name: '5 US - 37.5 EU' },
-            { id: '5.5 US - 38 EU', name: '5.5 US - 38 EU' },
-            { id: '6 US - 38.5 EU', name: '6 US - 38.5 EU' },
-            { id: '6.5 US - 39 EU', name: '6.5 US - 39 EU' },
-            { id: '7 US - 40 EU', name: '7 US - 40 EU' },
-            { id: '7.5 US - 40.5 EU', name: '7.5 US - 40.5 EU' },
-            { id: '8 US - 41 EU', name: '8 US - 41 EU' },
-            { id: '8.5 US - 42 EU', name: '8.5 US - 42 EU' },
-            { id: '9 US - 42.5 EU', name: '9 US - 42.5 EU' },
-            { id: '9.5 US - 43 EU', name: '9.5 US - 43 EU' },
-            { id: '10 US - 44 EU', name: '10 US - 44 EU' },
-            { id: '10.5 US - 44.5 EU', name: '10.5 US - 44.5 EU' },
-            { id: '11 US - 45 EU', name: '11 US - 45 EU' },
-            { id: '11.5 US - 45.5 EU', name: '11.5 US - 45.5 EU' },
-            { id: '12 US - 46 EU', name: '12 US - 46 EU' },
-            { id: '13 US - 47.5 EU', name: '13 US - 47.5 EU' },
-            { id: '14 US - 48.5 EU', name: '14 US - 48.5 EU' }
-          ];
+          let sizes = [];
+          const sizesField = renderData.form.fields.find(
+            field => field.title === 'Select your Size'
+          );
+          if (sizesField) {
+            sizes = sizesField.properties.choices.map(choice => ({
+              id: choice.label,
+              name: choice.label
+            }));
+          }
+          //  sizes = [
+          //   { id: '4 US - 36 EU', name: '4 US - 36 EU' },
+          //   { id: '4.5 US - 36.5 EU', name: '4.5 US - 36.5 EU' },
+          //   { id: '5 US - 37.5 EU', name: '5 US - 37.5 EU' },
+          //   { id: '5.5 US - 38 EU', name: '5.5 US - 38 EU' },
+          //   { id: '6 US - 38.5 EU', name: '6 US - 38.5 EU' },
+          //   { id: '6.5 US - 39 EU', name: '6.5 US - 39 EU' },
+          //   { id: '7 US - 40 EU', name: '7 US - 40 EU' },
+          //   { id: '7.5 US - 40.5 EU', name: '7.5 US - 40.5 EU' },
+          //   { id: '8 US - 41 EU', name: '8 US - 41 EU' },
+          //   { id: '8.5 US - 42 EU', name: '8.5 US - 42 EU' },
+          //   { id: '9 US - 42.5 EU', name: '9 US - 42.5 EU' },
+          //   { id: '9.5 US - 43 EU', name: '9.5 US - 43 EU' },
+          //   { id: '10 US - 44 EU', name: '10 US - 44 EU' },
+          //   { id: '10.5 US - 44.5 EU', name: '10.5 US - 44.5 EU' },
+          //   { id: '11 US - 45 EU', name: '11 US - 45 EU' },
+          //   { id: '11.5 US - 45.5 EU', name: '11.5 US - 45.5 EU' },
+          //   { id: '12 US - 46 EU', name: '12 US - 46 EU' },
+          //   { id: '13 US - 47.5 EU', name: '13 US - 47.5 EU' },
+          //   { id: '14 US - 48.5 EU', name: '14 US - 48.5 EU' }
+          // ];
 
           resolve({
             sizes,

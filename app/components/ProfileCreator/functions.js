@@ -11,19 +11,21 @@ const uuidv4 = require('uuid/v4');
 export const getRandomInt = max => Math.floor(Math.random() * Math.floor(max));
 
 const getCardType = number => {
-  let re = new RegExp('^4');
-  if (number.match(re) != null) return 'visa';
-  if (
-    /^(5[1-5][0-9]{14}|2(22[1-9][0-9]{12}|2[3-9][0-9]{13}|[3-6][0-9]{14}|7[0-1][0-9]{13}|720[0-9]{12}))$/.test(
-      number
+  if (number) {
+    let re = new RegExp('^4');
+    if (number.match(re) != null) return 'visa';
+    if (
+      /^(5[1-5][0-9]{14}|2(22[1-9][0-9]{12}|2[3-9][0-9]{13}|[3-6][0-9]{14}|7[0-1][0-9]{13}|720[0-9]{12}))$/.test(
+        number
+      )
     )
-  )
-    return 'master';
-  re = new RegExp('^3[47]');
-  if (number.match(re) != null) return 'american_express';
-  re = new RegExp(
-    '^(6011|622(12[6-9]|1[3-9][0-9]|[2-8][0-9]{2}|9[0-1][0-9]|92[0-5]|64[4-9])|65)'
-  );
+      return 'master';
+    re = new RegExp('^3[47]');
+    if (number.match(re) != null) return 'american_express';
+    re = new RegExp(
+      '^(6011|622(12[6-9]|1[3-9][0-9]|[2-8][0-9]{2}|9[0-1][0-9]|92[0-5]|64[4-9])|65)'
+    );
+  }
   return '';
 };
 
@@ -95,57 +97,54 @@ export const convertBaseToCybersole = (
   gmailEmails
 ) => ({
   name: `Profile - ${index}`,
-  payment: {
-    email: returnGmailOrCatchall(
-      index,
-      gmailEmails,
-      baseProfile.useCatchallBool,
-      baseProfile,
-      randomFirstName,
-      randomLastName
-    ),
-    phone:
-      baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
-        ? baseProfile.randomPhoneNumberTemplate
-            .split('#')
-            .map(number => (number === '' ? getRandomInt(9) : number))
-            .join('')
-        : baseProfile.phone,
-    card: {
-      name: `${baseProfile.deliveryFirstName} ${baseProfile.deliveryLastName}`,
-      number: card.cardNumber.match(/.{1,4}/g).join(' '),
-      exp_month: card.expMonth,
-      exp_year: card.expYear,
-      cvv: card.cvv
-    }
+  email: returnGmailOrCatchall(
+    index,
+    gmailEmails,
+    baseProfile.useCatchallBool,
+    baseProfile,
+    randomFirstName,
+    randomLastName
+  ),
+  phone:
+    baseProfile.randomPhoneNumberBool && baseProfile.randomPhoneNumberTemplate
+      ? baseProfile.randomPhoneNumberTemplate
+          .split('#')
+          .map(number => (number === '' ? getRandomInt(9) : number))
+          .join('')
+      : baseProfile.phone,
+  card: {
+    number: card.cardNumber ? card.cardNumber.match(/.{1,4}/g).join(' ') : '',
+    expiryMonth: card.expMonth,
+    expiryYear: card.expYear,
+    cvv: card.cvv
   },
   delivery: {
-    first_name: baseProfile.randomNameBool
+    firstName: baseProfile.randomNameBool
       ? randomFirstName
       : baseProfile.deliveryFirstName,
-    last_name: baseProfile.randomNameBool
+    lastName: baseProfile.randomNameBool
       ? randomLastName
       : baseProfile.deliveryLastName,
-    addr1: baseProfile.deliveryAddress,
-    addr2: baseProfile.deliveryApt,
+    address1: baseProfile.deliveryAddress,
+    address2: baseProfile.deliveryApt,
     zip: baseProfile.deliveryZip,
     city: baseProfile.deliveryCity,
     country: baseProfile.deliveryCountry,
-    state: baseProfile.deliveryRegion,
-    same_as_del: baseProfile.sameDeliveryBillingBool
+    state: baseProfile.deliveryRegion
   },
   billing: {
-    first_name: baseProfile.billingFirstName,
-    last_name: baseProfile.billingLastName,
-    addr1: baseProfile.billingAddress,
-    addr2: baseProfile.billingApt,
+    firstName: baseProfile.billingFirstName,
+    lastName: baseProfile.billingLastName,
+    address1: baseProfile.billingAddress,
+    address2: baseProfile.billingApt,
     zip: baseProfile.billingZip,
     city: baseProfile.billingCity,
     country: baseProfile.billingCountry,
     state: baseProfile.billingRegion,
     same_as_del: baseProfile.sameDeliveryBillingBool
   },
-  one_checkout: baseProfile.oneCheckoutBool,
+  billingDifferent: !baseProfile.sameDeliveryBillingBool,
+  singleCheckout: baseProfile.oneCheckoutBool,
   favourite: false
 });
 
@@ -176,8 +175,13 @@ export const convertBaseToProjectDestroyer = (
   },
   card: {
     code: card.cvv,
-    expire: `${card.expMonth} / ${card.expYear}`,
-    name: `${baseProfile.deliveryFirstName} ${baseProfile.deliveryLastName}`,
+    expire:
+      card.expMonth && card.expYear
+        ? `${card.expMonth}/${card.expYear.slice(-2)}`
+        : '',
+    name:
+      baseProfile.paymentCardholdersName ||
+      `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
     number: card.cardNumber
   },
   email: returnGmailOrCatchall(
@@ -327,7 +331,9 @@ export const convertBaseToEVEAIO = (
     baseProfile.useCatchallBool,
     baseProfile
   ),
-  NameOnCard: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
+  NameOnCard:
+    baseProfile.paymentCardholdersName ||
+    `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
   CreditCardNumber: card.cardNumber,
   ExpirationMonth: card.expMonth,
   ExpirationYear: card.expYear,
@@ -634,7 +640,9 @@ export const convertBaseToTKS = (
         : baseProfile.phone
   },
   Payment: {
-    CardHolder: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
+    CardHolder:
+      baseProfile.paymentCardholdersName ||
+      `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
     CardNumber: card.cardNumber,
     ExpirationMonth: card.expMonth,
     ExpirationYear: card.expYear,
@@ -754,7 +762,10 @@ export const convertBaseToKodai = (
       randomFirstName,
       randomLastName
     ),
-    expirationDate: `${card.expMonth}/${card.expYear.slice(-2)}`
+    expirationDate:
+      card.expMonth && card.expYear
+        ? `${card.expMonth}/${card.expYear.slice(-2)}`
+        : ''
   },
   profileName: `Profile - ${index}`,
   region: baseProfile.deliveryCountry
@@ -802,10 +813,15 @@ export const convertBaseToNSB = (
   },
   name: `Profile - ${index}`,
   cc: {
-    number: card.cardNumber.match(/.{1,4}/g).join(' '),
-    expiry: `${card.expMonth} / ${card.expYear.slice(-2)}`,
+    number: card.cardNumber ? card.cardNumber.match(/.{1,4}/g).join(' ') : '',
+    expiry:
+      card.expMonth && card.expYear
+        ? `${card.expMonth} / ${card.expYear.slice(-2)}`
+        : '',
     cvc: card.cvv,
-    name: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`
+    name:
+      baseProfile.paymentCardholdersName ||
+      `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`
   },
   email: returnGmailOrCatchall(
     index,
@@ -880,10 +896,12 @@ export const convertBaseToSOLEAIO = (
         ]
       : '',
   CardNumber: card.cardNumber,
-  CardName: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
+  CardName:
+    baseProfile.paymentCardholdersName ||
+    `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
   CardCvv: card.cvv,
-  CardExpiryMonth: card.expMonth,
-  CardExpiryYear: card.expYear.slice(-2),
+  CardExpiryMonth: card.expMonth ? card.expMonth : '',
+  CardExpiryYear: card.expYear ? card.expYear.slice(-2) : '',
   CardType: capitalize(getCardType(card.cardNumber)),
   CheckoutLimit: baseProfile.oneCheckoutBool
     ? '1 checkout per site'
@@ -933,7 +951,9 @@ export const convertBaseToCSV = (
   ),
   password: baseProfile.password,
   instagram: baseProfile.instagram,
-  paymentCardholdersName: `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
+  paymentCardholdersName:
+    baseProfile.paymentCardholdersName ||
+    `${baseProfile.billingFirstName} ${baseProfile.billingLastName}`,
   paymentCardnumber: card.cardNumber,
   paymentexpMonth: card.expMonth,
   paymentexpYear: card.expYear,
