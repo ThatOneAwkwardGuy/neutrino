@@ -173,7 +173,7 @@ Need to add animations
 - Raffle Bot - NakedCPH updated to support extra field they added
 - Raffle Bot - FootDistrict updated to support new sizes they added
 
-2.0.37
+2.1.0
 - Account Creator - JuiceStore Account Creator
 - Ping Tester - More accurate ping value
 - Browser Module - New browser module that supports proxies and autofill (BETA)
