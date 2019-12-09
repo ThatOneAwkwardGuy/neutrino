@@ -84,20 +84,74 @@ export const jigAddresses = (
   let finalJiggedAddresses = Array.from(newJiggedAddresses).map(address =>
     `${address}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
   );
-  if (
-    fourCharPrefixBool &&
-    finalJiggedAddresses.length < parseInt(quantity, 10)
-  ) {
-    const fourCharPrefixAddresses = Array(
-      parseInt(quantity, 10) - finalJiggedAddresses.length
-    )
-      .fill()
-      .map(() =>
-        `${makeid(
-          4
-        )} ${address1}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
-      );
-    finalJiggedAddresses = finalJiggedAddresses.concat(fourCharPrefixAddresses);
+  if (finalJiggedAddresses.length < parseInt(quantity, 10)) {
+    const extraAddress = new Set();
+    let counter = 0;
+    while (
+      extraAddress.size < parseInt(quantity, 10) &&
+      counter < quantity * 100
+    ) {
+      counter += 1;
+      if (fourCharPrefixBool) {
+        extraAddress.add(
+          `${makeid(
+            4
+          )} ${address1}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
+        );
+      } else {
+        extraAddress.add(
+          randomlyJig(
+            `${address1}\n${city}\n${aptSuite}\n${region}\n${country}\n${zipcode}`.trim()
+          )
+        );
+      }
+    }
+    console.log(extraAddress);
+    finalJiggedAddresses = finalJiggedAddresses.concat(
+      Array.from(extraAddress)
+    );
   }
   return finalJiggedAddresses;
+};
+
+export const changeLetterToNumber = string => {
+  const stringArray = string.split('');
+  const possibleLetters = ['E', 'I', '0', 'l', 'o'];
+  const conversions = {
+    E: '3',
+    I: '1',
+    l: '1',
+    O: '0',
+    o: '0'
+  };
+  const matchingIndexes = stringArray
+    .map((char, index) => (possibleLetters.includes(char) ? index : undefined))
+    .filter(char => char !== undefined);
+  const randomIndex =
+    matchingIndexes[Math.floor(Math.random() * matchingIndexes.length)];
+  stringArray[randomIndex] = conversions[stringArray[randomIndex]];
+  return stringArray.join('');
+};
+
+export const randomlyCapitalize = string =>
+  string
+    .split('')
+    .map(v => {
+      const chance = Math.round(Math.random());
+      return chance ? v.toUpperCase() : v.toLowerCase();
+    })
+    .join('');
+
+export const randomlyCapitalizeAndLetterToNumber = string =>
+  changeLetterToNumber(randomlyCapitalize(string));
+
+export const randomlyJig = string => {
+  const functions = [
+    changeLetterToNumber,
+    randomlyCapitalize,
+    randomlyCapitalizeAndLetterToNumber
+  ];
+  const randomFunction =
+    functions[Math.floor(Math.random() * functions.length)];
+  return randomFunction(string);
 };

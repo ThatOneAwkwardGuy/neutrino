@@ -753,7 +753,9 @@ class AccountCreator extends Component {
                     <option key="site-disabled" value="disabled">
                       Select a site
                     </option>
-                    {Object.keys(sites).map(this.returnSiteOption)}
+                    {Object.keys(sites)
+                      .sort()
+                      .map(this.returnSiteOption)}
                   </Input>
                 </Col>
                 {!randomPass ? (

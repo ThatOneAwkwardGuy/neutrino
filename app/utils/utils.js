@@ -48,6 +48,32 @@ export const createNewWindow = async (tokenID, proxy) => {
   return win;
 };
 
+export const setProxyForSession = (proxy, win, session) =>
+  new Promise((resolve, reject) => {
+    try {
+      const proxyArray = proxy.includes('http://')
+        ? proxy.split('http://')[1].split(/@|:/)
+        : proxy.split(/@|:/);
+
+      if (proxyArray.length === 4) {
+        win.webContents.on('login', (event, request, authInfo, callback) => {
+          event.preventDefault();
+
+          callback(proxyArray[0], proxyArray[1]);
+        });
+      }
+      const proxyIpAndPort = proxyArray.slice(-2);
+      session.setProxy(
+        { proxyRules: `${proxyIpAndPort[0]}:${proxyIpAndPort[1]},direct://` },
+        () => {
+          resolve();
+        }
+      );
+    } catch (error) {
+      reject(error);
+    }
+  });
+
 export const setProxyForWindow = (proxy, win) =>
   new Promise((resolve, reject) => {
     try {

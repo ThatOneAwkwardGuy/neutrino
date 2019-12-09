@@ -28,19 +28,20 @@ export const testProxy = async (proxyString, proxySite) => {
       time: true,
       resolveWithFullResponse: true,
       uri: proxySite,
-      agent: new HttpsProxyAgent(proxy)
+      agent: new HttpsProxyAgent(proxy),
+      timeout: 60000
     });
     console.log(responsePing);
   } catch (error) {
     console.log(error);
-    responsePing = { timings: { response: -1 } };
+    responsePing = { elapsedTime: -1 };
   }
   return {
     user,
     pass,
     ip,
     port,
-    ping: Math.round(responsePing.timings.response)
+    ping: Math.round(responsePing.elapsedTime)
   };
 };
 

@@ -10,7 +10,6 @@ import { convertBaseToNeutrino } from '../ProfileCreator/functions';
 import Table from '../Table/index';
 import bodega from '../../images/bodega.jpg';
 import extrabutter from '../../images/extrabutter.jpg';
-// import footpatrol from '../../images/footpatrol.png';
 import nakedcph from '../../images/nakedcph.jpg';
 import renarts from '../../images/renarts.jpg';
 import dsm from '../../images/dsm.png';
@@ -20,15 +19,16 @@ import lapstoneandhammer from '../../images/lapstoneandhammer.jpg';
 import stress95 from '../../images/stress95.png';
 import fearofgod from '../../images/fearofgod.png';
 import footdistrict from '../../images/footdistrict.png';
+import voostore from '../../images/voostore.png';
+// import end from '../../images/end.jpg';
+// import footpatrol from '../../images/footpatrol.png';
 // import footshop from '../../images/footshop.png';
 // import woodwood from '../../images/woodwood.jpg';
 // import oneblockdown from '../../images/oneblockdown.jpeg';
-import voostore from '../../images/voostore.png';
 // import supplystore from '../../images/supplystore.png';
 // import kickz from '../../images/kickz.png';
 // import bstn from '../../images/bstn.png';
 
-// import Footpatrol from './Raffle/Footpatrol';
 import NakedCPH from './Raffle/NakedCPH';
 import ExtraButter from './Raffle/ExtraButter';
 import Bodega from './Raffle/Bodega';
@@ -42,6 +42,7 @@ import FearOfGod from './Raffle/FearOfGod';
 import FootDistrict from './Raffle/FootDistrict';
 // import END from './Raffle/END';
 import VooStore from './Raffle/VooStore';
+// import Footpatrol from './Raffle/Footpatrol';
 // import FootShop from './Raffle/FootShop';
 // import SupplyStore from './Raffle/SupplyStore';
 // import OneBlockDown from './Raffle/OneBlockDown';
@@ -68,13 +69,14 @@ const sites = [
   { name: 'Stress95', img: stress95 },
   { name: 'Fear Of God', img: fearofgod },
   { name: 'FootDistrict', img: footdistrict },
+  // { name: 'END', img: end },
+  { name: 'VooStore', img: voostore }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
   // { name: 'WoodWood', img: woodwood }
   // { name: 'FootShop', img: footshop }
   // { name: 'SupplyStore', img: supplystore }
   // { name: 'OneBlockDown', img: oneblockdown }
-  { name: 'VooStore', img: voostore }
 ];
 
 const Classes = {

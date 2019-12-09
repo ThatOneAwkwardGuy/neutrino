@@ -681,3 +681,5 @@ export const FootDistrictSchema = new Schema({
     length: { min: 1 }
   }
 });
+
+export const ENDSchema = new Schema({});

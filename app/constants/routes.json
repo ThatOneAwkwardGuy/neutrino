@@ -12,6 +12,7 @@
   "ONECLICK_TESTER": "/home/oneclick-tester",
   "PROFILE_TASK_EDITOR_CONVERTER": "/home/profile-task-editor-converter",
   "RAFFLE_BOT": "/home/raffle-bot",
+  "BROWSER": "/home/browser",
   "SETTINGS": "/home/settings",
   "CAPTCHA": "/captcha"
 }

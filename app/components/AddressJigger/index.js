@@ -25,7 +25,7 @@ class AddressJigger extends Component {
       region: '',
       country: '',
       zipcode: '',
-      quantity: 0,
+      quantity: 1,
       jigAddressesBool: true,
       fourCharPrefixBool: false,
       jiggedAddresses: []
@@ -67,7 +67,10 @@ class AddressJigger extends Component {
       quantity
     );
     this.setState({
-      jiggedAddresses: finalJiggedAddresses
+      jiggedAddresses:
+        finalJiggedAddresses < parseInt(quantity, 10)
+          ? finalJiggedAddresses
+          : finalJiggedAddresses.slice(0, parseInt(quantity, 10))
     });
   };
 
@@ -172,18 +175,16 @@ class AddressJigger extends Component {
                   type="text"
                 />
               </Col>
-              {fourCharPrefixBool ? (
-                <Col xs="4">
-                  <Label>Quantity</Label>
-                  <Input
-                    name="quantity"
-                    value={quantity}
-                    onChange={this.handleChange}
-                    type="number"
-                    min="0"
-                  />
-                </Col>
-              ) : null}
+              <Col xs="4">
+                <Label>Quantity</Label>
+                <Input
+                  name="quantity"
+                  value={quantity}
+                  onChange={this.handleChange}
+                  type="number"
+                  min="1"
+                />
+              </Col>
             </FormGroup>
             <FormGroup row>
               <Col>

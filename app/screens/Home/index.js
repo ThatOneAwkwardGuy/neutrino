@@ -38,6 +38,7 @@ import OneClickTester from '../../components/OneClickTester';
 import ProfileCreator from '../../components/ProfileCreator';
 import ProfileTaskEditorConverter from '../../components/ProfileTaskEditorConverter';
 import RaffleBot from '../../components/RaffleBot';
+import Browser from '../../components/Browser';
 import Settings from '../../components/Settings';
 import {
   SET_DISCORD_RPC_STATE,
@@ -395,6 +396,16 @@ class Home extends Component {
         }
       },
       {
+        path: routes.BROWSER,
+        component: Browser,
+        exact: true,
+        props: {
+          settings,
+          setLoading,
+          setInfoModal
+        }
+      },
+      {
         path: routes.SETTINGS,
         component: Settings,
         exact: true,
@@ -612,6 +623,22 @@ class Home extends Component {
               </Link>
             </div>
             <div>
+              <Link to={routes.BROWSER} alt="Browser" title="Browser">
+                <div
+                  className={`sidebarIcon ${
+                    window.location.hash === `#${routes.BROWSER}`
+                      ? 'sidebarIconActive'
+                      : ''
+                  }`}
+                >
+                  <FontAwesomeIcon icon={['fab', 'chrome']} />
+                  {sidebarExpand ? (
+                    <span className="sidebarIconLabel">Browser</span>
+                  ) : null}
+                </div>
+              </Link>
+            </div>
+            <div>
               <Link to={routes.SETTINGS} alt="Settings" title="Settings">
                 <div
                   className={`sidebarIcon ${
@@ -696,7 +723,7 @@ const mapStateToProps = state => ({
 });
 
 // const mapDispatchToProps = dispatch => {
-//   
+//
 //   bindActionCreators({ ...SettingsActions, ...AccountActions }, dispatch);
 // };
 

@@ -3159,6 +3159,10 @@ braces@^2.3.1, braces@^2.3.2:
     split-string "^3.0.2"
     to-regex "^3.0.1"
 
+braintree-web@2.32.1:
+  version "2.32.1"
+  resolved "https://registry.yarnpkg.com/braintree-web/-/braintree-web-2.32.1.tgz#3dc91c0536a76324c05ea6d9c64989f43c3f7a2d"
+
 brorand@^1.0.1:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
@@ -5029,6 +5033,12 @@ ejs@~2.5.6:
   version "2.5.9"
   resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.5.9.tgz#7ba254582a560d267437109a68354112475b0ce5"
 
+electron-as-browser@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/electron-as-browser/-/electron-as-browser-1.0.0.tgz#8c2f5a546703ee16b693244b58b292f71928776b"
+  dependencies:
+    electron-log "^3.0.7"
+
 electron-builder@^21.2.0:
   version "21.2.0"
   resolved "https://registry.yarnpkg.com/electron-builder/-/electron-builder-21.2.0.tgz#b68ec4def713fc0b8602654ce842f972432f50c5"
@@ -5104,6 +5114,10 @@ electron-localshortcut@^3.1.0:
 electron-log@^3.0.6:
   version "3.0.8"
   resolved "https://registry.yarnpkg.com/electron-log/-/electron-log-3.0.8.tgz#ea672dc40b560143ed5d887eff1ff1904fe9ef71"
+
+electron-log@^3.0.7:
+  version "3.0.9"
+  resolved "https://registry.yarnpkg.com/electron-log/-/electron-log-3.0.9.tgz#53ff1fcdb2f3e4a73ea7096d2f7204121109ec6f"
 
 electron-notarize@^0.1.1:
   version "0.1.1"

@@ -16,7 +16,8 @@ const hashToName = {
   '#/home/profile-creator': 'Profile Creator',
   '#/home/profile-task-editor-converter': 'Profile Converter',
   '#/home/raffle-bot': 'Raffle Bot',
-  '#/home/settings': 'Settings'
+  '#/home/settings': 'Settings',
+  '#/home/browser': 'Browser'
 };
 
 export default class Header extends Component {

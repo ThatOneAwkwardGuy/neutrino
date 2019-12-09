@@ -173,6 +173,12 @@ Need to add animations
 - Raffle Bot - NakedCPH updated to support extra field they added
 - Raffle Bot - FootDistrict updated to support new sizes they added
 
+2.0.37
+- Account Creator - JuiceStore Account Creator
+- Ping Tester - More accurate ping value
+- Browser Module - New browser module that supports proxies and autofill (BETA)
+- Address Jigger - Smarter Jigger to provide even more results
+
 
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
