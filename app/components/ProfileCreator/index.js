@@ -39,6 +39,7 @@ const { dialog } = require('electron').remote;
 const randomName = require('random-name');
 const converter = require('json-2-csv');
 const fs = require('fs');
+const fsPromises = require('fs').promises;
 
 const bots = [
   'Cybersole',
@@ -287,6 +288,23 @@ class ProfileCreator extends Component {
       return { Profiles: Object.values(profiles) };
     }
     return profiles;
+  };
+
+  loadEmails = () => {
+    dialog.showOpenDialog(
+      null,
+      {
+        filters: [{ name: 'Emails and Passes Text File', extensions: ['txt'] }]
+      },
+      async filePaths => {
+        const filePath = filePaths[0];
+        const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
+        if (filePath.split('.').slice(-1)[0] === 'txt') {
+          const emails = file.split('\n');
+          this.setState({ emails, quantity: emails.length });
+        }
+      }
+    );
   };
 
   exportProfiles = async () => {
@@ -951,6 +969,16 @@ class ProfileCreator extends Component {
               </Col>
             </Row>
             <Row className="my-4">
+              {/* <Col xs="6" className="text-right">
+                <Tooltip
+                  arrow
+                  distance={20}
+                  title="Load premade emails or emails and passwords in the format email or email:pass"
+                >
+                  <FontAwesomeIcon icon="question-circle" />
+                </Tooltip>
+                <Button onClick={this.loadEmails}>Load Emails & Passes</Button>
+              </Col> */}
               <Col xs={{ size: 6, offset: 6 }}>
                 <Button onClick={this.copyDeliveryToBilling}>
                   Copy Delivery
@@ -1080,7 +1108,9 @@ class ProfileCreator extends Component {
                 <Button onClick={this.addCards}>Add Cards</Button>
               </Col>
               <Col>
-                <Button color="danger" onClick={clearCards}>Clear Cards</Button>
+                <Button color="danger" onClick={clearCards}>
+                  Clear Cards
+                </Button>
               </Col>
             </Row>
             <Row className="py-3 align-items-end noselect">

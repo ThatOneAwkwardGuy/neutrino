@@ -8,6 +8,7 @@ import { convertCSVToBase } from '../ProfileTaskEditorConverter/functions';
 import { convertBaseToNeutrino } from '../ProfileCreator/functions';
 import Table from '../Table';
 import { setProxyForSession } from '../../utils/utils';
+import { userAgents } from './utils';
 
 const { remote } = require('electron');
 const { BrowserWindow } = require('electron').remote;
@@ -27,7 +28,8 @@ class Browser extends Component {
       order: 'asc',
       orderBy: '#',
       proxyInput: '',
-      site: 'http://google.com'
+      site: 'http://google.com',
+      userAgent: ''
     };
   }
 
@@ -132,8 +134,6 @@ class Browser extends Component {
   getRandomProxy = () => {
     const { proxyInput } = this.state;
     const proxies = proxyInput.split('\n');
-    console.log(proxyInput);
-    console.log(proxies);
     const randomProxy = proxies[Math.floor(Math.random() * proxies.length)];
     const splitRandomProxy =
       randomProxy !== undefined ? randomProxy.split(':') : undefined;
@@ -149,7 +149,7 @@ class Browser extends Component {
   };
 
   startBrowser = async profile => {
-    const { site } = this.state;
+    const { site, userAgent } = this.state;
     const proxy = this.getRandomProxy();
     const browserURL =
       process.env.NODE_ENV === 'development'
@@ -173,13 +173,18 @@ class Browser extends Component {
         webSecurity: false
       }
     });
-    console.log(proxy);
     if (proxy !== '') {
       await setProxyForSession(
         proxy,
         this.windows[profile.email],
         remote.session.fromPartition(`persist:browser-${profile.email}`)
       );
+    }
+    if (userAgent !== '') {
+      const session = remote.session.fromPartition(
+        `persist:browser-${profile.email}`
+      );
+      session.setUserAgent(userAgent);
     }
     this.windows[profile.email].loadURL(`${browserURL}#${profile.email}`);
     const { webContents } = this.windows[profile.email];
@@ -295,7 +300,7 @@ class Browser extends Component {
       }
     ];
 
-    const { profiles, site, proxyInput } = this.state;
+    const { profiles, site, proxyInput, userAgent } = this.state;
     return (
       <Row className="h-100">
         <Col className="h-100">
@@ -322,7 +327,7 @@ class Browser extends Component {
               <Col>
                 <Container fluid>
                   <Row>
-                    <Col xs="6" className="py-3">
+                    <Col xs="4" className="py-3">
                       <Label>
                         Proxies*{' '}
                         <Tooltip
@@ -343,6 +348,28 @@ class Browser extends Component {
                       />
                     </Col>
                     <Col xs="3" className="py-3">
+                      <Label>
+                        User Agents*{' '}
+                        <Tooltip
+                          arrow
+                          distance={20}
+                          title="The user agent you want to use when loading sites."
+                        >
+                          <FontAwesomeIcon icon="question-circle" />
+                        </Tooltip>
+                      </Label>
+                      <Input
+                        type="select"
+                        value={userAgent}
+                        name="userAgent"
+                        onChange={this.handleChange}
+                      >
+                        {Object.keys(userAgents).map(agent => (
+                          <option value={userAgents[agent]}>{agent}</option>
+                        ))}
+                      </Input>
+                    </Col>
+                    <Col xs="2" className="py-3">
                       <Label>
                         Website*{' '}
                         <Tooltip

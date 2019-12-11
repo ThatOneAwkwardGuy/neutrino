@@ -140,7 +140,7 @@ export const testAccountPromise = (index, account) =>
           .executeJavaScript(`document.getElementById("Email").value = "${account.email}";
                     document.getElementById("next").click();`);
       });
-      win.webContents.on('did-navigate-in-page', async () => {
+      win.webContents.on('did-finish-load', async () => {
         const passwordPage = await win.webContents.executeJavaScript(
           'document.documentElement.innerHTML',
           false
@@ -150,22 +150,13 @@ export const testAccountPromise = (index, account) =>
             `<input id="Passwd" name="Passwd" type="password"`
           )
         ) {
-          await win.webContents
-            .executeJavaScript(`var passwdObserver = new MutationObserver(function(mutations, me) {
+          await win.webContents.executeJavaScript(`
                         var canvas = document.getElementById("Passwd");
                         if (canvas) {
                           canvas.value = "${account.pass}";
                           document.getElementById("signIn").click();
-                          me.disconnect();
-                          return;
                         }
-                      });
-                      passwdObserver.observe(document, {
-                          childList: true,
-                          attributes:true,
-                          subtree: true,
-                          characterData: true
-                      })`);
+                        `);
           win.webContents.on('did-finish-load', () => {
             win.webContents.executeJavaScript(
               'window.location',

@@ -180,7 +180,11 @@ export default class OneClickGenerator extends Component {
 
   stopAllActivities = () => {
     Object.values(this.windows).forEach((window, index) => {
-      this.stopActivity(index);
+      try {
+        this.stopActivity(index + 1);
+      } catch (error) {
+        console.error(error);
+      }
     });
   };
 

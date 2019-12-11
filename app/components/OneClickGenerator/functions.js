@@ -41,23 +41,13 @@ export const createActivityWindow = (
                         document.getElementById("Email").value = "${activity.email}";
                         document.getElementById("next").click();
                         `);
-          win.webContents.once('did-navigate-in-page', () => {
+          win.webContents.once('did-finish-load', () => {
             win.webContents.executeJavaScript(`
-                          var passwdObserver = new MutationObserver(function(mutations, me) {
                             var canvas = document.getElementById("Passwd");
                             if (canvas) {
                               canvas.value = "${activity.pass}";
                               document.getElementById("signIn").click();
-                              me.disconnect();
-                              return;
                             }
-                          });
-                          passwdObserver.observe(document, {
-                              childList: true,
-                              attributes:true,
-                              subtree: true,
-                              characterData: true
-                          })
                           `);
             win.webContents.once('did-finish-load', () => {
               win.webContents.executeJavaScript(
