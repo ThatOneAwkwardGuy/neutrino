@@ -154,6 +154,8 @@ class Home extends Component {
         return 'Raffle Bot';
       case '/home/settings':
         return 'Settings';
+      case '/home/browser':
+        return 'Browser';
       default:
         return '';
     }
@@ -274,7 +276,8 @@ class Home extends Component {
       proxies,
       addProxy,
       clearProxies,
-      history
+      history,
+      raffleBot
     } = this.props;
     const {
       setLoading,
@@ -348,6 +351,7 @@ class Home extends Component {
         exact: true,
         props: {
           settings,
+          showAcitivtyWindows: settings.showAcitivtyWindows,
           addActivities,
           incrementActivity,
           updateActivity,
@@ -383,19 +387,6 @@ class Home extends Component {
         props: {}
       },
       {
-        path: routes.RAFFLE_BOT,
-        component: RaffleBot,
-        exact: true,
-        props: {
-          settings,
-          setLoading,
-          raffleInfo,
-          setRaffleInfo,
-          setInfoModal,
-          incrementRaffles
-        }
-      },
-      {
         path: routes.BROWSER,
         component: Browser,
         exact: true,
@@ -417,6 +408,21 @@ class Home extends Component {
         }
       }
     ];
+    if (raffleBot) {
+      appRoutes.push({
+        path: routes.RAFFLE_BOT,
+        component: RaffleBot,
+        exact: true,
+        props: {
+          settings,
+          setLoading,
+          raffleInfo,
+          setRaffleInfo,
+          setInfoModal,
+          incrementRaffles
+        }
+      });
+    }
     return (
       <Container fluid className="d-flex flex-column h-100">
         <Header />
@@ -606,22 +612,28 @@ class Home extends Component {
                 </div>
               </Link>
             </div>
-            <div>
-              <Link to={routes.RAFFLE_BOT} alt="Raffle Bot" title="Raffle Bot">
-                <div
-                  className={`sidebarIcon ${
-                    window.location.hash === `#${routes.RAFFLE_BOT}`
-                      ? 'sidebarIconActive'
-                      : ''
-                  }`}
+            {raffleBot ? (
+              <div>
+                <Link
+                  to={routes.RAFFLE_BOT}
+                  alt="Raffle Bot"
+                  title="Raffle Bot"
                 >
-                  <FontAwesomeIcon icon="ticket-alt" />
-                  {sidebarExpand ? (
-                    <span className="sidebarIconLabel">Raffle Bot</span>
-                  ) : null}
-                </div>
-              </Link>
-            </div>
+                  <div
+                    className={`sidebarIcon ${
+                      window.location.hash === `#${routes.RAFFLE_BOT}`
+                        ? 'sidebarIconActive'
+                        : ''
+                    }`}
+                  >
+                    <FontAwesomeIcon icon="ticket-alt" />
+                    {sidebarExpand ? (
+                      <span className="sidebarIconLabel">Raffle Bot</span>
+                    ) : null}
+                  </div>
+                </Link>
+              </div>
+            ) : null}
             <div>
               <Link to={routes.BROWSER} alt="Browser" title="Browser">
                 <div
@@ -744,6 +756,7 @@ Home.propTypes = {
   settings: PropTypes.objectOf(PropTypes.any).isRequired,
   addCreatedAccount: PropTypes.func.isRequired,
   removeCreatedAccount: PropTypes.func.isRequired,
+  raffleBot: PropTypes.bool.isRequired,
   removeAllCreatedAccounts: PropTypes.func.isRequired,
   location: PropTypes.objectOf(PropTypes.any).isRequired,
   checkUserAuth: PropTypes.func.isRequired,

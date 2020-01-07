@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { convertCSVToBase } from '../ProfileTaskEditorConverter/functions';
 import { convertBaseToNeutrino } from '../ProfileCreator/functions';
 import Table from '../Table';
-import { setProxyForSession } from '../../utils/utils';
+import { setProxyForSession, generateUEID } from '../../utils/utils';
 import { userAgents } from './utils';
 
 const { remote } = require('electron');
@@ -365,7 +365,12 @@ class Browser extends Component {
                         onChange={this.handleChange}
                       >
                         {Object.keys(userAgents).map(agent => (
-                          <option value={userAgents[agent]}>{agent}</option>
+                          <option
+                            key={generateUEID()}
+                            value={userAgents[agent]}
+                          >
+                            {agent}
+                          </option>
                         ))}
                       </Input>
                     </Col>

@@ -799,9 +799,15 @@ export default class Settings extends Component {
                   onChange={this.handleSettingsChange}
                   value={settings.CaptchaAPI}
                 >
-                  <option value="">Manual</option>
-                  <option value="2Captcha">2Captcha</option>
-                  <option value="AntiCaptcha">AntiCaptcha</option>
+                  <option key={generateUEID()} value="">
+                    Manual
+                  </option>
+                  <option key={generateUEID()} value="2Captcha">
+                    2Captcha
+                  </option>
+                  <option key={generateUEID()} value="AntiCaptcha">
+                    AntiCaptcha
+                  </option>
                   {/* <option value="ImageTypers">ImageTypers</option> */}
                 </Input>
               </Col>

@@ -1,5 +1,5 @@
 import * as firebase from 'firebase/app';
-import 'firebase/auth';
+import undefined from 'firebase/auth';
 import 'firebase/database';
 import 'firebase/firestore';
 import 'firebase/analytics';
@@ -46,7 +46,11 @@ export const checkIfUserMachineIDMatches = async UID => {
   const { machineID } = data;
   const id = machineIdSync();
   if (id === machineID && data.status === 'active') {
-    return { authorised: true, message: '' };
+    return {
+      authorised: true,
+      message: '',
+      raffleBot: data.raffleBot
+    };
   }
   if (data.status !== 'active') {
     auth.signOut();

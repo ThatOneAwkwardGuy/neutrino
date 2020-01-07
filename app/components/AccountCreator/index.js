@@ -21,7 +21,8 @@ import { sites } from '../../constants/constants';
 import {
   upperCaseFirst,
   createNewWindow,
-  generateRandomNLengthString
+  generateRandomNLengthString,
+  generateUEID
 } from '../../utils/utils';
 import { getCaptchaResponse } from '../../screens/Captcha/functions';
 import { getFormData } from './functions';
@@ -172,7 +173,9 @@ class AccountCreator extends Component {
   sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
 
   returnSiteOption = site => (
-    <option value={site}>{upperCaseFirst(site)}</option>
+    <option key={generateUEID()} value={site}>
+      {upperCaseFirst(site)}
+    </option>
   );
 
   toggleAdvancedSettings = () => {

@@ -31,6 +31,7 @@ import {
   convertBaseToAdept,
   generateGmailDotTrick
 } from './functions';
+import { generateUEID } from '../../utils/utils';
 
 import Countries from '../../constants/countries';
 import Table from '../Table/index';
@@ -888,9 +889,13 @@ class ProfileCreator extends Component {
                   value={deliveryCountry}
                   onChange={this.handleChange}
                 >
-                  <option value="">Select a delivery country</option>
+                  <option key={generateUEID()} value="">
+                    Select a delivery country
+                  </option>
                   {Object.keys(Countries).map(country => (
-                    <option value={country}>{country}</option>
+                    <option key={generateUEID()} value={country}>
+                      {country}
+                    </option>
                   ))}
                 </Input>
               </Col>
@@ -903,9 +908,13 @@ class ProfileCreator extends Component {
                   value={billingCountry}
                   onChange={this.handleChange}
                 >
-                  <option value="">Select a billing country</option>
+                  <option key={generateUEID()} value="">
+                    Select a billing country
+                  </option>
                   {Object.keys(Countries).map(country => (
-                    <option value={country}>{country}</option>
+                    <option key={generateUEID()} value={country}>
+                      {country}
+                    </option>
                   ))}
                 </Input>
               </Col>
@@ -920,10 +929,14 @@ class ProfileCreator extends Component {
                   value={deliveryRegion}
                   onChange={this.handleChange}
                 >
-                  <option value="">Select a delivery region</option>
+                  <option key={generateUEID()} value="">
+                    Select a delivery region
+                  </option>
                   {deliveryCountry !== ''
                     ? Countries[deliveryCountry].provinces.map(country => (
-                        <option value={country}>{country}</option>
+                        <option key={generateUEID()} value={country}>
+                          {country}
+                        </option>
                       ))
                     : null}
                 </Input>
@@ -948,10 +961,14 @@ class ProfileCreator extends Component {
                   value={billingRegion}
                   onChange={this.handleChange}
                 >
-                  <option value="">Select a billing region</option>
+                  <option key={generateUEID()} value="">
+                    Select a billing region
+                  </option>
                   {billingCountry !== ''
                     ? Countries[billingCountry].provinces.map(country => (
-                        <option value={country}>{country}</option>
+                        <option key={generateUEID()} value={country}>
+                          {country}
+                        </option>
                       ))
                     : null}
                 </Input>
@@ -1140,9 +1157,13 @@ class ProfileCreator extends Component {
                   name="bot"
                   onChange={this.handleChange}
                 >
-                  <option value="">Select a bot</option>
+                  <option key={generateUEID()} value="">
+                    Select a bot
+                  </option>
                   {bots.sort().map(bot => (
-                    <option value={bot}>{bot}</option>
+                    <option key={generateUEID()} value={bot}>
+                      {bot}
+                    </option>
                   ))}
                 </Input>
               </Col>

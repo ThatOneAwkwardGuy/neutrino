@@ -197,7 +197,8 @@ app.on('ready', async () => {
   });
 
   mainWindow.on('closed', () => {
-    mainWindow = null;
+    // mainWindow = null;
+    BrowserWindow.getAllWindows().forEach(window => window.close());
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);

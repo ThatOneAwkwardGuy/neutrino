@@ -31,7 +31,11 @@ export default class Header extends Component {
   };
 
   closeWindow = () => {
-    remote.getCurrentWindow().close();
+    if (process.platform !== 'darwin') {
+      remote.getCurrentWindow().close();
+    } else {
+      remote.app.hide();
+    }
   };
 
   render() {

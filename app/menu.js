@@ -64,7 +64,12 @@ export default class MenuBuilder {
           accelerator: 'Command+Shift+H',
           selector: 'hideOtherApplications:'
         },
-        { label: 'Show All', selector: 'unhideAllApplications:' },
+        {
+          label: 'Show All',
+          click: () => {
+            app.show();
+          }
+        },
         { type: 'separator' },
         {
           label: 'Quit',

@@ -571,6 +571,10 @@ export default class RaffleBot extends Component {
   }
 }
 
+RaffleBot.defaultProps = {
+  raffleInfo: {}
+};
+
 RaffleBot.propTypes = {
   settings: PropTypes.objectOf(PropTypes.any).isRequired,
   setLoading: PropTypes.func.isRequired,
@@ -578,7 +582,7 @@ RaffleBot.propTypes = {
   raffleInfo: PropTypes.shape({
     store: PropTypes.string.isRequired,
     link: PropTypes.string.isRequired
-  }).isRequired,
+  }),
   setRaffleInfo: PropTypes.func.isRequired,
   incrementRaffles: PropTypes.func.isRequired
 };
