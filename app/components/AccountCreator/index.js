@@ -25,7 +25,11 @@ import {
   generateUEID
 } from '../../utils/utils';
 import { getCaptchaResponse } from '../../screens/Captcha/functions';
-import { getFormData } from './functions';
+import {
+  getFormData
+  // randomNumberInRange,
+  // getNikeUSMobileNumberGetSMSCode
+} from './functions';
 import {
   getRandomInt,
   generateGmailDotTrick
@@ -196,6 +200,14 @@ class AccountCreator extends Component {
     const accountPromises = Array.from(Array(parseInt(quantity, 10))).map(
       (value, index) => {
         switch (site) {
+          case 'nike - US':
+            return this.sleep(parseInt(delay, 10)).then(() =>
+              this.createNikeAccount(gmailEmails[index]).catch(e => e)
+            );
+          case 'gmail - US':
+            return this.sleep(parseInt(delay, 10)).then(() =>
+              this.createGmailAccount(gmailEmails[index]).catch(e => e)
+            );
           case 'nakedcph':
             return this.sleep(parseInt(delay, 10)).then(() =>
               this.createNakedCphAccount(gmailEmails[index]).catch(e => e)
@@ -669,6 +681,106 @@ class AccountCreator extends Component {
       });
     });
   };
+
+  // createNikeAccount = async gmailEmail => {
+  //   const {
+  //     randomPass,
+  //     randomName,
+  //     useProxies,
+  //     site,
+  //     catchall,
+  //     pass,
+  //     firstName,
+  //     lastName
+  //   } = this.state;
+  //   const { addCreatedAccount } = this.props;
+  //   return new Promise(async (resolve, reject) => {
+  //     const email =
+  //       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
+  //     const accountPass = randomPass ? randomize('a', 10) : pass;
+  //     const accountFirstName = randomName ? random.first() : firstName;
+  //     const accountLastName = randomName ? random.last() : lastName;
+  //     const tokenID = uuidv4();
+  //     const proxy = useProxies ? this.getRandomProxy() : '';
+  //     const window = await createNewWindow(tokenID, proxy);
+  //     window.webContents.on('close', () => {
+  //       reject(new Error('Closed Window Before Finished'));
+  //     });
+  //     window.webContents.executeJavaScript(`
+  //     document.querySelector('input[autocomplete="email"]').value = "${email}";
+  //     document.querySelector('input[autocomplete="email"]').value = "${randomNumberInRange(
+  //       1970,
+  //       2000
+  //     )}-${randomNumberInRange(1, 12)}-${randomNumberInRange(1, 27)}";
+
+  //     `);
+  //     window.loadURL('https://www.nike.com/email-signup');
+  //   });
+  // };
+
+  // createGmailAccount = async gmailEmail => {
+  //   const {
+  //     randomPass,
+  //     randomName,
+  //     useProxies,
+  //     site,
+  //     catchall,
+  //     pass,
+  //     firstName,
+  //     lastName
+  //   } = this.state;
+  //   const { addCreatedAccount, settings } = this.props;
+  //   return new Promise(async (resolve, reject) => {
+  //     const email =
+  //       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
+  //     const accountPass = randomPass ? randomize('a', 10) : pass;
+  //     const accountFirstName = randomName ? random.first() : firstName;
+  //     const accountLastName = randomName ? random.last() : lastName;
+  //     const tokenID = uuidv4();
+  //     const proxy = useProxies ? this.getRandomProxy() : '';
+  //     const window = await createNewWindow(tokenID, proxy);
+  //     window.webContents.on('close', () => {
+  //       reject(new Error('Closed Window Before Finished'));
+  //     });
+  //     window.loadURL(
+  //       'https://accounts.google.com/signup/v2/webcreateaccount?continue=https%3A%2F%2Fwww.google.com%2F&hl=en&dsh=S-335479417%3A1578947587932690&flowName=GlifWebSignIn&flowEntry=SignUp'
+  //     );
+  //     window.webContents.executeJavaScript(`
+  //     document.querySelector('input[name="firstName"]').value = "${accountFirstName}";
+  //     document.querySelector('input[name="lastName"]').value = "${accountLastName}";
+  //     document.querySelector('input[name="Username"]').value = "${generateRandomNLengthString(
+  //       10
+  //     )}";
+  //     document.querySelector('input[name="Passwd"]').value = "${accountPass}";
+  //     document.querySelector('input[name="ConfirmPasswd"]').value = "${accountPass}";
+  //     document.getElementById('accountDetailsNext').click();
+  //     `);
+  //     window.webContents.executeJavaScript(`
+  //       var passwdObserver = new MutationObserver(function(mutations, me) {
+  //         var canvas = document.getElementById("countryList");
+  //         if (canvas) {
+  //           setTimeout(function(){ document.querySelector('#countryList > div:nth-child(1)').click(); }, 3000);
+  //           setTimeout(function(){ document.querySelector("#countryList > div > div[data-value='us'").click(); }, 5000);
+  //           me.disconnect();
+  //           return;
+  //         }
+  //       });
+  //       passwdObserver.observe(document, {
+  //           childList: true,
+  //           attributes:true,
+  //           subtree: true,
+  //           characterData: true
+  //       })
+  //     `);
+  //     // window.webContents.once('did-navigate-in-page', async () => {
+  //     //   console.log('Testin');
+  //     //   window.webContents.executeJavaScript(`
+  //     //   setTimeout(function(){ document.querySelector('#countryList > div:nth-child(1)').click(); }, 3000);
+  //     //   setTimeout(function(){ document.querySelector("#countryList > div > div[data-value='us'").click(); }, 5000);
+  //     // `);
+  //     const mobileNumber = await getNikeUSMobileNumberGetSMSCode(settings);
+  //   });
+  // };
 
   render() {
     const {

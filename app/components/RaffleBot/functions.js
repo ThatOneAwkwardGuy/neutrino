@@ -16,6 +16,8 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadDSMRaffleInfo(raffleLink);
       case 'DSMNY':
         return loadDSMNYRaffleInfo(raffleLink);
+        case 'DSMLA':
+            return loadDSMLARaffleInfo(raffleLink);
       case 'Footpatrol':
         return loadFootpatrolRaffleInfo(raffleLink);
       case 'Footpatrol UK':
@@ -256,6 +258,104 @@ const loadDSMNYRaffleInfo = async link => {
   });
 };
 
+const loadDSMLARaffleInfo = async link => {
+  const win = new BrowserWindow({
+    width: 500,
+    height: 650,
+    show: true,
+    frame: true,
+    resizable: true,
+    focusable: true,
+    minimizable: true,
+    closable: true,
+    allowRunningInsecureContent: true,
+    webPreferences: {
+      webviewTag: true,
+      allowRunningInsecureContent: true,
+      nodeIntegration: true,
+      webSecurity: false
+    }
+  });
+  return new Promise((resolve, reject) => {
+    try {
+      win.loadURL(link);
+      win.webContents.once('did-finish-load', () => {
+        win.webContents.executeJavaScript(
+          'window.location.href',
+          false,
+          result => {
+            if (result === link) {
+              win.webContents.executeJavaScript(
+                'document.documentElement.innerHTML',
+                false,
+                windowResult => {
+                  win.close();
+                  const $ = cheerio.load(windowResult);
+                  const styles = $(
+                    'div[fs-field-validation-name*="Color"] option'
+                  )
+                    .map((index, style) => ({
+                      id: style.attribs.value,
+                      name: style.attribs.value
+                    }))
+                    .toArray();
+                  const sizes = $(
+                    'div[fs-field-validation-name*="Size"] option'
+                  )
+                    .map((index, size) => ({
+                      id: size.attribs.value,
+                      name: size.attribs.value
+                    }))
+                    .toArray();
+                  const fullNameFormID = $(
+                    'div[fs-field-validation-name="Full Name"] input'
+                  ).attr('name');
+                  const emailFormID = $(
+                    'div[fs-field-validation-name="Email"] input'
+                  ).attr('name');
+                  const phoneFormID = $(
+                    'div[fs-field-validation-name="Mobile Phone Number"] input'
+                  ).attr('name');
+                  const postcodeFormID = $(
+                    'div[fs-field-validation-name="Postcode"] input'
+                  ).attr('name');
+                  const colorFormID = $(
+                    'div[fs-field-validation-name*="Color"] select'
+                  ).attr('name');
+                  const sizeFormID = $(
+                    'div[fs-field-validation-name*="Size"] select'
+                  ).attr('name');
+                  const formFields = {};
+                  $('form input').each((index, element) => {
+                    const { name, value } = element.attribs;
+                    formFields[name] = value;
+                  });
+                  resolve({
+                    sizeInput: sizeFormID !== undefined,
+                    styleInput: colorFormID !== undefined,
+                    styles,
+                    sizes,
+                    raffleDetails: {
+                      fullNameFormID,
+                      emailFormID,
+                      phoneFormID,
+                      postcodeFormID,
+                      colorFormID,
+                      sizeFormID,
+                      ...formFields
+                    }
+                  });
+                }
+              );
+            }
+          }
+        );
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 const loadStress95RaffleInfo = async link => {
   const win = await createNewWindow('', '');
   win.loadURL(link);

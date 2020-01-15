@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { ipcRenderer } from 'electron';
 import { Container, Row, Col, Button } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
 import PropTypes from 'prop-types';
 import { getFirestore } from '../../utils/firebase';
 import icon from '../../images/animatedIcon.svg';
@@ -135,6 +137,10 @@ export default class Homepage extends Component {
                   Welcome to Neutrino, we’re constanty adding new features,
                   updates and bug fixes, so makesure you’re always checking the
                   discord for updates.
+                </p>
+                <p className="font-weight-bold">
+                  Makesure to tweet about us!{' '}
+                  <FontAwesomeIcon icon={['fab', 'twitter']} />
                 </p>
                 <h5 className="font-weight-bold fs-0_8rem">Bugs?</h5>
                 <p>

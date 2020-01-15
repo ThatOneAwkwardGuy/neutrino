@@ -14,6 +14,7 @@ import nakedcph from '../../images/nakedcph.jpg';
 import renarts from '../../images/renarts.jpg';
 import dsm from '../../images/dsm.png';
 import dsmny from '../../images/dsmny.png';
+import dsmla from '../../images/dsmla.jpg';
 import cityblue from '../../images/cityblue.jpg';
 import lapstoneandhammer from '../../images/lapstoneandhammer.jpg';
 import stress95 from '../../images/stress95.png';
@@ -37,6 +38,7 @@ import LapstoneAndHammer from './Raffle/LapstoneAndHammer';
 import Renarts from './Raffle/Renarts';
 import DSM from './Raffle/DSM';
 import DSMNY from './Raffle/DSMNY';
+import DSMLA from './Raffle/DSMLA';
 import Stress95 from './Raffle/Stress95';
 import FearOfGod from './Raffle/FearOfGod';
 import FootDistrict from './Raffle/FootDistrict';
@@ -66,6 +68,7 @@ const sites = [
   { name: 'Renarts', img: renarts },
   { name: 'DSM', img: dsm },
   { name: 'DSMNY', img: dsmny },
+  { name: 'DSMLA', img: dsmla },
   { name: 'Stress95', img: stress95 },
   { name: 'Fear Of God', img: fearofgod },
   { name: 'FootDistrict', img: footdistrict },
@@ -91,7 +94,8 @@ const Classes = {
   Stress95,
   'Fear Of God': FearOfGod,
   FootDistrict,
-  VooStore
+  VooStore,
+  DSMLA
 };
 
 export default class RaffleBot extends Component {

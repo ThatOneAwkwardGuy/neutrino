@@ -583,6 +583,54 @@ export const DSMNYSchema = new Schema({
   }
 });
 
+export const DSMLASchema = new Schema({
+  deliveryFirstName: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery First Name must be a string.',
+      required: 'Delivery First Name is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryLastName: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Last Name must be a string.',
+      required: 'Delivery Last Name is required.'
+    },
+    length: { min: 1 }
+  },
+  phone: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Phone Number must be a string.',
+      required: 'Phone Number is required.'
+    },
+    length: { min: 1 }
+  },
+  email: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Email must be a string.',
+      required: 'Email is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryZip: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Zip must be a string.',
+      required: 'Delivery Zip is required.'
+    },
+    length: { min: 1 }
+  }
+});
+
 export const Stress95Schema = new Schema({
   deliveryFirstName: {
     type: String,

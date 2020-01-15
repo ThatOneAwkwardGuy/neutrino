@@ -36,6 +36,8 @@ export default class Settings extends Component {
       linodeAPIKey: '',
       awsAccessKey: '',
       awsSecretKey: ''
+      // smsApiKey: '',
+      // selectedSmsProvider: ''
     };
   }
 
@@ -812,6 +814,77 @@ export default class Settings extends Component {
                 </Input>
               </Col>
             </Row>
+            {/* <Row className="p-3 align-items-end">
+              <Col xs="3">
+                <Label>
+                  GetSMSCode API Key{' '}
+                  <Tooltip
+                    arrow
+                    distance={20}
+                    title="Your GetSMSCode API Key"
+                    target="GetSMSCodeAPIKeyLabel"
+                  >
+                    <FontAwesomeIcon
+                      id="GetSMSCodeAPIKeyLabel"
+                      icon="question-circle"
+                    />{' '}
+                  </Tooltip>
+                </Label>
+                <Input
+                  type="text"
+                  name="GetSMSCodeAPIKey"
+                  onChange={this.handleSettingsChange}
+                  value={settings.GetSMSCodeAPIKey}
+                />
+              </Col>
+            </Row>
+            <Row className="p-3 panel-middle align-items-end">
+              <Col xs="3">
+                <Label>SMS API</Label>{' '}
+                <Tooltip
+                  arrow
+                  distance={20}
+                  title="Which SMS API should be used when a Google CAPTCHA is needed"
+                  target="SMSAPILabel"
+                >
+                  <FontAwesomeIcon id="SMSAPILabel" icon="question-circle" />
+                </Tooltip>
+                <Input
+                  type="select"
+                  name="SMSAPI"
+                  onChange={this.handleSettingsChange}
+                  value={settings.SMSAPI}
+                >
+                  <option key={generateUEID()} value="">
+                    Select an SMS API Provider
+                  </option>
+                  <option key={generateUEID()} value="getSMSCode">
+                    GetSMSCode
+                  </option>
+                </Input>
+              </Col>
+              <Col xs="3">
+                <Label>SMS API Username</Label>{' '}
+                <Tooltip
+                  arrow
+                  distance={20}
+                  title="The SMS API Username, if its not required then leave empty. Required for GetSMSCode"
+                  target="SMSAPIUsernameLabel"
+                >
+                  <FontAwesomeIcon
+                    id="SMSAPIUsernameLabel"
+                    icon="question-circle"
+                  />
+                </Tooltip>
+                <Input
+                  type="text"
+                  name="SMSAPIUsername"
+                  onChange={this.handleSettingsChange}
+                  value={settings.SMSAPIUsername}
+                />
+              </Col>
+            </Row> */}
+
             <h6 className="font-weight-bold py-3">
               Neutrino CSV Template{' '}
               <Tooltip

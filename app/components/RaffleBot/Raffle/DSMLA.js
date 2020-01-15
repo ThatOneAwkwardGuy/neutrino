@@ -1,4 +1,5 @@
 import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+import { ValidateSchema, DSMLASchema } from '../schemas';
 
 const rp = require('request-promise');
 const uuidv4 = require('uuid/v4');
@@ -71,10 +72,12 @@ export default class DSMLA {
       proxy: this.proxy,
       baseURL: this.url,
       site: this.site,
-      settings: this.settings
+      settings: this.settings,
+      siteKey: '6LetKEIUAAAAAPk-uUXqq9E82MG3e40OMt_74gjS'
     });
 
   submitRaffle = captchaToken => {
+    console.log(this.raffleDetails);
     const payload = {
       form: parseInt(this.raffleDetails.form, 10),
       viewkey: this.raffleDetails.viewkey,
@@ -93,11 +96,14 @@ export default class DSMLA {
       [this.raffleDetails.phoneFormID]: this.profile.phone,
       [this.raffleDetails.emailFormID]: this.profile.email,
       [this.raffleDetails.postcodeFormID]: this.profile.deliveryZip,
-      [this.raffleDetails.colorFormID]: this.style.id,
       [this.raffleDetails.sizeFormID]: parseInt(this.size.id, 10),
-      'g-recaptcha-response': captchaToken
+      'g-recaptcha-response': captchaToken,
+      nonce: 'vEJQMJIDnQjW7sv6'
     };
-
+    if (this.style !== undefined) {
+      payload[this.raffleDetails.colorFormID] = this.style.id;
+    }
+    console.log(payload);
     return this.rp({
       method: 'POST',
       followAllRedirects: true,
@@ -109,17 +115,21 @@ export default class DSMLA {
   };
 
   makeEntry = async () => {
+    ValidateSchema(DSMLASchema, { ...this.profile });
+
     this.changeStatus('Getting Captcha');
     const captchaResponse = await this.getCaptcha();
-    
+
     try {
       const entryResponse = await this.submitRaffle(
         captchaResponse.captchaToken
       );
-      if (entryResponse.body.includes('<title>Thank You</title>')) {
+      console.log(entryResponse);
+      if (entryResponse.body.includes('<title>Thank you</title>')) {
         this.changeStatus('Successful Entry');
       }
     } catch (error) {
+      console.log(error);
       if (
         error.message.includes(
           'Each submission must have unique values for the following fields'
