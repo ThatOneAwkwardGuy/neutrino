@@ -42,6 +42,9 @@ export default class Routes extends Component {
         case 'blazeUnlimited':
           await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
           break;
+        case 'gloryNotify':
+          await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
+          break;
         default: {
           const machineIDStatus = await checkIfUserMachineIDMatches(uid);
           this.setState({

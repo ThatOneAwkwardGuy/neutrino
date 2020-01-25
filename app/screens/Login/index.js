@@ -9,6 +9,7 @@ import {
   Label,
   Button
 } from 'reactstrap';
+
 import BarLoader from 'react-spinners/BarLoader';
 import PropTypes from 'prop-types';
 import { getAuth } from '../../utils/firebase';
@@ -16,6 +17,8 @@ import { getExternalAuth } from '../../utils/services';
 import Header from '../../components/Header';
 import neutrinoTextLogo from '../../images/textLogo.svg';
 import blazeUnlimitedLogo from '../../images/blazeUnlimited.png';
+
+const { BrowserWindow } = require('electron').remote;
 
 export default class Login extends Component {
   constructor(props) {
@@ -44,10 +47,12 @@ export default class Login extends Component {
   returnAuthServerImage = () => {
     const { authServer } = this.state;
     let authServerImage = null;
-    console.log(authServer);
     switch (authServer) {
       case 'blazeUnlimited':
         authServerImage = blazeUnlimitedLogo;
+        break;
+      case 'gloryNotify':
+        authServerImage = null;
         break;
       default:
         break;
@@ -99,6 +104,7 @@ export default class Login extends Component {
       const auth = getAuth();
       auth.signInWithCustomToken(authResponse.token);
     } catch (error) {
+      console.log(error);
       const message = `There was an error logging you in: ${error.error.status}`;
       setAuthAndMessage(false, message);
     } finally {
@@ -113,15 +119,149 @@ export default class Login extends Component {
         this.loginWithFirebase();
         break;
       }
+      case 'gloryNotify': {
+        const code = await this.loginWithDiscord();
+        this.setState(
+          {
+            key: code
+          },
+          () => {
+            this.loginWithExternalAuth();
+          }
+        );
+        break;
+      }
       default:
         this.loginWithExternalAuth();
         break;
     }
   };
 
+  loginWithDiscord = async () => {
+    const win = new BrowserWindow({
+      width: 500,
+      height: 650,
+      show: true,
+      frame: true,
+      resizable: true,
+      focusable: true,
+      minimizable: true,
+      closable: true,
+      allowRunningInsecureContent: true,
+      webPreferences: {
+        webviewTag: true,
+        allowRunningInsecureContent: true,
+        nodeIntegration: false,
+        webSecurity: false
+      }
+    });
+    const winWebcontents = win.webContents;
+    return new Promise((resolve, reject) => {
+      win.loadURL(
+        'https://discordapp.com/api/oauth2/authorize?client_id=575360564767752194&redirect_uri=https%3A%2F%2Fneutrinotools.app&response_type=code&scope=identify%20email%20guilds'
+      );
+      winWebcontents.on('will-navigate', async () => {
+        const windowLocation = await winWebcontents.executeJavaScript(
+          'window.location.search'
+        );
+        if (windowLocation.includes('code=')) {
+          const urlParams = new URLSearchParams(windowLocation);
+          const code = urlParams.get('code');
+          resolve(code);
+        } else {
+          reject();
+        }
+        win.close();
+      });
+    });
+  };
+
+  returnAuthServerForm = () => {
+    const { showLoader, authServer } = this.state;
+    if (authServer === 'neutrino') {
+      return (
+        <div>
+          <FormGroup className="my-4">
+            <Label className="boldLabel">Email</Label>
+            <Input
+              name="email"
+              type="text"
+              onChange={this.handleChange}
+              onKeyPress={this.handleKeyPress}
+            />
+          </FormGroup>
+          <FormGroup className="my-4">
+            <Label className="boldLabel">Password</Label>
+            <Input
+              name="pass"
+              type="password"
+              onChange={this.handleChange}
+              onKeyPress={this.handleKeyPress}
+            />
+          </FormGroup>
+          <FormGroup>
+            {showLoader ? (
+              <BarLoader width={100} widthUnit="%" color="#2745fb" />
+            ) : null}
+            <Button className="neutrinoButton my-4" onClick={this.login}>
+              Login
+            </Button>
+          </FormGroup>
+        </div>
+      );
+    }
+
+    if (authServer === 'blazeUnlimited') {
+      return (
+        <div>
+          <FormGroup className="my-4">
+            <Label className="boldLabel">Key</Label>
+            <Input
+              name="key"
+              type="text"
+              onChange={this.handleChange}
+              onKeyPress={this.handleKeyPress}
+            />
+          </FormGroup>
+          <FormGroup>
+            {showLoader ? (
+              <BarLoader width={100} widthUnit="%" color="#2745fb" />
+            ) : null}
+            <Button className="neutrinoButton my-4" onClick={this.login}>
+              Login
+            </Button>
+          </FormGroup>
+        </div>
+      );
+    }
+
+    if (authServer === 'gloryNotify') {
+      return (
+        <div>
+          <FormGroup className="my-4">
+            <Label className="boldLabel">Key</Label>
+            <Input
+              name="key"
+              type="text"
+              onChange={this.handleChange}
+              onKeyPress={this.handleKeyPress}
+            />
+          </FormGroup>
+          <FormGroup>
+            {showLoader ? (
+              <BarLoader width={100} widthUnit="%" color="#2745fb" />
+            ) : null}
+            <Button className="neutrinoButton my-4" onClick={this.login}>
+              Login
+            </Button>
+          </FormGroup>
+        </div>
+      );
+    }
+  };
+
   render() {
     const { authorised, message } = this.props;
-    const { showLoader, authServer } = this.state;
     return (
       <Container fluid className="d-flex flex-column h-100">
         <Header showPageTitle={false} />
@@ -144,46 +284,7 @@ export default class Login extends Component {
                     <Col>{message}</Col>
                   </Row>
                 ) : null}
-                {authServer === 'neutrino' ? (
-                  <div>
-                    <FormGroup className="my-4">
-                      <Label className="boldLabel">Email</Label>
-                      <Input
-                        name="email"
-                        type="text"
-                        onChange={this.handleChange}
-                        onKeyPress={this.handleKeyPress}
-                      />
-                    </FormGroup>
-                    <FormGroup className="my-4">
-                      <Label className="boldLabel">Password</Label>
-                      <Input
-                        name="pass"
-                        type="password"
-                        onChange={this.handleChange}
-                        onKeyPress={this.handleKeyPress}
-                      />
-                    </FormGroup>
-                  </div>
-                ) : (
-                  <FormGroup className="my-4">
-                    <Label className="boldLabel">Key</Label>
-                    <Input
-                      name="key"
-                      type="text"
-                      onChange={this.handleChange}
-                      onKeyPress={this.handleKeyPress}
-                    />
-                  </FormGroup>
-                )}
-                <FormGroup>
-                  {showLoader ? (
-                    <BarLoader width={100} widthUnit="%" color="#2745fb" />
-                  ) : null}
-                  <Button className="neutrinoButton my-4" onClick={this.login}>
-                    Login
-                  </Button>
-                </FormGroup>
+                {this.returnAuthServerForm()}
               </Form>
             </div>
           </Col>
@@ -200,6 +301,7 @@ export default class Login extends Component {
                 >
                   <option value="neutrino">Neutrino</option>
                   <option value="blazeUnlimited">BlazeUnlimited</option>
+                  {/* <option value="gloryNotify">GloryNotify</option> */}
                 </Input>
               </FormGroup>
             </Form>

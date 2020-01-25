@@ -5126,6 +5126,12 @@ electron-notarize@^0.1.1:
     debug "^4.1.1"
     fs-extra "^8.0.1"
 
+electron-oauth-helper@^5.0.1:
+  version "5.0.1"
+  resolved "https://registry.yarnpkg.com/electron-oauth-helper/-/electron-oauth-helper-5.0.1.tgz#b5af3d9769acb87dfb4aecdbb0edcaa00354656e"
+  dependencies:
+    debug "4.1.1"
+
 electron-publish@21.2.0:
   version "21.2.0"
   resolved "https://registry.yarnpkg.com/electron-publish/-/electron-publish-21.2.0.tgz#cc225cb46aa62e74b899f2f7299b396c9802387d"

@@ -252,6 +252,7 @@
     "electron-debug": "^2.0.0",
     "electron-log": "^3.0.6",
     "electron-notarize": "^0.1.1",
+    "electron-oauth-helper": "^5.0.1",
     "electron-store": "^4.0.0",
     "electron-tabs": "^0.9.5",
     "electron-updater": "^4.1.2",
