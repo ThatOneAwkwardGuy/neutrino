@@ -18,6 +18,7 @@ export default class Routes extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      lastChecked: 0,
       authorised: false,
       raffleBot: false,
       message: '',
@@ -37,32 +38,39 @@ export default class Routes extends Component {
   };
 
   checkUserAuth = async uid => {
-    try {
-      switch (uid.split(/-(.+)/)[0]) {
-        case 'blazeUnlimited':
-          await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
-          break;
-        case 'gloryNotify':
-          await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
-          break;
-        default: {
-          const machineIDStatus = await checkIfUserMachineIDMatches(uid);
-          this.setState({
-            authorised: machineIDStatus.authorised,
-            raffleBot: machineIDStatus.raffleBot,
-            message: machineIDStatus.message,
-            uid
-          });
+    const { lastChecked } = this.state;
+    if (lastChecked === 0 || Date.now() - lastChecked > 300000) {
+      this.setState({ lastChecked: Date.now() });
+      try {
+        switch (uid.split(/-(.+)/)[0]) {
+          case 'blazeUnlimited':
+            await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
+            break;
+          case 'gloryNotify':
+            await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
+            break;
+          case 'soleNotify':
+            await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
+            break;
+          default: {
+            const machineIDStatus = await checkIfUserMachineIDMatches(uid);
+            this.setState({
+              authorised: machineIDStatus.authorised,
+              raffleBot: machineIDStatus.raffleBot,
+              message: machineIDStatus.message,
+              uid
+            });
+          }
         }
+      } catch (error) {
+        this.setState({
+          authorised: false,
+          message: 'There wase an error authorising your access to Neutrino.',
+          uid
+        });
+        const auth = getAuth();
+        auth.signOut();
       }
-    } catch (error) {
-      this.setState({
-        authorised: false,
-        message: 'There wase an error authorising your access to Neutrino.',
-        uid
-      });
-      const auth = getAuth();
-      auth.signOut();
     }
   };
 

@@ -9,6 +9,7 @@ import {
   Label,
   Button
 } from 'reactstrap';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import BarLoader from 'react-spinners/BarLoader';
 import PropTypes from 'prop-types';
@@ -17,6 +18,8 @@ import { getExternalAuth } from '../../utils/services';
 import Header from '../../components/Header';
 import neutrinoTextLogo from '../../images/textLogo.svg';
 import blazeUnlimitedLogo from '../../images/blazeUnlimited.png';
+import gloryNotifyLogo from '../../images/gloryNotify.png';
+import soleNotifyLogo from '../../images/soleNotify.png';
 
 const { BrowserWindow } = require('electron').remote;
 
@@ -52,7 +55,10 @@ export default class Login extends Component {
         authServerImage = blazeUnlimitedLogo;
         break;
       case 'gloryNotify':
-        authServerImage = null;
+        authServerImage = gloryNotifyLogo;
+        break;
+      case 'soleNotify':
+        authServerImage = soleNotifyLogo;
         break;
       default:
         break;
@@ -64,7 +70,7 @@ export default class Login extends Component {
             alt="Auth Server Text Logo"
             id="authServerLogo"
             draggable="false"
-            className="my-3 w-100"
+            className="my-3"
             src={authServerImage}
           />
         </FormGroup>
@@ -120,6 +126,18 @@ export default class Login extends Component {
         break;
       }
       case 'gloryNotify': {
+        const code = await this.loginWithDiscord();
+        this.setState(
+          {
+            key: code
+          },
+          () => {
+            this.loginWithExternalAuth();
+          }
+        );
+        break;
+      }
+      case 'soleNotify': {
         const code = await this.loginWithDiscord();
         this.setState(
           {
@@ -235,24 +253,18 @@ export default class Login extends Component {
       );
     }
 
-    if (authServer === 'gloryNotify') {
+    if (['gloryNotify', 'soleNotify'].includes(authServer)) {
       return (
         <div>
-          <FormGroup className="my-4">
-            <Label className="boldLabel">Key</Label>
-            <Input
-              name="key"
-              type="text"
-              onChange={this.handleChange}
-              onKeyPress={this.handleKeyPress}
-            />
-          </FormGroup>
           <FormGroup>
             {showLoader ? (
               <BarLoader width={100} widthUnit="%" color="#2745fb" />
             ) : null}
             <Button className="neutrinoButton my-4" onClick={this.login}>
-              Login
+              <div className="m-2">Login With Discord</div>
+              <div>
+                <FontAwesomeIcon size="3x" icon={['fab', 'discord']} />
+              </div>
             </Button>
           </FormGroup>
         </div>
@@ -290,7 +302,7 @@ export default class Login extends Component {
           </Col>
         </Row>
         <Row>
-          <Col xs={{ size: 2, offset: 10 }}>
+          <Col id="serverSelection" xs={{ size: 2, offset: 10 }}>
             <Form>
               <FormGroup>
                 <Label>Server</Label>
@@ -301,7 +313,8 @@ export default class Login extends Component {
                 >
                   <option value="neutrino">Neutrino</option>
                   <option value="blazeUnlimited">BlazeUnlimited</option>
-                  {/* <option value="gloryNotify">GloryNotify</option> */}
+                  <option value="gloryNotify">GloryNotify</option>
+                  <option value="soleNotify">SoleNotify</option>
                 </Input>
               </FormGroup>
             </Form>

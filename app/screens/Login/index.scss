@@ -1,6 +1,16 @@
 #loginWindow {
   background: $dark2Colour;
   padding: 40px 100px 40px 100px;
+  -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+  animation: fadein 1s;
+}
+
+#loginWindow input,
+#loginWindow button,
+#loginWindow img,
+#loginWindow form {
+  -webkit-animation: fadein 1s !important;
+  animation: fadein 1s !important;
 }
 
 .boldLabel {
@@ -15,4 +25,17 @@
 #loginErrorCard {
   background: $red;
   padding: 10px;
+}
+
+#serverSelection {
+  background: $dark2Colour;
+}
+
+#serverSelection input {
+  border-radius: 0 !important;
+}
+
+#authServerLogo {
+  max-height: 150px;
+  max-width: 100%;
 }
