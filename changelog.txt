@@ -188,6 +188,15 @@ Need to add animations
 - Bug Fixes
 - Raffle Bot - Added DSMLA
 
+2.1.5
+- Fix login issue for normal users
+
+2.1.6
+- Raffle Bot - END (BETA)
+
+2.1.7
+- One Click Tester Fix for login in
+
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
 

@@ -355,20 +355,15 @@ export default class Settings extends Component {
         ? `${appPath}/constants/Neutrino_CSV_Template.csv`
         : `${appPath}/app/constants/Neutrino_CSV_Template.csv`,
       'UTF-8',
-      (err, data) => {
+      async (err, data) => {
         if (!err) {
-          dialog.showSaveDialog(
-            {
-              title: 'name',
-              defaultPath: `~/Neutrino CSV Template.csv`
-            },
-            fileName => {
-              if (fileName === undefined) {
-                return;
-              }
-              fs.writeFile(fileName, data, () => {});
-            }
-          );
+          const filePaths = await dialog.showSaveDialog({
+            title: 'name',
+            defaultPath: `~/Neutrino CSV Template.csv`
+          });
+          if (!filePaths.canceled) {
+            fs.writeFile(filePaths.filePath, data, () => {});
+          }
         }
       }
     );

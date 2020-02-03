@@ -21,7 +21,7 @@ import stress95 from '../../images/stress95.png';
 import fearofgod from '../../images/fearofgod.png';
 import footdistrict from '../../images/footdistrict.png';
 import voostore from '../../images/voostore.png';
-// import end from '../../images/end.jpg';
+import end from '../../images/end.jpg';
 // import footpatrol from '../../images/footpatrol.png';
 // import footshop from '../../images/footshop.png';
 // import woodwood from '../../images/woodwood.jpg';
@@ -42,7 +42,7 @@ import DSMLA from './Raffle/DSMLA';
 import Stress95 from './Raffle/Stress95';
 import FearOfGod from './Raffle/FearOfGod';
 import FootDistrict from './Raffle/FootDistrict';
-// import END from './Raffle/END';
+import END from './Raffle/END';
 import VooStore from './Raffle/VooStore';
 // import Footpatrol from './Raffle/Footpatrol';
 // import FootShop from './Raffle/FootShop';
@@ -72,7 +72,7 @@ const sites = [
   { name: 'Stress95', img: stress95 },
   { name: 'Fear Of God', img: fearofgod },
   { name: 'FootDistrict', img: footdistrict },
-  // { name: 'END', img: end },
+  { name: 'END', img: end },
   { name: 'VooStore', img: voostore }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
@@ -95,7 +95,8 @@ const Classes = {
   'Fear Of God': FearOfGod,
   FootDistrict,
   VooStore,
-  DSMLA
+  DSMLA,
+  END
 };
 
 export default class RaffleBot extends Component {
@@ -213,45 +214,42 @@ export default class RaffleBot extends Component {
     }
   };
 
-  importProfiles = () => {
-    dialog.showOpenDialog(
-      {
-        filters: [{ name: 'Neutrino Profiles', extensions: ['json', 'csv'] }]
-      },
-      async fileNames => {
-        if (fileNames !== undefined) {
-          try {
-            const extension = fileNames[0]
-              .split('.')
-              .slice(-1)[0]
-              .toLowerCase();
-            let jsonContent;
-            if (extension === 'csv') {
-              const convertedCSV = await csv().fromFile(fileNames[0]);
-              jsonContent = convertedCSV.map((profile, index) => {
-                const baseProfile = convertCSVToBase(profile);
-                return convertBaseToNeutrino(
-                  index,
-                  baseProfile,
-                  baseProfile.card,
-                  '',
-                  ''
-                );
-              });
-            } else {
-              const contents = fs.readFileSync(fileNames[0]);
-              jsonContent = JSON.parse(contents);
-            }
-
-            this.setState({
-              profiles: Object.values(jsonContent)
-            });
-          } catch (error) {
-            console.error(error);
-          }
+  importProfiles = async () => {
+    const filePaths = await dialog.showOpenDialog({
+      filters: [{ name: 'Neutrino Profiles', extensions: ['json', 'csv'] }]
+    });
+    if (!filePaths.canceled) {
+      const filePath = filePaths.filePaths[0];
+      try {
+        const extension = filePath
+          .split('.')
+          .slice(-1)[0]
+          .toLowerCase();
+        let jsonContent;
+        if (extension === 'csv') {
+          const convertedCSV = await csv().fromFile(filePath);
+          jsonContent = convertedCSV.map((profile, index) => {
+            const baseProfile = convertCSVToBase(profile);
+            return convertBaseToNeutrino(
+              index,
+              baseProfile,
+              baseProfile.card,
+              '',
+              ''
+            );
+          });
+        } else {
+          console.log(filePath);
+          const contents = fs.readFileSync(filePath);
+          jsonContent = JSON.parse(contents);
         }
+        this.setState({
+          profiles: Object.values(jsonContent)
+        });
+      } catch (error) {
+        console.error(error);
       }
-    );
+    }
   };
 
   loadEntries = () => {

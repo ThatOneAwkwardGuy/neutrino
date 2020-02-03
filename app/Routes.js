@@ -58,7 +58,7 @@ export default class Routes extends Component {
               authorised: machineIDStatus.authorised,
               raffleBot: machineIDStatus.raffleBot,
               message: machineIDStatus.message,
-              uid
+              uid,
             });
           }
         }
@@ -77,10 +77,10 @@ export default class Routes extends Component {
   checkAuthChange() {
     const auth = getAuth();
     auth.onAuthStateChanged(async user => {
-      if (user && user.email !== null) {
+      if (user !== null && user.email !== null) {
         await setUserMachineIDOnFirstLoad(user.uid);
         this.checkUserAuth(user.uid);
-      } else if (user && user.email === null) {
+      } else if (user !== null && user.email === null) {
         this.setState({
           uid: user.uid,
           authorised: true,
@@ -88,7 +88,7 @@ export default class Routes extends Component {
         });
       } else {
         this.setState({
-          authorised: false
+          authorised: false, lastChecked:0
         });
       }
     });

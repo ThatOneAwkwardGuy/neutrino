@@ -11,7 +11,7 @@ import { testAccountPromise } from '../OneClickTester/functions';
 const rp = require('request-promise');
 const cheerio = require('cheerio');
 
-export const createActivityWindow = (
+export const createActivityWindow = async (
   win,
   index,
   activity,
@@ -19,7 +19,7 @@ export const createActivityWindow = (
   updateActivity,
   showAcitivtyWindows
 ) =>
-  new Promise(resolve => {
+  new Promise(async resolve => {
     if (updateActivity) {
       updateActivity(index, { status: 'Logging In' });
     }
@@ -32,36 +32,40 @@ export const createActivityWindow = (
       });
       win.loadURL('https://google.com');
       win.webContents.setAudioMuted(true);
-      win.webContents.once('did-finish-load', () => {
-        win.webContents.executeJavaScript(
+      win.webContents.once('did-finish-load', async () => {
+        await win.webContents.executeJavaScript(
           'document.querySelector(\'a[target="_top"]\').click();'
         );
-        win.webContents.once('did-finish-load', () => {
-          win.webContents.executeJavaScript(`
+        win.webContents.once('did-finish-load', async () => {
+          await win.webContents.executeJavaScript(`
                         document.getElementById("Email").value = "${activity.email}";
                         document.getElementById("next").click();
                         `);
-          win.webContents.once('did-finish-load', () => {
-            win.webContents.executeJavaScript(`
+          win.webContents.once('did-finish-load', async () => {
+            await win.webContents.executeJavaScript(`
                             var canvas = document.getElementById("Passwd");
                             if (canvas) {
                               canvas.value = "${activity.pass}";
                               document.getElementById("signIn").click();
                             }
                           `);
-            win.webContents.once('did-finish-load', () => {
-              win.webContents.executeJavaScript(
-                'window.location',
-                false,
-                windowLocation1 => {
-                  if (windowLocation1.pathname === '/') {
-                    updateActivity(index, { status: 'Logged In' });
-                  } else if (updateActivity) {
-                    updateActivity(index, { status: 'Stuck In Login' });
-                  }
-                  resolve();
-                }
+            win.webContents.once('did-finish-load', async () => {
+              const documentHTML = await win.webContents.executeJavaScript(
+                'document.documentElement.innerHTML',
+                false
               );
+              if (documentHTML.includes(activity.email) && updateActivity) {
+                updateActivity(index, { status: 'Logged In' });
+                resolve();
+              } else if (updateActivity) {
+                updateActivity(index, { status: 'Stuck In Login' });
+              }
+              // if (windowLocation1.pathname === '/') {
+              //   updateActivity(index, { status: 'Logged In' });
+              //   resolve();
+              // } else if (updateActivity) {
+              //   updateActivity(index, { status: 'Stuck In Login' });
+              // }
             });
           });
         });

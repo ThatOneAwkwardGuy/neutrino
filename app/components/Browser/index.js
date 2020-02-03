@@ -76,45 +76,42 @@ class Browser extends Component {
     });
   };
 
-  importProfiles = () => {
-    dialog.showOpenDialog(
-      {
-        filters: [{ name: 'Neutrino Profiles', extensions: ['json', 'csv'] }]
-      },
-      async fileNames => {
-        if (fileNames !== undefined) {
-          try {
-            const extension = fileNames[0]
-              .split('.')
-              .slice(-1)[0]
-              .toLowerCase();
-            let jsonContent;
-            if (extension === 'csv') {
-              const convertedCSV = await csv().fromFile(fileNames[0]);
-              jsonContent = convertedCSV.map((profile, index) => {
-                const baseProfile = convertCSVToBase(profile);
-                return convertBaseToNeutrino(
-                  index,
-                  baseProfile,
-                  baseProfile.card,
-                  '',
-                  ''
-                );
-              });
-            } else {
-              const contents = fs.readFileSync(fileNames[0]);
-              jsonContent = JSON.parse(contents);
-            }
-
-            this.setState({
-              profiles: Object.values(jsonContent)
-            });
-          } catch (error) {
-            console.error(error);
-          }
+  importProfiles = async () => {
+    const filePaths = await dialog.showOpenDialog({
+      filters: [{ name: 'Neutrino Profiles', extensions: ['json', 'csv'] }]
+    });
+    if (!filePaths.canceled) {
+      const fileNames = filePaths.filePaths;
+      try {
+        const extension = fileNames[0]
+          .split('.')
+          .slice(-1)[0]
+          .toLowerCase();
+        let jsonContent;
+        if (extension === 'csv') {
+          const convertedCSV = await csv().fromFile(fileNames[0]);
+          jsonContent = convertedCSV.map((profile, index) => {
+            const baseProfile = convertCSVToBase(profile);
+            return convertBaseToNeutrino(
+              index,
+              baseProfile,
+              baseProfile.card,
+              '',
+              ''
+            );
+          });
+        } else {
+          const contents = fs.readFileSync(fileNames[0]);
+          jsonContent = JSON.parse(contents);
         }
+
+        this.setState({
+          profiles: Object.values(jsonContent)
+        });
+      } catch (error) {
+        console.error(error);
       }
-    );
+    }
   };
 
   deleteBrowser = row => {
@@ -164,13 +161,10 @@ class Browser extends Component {
       focusable: true,
       minimizable: true,
       closable: true,
-      allowRunningInsecureContent: true,
       webPreferences: {
         webviewTag: true,
         javascript: true,
-        allowRunningInsecureContent: true,
-        nodeIntegration: true,
-        webSecurity: false
+        nodeIntegration: true
       }
     });
     if (proxy !== '') {

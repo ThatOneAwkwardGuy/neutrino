@@ -95,66 +95,61 @@ class ProfileTaskEditorConverter extends Component {
     });
   };
 
-  loadFile = () => {
+  loadFile = async () => {
     const { fromBot } = this.state;
-    dialog.showOpenDialog(
-      null,
-      {
-        filters: [
-          { name: 'Profiles', extensions: ['csv', 'xml', 'json', 'txt'] },
-          { name: 'All Files', extensions: ['*'] }
-        ]
-      },
-      async filePaths => {
-        const filePath = filePaths[0];
-        const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
-        let processedFile = null;
-        if (filePath.split('.').slice(-1)[0] === 'csv') {
-          const csvToJSON = await csv().fromString(file);
-          processedFile = csvToJSON;
-        } else if (filePath.split('.').slice(-1)[0] === 'xml') {
-          const xmlFile = await xml2js.parseStringPromise(file, {
-            trim: true,
-            childkey: 'Profile',
-            explicitArray: false
-          });
-          processedFile =
-            xmlFile.ArrayOfProfile.Profile.length === undefined
-              ? [xmlFile.ArrayOfProfile.Profile]
-              : xmlFile.ArrayOfProfile.Profile;
-        } else if (
-          [
-            'Project Destroyer',
-            'Hastey',
-            'EVE AIO',
-            'Phantom',
-            'NSB',
-            'SOLE AIO'
-          ].includes(fromBot)
-        ) {
-          processedFile = JSON.parse(file);
-        } else if (fromBot === 'Adept') {
-          const parsedFile = JSON.parse(file);
-          if (parsedFile.length === undefined) {
-            processedFile = [parsedFile];
-          } else {
-            processedFile = parsedFile;
-          }
-        } else if (fromBot === 'TKS') {
-          processedFile = JSON.parse(file).Profiles;
-        } else {
-          processedFile = Object.values(JSON.parse(file));
-        }
-        this.setState({
-          profiles: processedFile.filter(
-            profile =>
-              profile !== undefined &&
-              profile !== null &&
-              typeof profile === 'object'
-          )
-        });
+    const filePaths = await dialog.showOpenDialog(null, {
+      filters: [
+        { name: 'Profiles', extensions: ['csv', 'xml', 'json', 'txt'] },
+        { name: 'All Files', extensions: ['*'] }
+      ]
+    });
+    const filePath = filePaths.filePaths[0];
+    const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
+    let processedFile = null;
+    if (filePath.split('.').slice(-1)[0] === 'csv') {
+      const csvToJSON = await csv().fromString(file);
+      processedFile = csvToJSON;
+    } else if (filePath.split('.').slice(-1)[0] === 'xml') {
+      const xmlFile = await xml2js.parseStringPromise(file, {
+        trim: true,
+        childkey: 'Profile',
+        explicitArray: false
+      });
+      processedFile =
+        xmlFile.ArrayOfProfile.Profile.length === undefined
+          ? [xmlFile.ArrayOfProfile.Profile]
+          : xmlFile.ArrayOfProfile.Profile;
+    } else if (
+      [
+        'Project Destroyer',
+        'Hastey',
+        'EVE AIO',
+        'Phantom',
+        'NSB',
+        'SOLE AIO'
+      ].includes(fromBot)
+    ) {
+      processedFile = JSON.parse(file);
+    } else if (fromBot === 'Adept') {
+      const parsedFile = JSON.parse(file);
+      if (parsedFile.length === undefined) {
+        processedFile = [parsedFile];
+      } else {
+        processedFile = parsedFile;
       }
-    );
+    } else if (fromBot === 'TKS') {
+      processedFile = JSON.parse(file).Profiles;
+    } else {
+      processedFile = Object.values(JSON.parse(file));
+    }
+    this.setState({
+      profiles: processedFile.filter(
+        profile =>
+          profile !== undefined &&
+          profile !== null &&
+          typeof profile === 'object'
+      )
+    });
   };
 
   convertToXML = profiles => {
@@ -196,26 +191,21 @@ class ProfileTaskEditorConverter extends Component {
     } else {
       file = JSON.stringify(convertedProfiles);
     }
-    dialog.showSaveDialog(
-      {
-        title: 'name',
-        defaultPath: `~/${toBot} Profiles (Converted From ${fromBot}).${extension}`,
-        filters: [
-          {
-            name: `${toBot} Profiles (Converted From ${fromBot})`,
-            extensions: [extension]
-          }
-        ]
-      },
-      fileName => {
-        if (fileName === undefined) {
-          return;
+    const filePaths = await dialog.showSaveDialog({
+      title: 'name',
+      defaultPath: `~/${toBot} Profiles (Converted From ${fromBot}).${extension}`,
+      filters: [
+        {
+          name: `${toBot} Profiles (Converted From ${fromBot})`,
+          extensions: [extension]
         }
-        fs.writeFile(fileName, file, err => {
-          if (err) console.error(err);
-        });
-      }
-    );
+      ]
+    });
+    if (!filePaths.canceled) {
+      fs.writeFile(filePaths.filePath, file, err => {
+        if (err) console.error(err);
+      });
+    }
   };
 
   convertToCSVString = profiles =>

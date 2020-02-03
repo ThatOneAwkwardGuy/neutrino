@@ -12,8 +12,8 @@ import {
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { withToastManager } from 'react-toast-notifications';
 import { Tooltip } from 'react-tippy';
-
 import PropTypes from 'prop-types';
+import { getCookiesFromWindow } from '../RaffleBot/functions';
 
 import Table from '../Table/index';
 
@@ -25,11 +25,7 @@ import {
   generateUEID
 } from '../../utils/utils';
 import { getCaptchaResponse } from '../../screens/Captcha/functions';
-import {
-  getFormData
-  // randomNumberInRange,
-  // getNikeUSMobileNumberGetSMSCode
-} from './functions';
+import { getFormData, randomNumberInRange } from './functions';
 import {
   getRandomInt,
   generateGmailDotTrick
@@ -46,6 +42,7 @@ const random = require('random-name');
 const uuidv4 = require('uuid/v4');
 const fs = require('fs');
 const HttpsProxyAgent = require('https-proxy-agent');
+const tough = require('tough-cookie');
 
 class AccountCreator extends Component {
   constructor(props) {
@@ -68,21 +65,18 @@ class AccountCreator extends Component {
     };
   }
 
-  loadEmails = () => {
-    dialog.showOpenDialog(
-      null,
-      {
-        filters: [{ name: 'Emails Text File', extensions: ['txt'] }]
-      },
-      async filePaths => {
-        const filePath = filePaths[0];
-        const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
-        if (filePath.split('.').slice(-1)[0] === 'txt') {
-          const emails = file.split('\n');
-          this.setState({ emails, quantity: emails.length });
-        }
+  loadEmails = async () => {
+    const filePaths = await dialog.showOpenDialog(null, {
+      filters: [{ name: 'Emails Text File', extensions: ['txt'] }]
+    });
+    if (!filePaths.canceled) {
+      const filePath = filePaths.filePaths[0];
+      const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
+      if (filePath.split('.').slice(-1)[0] === 'txt') {
+        const emails = file.split('\n');
+        this.setState({ emails, quantity: emails.length });
       }
-    );
+    }
   };
 
   clearEmails = () => {
@@ -92,7 +86,7 @@ class AccountCreator extends Component {
     });
   };
 
-  exportAccountsAsProfiles = () => {
+  exportAccountsAsProfiles = async () => {
     const { accounts, profile, cards } = this.props;
     const selectedCard =
       cards.length === 0
@@ -147,18 +141,13 @@ class AccountCreator extends Component {
       jigAddressesBool: profile.jigAddressesBool,
       fourCharPrefixBool: profile.fourCharPrefixBool
     }));
-    dialog.showSaveDialog(
-      {
-        title: 'name',
-        defaultPath: `~/Account-Generator-Neutrino-Profiles.json`
-      },
-      fileName => {
-        if (fileName === undefined) {
-          return;
-        }
-        fs.writeFile(fileName, JSON.stringify(profiles), () => {});
-      }
-    );
+    const fileNames = await dialog.showSaveDialog({
+      title: 'name',
+      defaultPath: `~/Account-Generator-Neutrino-Profiles.json`
+    });
+    if (!fileNames.canceled) {
+      fs.writeFile(fileNames.filePath, JSON.stringify(profiles), () => {});
+    }
   };
 
   handleChange = e => {
@@ -219,6 +208,10 @@ class AccountCreator extends Component {
           case 'oneblockdown':
             return this.sleep(parseInt(delay, 10)).then(() =>
               this.createOneBlockDownAccount(gmailEmails[index]).catch(e => e)
+            );
+          case 'end':
+            return this.sleep(parseInt(delay, 10)).then(() =>
+              this.createEndAccount(gmailEmails[index]).catch(e => e)
             );
           default:
             return this.sleep(parseInt(delay, 10)).then(() =>
@@ -645,41 +638,103 @@ class AccountCreator extends Component {
         reject(new Error('Closed Window Before Finished'));
       });
       window.loadURL('https://stress95.com/en/auth/view?op=register');
-      window.webContents.on('did-finish-load', () => {
-        window.webContents.executeJavaScript(
+      window.webContents.on('did-finish-load', async () => {
+        await window.webContents.executeJavaScript(
           `
         document.getElementById('firstNameInput').value = '${accountFirstName} ${accountLastName}';
         document.getElementById('emailInput').value = '${email}';
         document.getElementById('passwordInput').value = '${accountPass}';
         document.querySelector('button[type="submit"]').click();
         `,
-          false,
-          () => {
-            window.webContents.on('did-finish-load', () => {
-              window.webContents.executeJavaScript(
-                'document.documentElement.innerHTML',
-                false,
-                result => {
-                  if (result.includes('Account created!')) {
-                    window.webContents.removeAllListeners('close', () => {});
-                    addCreatedAccount({
-                      email,
-                      site,
-                      pass: accountPass,
-                      status: 'created'
-                    });
-                    resolve();
-                  } else {
-                    reject(new Error('Couldnt tell if account was created'));
-                  }
-                  window.close();
-                }
-              );
-            });
-          }
+          false
         );
+        window.webContents.on('did-finish-load', async () => {
+          const result = await window.webContents.executeJavaScript(
+            'document.documentElement.innerHTML',
+            false
+          );
+          if (result.includes('Account created!')) {
+            window.webContents.removeAllListeners('close', () => {});
+            addCreatedAccount({
+              email,
+              site,
+              pass: accountPass,
+              status: 'created'
+            });
+            resolve();
+          } else {
+            reject(new Error('Couldnt tell if account was created'));
+          }
+          window.close();
+        });
       });
     });
+  };
+
+  createEndAccount = async gmailEmail => {
+    const {
+      randomPass,
+      randomName,
+      useProxies,
+      catchall,
+      pass,
+      firstName,
+      lastName
+    } = this.state;
+    const email =
+      gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
+    const accountPass = randomPass ? randomize('a', 10) : pass;
+    const accountFirstName = randomName ? random.first() : firstName;
+    const accountLastName = randomName ? random.last() : lastName;
+    const tokenID = uuidv4();
+    this.cookieJars[tokenID] = request.jar();
+    const proxy = useProxies ? this.getRandomProxy() : '';
+    const cookies = await getCookiesFromWindow(
+      'https://www.endclothing.com',
+      proxy
+    );
+    cookies.forEach(cookie => {
+      if (cookie.domain === '.endclothing.com') {
+        const toughCookie = new tough.Cookie({
+          key: cookie.name,
+          value: cookie.value,
+          httpOnly: cookie.httpOnly,
+          hostOnly: cookie.hostOnly,
+          path: cookie.path
+        });
+        console.log(cookie);
+        this.cookieJars[tokenID].setCookie(toughCookie.toString(), this.url);
+      }
+    });
+    // const loginPage = request({
+    //   method: 'GET',
+    //   uri: 'https://www.endclothing.com/gb/customer/account/login/',
+    //   jar: this.cookieJars[tokenID]
+    // });
+    // const $ = cheerio.load(loginPage);
+    // cont form_key = $(".form .create .account .form-create-account ")
+    const repsonse = await request({
+      method: 'POST',
+      jar: this.cookieJars[tokenID],
+      form: {
+        form_key: '',
+        success_url: '',
+        error_url: '',
+        firstname: accountFirstName,
+        lastname: accountLastName,
+        email,
+        dob: `${randomNumberInRange(1, 26)}/${randomNumberInRange(
+          1,
+          12
+        )}/${randomNumberInRange(1980, 1999)}`,
+        password: accountPass,
+        password_confirmation: accountPass
+      },
+      uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
+      followAllRedirects: true,
+      followRedirect: true
+    });
+    console.log(repsonse);
   };
 
   // createNikeAccount = async gmailEmail => {

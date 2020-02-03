@@ -291,21 +291,18 @@ class ProfileCreator extends Component {
     return profiles;
   };
 
-  loadEmails = () => {
-    dialog.showOpenDialog(
-      null,
-      {
-        filters: [{ name: 'Emails and Passes Text File', extensions: ['txt'] }]
-      },
-      async filePaths => {
-        const filePath = filePaths[0];
-        const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
-        if (filePath.split('.').slice(-1)[0] === 'txt') {
-          const emails = file.split('\n');
-          this.setState({ emails, quantity: emails.length });
-        }
+  loadEmails = async () => {
+    const filePaths = await dialog.showOpenDialog(null, {
+      filters: [{ name: 'Emails and Passes Text File', extensions: ['txt'] }]
+    });
+    if (!filePaths.canceled) {
+      const filePath = filePaths.filePaths[0];
+      const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
+      if (filePath.split('.').slice(-1)[0] === 'txt') {
+        const emails = file.split('\n');
+        this.setState({ emails, quantity: emails.length });
       }
-    );
+    }
   };
 
   exportProfiles = async () => {
@@ -588,26 +585,21 @@ class ProfileCreator extends Component {
     } else {
       file = JSON.stringify(this.convertProfiles(convertedProfiles));
     }
-    dialog.showSaveDialog(
-      {
-        title: 'name',
-        defaultPath: `~/${name}.${extension}`
-      },
-      fileName => {
-        if (fileName === undefined) {
-          return;
+    const filePaths = await dialog.showSaveDialog({
+      title: 'name',
+      defaultPath: `~/${name}.${extension}`
+    });
+    if (!filePaths.canceled) {
+      fs.writeFile(filePaths.filePath, file, err => {
+        if (err.message !== `"ENOENT: no such file or directory, open ''"`) {
+          toastManager.add('Failed to export profiles', {
+            appearance: 'error',
+            autoDismiss: true,
+            pauseOnHover: true
+          });
         }
-        fs.writeFile(fileName, file, err => {
-          if (err.message !== `"ENOENT: no such file or directory, open ''"`) {
-            toastManager.add('Failed to export profiles', {
-              appearance: 'error',
-              autoDismiss: true,
-              pauseOnHover: true
-            });
-          }
-        });
-      }
-    );
+      });
+    }
   };
 
   render() {

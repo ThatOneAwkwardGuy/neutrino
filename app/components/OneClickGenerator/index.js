@@ -113,15 +113,22 @@ export default class OneClickGenerator extends Component {
       focusable: true,
       minimizable: true,
       closable: true,
-      allowRunningInsecureContent: true,
       webPreferences: {
         webviewTag: true,
-        allowRunningInsecureContent: true,
-        nodeIntegration: true,
-        webSecurity: false,
         session: remote.session.fromPartition(`activity-${tokenID}`)
       }
     });
+    this.windows[index].webContents.session.webRequest.onBeforeSendHeaders(
+      (details, callback) => {
+        const requestHeaders = { ...details.requestHeaders };
+        requestHeaders['User-Agent'] =
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari/537.36';
+        callback({ requestHeaders });
+      }
+    );
+    if (activity.proxy !== '') {
+      await setProxyForWindow(activity.proxy, this.windows[index]);
+    }
     await createActivityWindow(
       this.windows[index],
       index,
@@ -130,9 +137,6 @@ export default class OneClickGenerator extends Component {
       updateActivity,
       showAcitivtyWindows
     );
-    if (activity.proxy !== '') {
-      await setProxyForWindow(activity.proxy, this.windows[index]);
-    }
     if (
       !showAcitivtyWindows &&
       process.platform === 'win32' &&
@@ -179,9 +183,9 @@ export default class OneClickGenerator extends Component {
   };
 
   stopAllActivities = () => {
-    Object.values(this.windows).forEach((window, index) => {
+    Object.keys(this.windows).forEach(key => {
       try {
-        this.stopActivity(index + 1);
+        this.stopActivity(key);
       } catch (error) {
         console.error(error);
       }

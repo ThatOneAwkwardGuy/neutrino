@@ -255,11 +255,13 @@ app.on('ready', async () => {
     captchaWindow.webContents.send(STOP_CAPTCHA_JOB, arg);
   });
 
-  rpc.on('ready', () => {
-    setInterval(() => {
-      setActivity();
-    }, 60e3);
-  });
+  if (process.env.NODE_ENV !== 'development') {
+    rpc.on('ready', () => {
+      setInterval(() => {
+        setActivity();
+      }, 60e3);
+    });
+  }
 });
 
 app.on('login', event => {

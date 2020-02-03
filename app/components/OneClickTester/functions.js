@@ -16,12 +16,8 @@ export const testAccount = (index, account, setAccountStatus) => {
     focusable: true,
     minimizable: true,
     closable: true,
-    allowRunningInsecureContent: true,
     webPreferences: {
       webviewTag: true,
-      allowRunningInsecureContent: true,
-      nodeIntegration: true,
-      webSecurity: false,
       session: remote.session.fromPartition(`account-${tokenID}`)
     }
   });
@@ -29,17 +25,17 @@ export const testAccount = (index, account, setAccountStatus) => {
     setAccountStatus(index, 'Not Started');
   });
   win.loadURL('https://google.com');
-  win.webContents.once('did-finish-load', () => {
-    win.webContents.executeJavaScript(
+  win.webContents.once('did-finish-load', async () => {
+    await win.webContents.executeJavaScript(
       'document.querySelector(\'a[target="_top"]\').click();'
     );
-    win.webContents.once('did-finish-load', () => {
-      win.webContents.executeJavaScript(`
+    win.webContents.once('did-finish-load', async () => {
+      await win.webContents.executeJavaScript(`
                   document.getElementById("Email").value = "${account.email}";
                   document.getElementById("next").click();
                   `);
-      win.webContents.once('did-navigate-in-page', () => {
-        win.webContents.executeJavaScript(`
+      win.webContents.once('did-navigate-in-page', async () => {
+        await win.webContents.executeJavaScript(`
                     var passwdObserver = new MutationObserver(function(mutations, me) {
                       var canvas = document.getElementById("Passwd");
                       if (canvas) {
@@ -56,48 +52,43 @@ export const testAccount = (index, account, setAccountStatus) => {
                         characterData: true
                     })
                     `);
-        win.webContents.on('did-finish-load', () => {
-          win.webContents.executeJavaScript(
+        win.webContents.on('did-finish-load', async () => {
+          const windowLocation1 = await win.webContents.executeJavaScript(
             'window.location',
-            false,
-            windowLocation1 => {
-              if (windowLocation1.pathname === '/') {
-                win.webContents.session.cookies.get({}, () => {
-                  win.loadURL('https://neutrinotools.app/captcha');
-                  win.webContents.once('dom-ready', () => {
-                    win.webContents.executeJavaScript(
-                      'grecaptcha.execute()',
-                      false,
-                      () => {}
-                    );
-                    win.webContents.once('did-navigate-in-page', () => {
-                      win.webContents.executeJavaScript(
-                        'window.location.hash',
-                        false,
-                        windowLocation2 => {
-                          if (windowLocation2 === '#success') {
-                            if (setAccountStatus) {
-                              setAccountStatus(index, 'One Click Success');
-                            }
-                          } else if (setAccountStatus) {
-                            setAccountStatus(index, 'One Click Fail');
-                          }
-                          win.webContents.removeAllListeners('close', () => {});
-                          win.close();
-                        }
-                      );
-                    });
-                  });
-                });
-              } else if (
-                windowLocation1.host.includes('google.') &&
-                windowLocation1.pathname !== '/' &&
-                setAccountStatus
-              ) {
-                setAccountStatus(index, 'Stuck In Login');
-              }
-            }
+            false
           );
+          if (windowLocation1.pathname === '/') {
+            win.webContents.session.cookies.get({}, () => {
+              win.loadURL('https://neutrinotools.app/captcha');
+              win.webContents.once('dom-ready', () => {
+                win.webContents.executeJavaScript(
+                  'grecaptcha.execute()',
+                  false
+                );
+                win.webContents.once('did-navigate-in-page', async () => {
+                  const windowLocation2 = await win.webContents.executeJavaScript(
+                    'window.location.hash',
+                    false
+                  );
+                  if (windowLocation2 === '#success') {
+                    if (setAccountStatus) {
+                      setAccountStatus(index, 'One Click Success');
+                    }
+                  } else if (setAccountStatus) {
+                    setAccountStatus(index, 'One Click Fail');
+                  }
+                  win.webContents.removeAllListeners('close', () => {});
+                  win.close();
+                });
+              });
+            });
+          } else if (
+            windowLocation1.host.includes('google.') &&
+            windowLocation1.pathname !== '/' &&
+            setAccountStatus
+          ) {
+            setAccountStatus(index, 'Stuck In Login');
+          }
         });
       });
     });
@@ -117,15 +108,21 @@ export const testAccountPromise = (index, account) =>
       focusable: true,
       minimizable: true,
       closable: true,
-      allowRunningInsecureContent: true,
       webPreferences: {
         webviewTag: true,
-        allowRunningInsecureContent: true,
-        nodeIntegration: true,
-        webSecurity: false,
         session: remote.session.fromPartition(`account-${tokenID}`)
       }
     });
+
+    win.webContents.session.webRequest.onBeforeSendHeaders(
+      (details, callback) => {
+        const requestHeaders = { ...details.requestHeaders };
+        requestHeaders['User-Agent'] =
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari/537.36';
+        callback({ requestHeaders });
+      }
+    );
+
     win.webContents.once('close', () => {
       resolve('Not Started');
     });
@@ -157,122 +154,48 @@ export const testAccountPromise = (index, account) =>
                           document.getElementById("signIn").click();
                         }
                         `);
-          win.webContents.on('did-finish-load', () => {
-            win.webContents.executeJavaScript(
+          win.webContents.on('did-finish-load', async () => {
+            const windowLocation1 = await win.webContents.executeJavaScript(
               'window.location',
-              false,
-              windowLocation1 => {
-                if (windowLocation1.pathname === '/') {
-                  win.loadURL('https://neutrinotools.app/captcha');
-                  win.webContents.on('dom-ready', async () => {
-                    const currentURL = await win.webContents.executeJavaScript(
-                      'window.location.href',
+              false
+            );
+            if (windowLocation1.pathname === '/') {
+              win.loadURL('https://neutrinotools.app/captcha');
+              win.webContents.on('dom-ready', async () => {
+                const currentURL = await win.webContents.executeJavaScript(
+                  'window.location.href',
+                  false
+                );
+                if (currentURL === 'https://neutrinotools.app/captcha') {
+                  await win.webContents.executeJavaScript(
+                    'grecaptcha.execute()',
+                    false
+                  );
+                  win.webContents.once('did-navigate-in-page', async () => {
+                    const windowLocation2 = await win.webContents.executeJavaScript(
+                      'window.location.hash',
                       false
                     );
-                    if (currentURL === 'https://neutrinotools.app/captcha') {
-                      await win.webContents.executeJavaScript(
-                        'grecaptcha.execute()',
-                        false
-                      );
-                      win.webContents.once('did-navigate-in-page', async () => {
-                        const windowLocation2 = await win.webContents.executeJavaScript(
-                          'window.location.hash',
-                          false
-                        );
-                        if (windowLocation2 === '#success') {
-                          resolve('One Click Success');
-                        } else {
-                          resolve('One Click Fail');
-                        }
-                        win.webContents.removeAllListeners('close', () => {});
-                        win.close();
-                      });
+                    if (windowLocation2 === '#success') {
+                      resolve('One Click Success');
+                    } else {
+                      resolve('One Click Fail');
                     }
+                    win.webContents.removeAllListeners('close', () => {});
+                    win.close();
                   });
-                } else if (
-                  windowLocation1.host.includes('google.') &&
-                  windowLocation1.pathname !== '/'
-                ) {
-                  resolve('Stuck In Login');
                 }
-              }
-            );
+              });
+            } else if (
+              windowLocation1.host.includes('google.') &&
+              windowLocation1.pathname !== '/'
+            ) {
+              resolve('Stuck In Login');
+            }
           });
         }
       });
     });
-
-    // win.webContents.once('did-finish-load', () => {
-    //   win.webContents.executeJavaScript(
-    //     'document.querySelector(\'a[target="_top"]\').click();'
-    //   );
-    //   win.webContents.once('did-finish-load', () => {
-    //     win.webContents.executeJavaScript(`
-    //                 document.getElementById("Email").value = "${account.email}";
-    //                 document.getElementById("next").click();
-    //                 `);
-    //     win.webContents.once('did-navigate-in-page', () => {
-    //       win.webContents.executeJavaScript(`
-    //                   var passwdObserver = new MutationObserver(function(mutations, me) {
-    //                     var canvas = document.getElementById("Passwd");
-    //                     if (canvas) {
-    //                       canvas.value = "${account.pass}";
-    //                       document.getElementById("signIn").click();
-    //                       me.disconnect();
-    //                       return;
-    //                     }
-    //                   });
-    //                   passwdObserver.observe(document, {
-    //                       childList: true,
-    //                       attributes:true,
-    //                       subtree: true,
-    //                       characterData: true
-    //                   })
-    //                   `);
-    //       win.webContents.on('did-finish-load', () => {
-    //         win.webContents.executeJavaScript(
-    //           'window.location',
-    //           false,
-    //           windowLocation1 => {
-    //             if (windowLocation1.pathname === '/') {
-    //               win.loadURL('https://neutrinotools.app/captcha');
-    //               win.webContents.on('dom-ready', async () => {
-    //                 const currentURL = await win.webContents.executeJavaScript(
-    //                   'window.location.href',
-    //                   false
-    //                 );
-    //                 if (currentURL === 'https://neutrinotools.app/captcha') {
-    //                   await win.webContents.executeJavaScript(
-    //                     'grecaptcha.execute()',
-    //                     false
-    //                   );
-    //                   win.webContents.once('did-navigate-in-page', async () => {
-    //                     const windowLocation2 = await win.webContents.executeJavaScript(
-    //                       'window.location.hash',
-    //                       false
-    //                     );
-    //                     if (windowLocation2 === '#success') {
-    //                       resolve('One Click Success');
-    //                     } else {
-    //                       resolve('One Click Fail');
-    //                     }
-    //                     win.webContents.removeAllListeners('close', () => {});
-    //                     win.close();
-    //                   });
-    //                 }
-    //               });
-    //             } else if (
-    //               windowLocation1.host.includes('google.') &&
-    //               windowLocation1.pathname !== '/'
-    //             ) {
-    //               resolve('Stuck In Login');
-    //             }
-    //           }
-    //         );
-    //       });
-    //     });
-    //   });
-    // });
     return win;
   });
 

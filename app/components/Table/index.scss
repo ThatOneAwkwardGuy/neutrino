@@ -22,6 +22,8 @@
 .th:not(:first-child),
 .tr {
   width: 100% !important;
+  word-break: break-word;
+  overflow: hidden;
 }
 
 // #TableContainer > div > div > div:nth-child(2) > div > div {
