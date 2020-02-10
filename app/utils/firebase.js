@@ -20,7 +20,6 @@ const prodConfig = {
 firebase.initializeApp(prodConfig);
 
 const auth = firebase.auth();
-const analytics = firebase.analytics();
 
 auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
@@ -32,8 +31,6 @@ export const doSignInWithEmailAndPassword = (email, password) =>
 export const signOut = () => auth.signOut();
 
 export const getAuth = () => auth;
-
-export const getAnalytics = () => analytics;
 
 export const getFirestore = () => firestore;
 

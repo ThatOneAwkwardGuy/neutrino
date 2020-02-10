@@ -585,6 +585,8 @@ class AccountCreator extends Component {
           document.getElementById('firstNameInput').value = '${accountFirstName} ${accountLastName}';
           document.getElementById('emailInput').value = '${email}';
           document.getElementById('passwordInput').value = '${accountPass}';
+          document.querySelector('input[name="termsAccepted"]').value = true;
+          document.querySelector('input[name="termsAccepted"]').checked = true;
           document.querySelector('button[type="submit"]').click();
           `,
             false
@@ -612,6 +614,60 @@ class AccountCreator extends Component {
       });
     });
   };
+
+  // createNakedCphAccount2 = async gmailEmail => {
+  //   const {
+  //     randomPass,
+  //     randomName,
+  //     useProxies,
+  //     catchall,
+  //     pass,
+  //     firstName,
+  //     lastName
+  //   } = this.state;
+  //   const { addCreatedAccount } = this.props;
+  //   const email =
+  //     gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
+  //   const accountPass = randomPass ? randomize('a', 10) : pass;
+  //   const accountFirstName = randomName ? random.first() : firstName;
+  //   const accountLastName = randomName ? random.last() : lastName;
+  //   const tokenID = uuidv4();
+  //   this.cookieJars[tokenID] = request.jar();
+  //   const proxy = useProxies ? this.getRandomProxy() : '';
+  //   const cookies = await getCookiesFromWindow(
+  //     'https://www.nakedcph.com/en/auth/view?op=register',
+  //     proxy
+  //   );
+  //   console.log(cookies);
+  //   cookies.forEach(cookie => {
+  //     const toughCookie = new tough.Cookie({
+  //       key: cookie.name,
+  //       value: cookie.value,
+  //       httpOnly: cookie.httpOnly,
+  //       hostOnly: cookie.hostOnly,
+  //       path: cookie.path
+  //     });
+  //     this.cookieJars[tokenID].setCookie(
+  //       toughCookie.toString(),
+  //       'https://www.nakedcph.com/en/auth/view?op=register'
+  //     );
+  //   });
+  //   try {
+  //     const response = await request({
+  //       method: 'GET',
+  //       headers: {
+  //         authority: 'www.nakedcph.com',
+  //         'user-agent':
+  //           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
+  //       },
+  //       uri: 'https://nakedcph.com/en/auth/view?op=register',
+  //       jar: this.cookieJars[tokenID]
+  //     });
+  //     console.log(response);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
 
   createStress95Account = async gmailEmail => {
     const {
@@ -703,7 +759,10 @@ class AccountCreator extends Component {
           path: cookie.path
         });
         console.log(cookie);
-        this.cookieJars[tokenID].setCookie(toughCookie.toString(), this.url);
+        this.cookieJars[tokenID].setCookie(
+          toughCookie.toString(),
+          'https://www.endclothing.com'
+        );
       }
     });
     // const loginPage = request({

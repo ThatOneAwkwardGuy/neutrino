@@ -14,6 +14,11 @@ import {
 import { getExternalAuth } from './utils/services';
 import { NeutrinoToast } from './components/Toast';
 
+const { getGlobal } = require('electron').remote;
+
+const trackEvent = getGlobal('trackEvent');
+const setAnalyticsUserID = getGlobal('setAnalyticsUserID');
+
 export default class Routes extends Component {
   constructor(props) {
     super(props);
@@ -52,15 +57,24 @@ export default class Routes extends Component {
           case 'soleNotify':
             await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
             break;
+          case 'globalHeat':
+            await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
+            break;
           default: {
             const machineIDStatus = await checkIfUserMachineIDMatches(uid);
             this.setState({
               authorised: machineIDStatus.authorised,
               raffleBot: machineIDStatus.raffleBot,
               message: machineIDStatus.message,
-              uid,
+              uid
             });
           }
+        }
+        try {
+          setAnalyticsUserID(uid);
+          trackEvent('login', 'login');
+        } catch (error) {
+          console.log(error);
         }
       } catch (error) {
         this.setState({
@@ -88,7 +102,8 @@ export default class Routes extends Component {
         });
       } else {
         this.setState({
-          authorised: false, lastChecked:0
+          authorised: false,
+          lastChecked: 0
         });
       }
     });

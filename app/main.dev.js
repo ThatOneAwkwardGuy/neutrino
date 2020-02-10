@@ -30,6 +30,7 @@ import {
 } from './constants/ipcConstants';
 
 const DiscordRPC = require('discord-rpc');
+const ua = require('universal-analytics');
 
 const clientId = '575360564767752194';
 DiscordRPC.register(clientId);
@@ -37,6 +38,8 @@ const rpc = new DiscordRPC.Client({ transport: 'ipc' });
 const startTimestamp = new Date();
 let discordRPCState = '';
 const version = app.getVersion();
+
+let analyticsUser = null;
 
 export default class AppUpdater {
   constructor() {
@@ -57,7 +60,7 @@ export default class AppUpdater {
       if (mainWindow !== null && !mainWindow.isDestroyed()) {
         mainWindow.destroy();
       }
-      autoUpdater.quitAndInstall(false, true);
+      autoUpdater.quitAndInstall();
     });
     autoUpdater.on('update-available', info => {
       mainWindow.send(UPDATE_AVAILABLE, info);
@@ -267,3 +270,28 @@ app.on('ready', async () => {
 app.on('login', event => {
   event.preventDefault();
 });
+
+const setAnalyticsUserID = uid => {
+  analyticsUser = ua('UA-89115267-5', uid);
+};
+
+const trackEvent = (category, action, label, value) => {
+  analyticsUser
+    .event({
+      ec: category,
+      ea: action,
+      el: label,
+      ev: value
+    })
+    .send();
+  console.log(`Logged Event: ${category}|${action}|${label}|${value}`);
+};
+
+const trackScreenview = screen => {
+  analyticsUser.screenview({ cd: screen, an: 'Neutrino', av: version }).send();
+  console.log(`Logged Screen View: ${screen}`);
+};
+
+global.setAnalyticsUserID = setAnalyticsUserID;
+global.trackEvent = trackEvent;
+global.trackScreenview = trackScreenview;

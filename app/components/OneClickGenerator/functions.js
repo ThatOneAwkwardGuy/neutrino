@@ -49,12 +49,20 @@ export const createActivityWindow = async (
                               document.getElementById("signIn").click();
                             }
                           `);
-            win.webContents.once('did-finish-load', async () => {
+            win.webContents.on('did-finish-load', async () => {
               const documentHTML = await win.webContents.executeJavaScript(
                 'document.documentElement.innerHTML',
                 false
               );
-              if (documentHTML.includes(activity.email) && updateActivity) {
+              const windowLocation = await win.webContents.executeJavaScript(
+                'window.location',
+                false
+              );
+              if (
+                (documentHTML.includes(activity.email) ||
+                  windowLocation.pathname === '/') &&
+                updateActivity
+              ) {
                 updateActivity(index, { status: 'Logged In' });
                 resolve();
               } else if (updateActivity) {
@@ -181,8 +189,10 @@ export const runAcitivitiesOnWindow = async (
     incrementActivity
   );
 
-  const oneClickStatusPre = await testActivityWindow(index, activity);
-  updateActivity(index, { oneClickStatus: oneClickStatusPre });
+  if (settings.oneClickCheckTimingBool) {
+    const oneClickStatusPre = await testActivityWindow(index, activity);
+    updateActivity(index, { oneClickStatus: oneClickStatusPre });
+  }
 
   if (settings.oneClickCheckTimingBool) {
     const testInterval = setInterval(async () => {

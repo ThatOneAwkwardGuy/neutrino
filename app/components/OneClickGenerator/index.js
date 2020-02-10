@@ -121,8 +121,7 @@ export default class OneClickGenerator extends Component {
     this.windows[index].webContents.session.webRequest.onBeforeSendHeaders(
       (details, callback) => {
         const requestHeaders = { ...details.requestHeaders };
-        requestHeaders['User-Agent'] =
-          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome Safari/537.36';
+        requestHeaders['User-Agent'] = 'Chrome';
         callback({ requestHeaders });
       }
     );

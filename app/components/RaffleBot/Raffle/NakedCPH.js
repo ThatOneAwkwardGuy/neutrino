@@ -83,37 +83,7 @@ export default class NakedCPH {
     const payload = {};
     const formObj = {};
     this.raffleDetails.renderData.form.fields.forEach((row, index) => {
-      if (row.title.includes('first name')) {
-        formObj['1'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryFirstName,
-          type: 'text'
-        };
-      } else if (row.title.includes('last name')) {
-        formObj['2'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryLastName,
-          type: 'text'
-        };
-      } else if (row.title.includes('email')) {
-        formObj['5'] = {
-          field: { id: row.id, type: row.type },
-          email: this.profile.email,
-          type: 'email'
-        };
-      } else if (row.title.includes('postal code')) {
-        formObj['6'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryZip,
-          type: 'text'
-        };
-      } else if (row.title.includes('country are you')) {
-        formObj['7'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryCountry,
-          type: 'text'
-        };
-      } else if (row.title.includes('Our Captcha is') && index === 0) {
+      if (row.title.toLowerCase().includes('our captcha is') && index === 0) {
         const { ref } = row;
         const matchingLogic = this.raffleDetails.renderData.form.logic.find(
           logic => logic.ref === ref
@@ -123,18 +93,56 @@ export default class NakedCPH {
           text: matchingLogic.actions[0].condition.vars[1].value,
           type: 'text'
         };
-      } else if (row.title.includes('Our Captcha is')) {
-        const { ref } = row;
-        const matchingLogic = this.raffleDetails.renderData.form.logic.find(
-          logic => logic.ref === ref
-        );
-        formObj['3'] = {
+      } else if (row.title.toLowerCase().includes('first name')) {
+        formObj['1'] = {
           field: { id: row.id, type: row.type },
-          text: matchingLogic.actions[0].condition.vars[1].value,
+          text: this.profile.deliveryFirstName,
           type: 'text'
         };
-      } else if (row.title.includes('Newsletter')) {
+      } else if (row.title.toLowerCase().includes('last name')) {
+        formObj['2'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryLastName,
+          type: 'text'
+        };
+      } else if (row.title.toLowerCase().includes('email')) {
+        formObj['3'] = {
+          field: { id: row.id, type: row.type },
+          email: this.profile.email,
+          type: 'email'
+        };
+      } else if (row.title.toLowerCase().includes('shipping')) {
+        formObj['4'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryAddress,
+          type: 'text'
+        };
+      } else if (row.title.toLowerCase().includes('city')) {
+        formObj['5'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryCity,
+          type: 'text'
+        };
+      } else if (row.title.toLowerCase().includes('number')) {
+        formObj['6'] = {
+          field: { id: row.id, type: row.type },
+          phone_number: `+${this.profile.phoneNumber}`,
+          type: 'phone_number'
+        };
+      } else if (row.title.toLowerCase().includes('postal code')) {
+        formObj['7'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryZip,
+          type: 'text'
+        };
+      } else if (row.title.toLowerCase().includes('country are you')) {
         formObj['8'] = {
+          field: { id: row.id, type: row.type },
+          text: this.profile.deliveryCountry,
+          type: 'text'
+        };
+      } else if (row.title.toLowerCase().includes('newsletter')) {
+        formObj['9'] = {
           field: { id: row.id, type: row.type },
           text: 'Yes',
           type: 'text'
@@ -145,7 +153,6 @@ export default class NakedCPH {
     payload.form_id = this.raffleDetails.typeformCode;
     payload.signature = token;
     payload.landed_at = parseInt(landedAt, 10);
-
     const response = await this.rp({
       method: 'POST',
       json: true,

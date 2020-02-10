@@ -197,6 +197,15 @@ Need to add animations
 2.1.7
 - One Click Tester Fix for login in
 
+2.1.8
+ - Added analytics for me
+ - Fixed One Click Tester triggering when running One Click Generator even though it was turned off
+ - Fixed NakedCPH Raffle
+ - Attempt at fixing one click gen login issues for some users who were seeing "This browser or app may be insecure"
+
+2.1.9
+
+
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
 

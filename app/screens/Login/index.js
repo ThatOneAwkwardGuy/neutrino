@@ -20,6 +20,7 @@ import neutrinoTextLogo from '../../images/textLogo.svg';
 import blazeUnlimitedLogo from '../../images/blazeUnlimited.png';
 import gloryNotifyLogo from '../../images/gloryNotify.png';
 import soleNotifyLogo from '../../images/soleNotify.png';
+import globalHeatLogo from '../../images/globalHeat.png';
 
 const { BrowserWindow } = require('electron').remote;
 
@@ -39,6 +40,10 @@ export default class Login extends Component {
     this.setState({
       [e.target.name]: e.target.value
     });
+    if (e.target.name === 'authServer') {
+      const { setAuthAndMessage } = this.props;
+      setAuthAndMessage(false, '');
+    }
   };
 
   handleKeyPress = event => {
@@ -59,6 +64,9 @@ export default class Login extends Component {
         break;
       case 'soleNotify':
         authServerImage = soleNotifyLogo;
+        break;
+      case 'globalHeat':
+        authServerImage = globalHeatLogo;
         break;
       default:
         break;
@@ -138,6 +146,18 @@ export default class Login extends Component {
         break;
       }
       case 'soleNotify': {
+        const code = await this.loginWithDiscord();
+        this.setState(
+          {
+            key: code
+          },
+          () => {
+            this.loginWithExternalAuth();
+          }
+        );
+        break;
+      }
+      case 'globalHeat': {
         const code = await this.loginWithDiscord();
         this.setState(
           {
@@ -253,7 +273,7 @@ export default class Login extends Component {
       );
     }
 
-    if (['gloryNotify', 'soleNotify'].includes(authServer)) {
+    if (['gloryNotify', 'soleNotify', 'globalHeat'].includes(authServer)) {
       return (
         <div>
           <FormGroup>
@@ -315,6 +335,7 @@ export default class Login extends Component {
                   <option value="blazeUnlimited">BlazeUnlimited</option>
                   <option value="gloryNotify">GloryNotify</option>
                   <option value="soleNotify">SoleNotify</option>
+                  <option value="globalHeat">GlobalHeat</option>
                 </Input>
               </FormGroup>
             </Form>

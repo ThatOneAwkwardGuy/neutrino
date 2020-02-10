@@ -1,18 +1,15 @@
-import { getAnalytics } from '../utils/firebase';
-
 const log = require('electron-log');
+const { getGlobal } = require('electron').remote;
+
+const trackEvent = getGlobal('trackEvent');
 
 export const INCREMENT_RAFFLES = 'INCREMENT_RAFFLES';
 export const INCREMENT_PROXIES = 'INCREMENT_PROXIES';
 export const INCREMENT_ACCOUNTS = 'INCREMENT_ACCOUNTS';
 
-const analytics = getAnalytics();
-
 export const incrementRaffles = (raffleInfo = {}) => {
   try {
-    analytics.logEvent('Raffle Entry', {
-      ...raffleInfo
-    });
+    trackEvent('Raffle Bot', 'Raffle Entry', raffleInfo.url);
   } catch (e) {
     log.error(e);
   }
@@ -23,9 +20,7 @@ export const incrementRaffles = (raffleInfo = {}) => {
 
 export const incrementProxies = proxyInfo => {
   try {
-    analytics.logEvent('Proxy Creation', {
-      ...proxyInfo
-    });
+    trackEvent('Proxy Creator', 'Proxy Creation', proxyInfo.provider);
   } catch (e) {
     log.error(e);
   }
@@ -36,9 +31,7 @@ export const incrementProxies = proxyInfo => {
 
 export const incrementAccounts = accountInfo => {
   try {
-    analytics.logEvent('Account Creation', {
-      ...accountInfo
-    });
+    trackEvent('Account Creator', 'Account Creation', accountInfo.site);
   } catch (e) {
     log.error(e);
   }

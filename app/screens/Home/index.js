@@ -49,6 +49,10 @@ import {
 } from '../../constants/ipcConstants';
 import { cardTypes } from '../../constants/constants';
 
+const { getGlobal } = require('electron').remote;
+
+const trackScreenview = getGlobal('trackScreenview');
+
 library.add(fab);
 library.add(fas);
 
@@ -164,6 +168,7 @@ class Home extends Component {
   setDiscordRichPresence = currentWindow => {
     const state = this.currentWindowToText(currentWindow);
     ipcRenderer.send(SET_DISCORD_RPC_STATE, { state });
+    trackScreenview(this.currentWindowToText(currentWindow));
   };
 
   toggleSidebarExpand = () => {

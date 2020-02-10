@@ -95,7 +95,7 @@ export default class Footer extends Component {
           ''
         )}
         <Col className="text-center font-weight-bold footerText noselect">
-          Copyright © 2019 Neutrino - All Rights Reserved
+          Copyright ©2020 Neutrino - All Rights Reserved
         </Col>
         <Col xs="1">v{remote.app.getVersion()}</Col>
         <Col xs="2" className="text-right ml-auto">
