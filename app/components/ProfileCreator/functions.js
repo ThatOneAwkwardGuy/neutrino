@@ -64,12 +64,12 @@ export const shuffle = array => {
 };
 
 export const generateGmailDotTrick = (length, email) => {
-  const emails = [];
+  let emails = [];
   const generator = generate(email);
   for (let i = 0; i < length * 100; i += 1) {
     emails.push(generator.next().value);
   }
-  console.log(shuffle(emails));
+  emails = emails.filter(e => !e.includes('.@'));
   return shuffle(emails);
 };
 

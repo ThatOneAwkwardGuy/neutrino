@@ -197,6 +197,10 @@ class AccountCreator extends Component {
             return this.sleep(parseInt(delay, 10)).then(() =>
               this.createGmailAccount(gmailEmails[index]).catch(e => e)
             );
+          case 'hollywood':
+            return this.sleep(parseInt(delay, 10)).then(() =>
+              this.createHollyWoodAccount(gmailEmails[index]).catch(e => e)
+            );
           case 'nakedcph':
             return this.sleep(parseInt(delay, 10)).then(() =>
               this.createNakedCphAccount(gmailEmails[index]).catch(e => e)
@@ -796,6 +800,101 @@ class AccountCreator extends Component {
     console.log(repsonse);
   };
 
+  createHollyWoodAccount = async gmailEmail => {
+    const {
+      randomPass,
+      randomName,
+      useProxies,
+      site,
+      catchall,
+      pass,
+      firstName
+    } = this.state;
+    const { addCreatedAccount, settings } = this.props;
+    const email =
+      gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
+    const accountPass = randomPass ? randomize('a', 10) : pass;
+    const accountFirstName = randomName ? random.first() : firstName;
+    const tokenID = uuidv4();
+    this.cookieJars[tokenID] = request.jar();
+    const proxy = useProxies ? this.getRandomProxy() : '';
+    const cookies = await getCookiesFromWindow(
+      'https://www.hollywood.se/auth/submit',
+      proxy
+    );
+    cookies.forEach(cookie => {
+      const toughCookie = new tough.Cookie({
+        key: cookie.name,
+        value: cookie.value,
+        httpOnly: cookie.httpOnly,
+        hostOnly: cookie.hostOnly,
+        path: cookie.path
+      });
+      this.cookieJars[tokenID].setCookie(
+        toughCookie.toString(),
+        'https://www.hollywood.se/auth/submit'
+      );
+    });
+    const captchaResponse = await getCaptchaResponse({
+      cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
+      url: 'https://www.hollywood.se/auth/view',
+      id: tokenID,
+      agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+      baseURL: sites[site],
+      site,
+      accountPass,
+      settings,
+      siteKey: '6LcAB4wUAAAAABgTVnim-xSegGfH9ewhf7n_hfG3'
+    });
+    const payload = {
+      email,
+      password: accountPass,
+      firstName: accountFirstName,
+      'g-recaptcha-response': captchaResponse.captchaToken,
+      action: 'register'
+    };
+    const anticsrftokenCookie = cookies.find(
+      cookie => cookie.name === 'AntiCsrfToken'
+    );
+    const response = await request({
+      method: 'POST',
+      url: 'https://www.hollywood.se/auth/submit',
+      followRedirect: true,
+      agent: useProxies ? new HttpsProxyAgent(proxy) : null,
+      resolveWithFullResponse: true,
+      followAllRedirects: true,
+      jar: this.cookieJars[tokenID],
+      headers: {
+        authority: 'www.hollywood.se',
+        accept: 'application/json, text/javascript, */*; q=0.01',
+        'x-anticsrftoken': anticsrftokenCookie.value,
+        'x-requested-with': 'XMLHttpRequest',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        origin: 'https://www.hollywood.se',
+        'sec-fetch-site': 'same-origin',
+        'sec-fetch-mode': 'cors',
+        referer: 'https://www.hollywood.se/auth/view'
+      },
+      // body: queryString
+      form: payload
+    });
+    const jsonResponse = JSON.parse(response.body);
+    if (jsonResponse.Response.Success) {
+      addCreatedAccount({
+        email,
+        site,
+        pass: accountPass,
+        status: 'created'
+      });
+    } else {
+      return new Error(
+        'There was an error creating your account. this could be due to a banned catchall'
+      );
+    }
+  };
+
   // createNikeAccount = async gmailEmail => {
   //   const {
   //     randomPass,
@@ -955,7 +1054,9 @@ class AccountCreator extends Component {
             <Row className="pt-1 align-items-end noselect">
               <Col className="text-right">
                 <FontAwesomeIcon
+                  size="2x"
                   icon="cog"
+                  className="hoverIcon"
                   onClick={this.toggleAdvancedSettings}
                 />
               </Col>

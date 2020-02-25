@@ -6,7 +6,7 @@
     "name": "ThatOneAwkwardGuy",
     "email": "support@neutrino.app"
   },
-  "version": "2.1.9",
+  "version": "2.1.23",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dev": "concurrently \"yarn build-main\" \"yarn build-renderer-dev\"",
@@ -263,6 +263,7 @@
     "html-react-parser": "^0.9.1",
     "https-proxy-agent": "^3.0.1",
     "jquery": "^3.4.1",
+    "jshashes": "^1.0.8",
     "json-2-csv": "^3.5.5",
     "linode-api-node": "^1.2.3",
     "lodash": "^4.17.15",

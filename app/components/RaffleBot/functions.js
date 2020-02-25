@@ -57,6 +57,10 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadWoodWoodRaffleInfo(raffleLink);
       case 'FootDistrict':
         return loadFootDistrctRaffleInfo(raffleLink);
+      case 'EmpireShop':
+        return loadEmpireShopRaffleInfo(raffleLink);
+      case 'HollyWood':
+        return loadHollyWoodRaffleInfo(raffleLink);
       default:
         return undefined;
     }
@@ -729,6 +733,73 @@ const loadVooStoreRaffleInfo = async link => {
     size: sizes[0].id,
     raffleDetails: { token, pageID }
   };
+};
+
+const loadEmpireShopRaffleInfo = async link => {
+  const response = await rp.get(link);
+  const $ = cheerio.load(response);
+  console.log($('select[name="Taille__Size"] option'));
+  const sizes = $('select[name="Taille__Size"] option')
+    .map((index, size) => ({
+      id: size.attribs.value,
+      name: $(size).text()
+    }))
+    .toArray();
+  const image = $("input[name='image']").val();
+  const numFormulaire = $('input[name="num_formulaire"]').val();
+  const dysListeChamps = $('input[name="dys_liste_champs"]').val();
+  const dysListeChampsId = $('input[name="dys_liste_champs_id"]').val();
+  return {
+    styleInput: false,
+    sizeInput: true,
+    sizes,
+    size: sizes[0].id,
+    raffleDetails: {
+      image,
+      numFormulaire,
+      dysListeChamps,
+      dysListeChampsId
+    }
+  };
+};
+
+const loadHollyWoodRaffleInfo = async link => {
+  const win = await createNewWindow('', '');
+  win.loadURL(link);
+  return new Promise((resolve, reject) => {
+    try {
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.webContents.on('dom-ready', async () => {
+        const renderData = await win.webContents.executeJavaScript(
+          'window.rendererData',
+          true
+        );
+        const typeformCode = renderData.form.id;
+        let sizes = [];
+        const sizesField = renderData.form.fields.find(
+          field => field.title === 'YOUR US SIZE'
+        );
+        if (sizesField) {
+          sizes = sizesField.properties.choices.map(choice => ({
+            id: choice.label,
+            name: choice.label
+          }));
+        }
+        resolve({
+          sizes,
+          size: sizes[0].id,
+          sizeInput: true,
+          styleInput: false,
+          raffleDetails: { typeformCode, renderData }
+        });
+        win.close();
+      });
+    } catch (error) {
+      reject(error);
+    }
+  });
 };
 
 const loadBodegaRaffleInfo = async link => {

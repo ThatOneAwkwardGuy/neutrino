@@ -6,6 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import PropTypes from 'prop-types';
 import { getFirestore } from '../../utils/firebase';
 import icon from '../../images/animatedIcon.svg';
+import ssxLogo from '../../images/ssx.png';
+
 import { CHECK_FOR_UPDATES, START_UPDATE } from '../../constants/ipcConstants';
 
 const parse = require('html-react-parser');
@@ -114,7 +116,7 @@ export default class Homepage extends Component {
 
   render() {
     const { raffles } = this.state;
-    const { home, updateDownloading } = this.props;
+    const { home, updateDownloading, settings } = this.props;
     return (
       <Row className="h-100">
         <Col className="h-100 panel-left h-100">
@@ -122,13 +124,23 @@ export default class Homepage extends Component {
             <Row className="h-100">
               <Col>
                 <p className="text-center">
-                  <img
-                    alt="Neutrino Non-Text Logo"
-                    src={icon}
-                    draggable="false"
-                    className="my-5"
-                    style={{ width: '100px' }}
-                  />
+                  {settings.theme === 'Neutrino' ? (
+                    <img
+                      alt="Neutrino Non-Text Logo"
+                      src={icon}
+                      draggable="false"
+                      className="my-5"
+                      style={{ width: '100px' }}
+                    />
+                  ) : (
+                    <img
+                      alt="SSX Non-Text Logo"
+                      src={ssxLogo}
+                      draggable="false"
+                      className="my-5"
+                      style={{ width: '100px' }}
+                    />
+                  )}
                 </p>
                 <h5 className="font-weight-bold fs-0_8rem">
                   Welcome To Neutrino
@@ -246,6 +258,7 @@ export default class Homepage extends Component {
 
 Homepage.propTypes = {
   settings: PropTypes.shape({
+    theme: PropTypes.string.isRequired,
     update: PropTypes.shape({
       status: PropTypes.string.isRequired,
       lastChecked: PropTypes.number.isRequired,

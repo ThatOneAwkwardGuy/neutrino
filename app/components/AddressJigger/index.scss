@@ -1,6 +1,8 @@
 .addressCard {
-  padding: 10px;
-  background: $mainColour;
-  border: solid 5px $dark2Colour;
-  white-space: pre;
+  @include themify($themes) {
+    background: themed('mainColour');
+    border: solid 5px themed('dark2Colour');
+    padding: 10px;
+    white-space: pre;
+  }
 }

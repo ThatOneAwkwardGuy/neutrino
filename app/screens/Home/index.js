@@ -48,6 +48,7 @@ import {
   CHECK_FOR_UPDATES
 } from '../../constants/ipcConstants';
 import { cardTypes } from '../../constants/constants';
+import { changeTheme } from '../../reducers/settings';
 
 const { getGlobal } = require('electron').remote;
 
@@ -77,7 +78,13 @@ class Home extends Component {
   }
 
   componentDidMount() {
+    const { settings } = this.props;
     this.watchForUpdates();
+    if (settings.theme === 'SSX') {
+      changeTheme('SSX');
+    } else {
+      changeTheme('Neutrino');
+    }
   }
 
   componentDidUpdate(prevProps) {
@@ -342,7 +349,7 @@ class Home extends Component {
         path: routes.PROXY_TESTER,
         component: ProxyTester,
         exact: true,
-        props: { setLoading }
+        props: { setLoading, settings }
       },
       {
         path: routes.ADDRESS_JIGGER,
@@ -430,7 +437,7 @@ class Home extends Component {
     }
     return (
       <Container fluid className="d-flex flex-column h-100">
-        <Header />
+        <Header settings={settings} />
         <Row className="flex-fill overflow-y-scroll">
           <Col
             id="sidebar"
@@ -738,11 +745,6 @@ const mapStateToProps = state => ({
   home: state.home,
   proxies: state.proxies
 });
-
-// const mapDispatchToProps = dispatch => {
-//
-//   bindActionCreators({ ...SettingsActions, ...AccountActions }, dispatch);
-// };
 
 const mapDispatchToProps = {
   ...SettingsActions,

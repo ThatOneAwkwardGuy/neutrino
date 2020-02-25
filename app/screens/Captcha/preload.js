@@ -116,13 +116,15 @@ ipcRenderer.on(
 if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
   if (
     window.location.href.includes('doverstreetmarket') ||
-    window.location.href.includes('bstn')
+    window.location.href.includes('bstn') ||
+    window.location.href.includes('hollywood.se')
   ) {
     window.addEventListener('DOMContentLoaded', () => {
       if (!window.location.href.includes('bstn')) {
         document.querySelector('form').id = 'blahhhhh';
       }
       document.querySelector('form').action = 'http://google.com';
+      window.validateReCaptchaAuth = () => {};
     });
   }
   if (

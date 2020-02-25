@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Container, Row, Col, Input, Button } from 'reactstrap';
 import { withToastManager } from 'react-toast-notifications';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import PropTypes from 'prop-types';
 
 import { generateUEID } from '../../utils/utils';
 import { convertToBase } from './functions';
@@ -97,6 +98,7 @@ class ProfileTaskEditorConverter extends Component {
 
   loadFile = async () => {
     const { fromBot } = this.state;
+    const { toastManager } = this.props;
     const filePaths = await dialog.showOpenDialog(null, {
       filters: [
         { name: 'Profiles', extensions: ['csv', 'xml', 'json', 'txt'] },
@@ -104,52 +106,62 @@ class ProfileTaskEditorConverter extends Component {
       ]
     });
     const filePath = filePaths.filePaths[0];
-    const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
-    let processedFile = null;
-    if (filePath.split('.').slice(-1)[0] === 'csv') {
-      const csvToJSON = await csv().fromString(file);
-      processedFile = csvToJSON;
-    } else if (filePath.split('.').slice(-1)[0] === 'xml') {
-      const xmlFile = await xml2js.parseStringPromise(file, {
-        trim: true,
-        childkey: 'Profile',
-        explicitArray: false
-      });
-      processedFile =
-        xmlFile.ArrayOfProfile.Profile.length === undefined
-          ? [xmlFile.ArrayOfProfile.Profile]
-          : xmlFile.ArrayOfProfile.Profile;
-    } else if (
-      [
-        'Project Destroyer',
-        'Hastey',
-        'EVE AIO',
-        'Phantom',
-        'NSB',
-        'SOLE AIO'
-      ].includes(fromBot)
-    ) {
-      processedFile = JSON.parse(file);
-    } else if (fromBot === 'Adept') {
-      const parsedFile = JSON.parse(file);
-      if (parsedFile.length === undefined) {
-        processedFile = [parsedFile];
-      } else {
-        processedFile = parsedFile;
+    if (!filePaths.canceled) {
+      try {
+        const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
+        let processedFile = null;
+        if (filePath.split('.').slice(-1)[0] === 'csv') {
+          const csvToJSON = await csv().fromString(file);
+          processedFile = csvToJSON;
+        } else if (filePath.split('.').slice(-1)[0] === 'xml') {
+          const xmlFile = await xml2js.parseStringPromise(file, {
+            trim: true,
+            childkey: 'Profile',
+            explicitArray: false
+          });
+          processedFile =
+            xmlFile.ArrayOfProfile.Profile.length === undefined
+              ? [xmlFile.ArrayOfProfile.Profile]
+              : xmlFile.ArrayOfProfile.Profile;
+        } else if (
+          [
+            'Project Destroyer',
+            'Hastey',
+            'EVE AIO',
+            'Phantom',
+            'NSB',
+            'SOLE AIO'
+          ].includes(fromBot)
+        ) {
+          processedFile = JSON.parse(file);
+        } else if (fromBot === 'Adept') {
+          const parsedFile = JSON.parse(file);
+          if (parsedFile.length === undefined) {
+            processedFile = [parsedFile];
+          } else {
+            processedFile = parsedFile;
+          }
+        } else if (fromBot === 'TKS') {
+          processedFile = JSON.parse(file).Profiles;
+        } else {
+          processedFile = Object.values(JSON.parse(file));
+        }
+        this.setState({
+          profiles: processedFile.filter(
+            profile =>
+              profile !== undefined &&
+              profile !== null &&
+              typeof profile === 'object'
+          )
+        });
+      } catch (error) {
+        toastManager.add(error.message, {
+          appearance: 'error',
+          autoDismiss: true,
+          pauseOnHover: true
+        });
       }
-    } else if (fromBot === 'TKS') {
-      processedFile = JSON.parse(file).Profiles;
-    } else {
-      processedFile = Object.values(JSON.parse(file));
     }
-    this.setState({
-      profiles: processedFile.filter(
-        profile =>
-          profile !== undefined &&
-          profile !== null &&
-          typeof profile === 'object'
-      )
-    });
   };
 
   convertToXML = profiles => {
@@ -168,42 +180,57 @@ class ProfileTaskEditorConverter extends Component {
 
   exportFile = async () => {
     const { profiles, fromBot, toBot } = this.state;
+    const { toastManager } = this.props;
+    try {
+      const baseProfiles = profiles.map(profile =>
+        convertToBase(fromBot, profile)
+      );
+      const convertedProfiles = baseProfiles.map((profile, index) =>
+        convertFromBase(index, toBot, profile)
+      );
+      let extension = 'json';
+      let file = null;
+      if (toBot === 'Kodai') {
+        extension = 'txt';
+        file = JSON.stringify(convertedProfiles);
+      } else if (toBot === 'CSV') {
+        extension = 'csv';
+        file = this.convertToCSVString(convertedProfiles);
+      } else if (toBot === 'EVE AIO') {
+        extension = 'xml';
 
-    const baseProfiles = profiles.map(profile =>
-      convertToBase(fromBot, profile)
-    );
-
-    const convertedProfiles = baseProfiles.map((profile, index) =>
-      convertFromBase(index, toBot, profile)
-    );
-    let extension = 'json';
-    let file = null;
-    if (toBot === 'Kodai') {
-      extension = 'txt';
-      file = JSON.stringify(convertedProfiles);
-    } else if (toBot === 'CSV') {
-      extension = 'csv';
-      file = this.convertToCSVString(convertedProfiles);
-    } else if (toBot === 'EVE AIO') {
-      extension = 'xml';
-
-      file = this.convertToXML(convertedProfiles);
-    } else {
-      file = JSON.stringify(convertedProfiles);
-    }
-    const filePaths = await dialog.showSaveDialog({
-      title: 'name',
-      defaultPath: `~/${toBot} Profiles (Converted From ${fromBot}).${extension}`,
-      filters: [
-        {
-          name: `${toBot} Profiles (Converted From ${fromBot})`,
-          extensions: [extension]
-        }
-      ]
-    });
-    if (!filePaths.canceled) {
-      fs.writeFile(filePaths.filePath, file, err => {
-        if (err) console.error(err);
+        file = this.convertToXML(convertedProfiles);
+      } else {
+        file = JSON.stringify(convertedProfiles);
+      }
+      const filePaths = await dialog.showSaveDialog({
+        title: 'name',
+        defaultPath: `~/${toBot} Profiles (Converted From ${fromBot}).${extension}`,
+        filters: [
+          {
+            name: `${toBot} Profiles (Converted From ${fromBot})`,
+            extensions: [extension]
+          }
+        ]
+      });
+      if (!filePaths.canceled) {
+        fs.writeFile(filePaths.filePath, file, err => {
+          if (err) console.error(err);
+        });
+        toastManager.add(
+          `Successfully converted ${fromBot} profiles to ${toBot} profiles`,
+          {
+            appearance: 'success',
+            autoDismiss: true,
+            pauseOnHover: true
+          }
+        );
+      }
+    } catch (error) {
+      toastManager.add(error.message, {
+        appearance: 'error',
+        autoDismiss: true,
+        pauseOnHover: true
       });
     }
   };
@@ -329,5 +356,13 @@ class ProfileTaskEditorConverter extends Component {
     );
   }
 }
+
+ProfileTaskEditorConverter.propTypes = {
+  toastManager: PropTypes.shape({
+    add: PropTypes.func,
+    remove: PropTypes.func,
+    toasts: PropTypes.array
+  }).isRequired
+};
 
 export default withToastManager(ProfileTaskEditorConverter);

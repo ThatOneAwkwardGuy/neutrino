@@ -5,11 +5,13 @@ import {
   subjectList,
   actionVerbList
 } from './constants';
-
-import { testAccountPromise } from '../OneClickTester/functions';
+import { setProxyForWindow } from '../../utils/utils';
 
 const rp = require('request-promise');
 const cheerio = require('cheerio');
+const { remote } = require('electron');
+const { BrowserWindow } = require('electron').remote;
+const uuidv4 = require('uuid/v4');
 
 export const createActivityWindow = async (
   win,
@@ -28,7 +30,10 @@ export const createActivityWindow = async (
     }
     if (!win.isDestroyed()) {
       win.webContents.once('close', () => {
-        updateActivity(index, { status: 'Not Started' });
+        if (updateActivity) {
+          updateActivity(index, { status: 'Not Started' });
+        }
+        resolve();
       });
       win.loadURL('https://google.com');
       win.webContents.setAudioMuted(true);
@@ -59,12 +64,14 @@ export const createActivityWindow = async (
                 false
               );
               if (
-                (documentHTML.includes(activity.email) ||
-                  windowLocation.pathname === '/') &&
-                updateActivity
+                documentHTML.includes(activity.email) ||
+                windowLocation.pathname === '/'
               ) {
-                updateActivity(index, { status: 'Logged In' });
-                resolve();
+                if (updateActivity) {
+                  updateActivity(index, { status: 'Logged In' });
+                }
+                win.webContents.removeAllListeners('did-finish-load');
+                resolve(win);
               } else if (updateActivity) {
                 updateActivity(index, { status: 'Stuck In Login' });
               }
@@ -190,7 +197,11 @@ export const runAcitivitiesOnWindow = async (
   );
 
   if (settings.oneClickCheckTimingBool) {
-    const oneClickStatusPre = await testActivityWindow(index, activity);
+    const oneClickStatusPre = await testActivityWindow(
+      index,
+      activity,
+      settings
+    );
     updateActivity(index, { oneClickStatus: oneClickStatusPre });
   }
 
@@ -201,15 +212,14 @@ export const runAcitivitiesOnWindow = async (
         return;
       }
       const oneClickStatus = await testActivityWindow(index, activity);
+      console.log(oneClickStatus);
       updateActivity(index, { oneClickStatus });
     }, settings.oneClickCheckTiming * 60000);
   }
 };
 
-export const testActivityWindow = async (index, activity) => {
-  const accountTestResponse = await testAccountPromise(index, activity);
-  return accountTestResponse;
-};
+export const testActivityWindow = async (index, activity, settings) =>
+  testAccountPromise(index, activity, settings);
 
 const runActivityOnWindow = async (
   window,
@@ -244,3 +254,85 @@ const runActivityOnWindow = async (
     console.error(error);
   }
 };
+
+export const testAccountPromise = async (
+  index,
+  activity,
+  settings,
+  setAccountStatus
+) =>
+  new Promise(async resolve => {
+    const tokenID = uuidv4();
+    const win = new BrowserWindow({
+      width: 500,
+      height: 650,
+      show: true,
+      frame: true,
+      resizable: true,
+      focusable: true,
+      minimizable: true,
+      closable: true,
+      webPreferences: {
+        webviewTag: true,
+        session: remote.session.fromPartition(`activity-${tokenID}`)
+      }
+    });
+    win.webContents.session.webRequest.onBeforeSendHeaders(
+      (details, callback) => {
+        const requestHeaders = { ...details.requestHeaders };
+        requestHeaders['User-Agent'] = 'Chrome';
+        callback({ requestHeaders });
+      }
+    );
+    if (activity.proxy !== '') {
+      await setProxyForWindow(activity.proxy, this.windows[index]);
+    }
+    const loggedInWindow = await createActivityWindow(
+      win,
+      index,
+      activity,
+      settings,
+      false,
+      true
+    );
+    if (loggedInWindow) {
+      loggedInWindow.webContents.once('close', () => {
+        setAccountStatus(index, 'Not Started');
+        resolve();
+      });
+      loggedInWindow.loadURL('https://neutrinotools.app/captcha');
+      loggedInWindow.webContents.on('dom-ready', async () => {
+        const currentURL = await loggedInWindow.webContents.executeJavaScript(
+          'window.location.href',
+          false
+        );
+        if (currentURL === 'https://neutrinotools.app/captcha') {
+          await loggedInWindow.webContents.executeJavaScript(
+            'grecaptcha.execute()',
+            false
+          );
+          loggedInWindow.webContents.once('did-navigate-in-page', async () => {
+            const windowLocation2 = await loggedInWindow.webContents.executeJavaScript(
+              'window.location.hash',
+              false
+            );
+            if (windowLocation2 === '#success') {
+              resolve('One Click Success');
+              if (setAccountStatus) {
+                setAccountStatus(index, 'One Click Success');
+              }
+            } else {
+              resolve('One Click Fail');
+              if (setAccountStatus) {
+                setAccountStatus(index, 'One Click Fail');
+              }
+            }
+            loggedInWindow.webContents.removeAllListeners('close', () => {});
+            loggedInWindow.close();
+          });
+        }
+      });
+    } else {
+      resolve();
+    }
+  });

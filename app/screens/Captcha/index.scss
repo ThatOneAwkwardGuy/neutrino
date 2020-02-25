@@ -13,38 +13,52 @@
 }
 
 #captchaWindow .etabs-view {
-  width: 100%;
-  background: $dark1Colour !important;
-  background-color: $dark1Colour !important;
+  @include themify($themes) {
+    background: themed('dark1Colour') !important;
+    background-color: themed('dark1Colour') !important;
+    width: 100%;
+  }
 }
 
 #captchaWindow .etabs-view.visible {
-  background: $dark2Colour !important;
-  background-color: $dark2Colour !important;
+  @include themify($themes) {
+    background: themed('dark2Colour') !important;
+    background-color: themed('dark2Colour') !important;
+  }
 }
 
 #captchaWindow .etabs-tab {
-  height: 100%;
-  font-weight: bold;
-  background: $dark1Colour !important;
-  border: none;
-  color: white;
+  @include themify($themes) {
+    background: themed('dark1Colour') !important;
+    height: 100%;
+    font-weight: bold;
+    border: none;
+    color: white;
+  }
 }
 
 #captchaWindow .etabs-tab.active {
-  background: $dark2Colour !important;
+  @include themify($themes) {
+    background: themed('dark2Colour') !important;
+  }
 }
 
 #captchaWindow .etabs-tab-buttons .etabs-tab-button-close {
-  color: $red;
+  @include themify($themes) {
+    color: themed('red');
+  }
 }
 
 #captchaWindow .etabs-tabgroup {
-  height: auto !important;
-  background: $dark1Colour;
+  @include themify($themes) {
+    background: themed('dark1Colour');
+    height: auto !important;
+  }
 }
 
 #captchaWindow .etabs-buttons button {
-  color: $mainColour;
-  font-weight: bold !important;
+  @include themify($themes) {
+    color: themed('mainColour');
+    font-weight: bold !important;
+  }
 }

@@ -21,7 +21,9 @@ import stress95 from '../../images/stress95.png';
 import fearofgod from '../../images/fearofgod.png';
 import footdistrict from '../../images/footdistrict.png';
 import voostore from '../../images/voostore.png';
+import empireShop from '../../images/empireShop.png';
 import end from '../../images/end.jpg';
+import hollywood from '../../images/hollywood.png';
 // import footpatrol from '../../images/footpatrol.png';
 // import footshop from '../../images/footshop.png';
 // import woodwood from '../../images/woodwood.jpg';
@@ -44,6 +46,8 @@ import FearOfGod from './Raffle/FearOfGod';
 import FootDistrict from './Raffle/FootDistrict';
 import END from './Raffle/END';
 import VooStore from './Raffle/VooStore';
+import EmpireShop from './Raffle/EmpireShop';
+import HollyWood from './Raffle/HollyWood';
 // import Footpatrol from './Raffle/Footpatrol';
 // import FootShop from './Raffle/FootShop';
 // import SupplyStore from './Raffle/SupplyStore';
@@ -54,6 +58,7 @@ const { dialog } = require('electron').remote;
 const fs = require('fs');
 const csv = require('csvtojson');
 const chunk = require('lodash/chunk');
+const fsPromises = require('fs').promises;
 
 const sites = [
   // {
@@ -73,7 +78,9 @@ const sites = [
   { name: 'Fear Of God', img: fearofgod },
   { name: 'FootDistrict', img: footdistrict },
   { name: 'END', img: end },
-  { name: 'VooStore', img: voostore }
+  { name: 'VooStore', img: voostore },
+  { name: 'EmpireShop', img: empireShop },
+  { name: 'HollyWood', img: hollywood }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
   // { name: 'WoodWood', img: woodwood }
@@ -95,8 +102,10 @@ const Classes = {
   'Fear Of God': FearOfGod,
   FootDistrict,
   VooStore,
+  EmpireShop,
   DSMLA,
-  END
+  END,
+  HollyWood
 };
 
 export default class RaffleBot extends Component {
@@ -106,8 +115,10 @@ export default class RaffleBot extends Component {
       site: '',
       link: '',
       loadedRaffle: false,
+      instagramAccounts: [],
       proxiesInput: '',
       style: '',
+      captcha: '',
       size: '',
       sizes: [],
       styles: [],
@@ -252,6 +263,22 @@ export default class RaffleBot extends Component {
     }
   };
 
+  importInstagramAccounts = async () => {
+    const filePaths = await dialog.showOpenDialog({
+      filters: [{ name: 'Instagram Account List', extensions: ['txt'] }]
+    });
+    if (!filePaths.canceled) {
+      const filePath = filePaths.filePaths[0];
+      try {
+        const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
+        const instagramAccounts = file.split('\n');
+        this.setState({ instagramAccounts });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
   loadEntries = () => {
     const {
       profiles,
@@ -262,8 +289,10 @@ export default class RaffleBot extends Component {
       sizes,
       styles,
       raffleDetails,
+      captcha,
       entries,
-      proxiesInput
+      proxiesInput,
+      instagramAccounts
     } = this.state;
     const { incrementRaffles, settings } = this.props;
     const newEntries = [];
@@ -272,7 +301,7 @@ export default class RaffleBot extends Component {
         proxies: proxiesInput.split('\n')
       },
       () => {
-        profiles.forEach(profile => {
+        profiles.forEach((profile, index) => {
           let entry = false;
           const sizeObject = sizes.find(
             sizeOption => String(sizeOption.id) === size
@@ -280,6 +309,16 @@ export default class RaffleBot extends Component {
           const styleObject = styles.find(
             styleOption => String(styleOption.id) === style
           );
+          if (['EmpireShop'].includes(site)) {
+            raffleDetails.captcha = captcha;
+          }
+          // eslint-disable-next-line no-param-reassign
+          profile.instagram =
+            instagramAccounts.length > 0 &&
+            instagramAccounts[index] !== undefined
+              ? // eslint-disable-next-line no-param-reassign
+                (profile.instagram = instagramAccounts[index])
+              : '';
           entry = new Classes[site](
             link,
             profile,
@@ -359,6 +398,7 @@ export default class RaffleBot extends Component {
       proxiesInput,
       styleInput,
       sizeInput,
+      captcha,
       entries
     } = this.state;
     const columns = [
@@ -423,27 +463,26 @@ export default class RaffleBot extends Component {
           <Container fluid className="p-0 h-100 d-flex flex-column">
             <Row className="flex-1 overflow-hidden panel-middle">
               <Col id="TableContainer" className="h-100">
-                <Table
-                  data={entries}
-                  columns={columns}
-                  // {...{
-
-                  //   loading: false,
-                  //   infinite: true,
-                  //   manualSorting: false,
-                  //   manualFilters: false,
-                  //   manualPagination: false,
-                  //   disableMultiSort: true,
-                  //   disableGrouping: true,
-                  //   debug: false
-                  // }}
-                />
+                <Table data={entries} columns={columns} />
               </Col>
             </Row>
             {loadedRaffle ? (
               <Row className="py-3">
                 <Col xs="4">
                   <Container>
+                    {['EmpireShop'].includes(site) ? (
+                      <Row className="py-3">
+                        <Col>
+                          <Label>Captcha</Label>
+                          <Input
+                            onChange={this.handleChange}
+                            type="text"
+                            name="captcha"
+                            value={captcha}
+                          />
+                        </Col>
+                      </Row>
+                    ) : null}
                     <Row className="py-3">
                       {styleInput ? (
                         <Col>
@@ -479,7 +518,9 @@ export default class RaffleBot extends Component {
                         </Button>
                       </Col>
                       <Col>
-                        <Button onClick={this.goBack}>Back</Button>
+                        <Button onClick={this.importInstagramAccounts}>
+                          Load Instagram
+                        </Button>
                       </Col>
                     </Row>
                   </Container>
@@ -499,25 +540,46 @@ export default class RaffleBot extends Component {
                     </Row>
                   </Container>
                 </Col>
-                <Col xs="2" className="align-self-center">
-                  <Button className="my-3" onClick={this.loadEntries}>
-                    Load
-                  </Button>
-                  <Button className="my-3" onClick={this.stopAll}>
-                    Stop
-                  </Button>
-                </Col>
-                <Col xs="2" className="align-self-center">
-                  <Button className="my-3" onClick={this.startAll}>
-                    Start
-                  </Button>
-                  <Button
-                    color="danger"
-                    className="my-3"
-                    onClick={this.clearAll}
-                  >
-                    Clear
-                  </Button>
+                <Col xs="4" className="align-self-center">
+                  <Row>
+                    <Col>
+                      <Button className="my-3" onClick={this.loadEntries}>
+                        Load
+                      </Button>
+                    </Col>
+                    <Col>
+                      <Button className="my-3" onClick={this.startAll}>
+                        Start
+                      </Button>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>
+                      <Button className="my-3" onClick={this.stopAll}>
+                        Stop
+                      </Button>
+                    </Col>
+                    <Col>
+                      <Button
+                        color="danger"
+                        className="my-3"
+                        onClick={this.clearAll}
+                      >
+                        Clear
+                      </Button>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col xs="6">
+                      <Button
+                        color="danger"
+                        className="my-3"
+                        onClick={this.goBack}
+                      >
+                        Back
+                      </Button>
+                    </Col>
+                  </Row>
                 </Col>
               </Row>
             ) : (

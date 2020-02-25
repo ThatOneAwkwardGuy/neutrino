@@ -136,7 +136,8 @@ class ProfileCreator extends Component {
       billingApt,
       billingCountry,
       billingRegion,
-      billingZip
+      billingZip,
+      instagram
     } = this.state;
     updateProfile({
       sameDeliveryBillingBool,
@@ -165,7 +166,8 @@ class ProfileCreator extends Component {
       billingApt,
       billingCountry,
       billingRegion,
-      billingZip
+      billingZip,
+      instagram
     });
     toastManager.add('Saved profile', {
       appearance: 'success',

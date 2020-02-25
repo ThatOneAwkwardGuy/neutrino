@@ -1,8 +1,12 @@
 .progress {
   border-radius: 0 !important;
-  background-color: $dark1Colour;
+  @include themify($themes) {
+    background-color: themed('dark1Colour');
+  }
 }
 
 .progress-bar {
-  background-color: $mainColour;
+  @include themify($themes) {
+    background-color: themed('mainColour');
+  }
 }

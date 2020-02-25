@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Switch, Route } from 'react-router';
 import { ToastProvider } from 'react-toast-notifications';
+import PropTypes from 'prop-types';
 import routes from './constants/routes';
 import App from './containers/App';
 import Home from './screens/Home';
@@ -60,6 +61,9 @@ export default class Routes extends Component {
           case 'globalHeat':
             await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
             break;
+          case 'SSX':
+            await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
+            break;
           default: {
             const machineIDStatus = await checkIfUserMachineIDMatches(uid);
             this.setState({
@@ -72,7 +76,7 @@ export default class Routes extends Component {
         }
         try {
           setAnalyticsUserID(uid);
-          trackEvent('login', 'login');
+          trackEvent('Login', 'Login');
         } catch (error) {
           console.log(error);
         }
@@ -111,6 +115,7 @@ export default class Routes extends Component {
 
   render() {
     const { authorised, message, uid, raffleBot } = this.state;
+    const { setKeyInSetting } = this.props;
     return (
       <ToastProvider
         autoDismissTimeout={5000}
@@ -138,6 +143,7 @@ export default class Routes extends Component {
                   <Login
                     authorised={authorised}
                     message={message}
+                    setKeyInSetting={setKeyInSetting}
                     setAuthAndMessage={this.setAuthAndMessage}
                   />
                 )}
@@ -150,3 +156,7 @@ export default class Routes extends Component {
     );
   }
 }
+
+Routes.propTypes = {
+  setKeyInSetting: PropTypes.func.isRequired
+};

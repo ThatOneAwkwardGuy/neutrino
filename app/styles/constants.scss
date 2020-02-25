@@ -1,7 +1,28 @@
-$mainColour: #2b4df7;
-$mainColourDarker1: #2441ce;
-$mainColourDarker2: #1930a5;
-$dark1Colour: #222;
-$dark2Colour: #2d2d2d;
-$white: #fff;
-$red: red;
+$themes: (
+  Neutrino: (
+    mainColour: #2b4df7,
+    mainColourDarker1: #2441ce,
+    mainColourDarker2: #1930a5,
+    dark1Colour: #222,
+    dark2Colour: #2d2d2d,
+    white: #fff,
+    red: red
+  ),
+  SSX: (
+    mainColour: #fe4922,
+    mainColourDarker1: #fe4922,
+    mainColourDarker2: #fe4922,
+    dark1Colour: #000,
+    dark2Colour: rgb(20, 20, 20),
+    white: #fff,
+    red: #fe4922
+  )
+);
+
+// $mainColour: #2b4df7;
+// $mainColourDarker1: #2441ce;
+// $mainColourDarker2: #1930a5;
+// $dark1Colour: #222;
+// $dark2Colour: #2d2d2d;
+// $white: #fff;
+// $red: red;

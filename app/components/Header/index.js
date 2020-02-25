@@ -3,7 +3,9 @@ import { Row, Col } from 'reactstrap';
 import { remote } from 'electron';
 import PropTypes from 'prop-types';
 import minimiseIcon from '../../images/minimise.svg';
+import minimiseIconRed from '../../images/minimise_red.svg';
 import closeIcon from '../../images/close.svg';
+import closeIconRed from '../../images/close_red.svg';
 
 const hashToName = {
   '#/home/proxy-creator': 'Proxy Creator',
@@ -39,7 +41,7 @@ export default class Header extends Component {
   };
 
   render() {
-    const { showPageTitle, closable } = this.props;
+    const { showPageTitle, closable, settings } = this.props;
     return (
       <Row
         id="header"
@@ -58,7 +60,9 @@ export default class Header extends Component {
               draggable="false"
               alt="Minimise Window"
               className="headerIcon"
-              src={minimiseIcon}
+              src={
+                settings.theme === 'Neutrino' ? minimiseIcon : minimiseIconRed
+              }
             />
           </span>
         </Col>
@@ -69,7 +73,7 @@ export default class Header extends Component {
                 draggable="false"
                 alt="Close Window"
                 className="headerIcon"
-                src={closeIcon}
+                src={settings.theme === 'Neutrino' ? closeIcon : closeIconRed}
               />
             </span>
           </Col>
@@ -81,10 +85,12 @@ export default class Header extends Component {
 
 Header.propTypes = {
   showPageTitle: PropTypes.bool,
-  closable: PropTypes.bool
+  closable: PropTypes.bool,
+  settings: PropTypes.objectOf(PropTypes.any)
 };
 
 Header.defaultProps = {
   showPageTitle: true,
-  closable: true
+  closable: true,
+  settings: { theme: 'Neutrino' }
 };

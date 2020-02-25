@@ -27,6 +27,7 @@ export default function settings(
     activityGoogleNews: true,
     activityGoogleShopping: true,
     activityYoutube: true,
+    theme: 'Neutrino',
     update: {
       status: '',
       releaseDate: '',
@@ -57,6 +58,9 @@ export default function settings(
     case SET_ROOT_SETTING_VALUE: {
       const changeRootSetting = { ...state };
       changeRootSetting[action.key] = action.value;
+      if (action.key === 'theme') {
+        changeTheme(action.value);
+      }
       return changeRootSetting;
     }
     case UPDATE_UPDATE_STATUS: {
@@ -69,3 +73,7 @@ export default function settings(
       return state;
   }
 }
+
+export const changeTheme = themeName => {
+  document.getElementById('neutrinoHTML').className = `theme-${themeName}`;
+};

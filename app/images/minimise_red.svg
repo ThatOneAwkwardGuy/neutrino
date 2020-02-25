@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="13px" height="3px" viewBox="0 0 13 3" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 61.2 (89653) - https://sketch.com -->
+    <title>minimise</title>
+    <desc>Created with Sketch.</desc>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="minimise" transform="translate(-746.000000, -25.000000)">
+            <rect id="Navbar" x="0" y="0" width="800" height="50"></rect>
+            <line x1="747.5" y1="26.5" x2="757.5" y2="26.5" id="Line" stroke="#FE4922" stroke-width="3" stroke-linecap="square"></line>
+        </g>
+    </g>
+</svg>

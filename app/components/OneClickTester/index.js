@@ -2,8 +2,9 @@ import React, { Component } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 import { Container, Row, Col, Label, Input, Button } from 'reactstrap';
+import PropTypes from 'prop-types';
 import Table from '../Table/index';
-import { testAccount } from './functions';
+import { testAccountPromise } from '../OneClickGenerator/functions';
 
 export default class OneClickTester extends Component {
   constructor(props) {
@@ -73,12 +74,16 @@ export default class OneClickTester extends Component {
 
   testAllAccounts = () => {
     const { accounts } = this.state;
+    const { settings } = this.props;
     this.windows = accounts.map((account, index) =>
-      testAccount(index, account, this.setAccountStatus)
+      testAccountPromise(index, account, settings, this.setAccountStatus)
     );
   };
 
-  stopAccount = row => {
+  stopAccount = async row => {
+    this.windows[row.row.index] = await Promise.resolve(
+      this.windows[row.row.index]
+    );
     if (
       this.windows[row.row.index] &&
       !this.windows[row.row.index].isDestroyed()
@@ -103,6 +108,7 @@ export default class OneClickTester extends Component {
 
   render() {
     const { accounts, massAccounts } = this.state;
+    const { settings } = this.props;
     const columns = [
       {
         Header: '#',
@@ -130,10 +136,13 @@ export default class OneClickTester extends Component {
               icon="play"
               onClick={() => {
                 this.windows.push(
-                  testAccount(
-                    row.row.index,
-                    row.row.original,
-                    this.setAccountStatus
+                  Promise.resolve(
+                    testAccountPromise(
+                      row.row.index,
+                      row.row.original,
+                      settings,
+                      this.setAccountStatus
+                    )
                   )
                 );
               }}
@@ -212,3 +221,7 @@ export default class OneClickTester extends Component {
     );
   }
 }
+
+OneClickTester.propTypes = {
+  settings: PropTypes.objectOf(PropTypes.any).isRequired
+};

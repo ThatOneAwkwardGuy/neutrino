@@ -153,6 +153,54 @@ export const NakedCPHSchema = new Schema({
   }
 });
 
+export const HollyWoodSchema = new Schema({
+  deliveryFirstName: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery First Name must be a string.',
+      required: 'Delivery First Name is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryLastName: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Last Name must be a string.',
+      required: 'Delivery Last Name is required.'
+    },
+    length: { min: 1 }
+  },
+  email: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Email must be a string.',
+      required: 'Email is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryZip: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Zip must be a string.',
+      required: 'Delivery Zip is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryCountry: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Country must be a string.',
+      required: 'Delivery Country is required.'
+    },
+    length: { min: 1 }
+  }
+});
+
 export const ExtraButterSchema = new Schema({
   email: {
     type: String,
@@ -263,6 +311,63 @@ export const ExtraButterSchema = new Schema({
       },
       length: { min: 1 }
     }
+  }
+});
+
+export const EmpireShopSchema = new Schema({
+  email: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Email must be a string.',
+      required: 'Email is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryFirstName: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery First Name must be a string.',
+      required: 'Delivery First Name is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryLastName: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Last Name must be a string.',
+      required: 'Delivery Last Name is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryAddress: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Address must be a string.',
+      required: 'Delivery Address is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryCity: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery City must be a string.',
+      required: 'Delivery City is required.'
+    },
+    length: { min: 1 }
+  },
+  deliveryZip: {
+    type: String,
+    required: true,
+    message: {
+      type: 'Delivery Zip must be a string.',
+      required: 'Delivery Zip is required.'
+    },
+    length: { min: 1 }
   }
 });
 

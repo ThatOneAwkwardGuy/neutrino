@@ -1,11 +1,14 @@
 #sidebar {
-  box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(0, 0, 0, 0.5);
-  background-color: $dark2Colour;
-  overflow-y: scroll;
-  padding: 0;
-  text-decoration: none !important;
-  height: 100%;
-  transition: all 200ms ease;
+  @include themify($themes) {
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 0 rgba(0, 0, 0, 0.5);
+    background-color: themed('dark2Colour');
+    overflow-y: scroll;
+    padding: 0;
+    text-decoration: none !important;
+    height: 100%;
+    transition: all 200ms ease;
+  }
 }
 
 /* Safari, Chrome and Opera > 12.1 */
@@ -25,7 +28,9 @@
 }
 
 .sidebarIconActive span {
-  color: $mainColour;
+  @include themify($themes) {
+    color: themed('mainColour');
+  }
 }
 
 .sidebarIconActive:hover span {
@@ -39,12 +44,14 @@
 }
 
 #content {
-  margin: 0 10px 0 10px;
-  // box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5),
-  //   inset 0 1px 0px 0 rgba(0, 0, 0, 0.5);
-  background-color: $dark2Colour;
-  overflow-y: hidden;
-  height: 100%;
+  @include themify($themes) {
+    margin: 0 10px 0 10px;
+    // box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.5),
+    //   inset 0 1px 0px 0 rgba(0, 0, 0, 0.5);
+    background-color: themed('dark2Colour');
+    overflow-y: hidden;
+    height: 100%;
+  }
 }
 
 #content > .row {
@@ -57,8 +64,10 @@
 }
 
 .sidebarIcon:hover {
-  background-color: $mainColour;
-  text-decoration: none;
+  @include themify($themes) {
+    background-color: themed('mainColour');
+    text-decoration: none;
+  }
 }
 
 .sidebarIconLabel {
@@ -68,7 +77,9 @@
 }
 
 .sidebarIconActive {
-  background-color: $mainColour;
+  @include themify($themes) {
+    background-color: themed('mainColour');
+  }
 }
 
 .sidebarIconActive .sidebarIconLabel {

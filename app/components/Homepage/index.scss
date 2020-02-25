@@ -1,12 +1,18 @@
 .raffleRow {
-  background-color: $dark1Colour;
-  padding: 20px;
+  @include themify($themes) {
+    background-color: themed('dark1Colour');
+    padding: 20px;
+  }
 }
 
 .raffleRow:hover {
-  background-color: $mainColourDarker1;
+  @include themify($themes) {
+    background-color: themed('mainColourDarker1');
+  }
 }
 
 .raffleRow:active {
-  background-color: $mainColourDarker2;
+  @include themify($themes) {
+    background-color: themed('mainColourDarker2');
+  }
 }

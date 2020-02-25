@@ -1,15 +1,21 @@
 .neutrinoModal .modal-content {
-  background-color: $dark1Colour;
+  @include themify($themes) {
+    background-color: themed('dark1Colour');
+  }
 }
 
 .neutrinoModal button[aria-label='Close'] {
-  color: $red;
-  text-shadow: none;
+  @include themify($themes) {
+    color: themed('red');
+    text-shadow: none;
+  }
 }
 
 #loadingModal .modal-content,
 #infoModal .modal-content {
-  background-color: $dark1Colour;
+  @include themify($themes) {
+    background-color: themed('dark1Colour');
+  }
 }
 
 .modal-header,
@@ -19,6 +25,8 @@
 
 #loadingModal button[aria-label='Close'],
 #infoModal button[aria-label='Close'] {
-  color: $red;
-  text-shadow: none;
+  @include themify($themes) {
+    color: themed('red');
+    text-shadow: none;
+  }
 }

@@ -206,6 +206,26 @@ Need to add animations
 2.1.9
 - Addded Global Heat login
 
+2.1.20
+- One Click Tester login fixed
+
+2.1.21
+- Fixed saving instagram in profile gen
+- SneakerSquadX login
+- Small bug fixes
+
+2.1.22
+- Quick logo fix
+
+2.1.23
+- Raffle Bot - Added Hollywood.se
+- Raffle Bot - Added EmpireShop
+- Account Creator - Added Hollywood.se
+- Better error reporting for profile converter (Should help me find problems quicker)
+
+2.1.24
+- Raffle Bot - EmpireShop - Added captcha field to let you manually add captcha
+
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
 

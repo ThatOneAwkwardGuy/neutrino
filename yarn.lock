@@ -8715,6 +8715,11 @@ jsesc@~0.5.0:
   version "0.5.0"
   resolved "https://registry.yarnpkg.com/jsesc/-/jsesc-0.5.0.tgz#e7dee66e35d6fc16f710fe91d5cf69f70f08911d"
 
+jshashes@^1.0.8:
+  version "1.0.8"
+  resolved "https://registry.yarnpkg.com/jshashes/-/jshashes-1.0.8.tgz#f60d837428383abf73ab022e1542e6614bd75514"
+  integrity sha512-btmQZ/w1rj8Lb6nEwvhjM7nBYoj54yaEFo2PWh3RkxZ8qNwuvOxvQYN/JxVuwoMmdIluL+XwYVJ+pEEZoSYybQ==
+
 json-2-csv@^3.5.5:
   version "3.5.6"
   resolved "https://registry.yarnpkg.com/json-2-csv/-/json-2-csv-3.5.6.tgz#ec1f50f490301c10f2bacad3ad756aef904327e6"

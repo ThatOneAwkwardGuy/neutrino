@@ -10,21 +10,25 @@ import {
   Button
 } from 'reactstrap';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { connect } from 'react-redux';
 
 import BarLoader from 'react-spinners/BarLoader';
 import PropTypes from 'prop-types';
+import { changeTheme } from '../../reducers/settings';
 import { getAuth } from '../../utils/firebase';
 import { getExternalAuth } from '../../utils/services';
+import * as SettingsActions from '../../actions/settings';
 import Header from '../../components/Header';
 import neutrinoTextLogo from '../../images/textLogo.svg';
 import blazeUnlimitedLogo from '../../images/blazeUnlimited.png';
 import gloryNotifyLogo from '../../images/gloryNotify.png';
 import soleNotifyLogo from '../../images/soleNotify.png';
 import globalHeatLogo from '../../images/globalHeat.png';
+import ssxLogo from '../../images/ssx.png';
 
 const { BrowserWindow } = require('electron').remote;
 
-export default class Login extends Component {
+class Login extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -36,13 +40,29 @@ export default class Login extends Component {
     };
   }
 
+  componentDidMount() {
+    const { settings } = this.props;
+    if (settings.theme === 'SSX') {
+      changeTheme('SSX');
+      this.setState({ authServer: 'SSX' });
+    } else {
+      changeTheme('Neutrino');
+    }
+  }
+
   handleChange = e => {
+    const { setKeyInSetting } = this.props;
     this.setState({
       [e.target.name]: e.target.value
     });
     if (e.target.name === 'authServer') {
       const { setAuthAndMessage } = this.props;
       setAuthAndMessage(false, '');
+    }
+    if (e.target.value === 'SSX') {
+      setKeyInSetting('theme', 'SSX');
+    } else {
+      setKeyInSetting('theme', 'Neutrino');
     }
   };
 
@@ -67,6 +87,9 @@ export default class Login extends Component {
         break;
       case 'globalHeat':
         authServerImage = globalHeatLogo;
+        break;
+      case 'SSX':
+        authServerImage = ssxLogo;
         break;
       default:
         break;
@@ -169,6 +192,18 @@ export default class Login extends Component {
         );
         break;
       }
+      case 'SSX': {
+        const code = await this.loginWithDiscord();
+        this.setState(
+          {
+            key: code
+          },
+          () => {
+            this.loginWithExternalAuth();
+          }
+        );
+        break;
+      }
       default:
         this.loginWithExternalAuth();
         break;
@@ -179,6 +214,7 @@ export default class Login extends Component {
     const win = new BrowserWindow({
       width: 500,
       height: 650,
+      title: 'Discord',
       show: true,
       frame: true,
       resizable: true,
@@ -273,7 +309,9 @@ export default class Login extends Component {
       );
     }
 
-    if (['gloryNotify', 'soleNotify', 'globalHeat'].includes(authServer)) {
+    if (
+      ['gloryNotify', 'soleNotify', 'globalHeat', 'SSX'].includes(authServer)
+    ) {
       return (
         <div>
           <FormGroup>
@@ -293,23 +331,26 @@ export default class Login extends Component {
   };
 
   render() {
-    const { authorised, message } = this.props;
+    const { authServer } = this.state;
+    const { authorised, message, settings } = this.props;
     return (
       <Container fluid className="d-flex flex-column h-100">
-        <Header showPageTitle={false} />
+        <Header showPageTitle={false} settings={settings} />
         <Row className="flex-fill justify-content-center align-items-center">
           <Col xs="6">
             <div id="loginWindow">
               <Form>
-                <FormGroup className="text-center">
-                  <img
-                    alt="Neutrino Text Logo"
-                    id="loginLogo"
-                    draggable="false"
-                    className="my-3"
-                    src={neutrinoTextLogo}
-                  />
-                </FormGroup>
+                {authServer !== 'SSX' ? (
+                  <FormGroup className="text-center">
+                    <img
+                      alt="Neutrino Text Logo"
+                      id="loginLogo"
+                      draggable="false"
+                      className="my-3"
+                      src={neutrinoTextLogo}
+                    />
+                  </FormGroup>
+                ) : null}
                 {this.returnAuthServerImage()}
                 {!authorised && message !== '' ? (
                   <Row id="loginErrorCard" className="text-center">
@@ -328,10 +369,12 @@ export default class Login extends Component {
                 <Label>Server</Label>
                 <Input
                   onChange={this.handleChange}
+                  value={authServer}
                   name="authServer"
                   type="select"
                 >
                   <option value="neutrino">Neutrino</option>
+                  <option value="SSX">SneakerSquadX</option>
                   <option value="blazeUnlimited">BlazeUnlimited</option>
                   <option value="gloryNotify">GloryNotify</option>
                   <option value="soleNotify">SoleNotify</option>
@@ -349,5 +392,20 @@ export default class Login extends Component {
 Login.propTypes = {
   authorised: PropTypes.bool.isRequired,
   message: PropTypes.string.isRequired,
-  setAuthAndMessage: PropTypes.func.isRequired
+  setAuthAndMessage: PropTypes.func.isRequired,
+  settings: PropTypes.objectOf(PropTypes.any).isRequired,
+  setKeyInSetting: PropTypes.func.isRequired
 };
+
+const mapStateToProps = state => ({
+  settings: state.settings
+});
+
+const mapDispatchToProps = {
+  ...SettingsActions
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(Login);

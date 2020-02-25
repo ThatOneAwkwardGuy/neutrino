@@ -1,8 +1,5 @@
 const rp = require('request-promise').defaults({
-  baseUrl:
-    process.env.NODE_ENV === 'development'
-      ? 'http://localhost:3001/api/'
-      : 'http://neutrinotools.app/api'
+  baseUrl: 'http://neutrinotools.app/api'
 });
 
 export const bs = {};

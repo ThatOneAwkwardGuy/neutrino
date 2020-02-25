@@ -1,8 +1,10 @@
 #footer {
-  min-height: 50px;
-  background-color: $dark2Colour;
-  margin-top: 10px;
-  padding: 10px;
+  @include themify($themes) {
+    min-height: 50px;
+    background-color: themed('dark2Colour');
+    margin-top: 10px;
+    padding: 10px;
+  }
 }
 
 .footerIcon {
@@ -10,8 +12,10 @@
 }
 
 .footerIcon span:hover {
-  color: $mainColour !important;
-  transition: 0.3s;
+  @include themify($themes) {
+    color: themed('mainColour') !important;
+    transition: 0.3s;
+  }
 }
 .footerText {
   font-size: 0.8rem;

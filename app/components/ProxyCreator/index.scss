@@ -11,12 +11,16 @@
 }
 
 .proxyIconActive {
-  background-color: $mainColour;
+  @include themify($themes) {
+    background-color: themed('mainColour');
+  }
 }
 
 .proxyIcon:hover {
-  background-color: $mainColour;
-  cursor: pointer;
+  @include themify($themes) {
+    background-color: themed('mainColour');
+    cursor: pointer;
+  }
 }
 
 .proxyIcon h5 {

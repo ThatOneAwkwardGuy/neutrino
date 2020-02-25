@@ -8,9 +8,10 @@ $fa-font-path: '~font-awesome/fonts';
 @import './styles/constants.scss';
 @import './fonts/stylesheet.css';
 @import '~bootstrap/dist/css/bootstrap.css';
+@import './utils/mixins.scss';
+@import './screens/Login/index.scss';
 @import './components/Footer/index.scss';
 @import './components/Header/index.scss';
-@import './screens/Login/index.scss';
 @import './screens/Home/index.scss';
 @import './screens/Captcha/index.scss';
 @import './components/Homepage/index.scss';
@@ -18,7 +19,6 @@ $fa-font-path: '~font-awesome/fonts';
 @import './components/ProxyTester/index.scss';
 @import './components/AddressJigger/index.scss';
 @import '~electron-tabs/electron-tabs.css';
-@import './utils/mixins.scss';
 @import './components/OneClickGenerator/index.scss';
 @import './components/ProfileTaskEditorConverter/index.scss';
 @import './components/RaffleBot/index.scss';
@@ -26,15 +26,17 @@ $fa-font-path: '~font-awesome/fonts';
 
 body,
 html {
-  position: relative;
-  color: white;
-  height: 100vh;
-  background-color: $dark1Colour;
-  font-family: 'Montserrat', Arial, Helvetica, Helvetica Neue, serif;
-  /* stylelint-disable */
+  @include themify($themes) {
+    background-color: themed('dark1Colour');
+    position: relative;
+    color: white;
+    height: 100vh;
+    font-family: 'Montserrat', Arial, Helvetica, Helvetica Neue, serif;
+    /* stylelint-disable */
+    /* stylelint-enable */
+    overflow-y: hidden;
+  }
   @include fluid-type(font-size, 320px, 1366px, 4px, 14px);
-  /* stylelint-enable */
-  overflow-y: hidden;
 }
 
 a:hover {
@@ -46,10 +48,16 @@ a:hover {
 }
 
 .neutrinoButton {
-  background-color: $mainColour;
-  border: 0;
-  border-radius: 0;
-  font-weight: bold;
+  @include themify($themes) {
+    background-color: themed('mainColour');
+    border: 0;
+    border-radius: 0;
+    font-weight: bold;
+  }
+}
+
+.hoverIcon {
+  cursor: pointer;
 }
 
 input,
@@ -59,11 +67,13 @@ textarea,
 .custom-file-label::after,
 .list-group,
 .list-group-item {
-  border: 0 !important;
-  border-radius: 0 !important;
-  background-color: $dark1Colour !important;
-  color: white !important;
-  font-weight: bold !important;
+  @include themify($themes) {
+    border: 0 !important;
+    border-radius: 0 !important;
+    background-color: themed('dark1Colour') !important;
+    color: white !important;
+    font-weight: bold !important;
+  }
 }
 
 .custom-switch .custom-control-label::before,
@@ -73,7 +83,9 @@ textarea,
 }
 
 .custom-control-input:checked ~ .custom-control-label::before {
-  background-color: $mainColour;
+  @include themify($themes) {
+    background-color: themed('mainColour');
+  }
 }
 
 :focus {
@@ -81,12 +93,16 @@ textarea,
 }
 
 .manualTableRow {
-  background-color: $dark1Colour !important;
-  word-break: break-all;
+  @include themify($themes) {
+    background-color: themed('dark1Colour') !important;
+    word-break: break-all;
+  }
 }
 
 .custom-file-label::after {
-  background-color: $mainColour !important;
+  @include themify($themes) {
+    background-color: themed('mainColour') !important;
+  }
 }
 
 input:focus,
@@ -104,47 +120,55 @@ textarea:focus {
 }
 
 .panel-left {
-  border: solid 10px $dark1Colour;
-  border-top: 0;
-  border-bottom: 0;
-  border-left: 0;
-  background-color: $dark2Colour;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  @include themify($themes) {
+    border-top: 0;
+    border-bottom: 0;
+    border-left: 0;
+    background-color: themed('dark2Colour');
+    border-right: solid 10px themed('dark1Colour');
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
 }
 
 .panel-middle {
-  border: solid 10px $dark1Colour;
-  background-color: $dark2Colour;
-  overflow-y: scroll;
-  overflow-x: hidden;
-  border-right: 0;
-  border-left: 0;
-  border-top: 0;
+  @include themify($themes) {
+    border: solid 10px themed('dark1Colour');
+    background-color: themed('dark2Colour');
+    overflow-y: scroll;
+    overflow-x: hidden;
+    border-right: 0;
+    border-left: 0;
+    border-top: 0;
+  }
 }
 
 .panel-right {
-  border: solid 10px $dark1Colour;
-  border-top: 0;
-  border-bottom: 0;
-  border-right: 0;
-  background-color: $dark2Colour;
-  overflow-y: scroll;
-  overflow-x: hidden;
+  @include themify($themes) {
+    border: solid 10px themed('dark1Colour');
+    background-color: themed('dark2Colour');
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+    overflow-y: scroll;
+    overflow-x: hidden;
+  }
 }
 
 .panel-title {
-  background: $mainColour;
-  padding: 5px;
-  font-weight: bold;
-  font-size: 0.9rem;
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  user-select: none; /* Non-prefixed version, currently
-  supported by Chrome and Opera */
+  @include themify($themes) {
+    background: themed('mainColour');
+    padding: 5px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently
+    supported by Chrome and Opera */
+  }
 }
 
 .panel-container {
@@ -162,7 +186,9 @@ textarea:focus {
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: $mainColour !important;
+  @include themify($themes) {
+    background-color: themed('mainColour') !important;
+  }
 }
 
 .panel-left::-webkit-scrollbar,
@@ -175,7 +201,9 @@ textarea:focus {
 .panel-left::-webkit-scrollbar-thumb,
 .panel-middle::-webkit-scrollbar-thumb,
 .panel-right::-webkit-scrollbar-thumb {
-  background-color: $mainColour !important;
+  @include themify($themes) {
+    background-color: themed('mainColour') !important;
+  }
 }
 
 .fs-1rem {
@@ -204,16 +232,22 @@ label {
 }
 
 .btn-secondary {
-  background: $mainColour;
+  @include themify($themes) {
+    background: themed('mainColour');
+  }
 }
 
 .btn-secondary:hover:enabled {
-  background: $mainColourDarker1 !important;
-  background-color: $mainColourDarker1 !important;
+  @include themify($themes) {
+    background: themed('mainColourDarker1') !important;
+    background-color: themed('mainColourDarker1') !important;
+  }
 }
 .btn-secondary:active:enabled {
-  background: $mainColourDarker2 !important;
-  background-color: $mainColourDarker2 !important;
+  @include themify($themes) {
+    background: themed('mainColourDarker2') !important;
+    background-color: themed('mainColourDarker2') !important;
+  }
 }
 
 .btn {
@@ -277,23 +311,29 @@ div:first-of-type > div.NeutrinoToast {
 }
 
 .tippy-tooltip {
-  // border: solid 1px $mainColourDarker2;
-  border-radius: 0 !important;
-  padding: 10px;
-  background: $dark1Colour;
-  font-weight: bold;
+  @include themify($themes) {
+    background: themed('dark1Colour');
+    // border: solid 1px $mainColourDarker2;
+    border-radius: 0 !important;
+    padding: 10px;
+    font-weight: bold;
+  }
 }
 
 .tooltip-inner {
-  border: solid 1px $mainColourDarker2;
-  border-radius: 0 !important;
-  padding: 10px;
-  background: $dark1Colour;
-  font-weight: bold;
+  @include themify($themes) {
+    border: solid 1px themed('mainColourDarker2');
+    background: themed('dark1Colour');
+    border-radius: 0 !important;
+    padding: 10px;
+    font-weight: bold;
+  }
 }
 
 .tooltip .arrow::before {
-  border-top-color: $mainColourDarker2 !important;
+  @include themify($themes) {
+    border-top-color: themed('mainColourDarker2') !important;
+  }
 }
 
 .tooltip.show {

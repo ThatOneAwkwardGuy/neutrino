@@ -1,8 +1,10 @@
 #loginWindow {
-  background: $dark2Colour;
-  padding: 40px 100px 40px 100px;
-  -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
-  animation: fadein 1s;
+  @include themify($themes) {
+    background: themed('dark2Colour');
+    padding: 40px 100px 40px 100px;
+    -webkit-animation: fadein 1s; /* Safari, Chrome and Opera > 12.1 */
+    animation: fadein 1s;
+  }
 }
 
 #loginWindow input,
@@ -23,12 +25,16 @@
 }
 
 #loginErrorCard {
-  background: $red;
-  padding: 10px;
+  @include themify($themes) {
+    background: themed('red');
+    padding: 10px;
+  }
 }
 
 #serverSelection {
-  background: $dark2Colour;
+  @include themify($themes) {
+    background: themed('dark2Colour');
+  }
 }
 
 #serverSelection input {
