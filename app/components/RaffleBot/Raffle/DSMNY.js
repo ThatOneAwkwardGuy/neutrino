@@ -126,6 +126,12 @@ export default class DSMNY {
       );
       if (entryResponse.body.includes('<title>Thank You</title>')) {
         this.changeStatus('Successful Entry');
+        this.incrementRaffles({
+          url: this.url,
+          site: this.site,
+          size: this.size ? this.size.name : '',
+          style: this.style ? this.style.name : ''
+        });
       }
     } catch (error) {
       console.log(error);

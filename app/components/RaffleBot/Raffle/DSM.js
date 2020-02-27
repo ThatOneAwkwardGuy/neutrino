@@ -125,6 +125,12 @@ export default class DSM {
         entryResponse.body.toLowerCase().includes('<title>thank you</title>')
       ) {
         this.changeStatus('Successful Entry');
+        this.incrementRaffles({
+          url: this.url,
+          site: this.site,
+          size: this.size ? this.size.name : '',
+          style: this.style ? this.style.name : ''
+        });
       }
     } catch (error) {
       console.error(error);

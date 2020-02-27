@@ -485,13 +485,14 @@ export const convertCSVToBase = profile => ({
   password: profile.password,
   instagram: profile.instagram,
   phone: profile.phoneNumber,
-  sameDeliveryBillingBool: false,
-  oneCheckoutBool: false,
-  randomNameBool: false,
-  randomPhoneNumberBool: false,
-  useCatchallBool: false,
-  jigAddressesBool: false,
-  fourCharPrefixBool: false
+  sameDeliveryBillingBool:
+    profile.sameDeliveryBillingBool.toLowerCase() === 'true',
+  oneCheckoutBool: profile.oneCheckoutBool.toLowerCase() === 'true',
+  randomNameBool: profile.randomNameBool.toLowerCase() === 'true',
+  randomPhoneNumberBool: profile.randomPhoneNumberBool.toLowerCase() === 'true',
+  useCatchallBool: profile.useCatchallBool.toLowerCase() === 'true',
+  jigAddressesBool: profile.jigAddressesBool.toLowerCase() === 'true',
+  fourCharPrefixBool: profile.fourCharPrefixBool.toLowerCase() === 'true'
 });
 
 export const convertTKSToBase = profile => ({

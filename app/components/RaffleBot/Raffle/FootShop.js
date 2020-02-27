@@ -71,5 +71,11 @@ export default class FootShop {
 
   makeEntry = async () => {
     this.changeStatus('Check Email');
+    this.incrementRaffles({
+      url: this.url,
+      site: this.site,
+      size: this.size ? this.size.name : '',
+      style: this.style ? this.style.name : ''
+    });
   };
 }

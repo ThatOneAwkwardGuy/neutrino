@@ -129,6 +129,12 @@ export default class OneBlockDown {
 
   makeEntry = async () => {
     await this.getCaptchaCode();
+    this.incrementRaffles({
+      url: this.url,
+      site: this.site,
+      size: this.size ? this.size.name : '',
+      style: this.style ? this.style.name : ''
+    });
   };
 
   // makeEntry = async () => {

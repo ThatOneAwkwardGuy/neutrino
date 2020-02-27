@@ -151,7 +151,7 @@ export default class VooStore {
         site: this.site,
         size: this.size ? this.size.name : '',
         style: this.style ? this.style.name : ''
-      });;
+      });
     }
   };
 }

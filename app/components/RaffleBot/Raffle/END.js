@@ -279,5 +279,11 @@ export default class END {
     const entry = await this.submitEntry(account, address, payment, authToken);
     console.log(entry);
     this.changeStatus('Successfully Submitted Entry');
+    this.incrementRaffles({
+      url: this.url,
+      site: this.site,
+      size: this.size ? this.size.name : '',
+      style: this.style ? this.style.name : ''
+    });
   };
 }

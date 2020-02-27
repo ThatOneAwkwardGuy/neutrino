@@ -140,7 +140,7 @@ export default class Stress95 {
         site: this.site,
         size: this.size ? this.size.name : '',
         style: this.style ? this.style.name : ''
-      });;
+      });
     }
   };
 }

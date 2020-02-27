@@ -155,7 +155,7 @@ export default class FootDistrict {
         site: this.site,
         size: this.size ? this.size.name : '',
         style: this.style ? this.style.name : ''
-      });;
+      });
     }
   };
 }

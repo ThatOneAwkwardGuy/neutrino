@@ -227,6 +227,7 @@ class ProfileTaskEditorConverter extends Component {
         );
       }
     } catch (error) {
+      console.log(error);
       toastManager.add(error.message, {
         appearance: 'error',
         autoDismiss: true,

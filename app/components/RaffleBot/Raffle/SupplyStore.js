@@ -226,7 +226,12 @@ export default class SupplyStore {
     });
     this.changeStatus('Making Entry');
     await this.submitRaffle(subscribeLink, captchaResponse.captchaToken);
-
+    this.incrementRaffles({
+      url: this.url,
+      site: this.site,
+      size: this.size ? this.size.name : '',
+      style: this.style ? this.style.name : ''
+    });
     // const captchaResponse2 = await getCaptchaResponse({
     //   cookiesObject: {},
     //   url: this.url,

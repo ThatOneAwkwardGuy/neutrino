@@ -82,7 +82,11 @@ const returnGmailOrCatchall = (
   if (gmailEmails && gmailEmails.length > 0 && gmailEmails[index]) {
     return gmailEmails[index];
   }
-  if (useCatchallBool && !baseProfile.catchallEmail.includes('@gmail')) {
+  if (
+    useCatchallBool &&
+    baseProfile.catchallEmail &&
+    !baseProfile.catchallEmail.includes('@gmail')
+  ) {
     return `${generateRandomNLengthString(10)}@${baseProfile.catchallEmail}`;
   }
   return baseProfile.email;

@@ -132,7 +132,7 @@ export default class FearOfGod {
         site: this.site,
         size: this.size ? this.size.name : '',
         style: this.style ? this.style.name : ''
-      });;
+      });
     } else {
       this.changeStatus(`Error Submitting Entry`);
     }

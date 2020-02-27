@@ -267,7 +267,7 @@ export default class Renarts {
   };
 
   makeEntry = async () => {
-    ValidateSchema(RenartsSchema, {...this.profile});
+    ValidateSchema(RenartsSchema, { ...this.profile });
 
     this.changeStatus('Getting Variant ID For Size');
     const variant = await this.getIDForSize();
@@ -289,10 +289,10 @@ export default class Renarts {
 
     this.changeStatus('Completed Entry');
     this.incrementRaffles({
-        url: this.url,
-        site: this.site,
-        size: this.size ? this.size.name : '',
-        style: this.style ? this.style.name : ''
-      });;
+      url: this.url,
+      site: this.site,
+      size: this.size ? this.size.name : '',
+      style: this.style ? this.style.name : ''
+    });
   };
 }

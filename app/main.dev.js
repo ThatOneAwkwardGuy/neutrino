@@ -48,6 +48,7 @@ export default class AppUpdater {
     autoUpdater.checkForUpdatesAndNotify();
     autoUpdater.autoDownload = false;
     autoUpdater.on('update-downloaded', () => {
+      autoUpdater.quitAndInstall();
       app.removeAllListeners('window-all-closed');
       app.removeAllListeners('before-quit');
       const browserWindows = BrowserWindow.getAllWindows();
@@ -60,7 +61,6 @@ export default class AppUpdater {
       if (mainWindow !== null && !mainWindow.isDestroyed()) {
         mainWindow.destroy();
       }
-      autoUpdater.quitAndInstall();
     });
     autoUpdater.on('update-available', info => {
       mainWindow.send(UPDATE_AVAILABLE, info);

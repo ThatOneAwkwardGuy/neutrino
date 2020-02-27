@@ -18,6 +18,7 @@ export default class EmpireShop {
     this.url = url;
     this.profile = profile;
     this.run = false;
+    this.stopped = false;
     this.site = site;
     this.style = style;
     this.size = size;
@@ -42,19 +43,18 @@ export default class EmpireShop {
   };
 
   start = async () => {
-    while (this.run) {
-      try {
-        // eslint-disable-next-line no-await-in-loop
-        await this.makeEntry();
-      } catch (error) {
-        console.error(error);
-        this.changeStatus(`Error Submitting Raffle - ${error.message}`);
-      }
-      this.run = false;
+    try {
+      // eslint-disable-next-line no-await-in-loop
+      await this.makeEntry();
+    } catch (error) {
+      console.error(error);
+      this.changeStatus(`Error Submitting Raffle - ${error.message}`);
     }
+    this.run = false;
   };
 
   stop = () => {
+    this.stopped = true;
     this.run = false;
     this.changeStatus('Stopped');
   };
@@ -100,6 +100,12 @@ export default class EmpireShop {
     const entry = await this.submitEntry();
     if (entry.includes('Thank you, your registration to the')) {
       this.changeStatus('Successfully Submitted Entry');
+      this.incrementRaffles({
+        url: this.url,
+        site: this.site,
+        size: this.size ? this.size.name : '',
+        style: this.style ? this.style.name : ''
+      });
     } else {
       this.changeStatus(`Error Submitting Entry`);
     }
