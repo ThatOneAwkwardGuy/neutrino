@@ -117,7 +117,7 @@ const loadDSMRaffleInfo = async link => {
           );
           win.close();
           const $ = cheerio.load(windowResult);
-          const styles = $('div[fs-field-validation-name*="List"] option')
+          const styles = $('div[fs-field-validation-name*="Colour"] option')
             .map((index, style) => ({
               id: style.attribs.value,
               name: style.attribs.value
@@ -142,7 +142,7 @@ const loadDSMRaffleInfo = async link => {
             'div[fs-field-validation-name="Postcode"] input'
           ).attr('name');
           const colorFormID = $(
-            'div[fs-field-validation-name*="List"] select'
+            'div[fs-field-validation-name*="Colour"] select'
           ).attr('name');
           const sizeFormID = $(
             'div[fs-field-validation-name*="Size"] select'

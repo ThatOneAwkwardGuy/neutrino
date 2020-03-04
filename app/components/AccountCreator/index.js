@@ -230,6 +230,7 @@ class AccountCreator extends Component {
       true
     );
     const resolvedPromises = await Promise.all(accountPromises);
+    console.log(resolvedPromises);
     setLoading(
       false,
       `Creating ${quantity} ${upperCaseFirst(site)} Account(s)`,
@@ -739,13 +740,19 @@ class AccountCreator extends Component {
       catchall,
       pass,
       firstName,
-      lastName
+      lastName,
+      site
     } = this.state;
+    const { settings } = this.props;
     const email =
       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
     const accountPass = randomPass ? randomize('a', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const accountLastName = randomName ? random.last() : lastName;
+    const dob = `${randomNumberInRange(1, 26)}/${randomNumberInRange(
+      1,
+      12
+    )}/${randomNumberInRange(1980, 1999)}`;
     const tokenID = uuidv4();
     this.cookieJars[tokenID] = request.jar();
     const proxy = useProxies ? this.getRandomProxy() : '';
@@ -776,28 +783,155 @@ class AccountCreator extends Component {
     // });
     // const $ = cheerio.load(loginPage);
     // cont form_key = $(".form .create .account .form-create-account ")
-    const repsonse = await request({
-      method: 'POST',
-      jar: this.cookieJars[tokenID],
-      form: {
-        form_key: '',
-        success_url: '',
-        error_url: '',
-        firstname: accountFirstName,
-        lastname: accountLastName,
-        email,
-        dob: `${randomNumberInRange(1, 26)}/${randomNumberInRange(
-          1,
-          12
-        )}/${randomNumberInRange(1980, 1999)}`,
-        password: accountPass,
-        password_confirmation: accountPass
-      },
-      uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
-      followAllRedirects: true,
-      followRedirect: true
-    });
-    console.log(repsonse);
+    console.log(email);
+    console.log(accountPass);
+    try {
+      const response1 = await request({
+        method: 'POST',
+        jar: this.cookieJars[tokenID],
+        resolveWithFullResponse: true,
+        headers: {
+          accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+          'accept-language': 'en-US,en;q=0.9',
+          'cache-control': 'max-age=0',
+          'content-type':
+            'multipart/form-data; boundary=----WebKitFormBoundary7WjBaScA8Gd9EBPx',
+          'sec-fetch-dest': 'document',
+          'sec-fetch-mode': 'navigate',
+          'sec-fetch-site': 'same-origin',
+          'sec-fetch-user': '?1',
+          'upgrade-insecure-requests': '1'
+        },
+        formData: {
+          form_key: '',
+          success_url: '',
+          error_url: '',
+          firstname: accountFirstName,
+          lastname: accountLastName,
+          email,
+          dob,
+          password: accountPass,
+          password_confirmation: accountPass
+        },
+        uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
+        followAllRedirects: true,
+        followRedirect: true
+      });
+      console.log(response1);
+      const response2 = await request({
+        method: 'POST',
+        jar: this.cookieJars[tokenID],
+        resolveWithFullResponse: true,
+        headers: {
+          accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+          'accept-language': 'en-US,en;q=0.9',
+          'cache-control': 'max-age=0',
+          'sec-fetch-dest': 'document',
+          'sec-fetch-mode': 'navigate',
+          'sec-fetch-site': 'same-origin',
+          'sec-fetch-user': '?1',
+          'upgrade-insecure-requests': '1'
+        },
+        formData: {
+          form_key: '',
+          success_url: '',
+          error_url: '',
+          firstname: accountFirstName,
+          lastname: accountLastName,
+          email,
+          dob,
+          password: accountPass,
+          password_confirmation: accountPass
+        },
+        uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
+        followAllRedirects: true,
+        followRedirect: true
+      });
+      console.log(response2);
+    } catch (error) {
+      if (error.statusCode && error.statusCode === 405) {
+        const $ = cheerio.load(error.error);
+        const actionUrl = $('#distilCaptchaForm').attr('action');
+        const dCFTicket = $('input[name="dCF_ticket"]').attr('value');
+        const remoteip = $('input[name="remoteip"]').attr('value');
+        const captchaResponse = await getCaptchaResponse({
+          cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
+          url: error.response.request.href,
+          id: tokenID,
+          agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+          baseURL: sites[site],
+          site,
+          accountPass,
+          settings,
+          siteKey: '6LdC3UgUAAAAAJIcyA3Ym4j_nCP-ainSgf1NoFku'
+        });
+        console.log(actionUrl);
+        console.log(dCFTicket);
+        console.log(captchaResponse);
+        try {
+          const captchaSubmitResponse = await request({
+            method: 'POST',
+            jar: this.cookieJars[tokenID],
+            resolveWithFullResponse: true,
+            headers: {
+              accept: '*/*',
+              'accept-language': 'en-US,en;q=0.9',
+              'content-type': 'application/x-www-form-urlencoded',
+              'sec-fetch-dest': 'empty',
+              'sec-fetch-site': 'same-origin',
+              'x-distil-ajax': 'zruvztacuyfd'
+            },
+            form: {
+              dCF_ticket: dCFTicket,
+              remoteip,
+              'g-recaptcha-response': captchaResponse.captchaToken,
+              isAjax: 1
+            },
+            uri: `https://www.endclothing.com${actionUrl}`,
+            followAllRedirects: true,
+            followRedirect: true
+          });
+          console.log(captchaSubmitResponse);
+          const finalAccountResponse = await request({
+            method: 'POST',
+            jar: this.cookieJars[tokenID],
+            headers: {
+              accept:
+                'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+              'accept-language': 'en-US,en;q=0.9',
+              'cache-control': 'max-age=0',
+              'content-type':
+                'multipart/form-data; boundary=----WebKitFormBoundary7WjBaScA8Gd9EBPx',
+              'sec-fetch-dest': 'document',
+              'sec-fetch-mode': 'navigate',
+              'sec-fetch-site': 'same-origin',
+              'sec-fetch-user': '?1',
+              'upgrade-insecure-requests': '1'
+            },
+            resolveWithFullResponse: true,
+            formData: {
+              form_key: '',
+              success_url: '',
+              error_url: '',
+              firstname: accountFirstName,
+              lastname: accountLastName,
+              email,
+              dob,
+              password: accountPass,
+              password_confirmation: accountPass
+            },
+            uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
+            followAllRedirects: true,
+            followRedirect: true
+          });
+          console.log(finalAccountResponse);
+        } catch (error2) {
+          console.log(error2);
+        }
+      }
+    }
   };
 
   createHollyWoodAccount = async gmailEmail => {

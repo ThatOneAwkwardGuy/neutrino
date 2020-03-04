@@ -124,6 +124,13 @@ const initialiseCaptchaWindow = () => {
     closable: true
   });
   initialisedCaptchaWindow.loadURL(`file://${__dirname}/app.html#/captcha`);
+  initialisedCaptchaWindow.webContents.session.webRequest.onBeforeSendHeaders(
+    (details, callback) => {
+      const requestHeaders = { ...details.requestHeaders };
+      requestHeaders['User-Agent'] = 'Chrome';
+      callback({ requestHeaders });
+    }
+  );
   return initialisedCaptchaWindow;
 };
 

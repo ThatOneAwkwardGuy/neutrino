@@ -9,7 +9,7 @@ export const getFormData = object => {
 export const bs = '';
 
 export const randomNumberInRange = (min, max) =>
-  Math.floor(Math.random() * max) + min;
+  Math.floor(Math.random() * (max - min)) + min;
 
 export const getNikeUSMobileNumberGetSMSCode = async settings => {
   const response = await request.get(
