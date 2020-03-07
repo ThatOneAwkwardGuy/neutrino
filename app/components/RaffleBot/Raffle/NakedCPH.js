@@ -138,7 +138,10 @@ export default class NakedCPH {
       } else if (row.title.toLowerCase().includes('country are you')) {
         formObj['8'] = {
           field: { id: row.id, type: row.type },
-          text: this.profile.deliveryCountry,
+          text:
+            this.profile.deliveryCountry === 'United States'
+              ? 'United States of America'
+              : this.profile.deliveryCountry,
           type: 'text'
         };
       } else if (row.title.toLowerCase().includes('newsletter')) {

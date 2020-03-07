@@ -75,8 +75,29 @@ export default class VooStore {
     return formData;
   };
 
-  submitRaffle = (token, captchaToken) =>
-    this.rp({
+  submitRaffle = (token, captchaToken) => {
+    console.log({
+      token,
+      page_id: this.raffleDetails.pageID,
+      shoes_size: this.size.id,
+      action: 'send_request',
+      fax: '',
+      name: this.profile.deliveryFirstName,
+      lastname: this.profile.deliveryLastName,
+      email: this.profile.email,
+      contact_number: `00${this.profile.phone}`,
+      streetname: this.profile.deliveryAddress,
+      housenumber:
+        this.profile.deliveryApt === ''
+          ? this.profile.deliveryAddress
+          : this.profile.deliveryApt,
+      postalcode: this.profile.deliveryZip,
+      city: this.profile.deliveryCity,
+      country: this.profile.deliveryCountry,
+      countryhidden: '',
+      'g-recaptcha-response': captchaToken
+    });
+    return this.rp({
       method: 'POST',
       uri: 'https://raffle.vooberlin.com/ajax.php',
       headers: {
@@ -102,9 +123,12 @@ export default class VooStore {
         name: this.profile.deliveryFirstName,
         lastname: this.profile.deliveryLastName,
         email: this.profile.email,
-        contact_number: this.profile.phone,
+        contact_number: `00${this.profile.phone}`,
         streetname: this.profile.deliveryAddress,
-        housenumber: this.profile.deliveryApt,
+        housenumber:
+          this.profile.deliveryApt === ''
+            ? this.profile.deliveryAddress
+            : this.profile.deliveryApt,
         postalcode: this.profile.deliveryZip,
         city: this.profile.deliveryCity,
         country: this.profile.deliveryCountry,
@@ -112,12 +136,12 @@ export default class VooStore {
         'g-recaptcha-response': captchaToken
       }
     });
+  };
 
   getRafflePageToken = async () => {
     const body = await this.rp.get(this.url);
     const $ = cheerio.load(body);
     const token = $('input[name="token"]').attr('value');
-
     return token;
   };
 
@@ -141,6 +165,7 @@ export default class VooStore {
       token,
       capthcaResponse.captchaToken
     );
+    console.log(submitRaffleResponse);
     const submitRaffle = JSON.parse(submitRaffleResponse.body);
     if (submitRaffle.error) {
       throw new Error(submitRaffle.msg);

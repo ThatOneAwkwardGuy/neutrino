@@ -493,7 +493,14 @@ const loadNakedCphRaffleInfo = async link => {
           'window.location.href',
           false
         );
-        if (currentURL === link) {
+        const html = await win.webContents.executeJavaScript(
+          'document.body.innerHTML',
+          false
+        );
+        if (
+          currentURL.split('?')[0] === link &&
+          !html.includes('BOT or NOT?!')
+        ) {
           const innerHTML = await win.webContents.executeJavaScript(
             'document.documentElement.innerHTML',
             false
@@ -502,6 +509,7 @@ const loadNakedCphRaffleInfo = async link => {
             'window.rendererData',
             true
           );
+          console.log(renderData);
           let typeformCode;
           if (currentURL.includes('nakedcph.typeform.com')) {
             typeformCode = renderData.form.id;
@@ -539,6 +547,7 @@ const loadNakedCphRaffleInfo = async link => {
         }
       });
     } catch (error) {
+      console.log(error);
       reject(error);
     }
   });

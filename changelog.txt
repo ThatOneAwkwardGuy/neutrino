@@ -236,6 +236,14 @@ Need to add animations
 - Raffle Bot - Fix for DSM not loading style options
 - Captcha Window - Fixed logging in to Google account to reduce captchas
 
+2.1.27
+- Raffle Bot - Fix for NakedCPH changing United States to United States of America
+
+2.1.28
+- Raffle Bot - Fix NakedCPH loading raffle info when bot or not page displays
+
+2.1.29
+- Raffle Bot - Fix VooStore raffle entries
 
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a

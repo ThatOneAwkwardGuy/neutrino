@@ -6,7 +6,7 @@
     "name": "ThatOneAwkwardGuy",
     "email": "support@neutrino.app"
   },
-  "version": "2.1.26",
+  "version": "2.1.29",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dev": "concurrently \"yarn build-main\" \"yarn build-renderer-dev\"",

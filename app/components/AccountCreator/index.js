@@ -581,7 +581,7 @@ class AccountCreator extends Component {
       window.loadURL('http://www.nakedcph.com/auth/view?op=register');
       window.webContents.on('did-finish-load', async () => {
         const botOrNotPage = await window.webContents.executeJavaScript(
-          'document.documentElement.innerHTML',
+          'document.body.innerHTML',
           false
         );
         if (!botOrNotPage.includes('BOT or NOT?!')) {
