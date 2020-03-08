@@ -14,5 +14,6 @@
   "RAFFLE_BOT": "/home/raffle-bot",
   "BROWSER": "/home/browser",
   "SETTINGS": "/home/settings",
-  "CAPTCHA": "/captcha"
+  "CAPTCHA": "/captcha",
+  "SUPREME": "/home/supreme"
 }

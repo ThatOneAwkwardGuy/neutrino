@@ -1,0 +1,6 @@
+.highlightedImage {
+  @include themify($themes) {
+    border: solid 5px themed('mainColour');
+    transition: 0.2s;
+  }
+}

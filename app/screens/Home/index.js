@@ -39,7 +39,9 @@ import ProfileCreator from '../../components/ProfileCreator';
 import ProfileTaskEditorConverter from '../../components/ProfileTaskEditorConverter';
 import RaffleBot from '../../components/RaffleBot';
 import Browser from '../../components/Browser';
+import Supreme from '../../components/Supreme';
 import Settings from '../../components/Settings';
+import SupremeLeter from '../../images/supreme_letter.svg';
 import {
   SET_DISCORD_RPC_STATE,
   UPDATE_AVAILABLE,
@@ -409,6 +411,16 @@ class Home extends Component {
         }
       },
       {
+        path: routes.SUPREME,
+        component: Supreme,
+        exact: true,
+        props: {
+          settings,
+          setLoading,
+          setInfoModal
+        }
+      },
+      {
         path: routes.SETTINGS,
         component: Settings,
         exact: true,
@@ -658,6 +670,26 @@ class Home extends Component {
                   <FontAwesomeIcon icon={['fab', 'chrome']} />
                   {sidebarExpand ? (
                     <span className="sidebarIconLabel">Browser</span>
+                  ) : null}
+                </div>
+              </Link>
+            </div>
+            <div>
+              <Link to={routes.SUPREME} alt="Browser" title="Browser">
+                <div
+                  className={`sidebarIcon ${
+                    window.location.hash === `#${routes.SUPREME}`
+                      ? 'sidebarIconActive'
+                      : ''
+                  }`}
+                >
+                  <img
+                    src={SupremeLeter}
+                    style={{ width: '12px' }}
+                    alt="Supreme"
+                  />
+                  {sidebarExpand ? (
+                    <span className="sidebarIconLabel">Supreme</span>
                   ) : null}
                 </div>
               </Link>
