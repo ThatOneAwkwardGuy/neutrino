@@ -245,6 +245,9 @@ Need to add animations
 2.1.29
 - Raffle Bot - Fix VooStore raffle entries
 
+2.1.30
+- Profile Creator - Fixed bug where dropdown would not change when selecting bot
+
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
 
