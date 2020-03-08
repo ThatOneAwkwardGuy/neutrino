@@ -343,7 +343,7 @@ class ProfileCreator extends Component {
     } = this.state;
     const { cards } = this.props;
     const { toastManager } = this.props;
-    if (bot === '') {
+    if (bot === '' || bot === undefined) {
       toastManager.add('Select a bot to export profiles for.', {
         appearance: 'error',
         autoDismiss: true,
@@ -606,6 +606,7 @@ class ProfileCreator extends Component {
 
   render() {
     const {
+      bot,
       randomNameBool,
       randomPhoneNumberBool,
       useCatchallBool,
@@ -1150,13 +1151,14 @@ class ProfileCreator extends Component {
                   id="bot"
                   name="bot"
                   onChange={this.handleChange}
+                  value={bot}
                 >
                   <option key={generateUEID()} value="">
                     Select a bot
                   </option>
-                  {bots.sort().map(bot => (
-                    <option key={generateUEID()} value={bot}>
-                      {bot}
+                  {bots.sort().map(botOption => (
+                    <option key={generateUEID()} value={botOption}>
+                      {botOption}
                     </option>
                   ))}
                 </Input>
