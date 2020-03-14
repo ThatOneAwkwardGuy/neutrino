@@ -64,6 +64,7 @@ class ProfileCreator extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      emailsAndPasses: [],
       cards: [],
       cardsInput: '',
       profileQty: 1,
@@ -293,7 +294,8 @@ class ProfileCreator extends Component {
     return profiles;
   };
 
-  loadEmails = async () => {
+  loadEmailsAndPasses = async () => {
+    const { toastManager } = this.props;
     const filePaths = await dialog.showOpenDialog(null, {
       filters: [{ name: 'Emails and Passes Text File', extensions: ['txt'] }]
     });
@@ -301,10 +303,39 @@ class ProfileCreator extends Component {
       const filePath = filePaths.filePaths[0];
       const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
       if (filePath.split('.').slice(-1)[0] === 'txt') {
-        const emails = file.split('\n');
-        this.setState({ emails, quantity: emails.length });
+        const emailsAndPasses = file.split('\n').map(emailAndPass => {
+          const emailAndPassSplit = emailAndPass.split(':');
+          if (emailAndPassSplit.length === 2) {
+            return { email: emailAndPassSplit[0], pass: emailAndPassSplit[1] };
+          }
+          return { email: emailAndPassSplit[0], pass: '' };
+        });
+        this.setState(
+          { emailsAndPasses, profileQty: emailsAndPasses.length },
+          () => {
+            toastManager.add(
+              `Loaded ${emailsAndPasses.length} emails and/or passes.`,
+              {
+                appearance: 'success',
+                autoDismiss: true,
+                pauseOnHover: true
+              }
+            );
+          }
+        );
       }
     }
+  };
+
+  returnEmailArray = jiggedAddress => {
+    const { catchallEmail, emailsAndPasses, email } = this.state;
+    if (catchallEmail.includes('@gmail')) {
+      return generateGmailDotTrick(jiggedAddress.length, email);
+    }
+    if (emailsAndPasses.length > 0) {
+      return emailsAndPasses;
+    }
+    return [];
   };
 
   exportProfiles = async () => {
@@ -380,9 +411,7 @@ class ProfileCreator extends Component {
       addresses.length <= usableCards.length || usableCards.length === 0
         ? addresses
         : addresses.slice(0, usableCards.length);
-    const emails = catchallEmail.includes('@gmail')
-      ? generateGmailDotTrick(jiggedAddress.length, email)
-      : [];
+    const emails = this.returnEmailArray(jiggedAddress);
     const convertedProfiles = jiggedAddress
       .map((address, index) => {
         const [
@@ -981,16 +1010,6 @@ class ProfileCreator extends Component {
               </Col>
             </Row>
             <Row className="my-4">
-              {/* <Col xs="6" className="text-right">
-                <Tooltip
-                  arrow
-                  distance={20}
-                  title="Load premade emails or emails and passwords in the format email or email:pass"
-                >
-                  <FontAwesomeIcon icon="question-circle" />
-                </Tooltip>
-                <Button onClick={this.loadEmails}>Load Emails & Passes</Button>
-              </Col> */}
               <Col xs={{ size: 6, offset: 6 }}>
                 <Button onClick={this.copyDeliveryToBilling}>
                   Copy Delivery
@@ -1122,6 +1141,32 @@ class ProfileCreator extends Component {
               <Col>
                 <Button color="danger" onClick={clearCards}>
                   Clear Cards
+                </Button>
+              </Col>
+            </Row>
+            <Row className="py-3 align-items-end noselect panel-middle">
+              <Col className="text-right">
+                <Tooltip
+                  arrow
+                  distance={20}
+                  title="Load premade emails or emails and passwords in the format email or email:pass, per line, from a txt file."
+                >
+                  <FontAwesomeIcon icon="question-circle" />
+                </Tooltip>
+                <Button onClick={this.loadEmailsAndPasses}>
+                  Load Emails {'&'} Passes
+                </Button>
+              </Col>
+              <Col className="text-right">
+                <Tooltip
+                  arrow
+                  distance={20}
+                  title="Clear the loaded emails and/or passwords."
+                >
+                  <FontAwesomeIcon icon="question-circle" />
+                </Tooltip>
+                <Button color="danger" onClick={this.loadEmailsAndPasses}>
+                  Clear Emails {'&'} Passes
                 </Button>
               </Col>
             </Row>

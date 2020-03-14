@@ -43,6 +43,7 @@ const uuidv4 = require('uuid/v4');
 const fs = require('fs');
 const HttpsProxyAgent = require('https-proxy-agent');
 const tough = require('tough-cookie');
+// const cloudscraper = require('cloudscraper');
 
 class AccountCreator extends Component {
   constructor(props) {
@@ -471,7 +472,7 @@ class AccountCreator extends Component {
       },
       body: queryString
     });
-
+    console.log(response);
     if (response.request.href && response.request.href.includes('challenge')) {
       const regex = /sitekey: "(.*)"/gm;
       const siteKey = regex.exec(response.body)[1];
@@ -627,23 +628,22 @@ class AccountCreator extends Component {
   //     useProxies,
   //     catchall,
   //     pass,
-  //     firstName,
-  //     lastName
+  //     site,
+  //     firstName
   //   } = this.state;
-  //   const { addCreatedAccount } = this.props;
+  //   const { settings, addCreatedAccount } = this.props;
   //   const email =
   //     gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
   //   const accountPass = randomPass ? randomize('a', 10) : pass;
   //   const accountFirstName = randomName ? random.first() : firstName;
-  //   const accountLastName = randomName ? random.last() : lastName;
   //   const tokenID = uuidv4();
   //   this.cookieJars[tokenID] = request.jar();
   //   const proxy = useProxies ? this.getRandomProxy() : '';
   //   const cookies = await getCookiesFromWindow(
   //     'https://www.nakedcph.com/en/auth/view?op=register',
-  //     proxy
+  //     proxy,
+  //     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
   //   );
-  //   console.log(cookies);
   //   cookies.forEach(cookie => {
   //     const toughCookie = new tough.Cookie({
   //       key: cookie.name,
@@ -654,24 +654,234 @@ class AccountCreator extends Component {
   //     });
   //     this.cookieJars[tokenID].setCookie(
   //       toughCookie.toString(),
-  //       'https://www.nakedcph.com/en/auth/view?op=register'
+  //       'https://www.nakedcph.com/'
   //     );
   //   });
+  //   const captchaResponse = await getCaptchaResponse({
+  //     cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
+  //     url: 'https://www.nakedcph.com/en/auth/view?op=register',
+  //     id: tokenID,
+  //     agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+  //     baseURL: sites[site],
+  //     site,
+  //     accountPass,
+  //     settings,
+  //     siteKey: '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
+  //   });
+  //   console.log(captchaResponse);
+  //   console.log(
+  //     this.cookieJars[tokenID].getCookieString('https://www.nakedcph.com/')
+  //   );
+  //   const anticsrftokenCookie = cookies.find(
+  //     cookie => cookie.name === 'AntiCsrfToken'
+  //   );
+  //   const isCustomerValidResponse = await request({
+  //     resolveWithFullResponse: true,
+  //     method: 'POST',
+  //     jar: this.cookieJars[tokenID],
+  //     uri: 'https://www.nakedcph.com/auth/iscustomer',
+  //     headers: {
+  //       cookie: this.cookieJars[tokenID].getCookieString(
+  //         'https://www.nakedcph.com/'
+  //       ),
+  //       'x-anticsrftoken': anticsrftokenCookie.value,
+  //       'x-requested-with': 'XMLHttpRequest',
+  //       'User-Agent':
+  //         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
+  //     },
+  //     form: {
+  //       email
+  //     }
+  //   });
+  //   console.log(isCustomerValidResponse);
   //   try {
   //     const response = await request({
-  //       method: 'GET',
+  //       url: 'https://www.nakedcph.com/en/auth/submit',
+  //       method: 'POST',
   //       headers: {
-  //         authority: 'www.nakedcph.com',
-  //         'user-agent':
-  //           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
+  //         'x-anticsrftoken': anticsrftokenCookie.value,
+  //         'x-requested-with': 'XMLHttpRequest',
+  //         'User-Agent':
+  //           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
   //       },
-  //       uri: 'https://nakedcph.com/en/auth/view?op=register',
-  //       jar: this.cookieJars[tokenID]
+  //       jar: this.cookieJars[tokenID],
+  //       body: `_AntiCsrfToken=${
+  //         anticsrftokenCookie.value
+  //       }&firstName=${accountFirstName}&email=${encodeURIComponent(
+  //         email
+  //       )}&password=${pass}&termsAccepted=true&g-recaptcha-response=${
+  //         captchaResponse.captchaToken
+  //       }&action=register`
+  //       // form: {
+  //       //   _AntiCsrfToken: anticsrftokenCookie.value,
+  //       //   firstName: accountFirstName,
+  //       //   email,
+  //       //   password: pass,
+  //       //   termsAccepted: true,
+  //       //   'g-recaptcha-response': captchaResponse.captchaToken,
+  //       //   action: 'register'
+  //       // }
   //     });
   //     console.log(response);
   //   } catch (error) {
   //     console.log(error);
   //   }
+  // };
+
+  // createNakedCphAccount3 = async gmailEmail => {
+  //   const {
+  //     randomPass,
+  //     randomName,
+  //     useProxies,
+  //     catchall,
+  //     pass,
+  //     site,
+  //     firstName
+  //   } = this.state;
+  //   const { settings, addCreatedAccount } = this.props;
+  //   const email =
+  //     gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
+  //   const accountPass = randomPass ? randomize('a', 10) : pass;
+  //   const accountFirstName = randomName ? random.first() : firstName;
+  //   const tokenID = uuidv4();
+  //   const tokenID2 = uuidv4();
+  //   this.cookieJars[tokenID] = request.jar();
+  //   const proxy = useProxies ? this.getRandomProxy() : '';
+  //   const defaultCloudscraper = cloudscraper.defaults({
+  //     onCaptcha: async (options, response) => {
+  //       console.log(options);
+  //       console.log(response);
+  //       const { captcha } = response;
+  //       try {
+  //         const captchaResponse = await getCaptchaResponse({
+  //           cookiesObject: options.jar._jar.store.idx,
+  //           url: captcha.uri.href,
+  //           id: tokenID,
+  //           agent: useProxies
+  //             ? new HttpsProxyAgent(this.getRandomProxy())
+  //             : null,
+  //           baseURL: sites[site],
+  //           site,
+  //           accountPass,
+  //           settings,
+  //           siteKey: captcha.siteKey
+  //         });
+  //         captcha.form['g-recaptcha-response'] = captchaResponse.captchaToken;
+  //         captcha.submit();
+  //       } catch (error) {
+  //         captcha.submit(error);
+  //       }
+  //     }
+  //   });
+  //   try {
+  //     const response = await defaultCloudscraper.get({
+  //       uri: 'https://www.nakedcph.com/en/auth/view?op=register',
+  //       resolveWithFullResponse: true,
+  //       jar: this.cookieJars[tokenID]
+  //     });
+  //     const $ = cheerio.load(response.body);
+  //     const anticsrftoken = $("input[name='_AntiCsrfToken']").attr('value');
+  //     console.log(anticsrftoken);
+  //     const captchaResponse2 = await getCaptchaResponse({
+  //       cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
+  //       url: 'https://www.nakedcph.com/en/auth/view?op=register',
+  //       id: tokenID2,
+  //       agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+  //       baseURL: sites[site],
+  //       site,
+  //       accountPass,
+  //       settings,
+  //       siteKey: '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
+  //     });
+  //     const response2 = await defaultCloudscraper.post({
+  //       uri: 'https://www.nakedcph.com/en/auth/view',
+  //       jar: this.cookieJars[tokenID],
+  //       resolveWithFullResponse: true,
+  //       formDaat: {
+  //         _AntiCsrfToken: anticsrftoken,
+  //         firstName: accountFirstName,
+  //         email,
+  //         password: pass,
+  //         termsAccepted: true,
+  //         'g-recaptcha-response': captchaResponse2.captchaToken,
+  //         action: 'register'
+  //       }
+  //     });
+  //     console.log(response2);
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  //   // try {
+  //   //   await request({
+  //   //     uri: 'https://www.nakedcph.com/en/auth/view',
+  //   //     method: 'GET',
+  //   //     jar: this.cookieJars[tokenID],
+  //   //     headers: {
+  //   //       accept:
+  //   //         'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+  //   //       'accept-language': 'en-US,en;q=0.9',
+  //   //       'cache-control': 'max-age=0',
+  //   //       'sec-fetch-dest': 'document',
+  //   //       'sec-fetch-mode': 'navigate',
+  //   //       'sec-fetch-site': 'none',
+  //   //       'sec-fetch-user': '?1',
+  //   //       'upgrade-insecure-requests': '1'
+  //   //     }
+  //   //   });
+  //   // } catch (error) {
+  //   //   const $ = cheerio.load(error.response.body);
+  //   //   const action = $('#captcha form').attr('action');
+  //   //   const r = $("input[name='r']").attr('value');
+  //   //   const cfCaptchaKind = $("input[name='cf_captcha_kind']").attr('value');
+  //   //   const id = $(
+  //   //     "script[data-sitekey='6LfBixYUAAAAABhdHynFUIMA_sa4s-XsJvnjtgB0']"
+  //   //   ).attr('data-ray');
+  //   //   const captchaResponse = await getCaptchaResponse({
+  //   //     cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
+  //   //     url: 'https://www.nakedcph.com/en/auth/view?op=register',
+  //   //     id: tokenID,
+  //   //     agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+  //   //     baseURL: sites[site],
+  //   //     site,
+  //   //     accountPass,
+  //   //     settings,
+  //   //     siteKey: '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
+  //   //   });
+  //   //   try {
+  //   //     const captchaSubmit = await request({
+  //   //       uri: `https://www.nakedcph.com${action}`,
+  //   //       method: 'POST',
+  //   //       followAllRedirects: true,
+  //   //       jar: this.cookieJars[tokenID],
+  //   //       headers: {
+  //   //         authority: 'www.nakedcph.com',
+  //   //         'cache-control': 'max-age=0',
+  //   //         origin: 'https://www.nakedcph.com',
+  //   //         'upgrade-insecure-requests': '1',
+  //   //         'content-type': 'application/x-www-form-urlencoded',
+  //   //         'user-agent':
+  //   //           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36',
+  //   //         'sec-fetch-dest': 'document',
+  //   //         accept:
+  //   //           'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+  //   //         'sec-fetch-site': 'same-origin',
+  //   //         'sec-fetch-mode': 'navigate',
+  //   //         'sec-fetch-user': '?1',
+  //   //         referer: 'https://www.nakedcph.com/en/auth/view',
+  //   //         'accept-language': 'en-US,en;q=0.9'
+  //   //       },
+  //   //       form: {
+  //   //         r,
+  //   //         cf_captcha_kind: cfCaptchaKind,
+  //   //         id,
+  //   //         'g-recaptcha-response': captchaResponse.captchaToken
+  //   //       }
+  //   //     });
+  //   //     console.log(captchaSubmit);
+  //   //   } catch (error) {
+  //   //     console.log(error);
+  //   //   }
+  //   // }
   // };
 
   createStress95Account = async gmailEmail => {

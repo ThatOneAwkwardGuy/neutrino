@@ -64,6 +64,9 @@ export default class Routes extends Component {
           case 'SSX':
             await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
             break;
+          case 'juicedSnkrs':
+            await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
+            break;
           default: {
             const machineIDStatus = await checkIfUserMachineIDMatches(uid);
             this.setState({
@@ -76,14 +79,14 @@ export default class Routes extends Component {
         }
         try {
           setAnalyticsUserID(uid);
-          trackEvent('Login', 'Login');
+          trackEvent('Login', 'Login', uid);
         } catch (error) {
           console.log(error);
         }
       } catch (error) {
         this.setState({
           authorised: false,
-          message: 'There wase an error authorising your access to Neutrino.',
+          message: 'There was an error authorising your access to Neutrino.',
           uid
         });
         const auth = getAuth();

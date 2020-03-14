@@ -6,7 +6,7 @@
     "name": "ThatOneAwkwardGuy",
     "email": "support@neutrino.app"
   },
-  "version": "2.1.29",
+  "version": "2.1.35",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dev": "concurrently \"yarn build-main\" \"yarn build-renderer-dev\"",
@@ -244,6 +244,7 @@
     "braintree-web": "2.32.1",
     "browser-sync": "^2.26.7",
     "cheerio": "^1.0.0-rc.3",
+    "cloudscraper": "^4.6.0",
     "core-js": "3",
     "csvtojson": "^2.0.10",
     "devtron": "^1.4.0",

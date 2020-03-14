@@ -104,7 +104,10 @@ export default class Stress95 {
       } else if (row.title.includes('country')) {
         formObj['5'] = {
           field: { id: row.id, type: row.type },
-          text: this.profile.deliveryCountry,
+          text:
+            this.profile.deliveryCountry === 'United States'
+              ? 'United States of America'
+              : this.profile.deliveryCountry,
           type: 'text'
         };
       }

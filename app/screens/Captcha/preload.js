@@ -48,6 +48,11 @@ const setCookiesInWindow = (webContents, cookies) =>
 
 const checkCaptcha = async () => {
   try {
+    window.validateReCaptchaAuth = () => {};
+  } catch (error) {
+    // console.log(error);
+  }
+  try {
     const captchaJobs = remote.getGlobal('captchaQueue');
     const captchaJob = captchaJobs[focusedWebContents.id];
     let authToken = '';
@@ -132,13 +137,13 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
     !window.location.href.includes('google.') &&
     !window.location.href.includes('bstn.')
   ) {
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('body > :not(.g-recaptcha)').forEach(box => {
-        // eslint-disable-next-line no-param-reassign
-        box.style.display = 'none';
-      });
-      document.body.appendChild(document.querySelector('div.g-recaptcha'));
-    });
+    // document.addEventListener('DOMContentLoaded', () => {
+    //   document.querySelectorAll('body > :not(.g-recaptcha)').forEach(box => {
+    //     // eslint-disable-next-line no-param-reassign
+    //     box.style.display = 'none';
+    //   });
+    //   document.body.appendChild(document.querySelector('div.g-recaptcha'));
+    // });
   }
   captchaChecker = setInterval(checkCaptcha, 300);
 }

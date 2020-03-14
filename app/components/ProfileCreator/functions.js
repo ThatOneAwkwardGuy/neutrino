@@ -85,6 +85,9 @@ const returnGmailOrCatchall = (
   baseProfile
 ) => {
   if (gmailEmails && gmailEmails.length > 0 && gmailEmails[index]) {
+    if (gmailEmails[index].email !== undefined) {
+      return gmailEmails[index].email;
+    }
     return gmailEmails[index];
   }
   if (
@@ -917,6 +920,19 @@ export const convertBaseToSOLEAIO = (
     : 'No checkout limit'
 });
 
+const returnPassFromEmailPass = (emailPassObject, index, baseProfile) => {
+  if (emailPassObject === undefined) {
+    return baseProfile.password;
+  }
+  if (
+    emailPassObject[index].pass !== undefined &&
+    emailPassObject[index].pass !== ''
+  ) {
+    return emailPassObject.pass;
+  }
+  return baseProfile.password;
+};
+
 export const convertBaseToCSV = (
   index,
   baseProfile,
@@ -958,7 +974,7 @@ export const convertBaseToCSV = (
     baseProfile.useCatchallBool,
     baseProfile
   ),
-  password: baseProfile.password,
+  password: returnPassFromEmailPass(gmailEmails, index, baseProfile),
   instagram: baseProfile.instagram,
   paymentCardholdersName:
     baseProfile.paymentCardholdersName ||
@@ -991,7 +1007,8 @@ export const convertBaseToNeutrino = (
     baseProfile.useCatchallBool,
     baseProfile
   ),
-  card
+  card,
+  password: returnPassFromEmailPass(gmailEmails, index, baseProfile)
 });
 
 export const convertBaseToAdept = (

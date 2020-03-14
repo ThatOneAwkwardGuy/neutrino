@@ -176,7 +176,7 @@ export default class ExtraButter {
       headers: {
         Accept: 'application/json, text/javascript, */*; q=0.01',
         Referer: this.url,
-        Origin: 'https://shop.extrabutterny.com',
+        Origin: 'https://extrabutterny.com',
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -213,7 +213,7 @@ export default class ExtraButter {
       headers: {
         accept: 'application/json, text/javascript, */*; q=0.01',
         referrer: this.url,
-        Origin: 'https://shop.extrabutterny.com',
+        Origin: 'https://extrabutterny.com',
         'sec-fetch-mode': 'cors',
         referrerPolicy: 'no-referrer-when-downgrade',
         'User-Agent':
@@ -231,7 +231,7 @@ export default class ExtraButter {
     this.changeStatus('Logging In');
     const loginResponse = await this.rp({
       method: 'POST',
-      url: 'https://shop.extrabutterny.com/account/login',
+      url: 'https://extrabutterny.com/account/login',
       headers: {
         'accept-language': 'en-US,en;q=0.9',
         'cache-control': 'no-cache',
@@ -242,8 +242,8 @@ export default class ExtraButter {
         'sec-fetch-user': '?1',
         'upgrade-insecure-requests': '1',
         Accept: 'application/json, text/javascript, */*; q=0.01',
-        Referer: 'https://shop.extrabutterny.com/account/login',
-        Origin: 'https://shop.extrabutterny.com',
+        Referer: 'https://extrabutterny.com/account/login',
+        Origin: 'https://extrabutterny.com',
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -277,7 +277,7 @@ export default class ExtraButter {
       }
       await this.rp({
         method: 'POST',
-        url: 'https://shop.extrabutterny.com/account/login',
+        url: 'https://extrabutterny.com/account/login',
         headers: {
           'accept-language': 'en-US,en;q=0.9',
           'cache-control': 'no-cache',
@@ -288,8 +288,8 @@ export default class ExtraButter {
           'sec-fetch-user': '?1',
           'upgrade-insecure-requests': '1',
           Accept: 'application/json, text/javascript, */*; q=0.01',
-          Referer: 'https://shop.extrabutterny.com/account/login',
-          Origin: 'https://shop.extrabutterny.com',
+          Referer: 'https://extrabutterny.com/account/login',
+          Origin: 'https://extrabutterny.com',
           'User-Agent':
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.131 Safari/537.36',
           'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
@@ -307,6 +307,7 @@ export default class ExtraButter {
 
   getCustomerID = async () => {
     const body = await this.rp.get(this.url);
+    console.log(body);
     const regex = /(?:"|')(customerId)(?:"|')(?=:)(?::\s*)(?:"|')?(?<value>true|false|[0-9a-zA-Z+\-.$]*)/g;
     const customerId = regex.exec(body);
     if (customerId !== null && customerId.length === 3) {

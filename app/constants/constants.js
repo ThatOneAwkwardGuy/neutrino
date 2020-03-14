@@ -141,7 +141,7 @@ export const sites = {
   doomsday: 'https://doomsday-store.com',
   'dope-factory': 'https://www.dope-factory.com',
   exclucitylife: 'https://shop.exclucitylife.com',
-  extrabutterny: 'https://shop.extrabutterny.com',
+  extrabutterny: 'https://extrabutterny.com',
   fearofgod: 'https://fearofgod.com',
   featuresneakerboutique: 'https://www.featuresneakerboutique.com',
   ficegallery: 'https://www.ficegallery.com',

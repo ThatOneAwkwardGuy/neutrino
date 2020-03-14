@@ -67,16 +67,25 @@ export const loadRaffleInfo = async (site, raffleLink) => {
   }
 };
 
-export const getCookiesFromWindow = async (link, proxy) => {
+export const getCookiesFromWindow = async (link, proxy, userAgent) => {
   const tokenID = uuidv4();
   const win = await createNewWindow(tokenID, proxy);
   return new Promise((resolve, reject) => {
     try {
       win.loadURL(link);
-      win.webContents.once('did-finish-load', async () => {
-        const cookies = await win.webContents.session.cookies.get({});
-        win.close();
-        resolve(cookies);
+      if (userAgent) {
+        win.webContents.session.setUserAgent(userAgent);
+      }
+      win.webContents.on('dom-ready', async () => {
+        const html = await win.webContents.executeJavaScript(
+          'document.body.innerHTML',
+          false
+        );
+        if (!html.includes('BOT or NOT?!')) {
+          const cookies = await win.webContents.session.cookies.get({});
+          win.close();
+          resolve(cookies);
+        }
       });
     } catch (error) {
       reject(error);

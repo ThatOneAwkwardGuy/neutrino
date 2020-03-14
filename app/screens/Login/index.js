@@ -25,6 +25,7 @@ import gloryNotifyLogo from '../../images/gloryNotify.png';
 import soleNotifyLogo from '../../images/soleNotify.png';
 import globalHeatLogo from '../../images/globalHeat.png';
 import ssxLogo from '../../images/ssx.png';
+import juicedSnkrsLogo from '../../images/juicedsnkrs.png';
 
 const { BrowserWindow } = require('electron').remote;
 
@@ -90,6 +91,9 @@ class Login extends Component {
         break;
       case 'SSX':
         authServerImage = ssxLogo;
+        break;
+      case 'juicedSnkrs':
+        authServerImage = juicedSnkrsLogo;
         break;
       default:
         break;
@@ -204,6 +208,18 @@ class Login extends Component {
         );
         break;
       }
+      case 'juicedSnkrs': {
+        const code = await this.loginWithDiscord();
+        this.setState(
+          {
+            key: code
+          },
+          () => {
+            this.loginWithExternalAuth();
+          }
+        );
+        break;
+      }
       default:
         this.loginWithExternalAuth();
         break;
@@ -236,10 +252,16 @@ class Login extends Component {
       );
       winWebcontents.on('will-navigate', async () => {
         const windowLocation = await winWebcontents.executeJavaScript(
+          'window.location.href'
+        );
+        const windowLocationSearch = await winWebcontents.executeJavaScript(
           'window.location.search'
         );
-        if (windowLocation.includes('code=')) {
-          const urlParams = new URLSearchParams(windowLocation);
+        if (
+          windowLocationSearch.includes('code=') &&
+          windowLocation.includes('neutrinotools.app')
+        ) {
+          const urlParams = new URLSearchParams(windowLocationSearch);
           const code = urlParams.get('code');
           resolve(code);
         } else {
@@ -310,7 +332,13 @@ class Login extends Component {
     }
 
     if (
-      ['gloryNotify', 'soleNotify', 'globalHeat', 'SSX'].includes(authServer)
+      [
+        'gloryNotify',
+        'soleNotify',
+        'globalHeat',
+        'SSX',
+        'juicedSnkrs'
+      ].includes(authServer)
     ) {
       return (
         <div>
@@ -379,6 +407,7 @@ class Login extends Component {
                   <option value="gloryNotify">GloryNotify</option>
                   <option value="soleNotify">SoleNotify</option>
                   <option value="globalHeat">GlobalHeat</option>
+                  <option value="juicedSnkrs">JuicedSnkrs</option>
                 </Input>
               </FormGroup>
             </Form>
