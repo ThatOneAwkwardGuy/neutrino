@@ -22,7 +22,7 @@ import Header from '../../components/Header';
 import neutrinoTextLogo from '../../images/textLogo.svg';
 import blazeUnlimitedLogo from '../../images/blazeUnlimited.png';
 import gloryNotifyLogo from '../../images/gloryNotify.png';
-import soleNotifyLogo from '../../images/solesociety.jpg';
+import soleNotifyLogo from '../../images/solesociety.png';
 import globalHeatLogo from '../../images/globalHeat.png';
 import ssxLogo from '../../images/ssx.png';
 import juicedSnkrsLogo from '../../images/juicedsnkrs.png';
