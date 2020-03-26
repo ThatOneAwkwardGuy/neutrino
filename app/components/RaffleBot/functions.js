@@ -27,10 +27,16 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadNakedCphRaffleInfo(raffleLink);
       case 'ExtraButter':
         return loadExtraButterRaffleInfo(raffleLink);
+      case 'Rooted':
+        return loadRootedRaffleInfo(raffleLink);
+      case 'AFewStore':
+        return loadAFewStoreRaffleInfo(raffleLink);
       case 'END':
         return loadEndRaffleInfo(raffleLink);
       case 'VooStore':
         return loadVooStoreRaffleInfo(raffleLink);
+      case 'YME':
+        return loadYMERaffleInfo(raffleLink);
       case 'Bodega':
         return loadBodegaRaffleInfo(raffleLink);
       case 'OneBlockDown':
@@ -61,6 +67,10 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadEmpireShopRaffleInfo(raffleLink);
       case 'HollyWood':
         return loadHollyWoodRaffleInfo(raffleLink);
+      case 'EighteenMontrose':
+        return load18MontroseRaffleInfo(raffleLink);
+      case 'CrusoeAndSons':
+        return loadCrusoeAndSonsRaffleInfo(raffleLink);
       default:
         return undefined;
     }
@@ -451,28 +461,6 @@ export const loadFootDistrctRaffleInfo = async link => {
               name: choice.label
             }));
           }
-          //  sizes = [
-          //   { id: '4 US - 36 EU', name: '4 US - 36 EU' },
-          //   { id: '4.5 US - 36.5 EU', name: '4.5 US - 36.5 EU' },
-          //   { id: '5 US - 37.5 EU', name: '5 US - 37.5 EU' },
-          //   { id: '5.5 US - 38 EU', name: '5.5 US - 38 EU' },
-          //   { id: '6 US - 38.5 EU', name: '6 US - 38.5 EU' },
-          //   { id: '6.5 US - 39 EU', name: '6.5 US - 39 EU' },
-          //   { id: '7 US - 40 EU', name: '7 US - 40 EU' },
-          //   { id: '7.5 US - 40.5 EU', name: '7.5 US - 40.5 EU' },
-          //   { id: '8 US - 41 EU', name: '8 US - 41 EU' },
-          //   { id: '8.5 US - 42 EU', name: '8.5 US - 42 EU' },
-          //   { id: '9 US - 42.5 EU', name: '9 US - 42.5 EU' },
-          //   { id: '9.5 US - 43 EU', name: '9.5 US - 43 EU' },
-          //   { id: '10 US - 44 EU', name: '10 US - 44 EU' },
-          //   { id: '10.5 US - 44.5 EU', name: '10.5 US - 44.5 EU' },
-          //   { id: '11 US - 45 EU', name: '11 US - 45 EU' },
-          //   { id: '11.5 US - 45.5 EU', name: '11.5 US - 45.5 EU' },
-          //   { id: '12 US - 46 EU', name: '12 US - 46 EU' },
-          //   { id: '13 US - 47.5 EU', name: '13 US - 47.5 EU' },
-          //   { id: '14 US - 48.5 EU', name: '14 US - 48.5 EU' }
-          // ];
-
           resolve({
             sizes,
             size: sizes[0].id,
@@ -490,6 +478,15 @@ export const loadFootDistrctRaffleInfo = async link => {
 };
 
 const loadNakedCphRaffleInfo = async link => {
+  const cookies = await getCookiesFromWindow(link);
+  return {
+    raffleDetails: { cookies },
+    sizeInput: false,
+    styleInput: false
+  };
+};
+
+const loadYMERaffleInfo = async link => {
   const win = await createNewWindow('', '');
   win.loadURL(link);
   return new Promise((resolve, reject) => {
@@ -502,14 +499,7 @@ const loadNakedCphRaffleInfo = async link => {
           'window.location.href',
           false
         );
-        const html = await win.webContents.executeJavaScript(
-          'document.body.innerHTML',
-          false
-        );
-        if (
-          currentURL.split('?')[0] === link &&
-          !html.includes('BOT or NOT?!')
-        ) {
+        if (currentURL === link) {
           const innerHTML = await win.webContents.executeJavaScript(
             'document.documentElement.innerHTML',
             false
@@ -518,9 +508,8 @@ const loadNakedCphRaffleInfo = async link => {
             'window.rendererData',
             true
           );
-          console.log(renderData);
           let typeformCode;
-          if (currentURL.includes('nakedcph.typeform.com')) {
+          if (currentURL.includes('ymeuniverse.typeform.com')) {
             typeformCode = renderData.form.id;
           } else {
             const $ = cheerio.load(innerHTML);
@@ -529,26 +518,50 @@ const loadNakedCphRaffleInfo = async link => {
               .attr('data-url')
               .split('/to/')[1];
           }
-          if (!currentURL.includes('nakedcph.typeform.com')) {
+          if (!currentURL.includes('ymeuniverse.typeform.com')) {
             win.loadURL(
-              `https://nakedcph.typeform.com/to/${typeformCode}?typeform-embed=embed-widget`
+              `https://ymeuniverse.typeform.com/to/${typeformCode}?typeform-embed=embed-widget`
             );
             win.webContents.on('dom-ready', async () => {
               renderData = await win.webContents.executeJavaScript(
                 'window.rendererData',
                 true
               );
+              let sizes = [];
+              const sizesField = renderData.form.fields.find(
+                field => field.title === 'What is your size?'
+              );
+              if (sizesField) {
+                sizes = sizesField.properties.choices.map(choice => ({
+                  id: choice.label,
+                  name: choice.label
+                }));
+              }
               resolve({
-                sizeInput: false,
+                sizeInput: true,
                 styleInput: false,
+                sizes,
+                size: sizes[0].id,
                 raffleDetails: { typeformCode, renderData }
               });
               win.close();
             });
           } else {
+            let sizes = [];
+            const sizesField = renderData.form.fields.find(
+              field => field.title === 'What is your size?'
+            );
+            if (sizesField) {
+              sizes = sizesField.properties.choices.map(choice => ({
+                id: choice.label,
+                name: choice.label
+              }));
+            }
             resolve({
-              sizeInput: false,
+              sizeInput: true,
               styleInput: false,
+              sizes,
+              size: sizes[0].id,
               raffleDetails: { typeformCode, renderData }
             });
             win.close();
@@ -657,6 +670,37 @@ const loadExtraButterRaffleInfo = async link => {
   }));
   return {
     styleInput: false,
+    size: sizes[0].id.toString(),
+    sizes,
+    raffleDetails: { product: raffleInfo }
+  };
+};
+
+const loadCrusoeAndSonsRaffleInfo = async link => {
+  const response = await rp.get(`${link.split('?')[0]}.json`);
+  const raffleInfo = JSON.parse(response);
+  const sizes = raffleInfo.product.variants.map(size => ({
+    id: size.id,
+    name: size.title
+  }));
+  return {
+    styleInput: false,
+    size: sizes[0].id.toString(),
+    sizes,
+    raffleDetails: { product: raffleInfo }
+  };
+};
+
+const loadRootedRaffleInfo = async link => {
+  const response = await rp.get(`${link.split('?')[0]}.json`);
+  const raffleInfo = JSON.parse(response);
+  const sizes = raffleInfo.product.variants.map(size => ({
+    id: size.id,
+    name: size.title
+  }));
+  return {
+    styleInput: false,
+    sizeInput: true,
     size: sizes[0].id.toString(),
     sizes,
     raffleDetails: { product: raffleInfo }
@@ -818,6 +862,173 @@ const loadHollyWoodRaffleInfo = async link => {
       reject(error);
     }
   });
+};
+
+const load18MontroseRaffleInfo = async link => {
+  const win = await createNewWindow('', '');
+  win.loadURL(link);
+  return new Promise((resolve, reject) => {
+    try {
+      win.webContents.on('close', () => {
+        reject(new Error('Closed Window Before Finished'));
+      });
+      win.webContents.on('dom-ready', async () => {
+        const result = await win.webContents.executeJavaScript(
+          'window.location.href',
+          false
+        );
+        if (result === link) {
+          const mainPage = await win.webContents.executeJavaScript(
+            'document.documentElement.innerHTML',
+            false
+          );
+          let $ = cheerio.load(mainPage);
+          const rafflePageSrc = $('script[data-sharing="lp-embed"]').attr(
+            'data-page-id'
+          );
+          const response = await rp.get(
+            `https://email.18montrose.com/p/${rafflePageSrc}`
+          );
+          $ = cheerio.load(response);
+          const sizes = $('option:not([value=""])')
+            .filter((index, el) => {
+              const text = $(el).text();
+              return text.includes('UK');
+            })
+            .map((index, el) => ({
+              id: el.attribs.value,
+              name: $(el).text()
+            }))
+            .toArray();
+          const raffleDetails = {
+            url: $('form[name="lpsurveyform"]').attr('action'),
+            respondent: $('input[name="respondent"]').attr('value')
+          };
+          $('div[data-element-settings~="answer"]').each((index, el) => {
+            const input = $(el);
+            const inputDetails = JSON.parse(
+              input.attr('data-element-settings')
+            );
+            if (inputDetails.dataField !== undefined) {
+              if (inputDetails.dataField === 'EMAIL') {
+                raffleDetails.emailFormID = inputDetails.id;
+              }
+              if (inputDetails.dataField === 'FIRSTNAME') {
+                raffleDetails.firstNameFormID = inputDetails.id;
+              }
+              if (inputDetails.dataField === 'LASTNAME') {
+                raffleDetails.lastNameFormID = inputDetails.id;
+              }
+              if (inputDetails.dataField === 'COUNTRY') {
+                raffleDetails.countryFormID = inputDetails.id;
+              }
+              if (inputDetails.dataField === 'IG_NAME') {
+                raffleDetails.instagramFormID = inputDetails.id;
+              }
+              if (inputDetails.dataField.includes('SIZE')) {
+                raffleDetails.sizeFormID = inputDetails.id;
+              }
+            }
+            if (
+              inputDetails.list !== undefined &&
+              inputDetails.list.length === 1 &&
+              inputDetails.list[0].text.includes('Terms and Conditions')
+            ) {
+              raffleDetails.checkboxFormID = inputDetails.id;
+            }
+          });
+          resolve({
+            styleInput: false,
+            raffleDetails,
+            sizeInput: true,
+            sizes,
+            size: sizes[0].id
+          });
+          win.close();
+        }
+      });
+    } catch (error) {
+      console.log(error);
+      reject(error);
+    }
+  });
+};
+
+const loadAFewStoreRaffleInfo = async link => {
+  const body = await rp.get(link);
+  const $ = cheerio.load(body);
+  const endpoint = $(
+    'div[data-dojo-type="mojo/pages-signup-forms/Loader"]'
+  ).attr('endpoint');
+  const queryParams = new URLSearchParams(
+    endpoint.slice(endpoint.indexOf('?'))
+  );
+  const settings = await rp
+    .get(
+      `https://mc.us5.list-manage.com/signup-form/settings?u=${queryParams.get(
+        'u'
+      )}&id=${queryParams.get('id')}&for_preview=0`
+    )
+    .json();
+  const unformattedSizes = settings.config.fields.find(
+    field => field.name === 'SIZES'
+  );
+  console.log(unformattedSizes);
+  const sizes = unformattedSizes.choices.map(size => ({
+    name: size.value,
+    id: size.value
+  }));
+  return {
+    styleInput: false,
+    raffleDetails: { ...settings },
+    sizeInput: true,
+    sizes,
+    size: sizes[0].id
+  };
+  // const win = await createNewWindow('', '');
+  // win.loadURL(link);
+  // return new Promise((resolve, reject) => {
+  //   try {
+  //     win.webContents.on('close', () => {
+  //       reject(new Error('Closed Window Before Finished'));
+  //     });
+  //     win.webContents.on('dom-ready', async () => {
+  //       const result = await win.webContents.executeJavaScript(
+  //         'window.location.href',
+  //         false
+  //       );
+  //       if (result === link) {
+  //         const mainPage = await win.webContents.executeJavaScript(
+  //           'document.documentElement.innerHTML',
+  //           false
+  //         );
+  //         const $ = cheerio.load(mainPage);
+  //         const id = $('input[tabIndex="-1"]').attr('value');
+  //         const url = $('form').attr('action');
+  //         const sizes = $('select[name="SIZES"] option')
+  //           .map((index, el) => ({
+  //             id: el.attribs.value,
+  //             name: $(el).text()
+  //           }))
+  //           .toArray();
+  //         console.log(id);
+  //         console.log(url);
+  //         console.log(sizes);
+  //         resolve({
+  //           styleInput: false,
+  //           raffleDetails: { id, url },
+  //           sizeInput: true,
+  //           sizes,
+  //           size: sizes[0].id
+  //         });
+  //         win.close();
+  //       }
+  //     });
+  //   } catch (error) {
+  //     console.log(error);
+  //     reject(error);
+  //   }
+  // });
 };
 
 const loadBodegaRaffleInfo = async link => {
@@ -1096,7 +1307,7 @@ const loadLapstoneAndHammerRaffleInfo = async link => {
   ];
 
   return {
-    styleInput: true,
+    styleInput: false,
     sizeInput: true,
     styles,
     sizes,

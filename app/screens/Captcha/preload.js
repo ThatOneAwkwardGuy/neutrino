@@ -18,6 +18,10 @@ document.addEventListener('DOMNodeInserted', () => {
 //     )
 //   );
 
+if (process.env.NODE_ENV === 'development') {
+  focusedWebContents.openDevTools();
+}
+
 const setCookiesInWindow = (webContents, cookies) =>
   new Promise(resolve => {
     if (cookies) {
@@ -122,14 +126,20 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
   if (
     window.location.href.includes('doverstreetmarket') ||
     window.location.href.includes('bstn') ||
-    window.location.href.includes('hollywood.se')
+    window.location.href.includes('hollywood.se') ||
+    window.location.href.includes('nakedcph.com') ||
+    window.location.href.includes('mailchi.mp') ||
+    window.location.href.includes('ymeuniverse')
   ) {
     window.addEventListener('DOMContentLoaded', () => {
       if (!window.location.href.includes('bstn')) {
         document.querySelector('form').id = 'blahhhhh';
       }
-      document.querySelector('form').action = 'http://google.com';
+      if (!document.documentElement.innerHTML.includes('Bot Or Not')) {
+        document.querySelector('form').action = 'http://google.com';
+      }
       window.validateReCaptchaAuth = () => {};
+      window.submitRuleOptin = () => {};
     });
   }
   if (
@@ -147,7 +157,3 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
   }
   captchaChecker = setInterval(checkCaptcha, 300);
 }
-
-// if (process.env.NODE_ENV === 'development') {
-//   focusedWebContents.openDevTools();
-// }

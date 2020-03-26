@@ -921,7 +921,8 @@ export const convertBaseToSOLEAIO = (
 });
 
 const returnPassFromEmailPass = (emailPassObject, index, baseProfile) => {
-  if (emailPassObject === undefined) {
+  console.log(emailPassObject);
+  if (emailPassObject === undefined || emailPassObject.length === 0) {
     return baseProfile.password;
   }
   if (

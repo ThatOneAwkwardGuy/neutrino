@@ -1,6 +1,12 @@
 import { ValidateSchema, NakedCPHSchema } from '../schemas';
+import { getCaptchaResponse } from '../../../screens/Captcha/functions';
+import { sites, longToShortCountries } from '../../../constants/constants';
+import { randomNumberInRange } from '../../AccountCreator/functions';
 
 const rp = require('request-promise');
+const cloudscraper = require('cloudscraper');
+const uuidv4 = require('uuid/v4');
+const cheerio = require('cheerio');
 
 export default class NakedCPH {
   constructor(
@@ -13,7 +19,8 @@ export default class NakedCPH {
     proxy,
     raffleDetails,
     forceUpdate,
-    incrementRaffles
+    incrementRaffles,
+    settings
   ) {
     this.url = url;
     this.profile = profile;
@@ -25,13 +32,36 @@ export default class NakedCPH {
     this.forceUpdate = forceUpdate;
     this.raffleDetails = raffleDetails;
     this.incrementRaffles = incrementRaffles;
+    this.settings = settings;
     this.cookieJar = rp.jar();
-    this.rp = rp.defaults({
+    const tokenID = uuidv4();
+    this.rp = cloudscraper.defaults({
+      onCaptcha: async (options, response) => {
+        const { captcha } = response;
+        try {
+          const captchaResponse = await getCaptchaResponse({
+            // eslint-disable-next-line no-underscore-dangle
+            cookiesObject: options.jar._jar.store.idx,
+            url: captcha.uri.href,
+            id: tokenID,
+            agent: null,
+            baseURL: sites[site],
+            site,
+            accountPass: profile.pass,
+            settings,
+            siteKey: captcha.siteKey
+          });
+          captcha.form['g-recaptcha-response'] = captchaResponse.captchaToken;
+          captcha.submit();
+        } catch (error) {
+          console.log(error);
+          captcha.submit(error);
+        }
+      },
       headers: {
         'User-Agent':
           'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
       },
-      proxy,
       jar: this.cookieJar
     });
   }
@@ -59,130 +89,73 @@ export default class NakedCPH {
     this.changeStatus('Stopped');
   };
 
-  getRaffleToken = async raffleId => {
-    this.changeStatus('Getting Raffle Token');
-    const response = await this.rp({
-      method: 'POST',
-      headers: {
-        accept: 'application/json',
-        'accept-language': 'en-US,en;q=0.9',
-        'cache-control': 'no-cache',
-        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-        pragma: 'no-cache',
-        referrer: `https://nakedcph.typeform.com/to/${raffleId}`,
-        referrerPolicy: 'no-referrer-when-downgrade'
-      },
-      uri: `https://nakedcph.typeform.com/app/form/result/token/${raffleId}/default`,
-      form: {}
+  submitRaffleEntry = async () => {
+    this.changeStatus('Getting Raffle Page');
+    const response = await this.rp.get({
+      uri: this.url,
+      resolveWithFullResponse: true,
+      jar: this.cookieJar
     });
-    return JSON.parse(response);
-  };
-
-  submitRaffleEntry = async (token, landedAt) => {
-    this.changeStatus('Submitting Raffle Entry');
-    const payload = {};
-    const formObj = {};
-    this.raffleDetails.renderData.form.fields.forEach((row, index) => {
-      if (row.title.toLowerCase().includes('our captcha is') && index === 0) {
-        const { ref } = row;
-        const matchingLogic = this.raffleDetails.renderData.form.logic.find(
-          logic => logic.ref === ref
-        );
-        formObj['0'] = {
-          field: { id: row.id, type: row.type },
-          text: matchingLogic.actions[0].condition.vars[1].value,
-          type: 'text'
-        };
-      } else if (row.title.toLowerCase().includes('first name')) {
-        formObj['1'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryFirstName,
-          type: 'text'
-        };
-      } else if (row.title.toLowerCase().includes('last name')) {
-        formObj['2'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryLastName,
-          type: 'text'
-        };
-      } else if (row.title.toLowerCase().includes('email')) {
-        formObj['3'] = {
-          field: { id: row.id, type: row.type },
-          email: this.profile.email,
-          type: 'email'
-        };
-      } else if (row.title.toLowerCase().includes('shipping')) {
-        formObj['4'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryAddress,
-          type: 'text'
-        };
-      } else if (row.title.toLowerCase().includes('city')) {
-        formObj['5'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryCity,
-          type: 'text'
-        };
-      } else if (row.title.toLowerCase().includes('number')) {
-        formObj['6'] = {
-          field: { id: row.id, type: row.type },
-          phone_number: `+${this.profile.phoneNumber}`,
-          type: 'phone_number'
-        };
-      } else if (row.title.toLowerCase().includes('postal code')) {
-        formObj['7'] = {
-          field: { id: row.id, type: row.type },
-          text: this.profile.deliveryZip,
-          type: 'text'
-        };
-      } else if (row.title.toLowerCase().includes('country are you')) {
-        formObj['8'] = {
-          field: { id: row.id, type: row.type },
-          text:
-            this.profile.deliveryCountry === 'United States'
-              ? 'United States of America'
-              : this.profile.deliveryCountry,
-          type: 'text'
-        };
-      } else if (row.title.toLowerCase().includes('newsletter')) {
-        formObj['9'] = {
-          field: { id: row.id, type: row.type },
-          text: 'Yes',
-          type: 'text'
-        };
-      }
+    this.changeStatus('Processing Raffle Page');
+    const body = response.body.toString();
+    const $ = cheerio.load(body);
+    const tags = $('input[name="tags[]"]').attr('value');
+    const token = $('input[name="token"]').attr('value');
+    this.changeStatus('Getting Captcha');
+    const captchaResponse = await getCaptchaResponse({
+      // eslint-disable-next-line no-underscore-dangle
+      cookiesObject: {},
+      url: this.url,
+      id: this.tokenID,
+      proxy: this.proxy,
+      baseURL: this.url,
+      site: this.site,
+      settings: this.settings,
+      siteKey: '6LfbPnAUAAAAACqfb_YCtJi7RY0WkK-1T4b9cUO8'
     });
-    payload.answers = Object.values(formObj);
-    payload.form_id = this.raffleDetails.typeformCode;
-    payload.signature = token;
-    payload.landed_at = parseInt(landedAt, 10);
-    const response = await this.rp({
-      method: 'POST',
-      json: true,
-      uri: `https://nakedcph.typeform.com/app/form/submit/${this.raffleDetails.typeformCode}`,
-      body: payload
+    this.changeStatus('Entering Raffle');
+    const payload = {
+      'tags[]': tags,
+      token,
+      rule_email: this.profile.email,
+      phone_number: this.profile.phone,
+      'fields[Raffle.First Name]': this.profile.deliveryFirstName,
+      'fields[Raffle.Last Name]': this.profile.deliveryLastName,
+      'fields[Raffle.Shipping Address]': this.profile.deliveryAddress,
+      'fields[Raffle.Postal Code]': this.profile.deliveryZip,
+      'fields[Raffle.City]': this.profile.deliveryCity,
+      'fields[Raffle.Country]':
+        longToShortCountries[this.profile.deliveryCountry] !== undefined
+          ? longToShortCountries[this.profile.deliveryCountry]
+          : '',
+      'fields[SignupSource.ip]': `${randomNumberInRange(
+        1,
+        255
+      )}.${randomNumberInRange(1, 255)}.${randomNumberInRange(
+        1,
+        255
+      )}.${randomNumberInRange(1, 255)}`,
+      'fields[SignupSource.useragent]':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+      language: 'sv',
+      'g-recaptcha-response': captchaResponse.captchaToken
+    };
+    const finalResponse = await this.rp.post({
+      form: payload,
+      uri: 'https://app.rule.io/subscriber-form/subscriber'
     });
-    return response;
+    if (
+      finalResponse.includes('YOUR REGISTRATION FOR OUR FCFS WAS SUCCESSFUL')
+    ) {
+      this.changeStatus('Successful Entry');
+    } else {
+      this.changeStatus(`Error Submitting Entry`);
+    }
   };
 
   makeEntry = async () => {
     ValidateSchema(NakedCPHSchema, { ...this.profile });
     this.changeStatus('Started');
-    // eslint-disable-next-line camelcase
-    const { token, landed_at } = await this.getRaffleToken(
-      this.raffleDetails.typeformCode
-    );
-
-    const submissionResponse = await this.submitRaffleEntry(token, landed_at);
-
-    if (submissionResponse.message === 'success') {
-      this.changeStatus('Successful Entry');
-      this.incrementRaffles({
-        url: this.url,
-        site: this.site,
-        size: this.size ? this.size.name : '',
-        style: this.style ? this.style.name : ''
-      });
-    }
+    await this.submitRaffleEntry();
   };
 }

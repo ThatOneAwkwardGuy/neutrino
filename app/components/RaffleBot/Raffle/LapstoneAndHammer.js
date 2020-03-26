@@ -70,10 +70,10 @@ export default class LapstoneAndHammer {
       )}&FNAME=${encodeURIComponent(
         this.profile.deliveryFirstName
       )}&LNAME=${encodeURIComponent(this.profile.deliveryLastName)}&MMERGE3=${
-        this.style.id
-      }&MMERGE4=${this.size.id}&MMERGE5=&MMERGE6=${
-        this.profile.instagram !== undefined ? this.profile.instagram : ''
-      }&${this.raffleDetails.id}=&subscribe=Submit&_=1567090992894`,
+        this.size.id
+      }&MMERGE4=&MMERGE5=&${
+        this.raffleDetails.id
+      }=&subscribe=Submit&_=1567090992894`,
       headers: {
         'sec-fetch-mode': 'no-cors',
         referrer: this.link,

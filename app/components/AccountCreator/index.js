@@ -43,7 +43,7 @@ const uuidv4 = require('uuid/v4');
 const fs = require('fs');
 const HttpsProxyAgent = require('https-proxy-agent');
 const tough = require('tough-cookie');
-// const cloudscraper = require('cloudscraper');
+const cloudscraper = require('cloudscraper');
 
 class AccountCreator extends Component {
   constructor(props) {
@@ -190,6 +190,18 @@ class AccountCreator extends Component {
     const accountPromises = Array.from(Array(parseInt(quantity, 10))).map(
       (value, index) => {
         switch (site) {
+          case '': {
+            const { toastManager } = this.props;
+            toastManager.add(
+              'Select a site before attempting to make accounts.',
+              {
+                appearance: 'error',
+                autoDismiss: true,
+                pauseOnHover: true
+              }
+            );
+            return;
+          }
           case 'nike - US':
             return this.sleep(parseInt(delay, 10)).then(() =>
               this.createNikeAccount(gmailEmails[index]).catch(e => e)
@@ -204,7 +216,7 @@ class AccountCreator extends Component {
             );
           case 'nakedcph':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createNakedCphAccount(gmailEmails[index]).catch(e => e)
+              this.createNakedCph2Account(gmailEmails[index]).catch(e => e)
             );
           case 'stress95':
             return this.sleep(parseInt(delay, 10)).then(() =>
@@ -217,6 +229,10 @@ class AccountCreator extends Component {
           case 'end':
             return this.sleep(parseInt(delay, 10)).then(() =>
               this.createEndAccount(gmailEmails[index]).catch(e => e)
+            );
+          case 'yme':
+            return this.sleep(parseInt(delay, 10)).then(() =>
+              this.createYMEAccount(gmailEmails[index]).catch(e => e)
             );
           default:
             return this.sleep(parseInt(delay, 10)).then(() =>
@@ -318,15 +334,16 @@ class AccountCreator extends Component {
     const { addCreatedAccount, settings } = this.props;
     const email =
       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-    const accountPass = randomPass ? randomize('a', 10) : pass;
+    const accountPass = randomPass ? randomize('*', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const accountLastName = randomName ? random.last() : lastName;
     const tokenID = uuidv4();
     this.cookieJars[tokenID] = request.jar();
+    const proxy = useProxies ? this.getRandomProxy() : '';
     const response = await request({
       method: 'POST',
       uri: 'https://eu.oneblockdown.it/account',
-      agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+      agent: useProxies ? new HttpsProxyAgent(proxy) : null,
       headers: {
         Accept:
           'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3',
@@ -356,7 +373,7 @@ class AccountCreator extends Component {
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
         url: response.request.href,
         id: tokenID,
-        agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+        agent: useProxies ? new HttpsProxyAgent(proxy) : null,
         baseURL: sites[site],
         site,
         accountPass,
@@ -379,7 +396,7 @@ class AccountCreator extends Component {
         method: 'POST',
         url: `https://eu.oneblockdown.it/account`,
         followRedirect: true,
-        agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+        agent: useProxies ? new HttpsProxyAgent(proxy) : null,
         resolveWithFullResponse: true,
         followAllRedirects: true,
         headers: {
@@ -435,10 +452,11 @@ class AccountCreator extends Component {
     const { addCreatedAccount, settings } = this.props;
     const email =
       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-    const accountPass = randomPass ? randomize('a', 10) : pass;
+    const accountPass = randomPass ? randomize('*', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const accountLastName = randomName ? random.last() : lastName;
     const tokenID = uuidv4();
+    const proxy = useProxies ? this.getRandomProxy() : '';
     this.cookieJars[tokenID] = request.jar();
     const payload = {
       form_type: 'create_customer',
@@ -453,7 +471,7 @@ class AccountCreator extends Component {
       method: 'POST',
       url: `${sites[site]}/account`,
       followRedirect: true,
-      agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+      agent: useProxies ? new HttpsProxyAgent(proxy) : null,
       resolveWithFullResponse: true,
       followAllRedirects: true,
       jar: this.cookieJars[tokenID],
@@ -472,7 +490,6 @@ class AccountCreator extends Component {
       },
       body: queryString
     });
-    console.log(response);
     if (response.request.href && response.request.href.includes('challenge')) {
       const regex = /sitekey: "(.*)"/gm;
       const siteKey = regex.exec(response.body)[1];
@@ -480,7 +497,7 @@ class AccountCreator extends Component {
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
         url: response.request.href,
         id: tokenID,
-        agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+        agent: useProxies ? new HttpsProxyAgent(proxy) : null,
         baseURL: sites[site],
         site,
         accountPass,
@@ -498,7 +515,7 @@ class AccountCreator extends Component {
         method: 'POST',
         url: `${sites[site]}/account`,
         followRedirect: true,
-        agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+        agent: useProxies ? new HttpsProxyAgent(proxy) : null,
         resolveWithFullResponse: true,
         followAllRedirects: true,
         headers: {
@@ -569,7 +586,7 @@ class AccountCreator extends Component {
     return new Promise(async (resolve, reject) => {
       const email =
         gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-      const accountPass = randomPass ? randomize('a', 10) : pass;
+      const accountPass = randomPass ? randomize('*', 10) : pass;
       const accountFirstName = randomName ? random.first() : firstName;
       const accountLastName = randomName ? random.last() : lastName;
       const tokenID = uuidv4();
@@ -621,268 +638,131 @@ class AccountCreator extends Component {
     });
   };
 
-  // createNakedCphAccount2 = async gmailEmail => {
-  //   const {
-  //     randomPass,
-  //     randomName,
-  //     useProxies,
-  //     catchall,
-  //     pass,
-  //     site,
-  //     firstName
-  //   } = this.state;
-  //   const { settings, addCreatedAccount } = this.props;
-  //   const email =
-  //     gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-  //   const accountPass = randomPass ? randomize('a', 10) : pass;
-  //   const accountFirstName = randomName ? random.first() : firstName;
-  //   const tokenID = uuidv4();
-  //   this.cookieJars[tokenID] = request.jar();
-  //   const proxy = useProxies ? this.getRandomProxy() : '';
-  //   const cookies = await getCookiesFromWindow(
-  //     'https://www.nakedcph.com/en/auth/view?op=register',
-  //     proxy,
-  //     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
-  //   );
-  //   cookies.forEach(cookie => {
-  //     const toughCookie = new tough.Cookie({
-  //       key: cookie.name,
-  //       value: cookie.value,
-  //       httpOnly: cookie.httpOnly,
-  //       hostOnly: cookie.hostOnly,
-  //       path: cookie.path
-  //     });
-  //     this.cookieJars[tokenID].setCookie(
-  //       toughCookie.toString(),
-  //       'https://www.nakedcph.com/'
-  //     );
-  //   });
-  //   const captchaResponse = await getCaptchaResponse({
-  //     cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
-  //     url: 'https://www.nakedcph.com/en/auth/view?op=register',
-  //     id: tokenID,
-  //     agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
-  //     baseURL: sites[site],
-  //     site,
-  //     accountPass,
-  //     settings,
-  //     siteKey: '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
-  //   });
-  //   console.log(captchaResponse);
-  //   console.log(
-  //     this.cookieJars[tokenID].getCookieString('https://www.nakedcph.com/')
-  //   );
-  //   const anticsrftokenCookie = cookies.find(
-  //     cookie => cookie.name === 'AntiCsrfToken'
-  //   );
-  //   const isCustomerValidResponse = await request({
-  //     resolveWithFullResponse: true,
-  //     method: 'POST',
-  //     jar: this.cookieJars[tokenID],
-  //     uri: 'https://www.nakedcph.com/auth/iscustomer',
-  //     headers: {
-  //       cookie: this.cookieJars[tokenID].getCookieString(
-  //         'https://www.nakedcph.com/'
-  //       ),
-  //       'x-anticsrftoken': anticsrftokenCookie.value,
-  //       'x-requested-with': 'XMLHttpRequest',
-  //       'User-Agent':
-  //         'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
-  //     },
-  //     form: {
-  //       email
-  //     }
-  //   });
-  //   console.log(isCustomerValidResponse);
-  //   try {
-  //     const response = await request({
-  //       url: 'https://www.nakedcph.com/en/auth/submit',
-  //       method: 'POST',
-  //       headers: {
-  //         'x-anticsrftoken': anticsrftokenCookie.value,
-  //         'x-requested-with': 'XMLHttpRequest',
-  //         'User-Agent':
-  //           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.120 Safari/537.36'
-  //       },
-  //       jar: this.cookieJars[tokenID],
-  //       body: `_AntiCsrfToken=${
-  //         anticsrftokenCookie.value
-  //       }&firstName=${accountFirstName}&email=${encodeURIComponent(
-  //         email
-  //       )}&password=${pass}&termsAccepted=true&g-recaptcha-response=${
-  //         captchaResponse.captchaToken
-  //       }&action=register`
-  //       // form: {
-  //       //   _AntiCsrfToken: anticsrftokenCookie.value,
-  //       //   firstName: accountFirstName,
-  //       //   email,
-  //       //   password: pass,
-  //       //   termsAccepted: true,
-  //       //   'g-recaptcha-response': captchaResponse.captchaToken,
-  //       //   action: 'register'
-  //       // }
-  //     });
-  //     console.log(response);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  // };
-
-  // createNakedCphAccount3 = async gmailEmail => {
-  //   const {
-  //     randomPass,
-  //     randomName,
-  //     useProxies,
-  //     catchall,
-  //     pass,
-  //     site,
-  //     firstName
-  //   } = this.state;
-  //   const { settings, addCreatedAccount } = this.props;
-  //   const email =
-  //     gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-  //   const accountPass = randomPass ? randomize('a', 10) : pass;
-  //   const accountFirstName = randomName ? random.first() : firstName;
-  //   const tokenID = uuidv4();
-  //   const tokenID2 = uuidv4();
-  //   this.cookieJars[tokenID] = request.jar();
-  //   const proxy = useProxies ? this.getRandomProxy() : '';
-  //   const defaultCloudscraper = cloudscraper.defaults({
-  //     onCaptcha: async (options, response) => {
-  //       console.log(options);
-  //       console.log(response);
-  //       const { captcha } = response;
-  //       try {
-  //         const captchaResponse = await getCaptchaResponse({
-  //           cookiesObject: options.jar._jar.store.idx,
-  //           url: captcha.uri.href,
-  //           id: tokenID,
-  //           agent: useProxies
-  //             ? new HttpsProxyAgent(this.getRandomProxy())
-  //             : null,
-  //           baseURL: sites[site],
-  //           site,
-  //           accountPass,
-  //           settings,
-  //           siteKey: captcha.siteKey
-  //         });
-  //         captcha.form['g-recaptcha-response'] = captchaResponse.captchaToken;
-  //         captcha.submit();
-  //       } catch (error) {
-  //         captcha.submit(error);
-  //       }
-  //     }
-  //   });
-  //   try {
-  //     const response = await defaultCloudscraper.get({
-  //       uri: 'https://www.nakedcph.com/en/auth/view?op=register',
-  //       resolveWithFullResponse: true,
-  //       jar: this.cookieJars[tokenID]
-  //     });
-  //     const $ = cheerio.load(response.body);
-  //     const anticsrftoken = $("input[name='_AntiCsrfToken']").attr('value');
-  //     console.log(anticsrftoken);
-  //     const captchaResponse2 = await getCaptchaResponse({
-  //       cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
-  //       url: 'https://www.nakedcph.com/en/auth/view?op=register',
-  //       id: tokenID2,
-  //       agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
-  //       baseURL: sites[site],
-  //       site,
-  //       accountPass,
-  //       settings,
-  //       siteKey: '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
-  //     });
-  //     const response2 = await defaultCloudscraper.post({
-  //       uri: 'https://www.nakedcph.com/en/auth/view',
-  //       jar: this.cookieJars[tokenID],
-  //       resolveWithFullResponse: true,
-  //       formDaat: {
-  //         _AntiCsrfToken: anticsrftoken,
-  //         firstName: accountFirstName,
-  //         email,
-  //         password: pass,
-  //         termsAccepted: true,
-  //         'g-recaptcha-response': captchaResponse2.captchaToken,
-  //         action: 'register'
-  //       }
-  //     });
-  //     console.log(response2);
-  //   } catch (error) {
-  //     console.log(error);
-  //   }
-  //   // try {
-  //   //   await request({
-  //   //     uri: 'https://www.nakedcph.com/en/auth/view',
-  //   //     method: 'GET',
-  //   //     jar: this.cookieJars[tokenID],
-  //   //     headers: {
-  //   //       accept:
-  //   //         'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-  //   //       'accept-language': 'en-US,en;q=0.9',
-  //   //       'cache-control': 'max-age=0',
-  //   //       'sec-fetch-dest': 'document',
-  //   //       'sec-fetch-mode': 'navigate',
-  //   //       'sec-fetch-site': 'none',
-  //   //       'sec-fetch-user': '?1',
-  //   //       'upgrade-insecure-requests': '1'
-  //   //     }
-  //   //   });
-  //   // } catch (error) {
-  //   //   const $ = cheerio.load(error.response.body);
-  //   //   const action = $('#captcha form').attr('action');
-  //   //   const r = $("input[name='r']").attr('value');
-  //   //   const cfCaptchaKind = $("input[name='cf_captcha_kind']").attr('value');
-  //   //   const id = $(
-  //   //     "script[data-sitekey='6LfBixYUAAAAABhdHynFUIMA_sa4s-XsJvnjtgB0']"
-  //   //   ).attr('data-ray');
-  //   //   const captchaResponse = await getCaptchaResponse({
-  //   //     cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
-  //   //     url: 'https://www.nakedcph.com/en/auth/view?op=register',
-  //   //     id: tokenID,
-  //   //     agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
-  //   //     baseURL: sites[site],
-  //   //     site,
-  //   //     accountPass,
-  //   //     settings,
-  //   //     siteKey: '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
-  //   //   });
-  //   //   try {
-  //   //     const captchaSubmit = await request({
-  //   //       uri: `https://www.nakedcph.com${action}`,
-  //   //       method: 'POST',
-  //   //       followAllRedirects: true,
-  //   //       jar: this.cookieJars[tokenID],
-  //   //       headers: {
-  //   //         authority: 'www.nakedcph.com',
-  //   //         'cache-control': 'max-age=0',
-  //   //         origin: 'https://www.nakedcph.com',
-  //   //         'upgrade-insecure-requests': '1',
-  //   //         'content-type': 'application/x-www-form-urlencoded',
-  //   //         'user-agent':
-  //   //           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36',
-  //   //         'sec-fetch-dest': 'document',
-  //   //         accept:
-  //   //           'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-  //   //         'sec-fetch-site': 'same-origin',
-  //   //         'sec-fetch-mode': 'navigate',
-  //   //         'sec-fetch-user': '?1',
-  //   //         referer: 'https://www.nakedcph.com/en/auth/view',
-  //   //         'accept-language': 'en-US,en;q=0.9'
-  //   //       },
-  //   //       form: {
-  //   //         r,
-  //   //         cf_captcha_kind: cfCaptchaKind,
-  //   //         id,
-  //   //         'g-recaptcha-response': captchaResponse.captchaToken
-  //   //       }
-  //   //     });
-  //   //     console.log(captchaSubmit);
-  //   //   } catch (error) {
-  //   //     console.log(error);
-  //   //   }
-  //   // }
-  // };
+  createNakedCph2Account = async gmailEmail => {
+    const {
+      randomPass,
+      randomName,
+      useProxies,
+      catchall,
+      pass,
+      firstName,
+      site
+    } = this.state;
+    const { addCreatedAccount, settings } = this.props;
+    const email =
+      gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
+    const accountPass = randomPass ? randomize('*', 10) : pass;
+    const accountFirstName = randomName ? random.first() : firstName;
+    const jar = request.jar();
+    const tokenID = uuidv4();
+    const proxy = useProxies ? this.getRandomProxy() : '';
+    const rp = cloudscraper.defaults({
+      onCaptcha: async (options, response) => {
+        const { captcha } = response;
+        try {
+          const captchaResponse = await getCaptchaResponse({
+            cookiesObject: jar._jar.store.idx,
+            url: captcha.uri.href.includes('auth/submit')
+              ? 'https://www.nakedcph.com/en/auth/view?op=register'
+              : captcha.uri.href,
+            id: tokenID,
+            agent: null,
+            baseURL: sites[site],
+            site,
+            accountPass,
+            settings,
+            siteKey: captcha.siteKey
+          });
+          captcha.form['g-recaptcha-response'] = captchaResponse.captchaToken;
+          captcha.submit();
+        } catch (error) {
+          console.log(error);
+          captcha.submit(error);
+        }
+      },
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+      },
+      jar
+    });
+    const loginBody = await rp({
+      method: 'GET',
+      uri: 'https://www.nakedcph.com/en/auth/view?op=register',
+      jar,
+      headers: {
+        authority: 'www.nakedcph.com',
+        'upgrade-insecure-requests': '1',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'sec-fetch-dest': 'document',
+        accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'sec-fetch-site': 'same-origin',
+        'sec-fetch-mode': 'navigate',
+        'sec-fetch-user': '?1',
+        'accept-language': 'en-US,en;q=0.9'
+      }
+    });
+    const $ = cheerio.load(loginBody);
+    const antiToken = $('input[name="_AntiCsrfToken"]').attr('value');
+    console.log(antiToken);
+    const captchaResponse = await getCaptchaResponse({
+      cookiesObject: jar._jar.store.idx,
+      url: 'https://www.nakedcph.com/en/auth/view?op=register',
+      id: tokenID,
+      agent: useProxies ? new HttpsProxyAgent(proxy) : null,
+      baseURL: sites[site],
+      site,
+      accountPass,
+      settings,
+      siteKey: '6LetlZQUAAAAAGkLxjR5zvrHZHOSlSFp6t-mrv6J'
+    });
+    console.log(captchaResponse);
+    const registerBody = await rp({
+      method: 'POST',
+      headers: {
+        authority: 'www.nakedcph.com',
+        accept: 'application/json, text/javascript, */*; q=0.01',
+        'x-anticsrftoken': antiToken,
+        'sec-fetch-dest': 'empty',
+        'x-requested-with': 'XMLHttpRequest',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        origin: 'https://www.nakedcph.com',
+        'sec-fetch-site': 'same-origin',
+        'sec-fetch-mode': 'cors',
+        referer: 'https://www.nakedcph.com/en/auth/view?op=register',
+        'accept-language': 'en-US,en;q=0.9'
+      },
+      jar,
+      uri: 'https://www.nakedcph.com/en/auth/submit',
+      form: {
+        _AntiCsrfToken: antiToken,
+        firstName: accountFirstName,
+        email,
+        password: pass,
+        termsAccepted: true,
+        'g-recaptcha-response': captchaResponse.captchaToken,
+        action: 'register'
+      }
+    });
+    console.log(registerBody);
+    const parsedRegisterBody = JSON.parse(registerBody);
+    if (parsedRegisterBody.Response.Success) {
+      addCreatedAccount({
+        email,
+        site,
+        pass: accountPass,
+        status: 'created'
+      });
+    } else {
+      return new Error(
+        'There was an error creating your account. this could be due to a banned catchall'
+      );
+    }
+  };
 
   createStress95Account = async gmailEmail => {
     const {
@@ -899,7 +779,7 @@ class AccountCreator extends Component {
     return new Promise(async (resolve, reject) => {
       const email =
         gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-      const accountPass = randomPass ? randomize('a', 10) : pass;
+      const accountPass = randomPass ? randomize('*', 10) : pass;
       const accountFirstName = randomName ? random.first() : firstName;
       const accountLastName = randomName ? random.last() : lastName;
       const tokenID = uuidv4();
@@ -953,195 +833,253 @@ class AccountCreator extends Component {
       lastName,
       site
     } = this.state;
-    const { settings } = this.props;
+    const { addCreatedAccount, settings } = this.props;
     const email =
       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-    const accountPass = randomPass ? randomize('a', 10) : pass;
+    const accountPass = randomPass ? randomize('*', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const accountLastName = randomName ? random.last() : lastName;
     const dob = `${randomNumberInRange(1, 26)}/${randomNumberInRange(
       1,
       12
     )}/${randomNumberInRange(1980, 1999)}`;
+    const proxy = useProxies ? this.getRandomProxy() : '';
     const tokenID = uuidv4();
     this.cookieJars[tokenID] = request.jar();
+    let captchaBody = '';
+    let loginBody = '';
+    try {
+      loginBody = await request({
+        method: 'GET',
+        jar: this.cookieJars[tokenID],
+        uri: 'https://www.endclothing.com/gb/customer/account/login/'
+      });
+    } catch (error) {
+      captchaBody = error.response.body;
+    }
+    if (captchaBody !== '') {
+      const captchaID = uuidv4();
+      const captchaResponse = await getCaptchaResponse({
+        cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
+        url: 'https://www.endclothing.com/gb/customer/account/login/',
+        id: captchaID,
+        agent: useProxies ? new HttpsProxyAgent(proxy) : null,
+        baseURL: sites[site],
+        site,
+        accountPass,
+        settings,
+        siteKey: '6LdC3UgUAAAAAJIcyA3Ym4j_nCP-ainSgf1NoFku'
+      });
+      const $ = cheerio.load(captchaBody);
+      const remoteip = $('input[name="remoteip"]').attr('value');
+      const dCFTicket = $('input[name="dCF_ticket"]').attr('value');
+      const action = $('#distilCaptchaForm').attr('action');
+      await request({
+        method: 'POST',
+        uri: `https://www.endclothing.com${action}`,
+        jar: this.cookieJars[tokenID],
+        form: {
+          remoteip,
+          dCF_ticket: dCFTicket,
+          'g-recaptcha-response': captchaResponse.captchaToken,
+          isAjax: 1
+        }
+      });
+      loginBody = await request({
+        method: 'GET',
+        jar: this.cookieJars[tokenID],
+        uri: 'https://www.endclothing.com/gb/customer/account/login/'
+      });
+    }
+    const $ = cheerio.load(loginBody);
+    const formKey = $('input[name="form_key"]').attr('value');
+    const finalAccountResponse = await request({
+      method: 'POST',
+      jar: this.cookieJars[tokenID],
+      resolveWithFullResponse: true,
+      formData: {
+        form_key: formKey,
+        success_url: '',
+        error_url: '',
+        firstname: accountFirstName,
+        lastname: accountLastName,
+        email,
+        dob,
+        password: accountPass,
+        password_confirmation: accountPass
+      },
+      uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
+      maxRedirects: 1,
+      followAllRedirects: true,
+      followRedirect: true
+    });
+    if (
+      finalAccountResponse.body.includes(
+        `${accountFirstName} ${accountLastName}`
+      ) &&
+      finalAccountResponse.body.includes(email)
+    ) {
+      addCreatedAccount({
+        email,
+        site,
+        pass: accountPass,
+        status: 'created'
+      });
+    } else {
+      return new Error(
+        'There was an error creating your account. this could be due to a banned catchall'
+      );
+    }
+  };
+
+  createYMEAccount = async gmailEmail => {
+    const {
+      randomPass,
+      randomName,
+      useProxies,
+      catchall,
+      pass,
+      firstName,
+      site
+    } = this.state;
+    const { addCreatedAccount, settings } = this.props;
+    const email =
+      gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
+    const accountPass = randomPass ? randomize('*', 10) : pass;
+    const accountFirstName = randomName ? random.first() : firstName;
+    const jar = request.jar();
+    const tokenID = uuidv4();
     const proxy = useProxies ? this.getRandomProxy() : '';
-    const cookies = await getCookiesFromWindow(
-      'https://www.endclothing.com',
-      proxy
-    );
-    cookies.forEach(cookie => {
-      if (cookie.domain === '.endclothing.com') {
-        const toughCookie = new tough.Cookie({
-          key: cookie.name,
-          value: cookie.value,
-          httpOnly: cookie.httpOnly,
-          hostOnly: cookie.hostOnly,
-          path: cookie.path
-        });
-        console.log(cookie);
-        this.cookieJars[tokenID].setCookie(
-          toughCookie.toString(),
-          'https://www.endclothing.com'
-        );
+    const rp = cloudscraper.defaults({
+      onCaptcha: async (options, response) => {
+        const { captcha } = response;
+        try {
+          const captchaResponse = await getCaptchaResponse({
+            cookiesObject: jar._jar.store.idx,
+            url: captcha.uri.href.includes('auth/submit')
+              ? 'https://www.ymeuniverse.com/en/auth/view?op=register'
+              : captcha.uri.href,
+            id: tokenID,
+            agent: null,
+            baseURL: sites[site],
+            site,
+            accountPass,
+            settings,
+            siteKey: captcha.siteKey
+          });
+          captcha.form['g-recaptcha-response'] = captchaResponse.captchaToken;
+          captcha.submit();
+        } catch (error) {
+          console.log(error);
+          captcha.submit(error);
+        }
+      },
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+      },
+      jar
+    });
+    const loginBody = await rp({
+      method: 'GET',
+      uri: 'https://www.ymeuniverse.com/en/auth/view?op=register',
+      jar,
+      headers: {
+        authority: 'www.ymeuniverse.com',
+        'cache-control': 'max-age=0',
+        'upgrade-insecure-requests': '1',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'sec-fetch-dest': 'document',
+        accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'sec-fetch-site': 'none',
+        'sec-fetch-mode': 'navigate',
+        'sec-fetch-user': '?1',
+        'accept-language': 'en-US,en;q=0.9'
       }
     });
-    // const loginPage = request({
-    //   method: 'GET',
-    //   uri: 'https://www.endclothing.com/gb/customer/account/login/',
-    //   jar: this.cookieJars[tokenID]
-    // });
-    // const $ = cheerio.load(loginPage);
-    // cont form_key = $(".form .create .account .form-create-account ")
-    console.log(email);
-    console.log(accountPass);
-    try {
-      const response1 = await request({
-        method: 'POST',
-        jar: this.cookieJars[tokenID],
-        resolveWithFullResponse: true,
-        headers: {
-          accept:
-            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-          'accept-language': 'en-US,en;q=0.9',
-          'cache-control': 'max-age=0',
-          'content-type':
-            'multipart/form-data; boundary=----WebKitFormBoundary7WjBaScA8Gd9EBPx',
-          'sec-fetch-dest': 'document',
-          'sec-fetch-mode': 'navigate',
-          'sec-fetch-site': 'same-origin',
-          'sec-fetch-user': '?1',
-          'upgrade-insecure-requests': '1'
-        },
-        formData: {
-          form_key: '',
-          success_url: '',
-          error_url: '',
-          firstname: accountFirstName,
-          lastname: accountLastName,
-          email,
-          dob,
-          password: accountPass,
-          password_confirmation: accountPass
-        },
-        uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
-        followAllRedirects: true,
-        followRedirect: true
-      });
-      console.log(response1);
-      const response2 = await request({
-        method: 'POST',
-        jar: this.cookieJars[tokenID],
-        resolveWithFullResponse: true,
-        headers: {
-          accept:
-            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-          'accept-language': 'en-US,en;q=0.9',
-          'cache-control': 'max-age=0',
-          'sec-fetch-dest': 'document',
-          'sec-fetch-mode': 'navigate',
-          'sec-fetch-site': 'same-origin',
-          'sec-fetch-user': '?1',
-          'upgrade-insecure-requests': '1'
-        },
-        formData: {
-          form_key: '',
-          success_url: '',
-          error_url: '',
-          firstname: accountFirstName,
-          lastname: accountLastName,
-          email,
-          dob,
-          password: accountPass,
-          password_confirmation: accountPass
-        },
-        uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
-        followAllRedirects: true,
-        followRedirect: true
-      });
-      console.log(response2);
-    } catch (error) {
-      if (error.statusCode && error.statusCode === 405) {
-        const $ = cheerio.load(error.error);
-        const actionUrl = $('#distilCaptchaForm').attr('action');
-        const dCFTicket = $('input[name="dCF_ticket"]').attr('value');
-        const remoteip = $('input[name="remoteip"]').attr('value');
-        const captchaResponse = await getCaptchaResponse({
-          cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
-          url: error.response.request.href,
-          id: tokenID,
-          agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
-          baseURL: sites[site],
-          site,
-          accountPass,
-          settings,
-          siteKey: '6LdC3UgUAAAAAJIcyA3Ym4j_nCP-ainSgf1NoFku'
-        });
-        console.log(actionUrl);
-        console.log(dCFTicket);
-        console.log(captchaResponse);
-        try {
-          const captchaSubmitResponse = await request({
-            method: 'POST',
-            jar: this.cookieJars[tokenID],
-            resolveWithFullResponse: true,
-            headers: {
-              accept: '*/*',
-              'accept-language': 'en-US,en;q=0.9',
-              'content-type': 'application/x-www-form-urlencoded',
-              'sec-fetch-dest': 'empty',
-              'sec-fetch-site': 'same-origin',
-              'x-distil-ajax': 'zruvztacuyfd'
-            },
-            form: {
-              dCF_ticket: dCFTicket,
-              remoteip,
-              'g-recaptcha-response': captchaResponse.captchaToken,
-              isAjax: 1
-            },
-            uri: `https://www.endclothing.com${actionUrl}`,
-            followAllRedirects: true,
-            followRedirect: true
-          });
-          console.log(captchaSubmitResponse);
-          const finalAccountResponse = await request({
-            method: 'POST',
-            jar: this.cookieJars[tokenID],
-            headers: {
-              accept:
-                'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
-              'accept-language': 'en-US,en;q=0.9',
-              'cache-control': 'max-age=0',
-              'content-type':
-                'multipart/form-data; boundary=----WebKitFormBoundary7WjBaScA8Gd9EBPx',
-              'sec-fetch-dest': 'document',
-              'sec-fetch-mode': 'navigate',
-              'sec-fetch-site': 'same-origin',
-              'sec-fetch-user': '?1',
-              'upgrade-insecure-requests': '1'
-            },
-            resolveWithFullResponse: true,
-            formData: {
-              form_key: '',
-              success_url: '',
-              error_url: '',
-              firstname: accountFirstName,
-              lastname: accountLastName,
-              email,
-              dob,
-              password: accountPass,
-              password_confirmation: accountPass
-            },
-            uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
-            followAllRedirects: true,
-            followRedirect: true
-          });
-          console.log(finalAccountResponse);
-        } catch (error2) {
-          console.log(error2);
-        }
+    const $ = cheerio.load(loginBody);
+    const antiToken = $('input[name="_AntiCsrfToken"]').attr('value');
+    const captchaResponse = await getCaptchaResponse({
+      cookiesObject: jar._jar.store.idx,
+      url: 'https://www.ymeuniverse.com/en/auth/view?op=register',
+      id: tokenID,
+      agent: useProxies ? new HttpsProxyAgent(proxy) : null,
+      baseURL: sites[site],
+      site,
+      accountPass,
+      settings,
+      siteKey: '6LetlZQUAAAAAGkLxjR5zvrHZHOSlSFp6t-mrv6J'
+    });
+    const registerBody = await rp({
+      method: 'POST',
+      headers: {
+        authority: 'www.ymeuniverse.com',
+        'cache-control': 'max-age=0',
+        origin: 'https://www.ymeuniverse.com',
+        'upgrade-insecure-requests': '1',
+        'content-type': 'application/x-www-form-urlencoded',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'sec-fetch-dest': 'document',
+        accept:
+          'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+        'sec-fetch-site': 'same-origin',
+        'sec-fetch-mode': 'navigate',
+        'sec-fetch-user': '?1',
+        referer: 'https://www.ymeuniverse.com/en/auth/view?op=register',
+        'accept-language': 'en-US,en;q=0.9'
+      },
+      jar,
+      uri: 'https://www.ymeuniverse.com/en/auth/submit',
+      form: {
+        _AntiCsrfToken: antiToken,
+        firstName: accountFirstName,
+        email,
+        password: accountPass,
+        'g-recaptcha-response': captchaResponse.captchaToken
       }
+    });
+    const parsedRegisterBody = JSON.parse(registerBody);
+    if (parsedRegisterBody.Response.Success) {
+      addCreatedAccount({
+        email,
+        site,
+        pass: accountPass,
+        status: 'created'
+      });
+    } else {
+      return new Error(
+        'There was an error creating your account. this could be due to a banned catchall'
+      );
     }
+  };
+
+  getCookiesAfterCloudflarePage = async link => {
+    const tokenID = uuidv4();
+    const win = await createNewWindow(tokenID);
+    return new Promise((resolve, reject) => {
+      try {
+        win.loadURL(link);
+        win.webContents.on('dom-ready', async () => {
+          const html = await win.webContents.executeJavaScript(
+            'document.body.innerHTML',
+            false
+          );
+          if (
+            !html.includes('BOT or NOT?!') &&
+            !html.includes('Man or machine?')
+          ) {
+            const cookies = await win.webContents.session.cookies.get({});
+            win.close();
+            resolve(cookies);
+          }
+        });
+      } catch (error) {
+        reject(error);
+      }
+    });
   };
 
   createHollyWoodAccount = async gmailEmail => {
@@ -1157,7 +1095,7 @@ class AccountCreator extends Component {
     const { addCreatedAccount, settings } = this.props;
     const email =
       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-    const accountPass = randomPass ? randomize('a', 10) : pass;
+    const accountPass = randomPass ? randomize('*', 10) : pass;
     const accountFirstName = randomName ? random.first() : firstName;
     const tokenID = uuidv4();
     this.cookieJars[tokenID] = request.jar();
@@ -1183,7 +1121,7 @@ class AccountCreator extends Component {
       cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
       url: 'https://www.hollywood.se/auth/view',
       id: tokenID,
-      agent: useProxies ? new HttpsProxyAgent(this.getRandomProxy()) : null,
+      agent: useProxies ? new HttpsProxyAgent(proxy) : null,
       baseURL: sites[site],
       site,
       accountPass,
@@ -1254,7 +1192,7 @@ class AccountCreator extends Component {
   //   return new Promise(async (resolve, reject) => {
   //     const email =
   //       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-  //     const accountPass = randomPass ? randomize('a', 10) : pass;
+  //     const accountPass = randomPass ? randomize('*', 10) : pass;
   //     const accountFirstName = randomName ? random.first() : firstName;
   //     const accountLastName = randomName ? random.last() : lastName;
   //     const tokenID = uuidv4();
@@ -1290,7 +1228,7 @@ class AccountCreator extends Component {
   //   return new Promise(async (resolve, reject) => {
   //     const email =
   //       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
-  //     const accountPass = randomPass ? randomize('a', 10) : pass;
+  //     const accountPass = randomPass ? randomize('*', 10) : pass;
   //     const accountFirstName = randomName ? random.first() : firstName;
   //     const accountLastName = randomName ? random.last() : lastName;
   //     const tokenID = uuidv4();

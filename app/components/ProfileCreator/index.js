@@ -231,11 +231,12 @@ class ProfileCreator extends Component {
   };
 
   addCards = () => {
-    const { addCards } = this.props;
+    const { addCards, cards } = this.props;
     const { cardsInput } = this.state;
     addCards(cardsInput);
     this.setState({
-      cardsInput: ''
+      cardsInput: '',
+      profileQty: cards.length + cardsInput.split(/\n/).length
     });
   };
 

@@ -24,6 +24,11 @@ import voostore from '../../images/voostore.png';
 import empireShop from '../../images/empireShop.png';
 import end from '../../images/end.jpg';
 import hollywood from '../../images/hollywood.png';
+import rooted from '../../images/rooted.png';
+import eighteenmontrose from '../../images/18montrose.jpg';
+import afewstore from '../../images/afewstore.jpg';
+import crusoeandsons from '../../images/crusoeandsons.png';
+import yme from '../../images/yme.png';
 // import footpatrol from '../../images/footpatrol.png';
 // import footshop from '../../images/footshop.png';
 // import woodwood from '../../images/woodwood.jpg';
@@ -48,6 +53,11 @@ import END from './Raffle/END';
 import VooStore from './Raffle/VooStore';
 import EmpireShop from './Raffle/EmpireShop';
 import HollyWood from './Raffle/HollyWood';
+import Rooted from './Raffle/Rooted';
+import EighteenMontrose from './Raffle/18Montrose';
+import AFewStore from './Raffle/AFewStore';
+import CrusoeAndSons from './Raffle/CrusoeAndSons';
+import YME from './Raffle/YME';
 // import Footpatrol from './Raffle/Footpatrol';
 // import FootShop from './Raffle/FootShop';
 // import SupplyStore from './Raffle/SupplyStore';
@@ -80,7 +90,12 @@ const sites = [
   { name: 'END', img: end },
   { name: 'VooStore', img: voostore },
   { name: 'EmpireShop', img: empireShop },
-  { name: 'HollyWood', img: hollywood }
+  { name: 'HollyWood', img: hollywood },
+  { name: 'Rooted', img: rooted },
+  { name: '18Montrose', img: eighteenmontrose, value: 'EighteenMontrose' },
+  { name: 'AFewStore', img: afewstore },
+  { name: 'CrusoeAndSons', img: crusoeandsons },
+  { name: 'YME', img: yme }
   // { name: 'BSTN', img: bstn }
   // { name: 'Kickz', img: kickz }
   // { name: 'WoodWood', img: woodwood }
@@ -105,7 +120,12 @@ const Classes = {
   EmpireShop,
   DSMLA,
   END,
-  HollyWood
+  HollyWood,
+  Rooted,
+  EighteenMontrose,
+  AFewStore,
+  CrusoeAndSons,
+  YME
 };
 
 export default class RaffleBot extends Component {
@@ -314,11 +334,14 @@ export default class RaffleBot extends Component {
           }
           // eslint-disable-next-line no-param-reassign
           profile.instagram =
+            // eslint-disable-next-line no-nested-ternary
             instagramAccounts.length > 0 &&
             instagramAccounts[index] !== undefined
               ? // eslint-disable-next-line no-param-reassign
                 (profile.instagram = instagramAccounts[index])
-              : '';
+              : profile.instagram === undefined
+              ? ''
+              : profile.instagram;
           entry = new Classes[site](
             link,
             profile,
@@ -596,7 +619,11 @@ export default class RaffleBot extends Component {
                           xs="2"
                           className="my-2 text-center"
                           onClick={() => {
-                            this.handleRaffleSiteChange(raffleSite.name);
+                            this.handleRaffleSiteChange(
+                              raffleSite.value !== undefined
+                                ? raffleSite.value
+                                : raffleSite.name
+                            );
                           }}
                         >
                           <img
@@ -604,7 +631,10 @@ export default class RaffleBot extends Component {
                             name="raffleSite"
                             value={raffleSite.name}
                             className={`w-100 ${
-                              site === raffleSite.name ? 'highlightedImage' : ''
+                              site === raffleSite.name ||
+                              site === raffleSite.value
+                                ? 'highlightedImage'
+                                : ''
                             }`}
                             src={raffleSite.img}
                           />

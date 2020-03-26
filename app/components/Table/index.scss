@@ -19,7 +19,17 @@
 }
 
 .td:not(:first-child),
-.th:not(:first-child),
+.th:not(:first-child) {
+  width: 100% !important;
+  word-break: break-word;
+  overflow: hidden;
+}
+
+.td:first-child,
+.th:first-child {
+  word-break: normal !important;
+}
+
 .tr {
   width: 100% !important;
   word-break: break-word;

@@ -60,6 +60,7 @@ export const get2CaptchaResponse = async captchaJob => {
     }
     throw new Error('No Captcha Response After 100 seconds');
   } else {
+    console.log(response);
     throw new Error('Problem Creating 2CaptchaResponse Job');
   }
 };

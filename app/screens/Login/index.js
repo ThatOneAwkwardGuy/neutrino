@@ -22,7 +22,7 @@ import Header from '../../components/Header';
 import neutrinoTextLogo from '../../images/textLogo.svg';
 import blazeUnlimitedLogo from '../../images/blazeUnlimited.png';
 import gloryNotifyLogo from '../../images/gloryNotify.png';
-import soleNotifyLogo from '../../images/soleNotify.png';
+import soleNotifyLogo from '../../images/solesociety.jpg';
 import globalHeatLogo from '../../images/globalHeat.png';
 import ssxLogo from '../../images/ssx.png';
 import juicedSnkrsLogo from '../../images/juicedsnkrs.png';
@@ -405,7 +405,7 @@ class Login extends Component {
                   <option value="SSX">SneakerSquadX</option>
                   <option value="blazeUnlimited">BlazeUnlimited</option>
                   <option value="gloryNotify">GloryNotify</option>
-                  <option value="soleNotify">SoleNotify</option>
+                  <option value="soleNotify">SoleSociety</option>
                   <option value="globalHeat">GlobalHeat</option>
                   <option value="juicedSnkrs">JuicedSnkrs</option>
                 </Input>
