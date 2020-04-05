@@ -264,10 +264,11 @@ class Login extends Component {
           const urlParams = new URLSearchParams(windowLocationSearch);
           const code = urlParams.get('code');
           resolve(code);
+          win.close();
         } else {
           reject();
+          win.close();
         }
-        win.close();
       });
     });
   };

@@ -33,7 +33,7 @@ export default class END {
     this.rp = rp.defaults({
       headers: {
         'User-Agent':
-          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36'
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'
       },
       proxy,
       jar: this.cookieJar
@@ -93,7 +93,16 @@ export default class END {
       uri: 'https://launches-api.endclothing.com/api/account',
       json: true,
       headers: {
-        Authorization: `Bearer ${authToken}`
+        Authorization: `Bearer ${authToken}`,
+        authority: 'launches-api.endclothing.com',
+        accept: 'application/json',
+        'access-control-allow-credentials': 'true',
+        'sec-fetch-dest': 'empty',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'content-type': 'application/json',
+        origin: 'https://launches.endclothing.com',
+        'accept-language': 'en-US,en;q=0.9'
       }
     });
 
@@ -103,7 +112,16 @@ export default class END {
       uri: 'https://launches-api.endclothing.com/api/addresses',
       json: true,
       headers: {
-        Authorization: `Bearer ${authToken}`
+        Authorization: `Bearer ${authToken}`,
+        authority: 'launches-api.endclothing.com',
+        accept: 'application/json',
+        'access-control-allow-credentials': 'true',
+        'sec-fetch-dest': 'empty',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'content-type': 'application/json',
+        origin: 'https://launches.endclothing.com',
+        'accept-language': 'en-US,en;q=0.9'
       },
       body: {
         city: this.profile.deliveryCity,
@@ -127,7 +145,16 @@ export default class END {
       uri: 'https://launches-api.endclothing.com/gateway/token',
       body: {},
       headers: {
-        Authorization: `Bearer ${authToken}`
+        Authorization: `Bearer ${authToken}`,
+        authority: 'launches-api.endclothing.com',
+        accept: 'application/json',
+        'access-control-allow-credentials': 'true',
+        'sec-fetch-dest': 'empty',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'content-type': 'application/json',
+        origin: 'https://launches.endclothing.com',
+        'accept-language': 'en-US,en;q=0.9'
       },
       json: true
     });
@@ -153,7 +180,16 @@ export default class END {
           method: 'POST',
           uri: 'https://launches-api.endclothing.com/api/payment-methods',
           headers: {
-            Authorization: `Bearer ${authToken}`
+            Authorization: `Bearer ${authToken}`,
+            authority: 'launches-api.endclothing.com',
+            accept: 'application/json',
+            'access-control-allow-credentials': 'true',
+            'sec-fetch-dest': 'empty',
+            'user-agent':
+              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+            'content-type': 'application/json',
+            origin: 'https://launches.endclothing.com',
+            'accept-language': 'en-US,en;q=0.9'
           },
           json: true,
           body: {
@@ -188,7 +224,16 @@ export default class END {
       uri: 'https://launches-api.endclothing.com/api/payment-methods',
       json: true,
       headers: {
-        Authorization: `Bearer ${authToken}`
+        Authorization: `Bearer ${authToken}`,
+        authority: 'launches-api.endclothing.com',
+        accept: 'application/json',
+        'access-control-allow-credentials': 'true',
+        'sec-fetch-dest': 'empty',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'content-type': 'application/json',
+        origin: 'https://launches.endclothing.com',
+        'accept-language': 'en-US,en;q=0.9'
       }
     });
 
@@ -232,7 +277,16 @@ export default class END {
       method: 'POST',
       uri: 'https://launches-api.endclothing.com/api/subscriptions',
       headers: {
-        Authorization: `Bearer ${authToken}`
+        Authorization: `Bearer ${authToken}`,
+        authority: 'launches-api.endclothing.com',
+        accept: 'application/json',
+        'access-control-allow-credentials': 'true',
+        'sec-fetch-dest': 'empty',
+        'user-agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+        'content-type': 'application/json',
+        origin: 'https://launches.endclothing.com',
+        'accept-language': 'en-US,en;q=0.9'
       },
       json: true,
       body: {
@@ -258,17 +312,20 @@ export default class END {
     ValidateSchema(ENDSchema, { ...this.profile });
     const cookies = await getCookiesFromWindow(this.url, this.proxy);
     cookies.forEach(cookie => {
-      if (cookie.domain === '.endclothing.com') {
-        const toughCookie = new tough.Cookie({
-          key: cookie.name,
-          value: cookie.value,
-          domain: cookie.domain,
-          httpOnly: cookie.httpOnly,
-          hostOnly: cookie.hostOnly,
-          path: cookie.path
-        });
+      // if (cookie.domain === '.endclothing.com') {
+      const toughCookie = new tough.Cookie({
+        key: cookie.name,
+        value: cookie.value,
+        domain: cookie.domain,
+        httpOnly: cookie.httpOnly,
+        hostOnly: cookie.hostOnly,
+        path: cookie.path
+      });
+      try {
         this.cookieJar.setCookie(toughCookie.toString(), this.url);
-      }
+      } catch (error) {
+        console.error(error);
+      } // }
     });
     this.changeStatus('Logging Into Account');
     const authToken = await this.login();

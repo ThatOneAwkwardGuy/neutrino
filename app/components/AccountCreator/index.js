@@ -14,6 +14,7 @@ import { withToastManager } from 'react-toast-notifications';
 import { Tooltip } from 'react-tippy';
 import PropTypes from 'prop-types';
 import { getCookiesFromWindow } from '../RaffleBot/functions';
+import { jigAddresses } from '../AddressJigger/functions';
 
 import Table from '../Table/index';
 
@@ -89,59 +90,92 @@ class AccountCreator extends Component {
 
   exportAccountsAsProfiles = async () => {
     const { accounts, profile, cards } = this.props;
-    const selectedCard =
-      cards.length === 0
-        ? {
-            paymentCardholdersName: '',
-            cardNumber: '',
-            expMonth: '',
-            expYear: '',
-            cvv: ''
-          }
-        : cards[Math.floor(Math.random() * cards.length)];
     const accountFirstName = profile.randomNameBool
       ? random.first()
       : profile.deliveryFirstName;
     const accountLastName = profile.randomNameBool
       ? random.last()
       : profile.deliveryLastName;
-    const profiles = accounts.accounts.map(account => ({
-      profileID: `${account.site}-${account.email}`,
-      deliveryCountry: profile.deliveryCountry,
-      deliveryAddress: profile.deliveryAddress,
-      deliveryCity: profile.deliveryCity,
-      deliveryFirstName: accountFirstName,
-      deliveryLastName: accountLastName,
-      deliveryRegion: profile.deliveryRegion,
-      deliveryZip: profile.deliveryZip,
-      deliveryApt: profile.deliveryApt,
-      billingZip: profile.billingZip,
-      billingCountry: profile.billingCountry,
-      billingAddress: profile.billingAddress,
-      billingCity: profile.billingCity,
-      billingFirstName: profile.billingFirstName,
-      billingLastName: profile.billingLastName,
-      billingRegion: profile.billingRegion,
-      billingApt: profile.billingApt,
-      phone:
-        profile.randomPhoneNumberBool &&
-        profile.randomPhoneNumberTemplate !== ''
-          ? profile.randomPhoneNumberTemplate
-              .split('#')
-              .map(number => (number === '' ? getRandomInt(9) : number))
-              .join('')
-          : profile.phone,
-      card: selectedCard,
-      email: account.email,
-      password: account.pass,
-      sameDeliveryBillingBool: profile.sameDeliveryBillingBool,
-      oneCheckoutBool: profile.oneCheckoutBool,
-      randomNameBool: profile.randomNameBool,
-      randomPhoneNumberBool: profile.randomPhoneNumberBool,
-      useCatchallBool: profile.useCatchallBool,
-      jigAddressesBool: profile.jigAddressesBool,
-      fourCharPrefixBool: profile.fourCharPrefixBool
-    }));
+    const jiggedAddresses = profile.jigAddressesBool
+      ? jigAddresses(
+          profile.deliveryAddress,
+          profile.deliveryCity,
+          profile.deliveryApt,
+          profile.deliveryRegion,
+          profile.deliveryCountry,
+          profile.deliveryZip,
+          profile.fourCharPrefixBool,
+          accounts.accounts.length
+        )
+      : [];
+    const profiles = accounts.accounts.map((account, index) => {
+      const selectedCard =
+        cards.length === 0
+          ? {
+              paymentCardholdersName: '',
+              cardNumber: '',
+              expMonth: '',
+              expYear: '',
+              cvv: ''
+            }
+          : cards[index % cards.length];
+      const accountProfile = {
+        profileID: `${account.site}-${account.email}`,
+        deliveryCountry: profile.deliveryCountry,
+        deliveryAddress: profile.deliveryAddress,
+        deliveryCity: profile.deliveryCity,
+        deliveryFirstName: accountFirstName,
+        deliveryLastName: accountLastName,
+        deliveryRegion: profile.deliveryRegion,
+        deliveryZip: profile.deliveryZip,
+        deliveryApt: profile.deliveryApt,
+        billingZip: profile.billingZip,
+        billingCountry: profile.billingCountry,
+        billingAddress: profile.billingAddress,
+        billingCity: profile.billingCity,
+        billingFirstName: profile.billingFirstName,
+        billingLastName: profile.billingLastName,
+        billingRegion: profile.billingRegion,
+        billingApt: profile.billingApt,
+        phone:
+          profile.randomPhoneNumberBool &&
+          profile.randomPhoneNumberTemplate !== ''
+            ? profile.randomPhoneNumberTemplate
+                .split('#')
+                .map(number => (number === '' ? getRandomInt(9) : number))
+                .join('')
+            : profile.phone,
+        card: selectedCard,
+        email: account.email,
+        password: account.pass,
+        sameDeliveryBillingBool: profile.sameDeliveryBillingBool,
+        oneCheckoutBool: profile.oneCheckoutBool,
+        randomNameBool: profile.randomNameBool,
+        randomPhoneNumberBool: profile.randomPhoneNumberBool,
+        useCatchallBool: profile.useCatchallBool,
+        jigAddressesBool: profile.jigAddressesBool,
+        fourCharPrefixBool: profile.fourCharPrefixBool
+      };
+      if (profile.jigAddressesBool) {
+        const jiggedAddress = jiggedAddresses[index % jiggedAddresses.length];
+        console.log(jiggedAddress);
+        const [
+          splitDeliveryAddress,
+          splitDeliveryCity,
+          splitDeliveryApt,
+          splitDeliveryRegion,
+          splitDeliveryCountry,
+          splitDeliveryZip
+        ] = jiggedAddress.split('\n');
+        accountProfile.deliveryCountry = splitDeliveryCountry;
+        accountProfile.deliveryAddress = splitDeliveryAddress;
+        accountProfile.deliveryCity = splitDeliveryCity;
+        accountProfile.deliveryRegion = splitDeliveryRegion;
+        accountProfile.deliveryZip = splitDeliveryZip;
+        accountProfile.deliveryApt = splitDeliveryApt;
+      }
+      return accountProfile;
+    });
     const fileNames = await dialog.showSaveDialog({
       title: 'name',
       defaultPath: `~/Account-Generator-Neutrino-Profiles.json`
@@ -204,39 +238,50 @@ class AccountCreator extends Component {
           }
           case 'nike - US':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createNikeAccount(gmailEmails[index]).catch(e => e)
+              this.createNikeAccount(gmailEmails[index], index).catch(e => e)
             );
           case 'gmail - US':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createGmailAccount(gmailEmails[index]).catch(e => e)
+              this.createGmailAccount(gmailEmails[index], index).catch(e => e)
             );
           case 'hollywood':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createHollyWoodAccount(gmailEmails[index]).catch(e => e)
+              this.createHollyWoodAccount(gmailEmails[index], index).catch(
+                e => e
+              )
             );
           case 'nakedcph':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createNakedCph2Account(gmailEmails[index]).catch(e => e)
+              this.createNakedCphAccount(gmailEmails[index], index).catch(
+                e => e
+              )
             );
           case 'stress95':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createStress95Account(gmailEmails[index]).catch(e => e)
+              this.createStress95Account(gmailEmails[index], index).catch(
+                e => e
+              )
             );
           case 'oneblockdown':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createOneBlockDownAccount(gmailEmails[index]).catch(e => e)
+              this.createOneBlockDownAccount(gmailEmails[index], index).catch(
+                e => e
+              )
             );
           case 'end':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createEndAccount(gmailEmails[index]).catch(e => e)
+              this.createEndAccount(gmailEmails[index], index).catch(e => {
+                console.log(e);
+                return e;
+              })
             );
           case 'yme':
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createYMEAccount(gmailEmails[index]).catch(e => e)
+              this.createYMEAccount(gmailEmails[index], index).catch(e => e)
             );
           default:
             return this.sleep(parseInt(delay, 10)).then(() =>
-              this.createShopifyAccount(gmailEmails[index]).catch(e => e)
+              this.createShopifyAccount(gmailEmails[index], index).catch(e => e)
             );
         }
       }
@@ -716,7 +761,7 @@ class AccountCreator extends Component {
       site,
       accountPass,
       settings,
-      siteKey: '6LetlZQUAAAAAGkLxjR5zvrHZHOSlSFp6t-mrv6J'
+      siteKey: '6LeNqBUUAAAAAFbhC-CS22rwzkZjr_g4vMmqD_qo'
     });
     console.log(captchaResponse);
     const registerBody = await rp({
@@ -1177,7 +1222,7 @@ class AccountCreator extends Component {
     }
   };
 
-  // createNikeAccount = async gmailEmail => {
+  // createNikeAccount = async (gmailEmail, index) => {
   //   const {
   //     randomPass,
   //     randomName,
@@ -1213,7 +1258,7 @@ class AccountCreator extends Component {
   //   });
   // };
 
-  // createGmailAccount = async gmailEmail => {
+  // createGmailAccount = async (gmailEmail, index) => {
   //   const {
   //     randomPass,
   //     randomName,

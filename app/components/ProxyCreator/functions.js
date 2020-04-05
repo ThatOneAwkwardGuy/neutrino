@@ -93,8 +93,9 @@ export const deleteAllGoogleCloudInstances = async providerAccount => {
   });
   const [VMs] = await compute.getVMs();
   VMs.forEach(VM => {
-    VM.metadata.tags.items.includes('neutrinoproxy');
-    VM.delete();
+    if (VM.metadata.tags.items.includes('neutrinoproxy')) {
+      VM.delete();
+    }
   });
 };
 

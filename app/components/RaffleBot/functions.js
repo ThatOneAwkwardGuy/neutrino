@@ -37,6 +37,8 @@ export const loadRaffleInfo = async (site, raffleLink) => {
         return loadVooStoreRaffleInfo(raffleLink);
       case 'YME':
         return loadYMERaffleInfo(raffleLink);
+      case 'TresBien':
+        return loadTresBienInfo(raffleLink);
       case 'Bodega':
         return loadBodegaRaffleInfo(raffleLink);
       case 'OneBlockDown':
@@ -91,7 +93,10 @@ export const getCookiesFromWindow = async (link, proxy, userAgent) => {
           'document.body.innerHTML',
           false
         );
-        if (!html.includes('BOT or NOT?!')) {
+        if (
+          !html.includes('BOT or NOT?!') &&
+          !html.includes('Pardon Our Interruption')
+        ) {
           const cookies = await win.webContents.session.cookies.get({});
           win.close();
           resolve(cookies);
@@ -759,8 +764,23 @@ const loadEndRaffleInfo = async link => {
   const apilink = `https://launches-api.endclothing.com/api/products/${
     splitLink[splitLink.length - 1]
   }`;
+  console.log(apilink);
   const apiResponse = await rp({
     method: 'GET',
+    headers: {
+      Connection: 'keep-alive',
+      'Cache-Control': 'max-age=0',
+      'Upgrade-Insecure-Requests': '1',
+      'User-Agent':
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
+      'Sec-Fetch-Dest': 'document',
+      Accept:
+        'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
+      'Sec-Fetch-Site': 'none',
+      'Sec-Fetch-Mode': 'navigate',
+      'Sec-Fetch-User': '?1',
+      'Accept-Language': 'en-US,en;q=0.9'
+    },
     json: true,
     uri: apilink
   });
@@ -774,6 +794,25 @@ const loadEndRaffleInfo = async link => {
     sizes,
     size: sizes[0].id,
     raffleDetails: { product: apiResponse }
+  };
+};
+
+const loadTresBienInfo = async link => {
+  const page = await rp.get(link);
+  const $ = cheerio.load(page);
+  const sku = $('#raffle-form input[name="sku"]').attr('value');
+  const sizes = $('#Size_raffle option:not([value=""])')
+    .map((index, size) => ({
+      id: size.attribs.value,
+      name: $(size).text()
+    }))
+    .toArray();
+  return {
+    styleInput: false,
+    sizeInput: true,
+    sizes,
+    size: sizes[0].id,
+    raffleDetails: { sku }
   };
 };
 

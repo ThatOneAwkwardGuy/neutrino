@@ -145,15 +145,16 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
   if (
     !window.location.href.includes('youtube.') &&
     !window.location.href.includes('google.') &&
+    !window.location.href.includes('naked.') &&
     !window.location.href.includes('bstn.')
   ) {
-    // document.addEventListener('DOMContentLoaded', () => {
-    //   document.querySelectorAll('body > :not(.g-recaptcha)').forEach(box => {
-    //     // eslint-disable-next-line no-param-reassign
-    //     box.style.display = 'none';
-    //   });
-    //   document.body.appendChild(document.querySelector('div.g-recaptcha'));
-    // });
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('body > :not(.g-recaptcha)').forEach(box => {
+        // eslint-disable-next-line no-param-reassign
+        box.style.display = 'none';
+      });
+      document.body.appendChild(document.querySelector('div.g-recaptcha'));
+    });
   }
   captchaChecker = setInterval(checkCaptcha, 300);
 }
