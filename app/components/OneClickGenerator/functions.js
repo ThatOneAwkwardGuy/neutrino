@@ -280,7 +280,7 @@ export const testAccountPromise = async (
     win.webContents.session.webRequest.onBeforeSendHeaders(
       (details, callback) => {
         const requestHeaders = { ...details.requestHeaders };
-        requestHeaders['User-Agent'] = details.url.includes('accounts.google')
+        requestHeaders['User-Agent'] = details.url.includes('google')
           ? 'Chrome'
           : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
         callback({ requestHeaders });

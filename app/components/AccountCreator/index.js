@@ -90,12 +90,6 @@ class AccountCreator extends Component {
 
   exportAccountsAsProfiles = async () => {
     const { accounts, profile, cards } = this.props;
-    const accountFirstName = profile.randomNameBool
-      ? random.first()
-      : profile.deliveryFirstName;
-    const accountLastName = profile.randomNameBool
-      ? random.last()
-      : profile.deliveryLastName;
     const jiggedAddresses = profile.jigAddressesBool
       ? jigAddresses(
           profile.deliveryAddress,
@@ -109,6 +103,12 @@ class AccountCreator extends Component {
         )
       : [];
     const profiles = accounts.accounts.map((account, index) => {
+      const accountFirstName = profile.randomNameBool
+        ? random.first()
+        : profile.deliveryFirstName;
+      const accountLastName = profile.randomNameBool
+        ? random.last()
+        : profile.deliveryLastName;
       const selectedCard =
         cards.length === 0
           ? {
@@ -867,6 +867,11 @@ class AccountCreator extends Component {
     });
   };
 
+  getEndClothingCountryCode = response => {
+    const url = response.request.href;
+    return url.split('/')[3];
+  };
+
   createEndAccount = async gmailEmail => {
     const {
       randomPass,
@@ -897,16 +902,21 @@ class AccountCreator extends Component {
       loginBody = await request({
         method: 'GET',
         jar: this.cookieJars[tokenID],
-        uri: 'https://www.endclothing.com/gb/customer/account/login/'
+        resolveWithFullResponse: true,
+        uri: `https://www.endclothing.com/gb/customer/account/login/`
       });
     } catch (error) {
-      captchaBody = error.response.body;
+      captchaBody = error.response;
     }
-    if (captchaBody !== '') {
+    const countryCode =
+      loginBody.body !== undefined
+        ? this.getEndClothingCountryCode(loginBody)
+        : this.getEndClothingCountryCode(captchaBody);
+    if (captchaBody !== '' && captchaBody.body !== '') {
       const captchaID = uuidv4();
       const captchaResponse = await getCaptchaResponse({
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
-        url: 'https://www.endclothing.com/gb/customer/account/login/',
+        url: `https://www.endclothing.com/${countryCode}/customer/account/login/`,
         id: captchaID,
         agent: useProxies ? new HttpsProxyAgent(proxy) : null,
         baseURL: sites[site],
@@ -915,7 +925,8 @@ class AccountCreator extends Component {
         settings,
         siteKey: '6LdC3UgUAAAAAJIcyA3Ym4j_nCP-ainSgf1NoFku'
       });
-      const $ = cheerio.load(captchaBody);
+      console.log(captchaBody);
+      const $ = cheerio.load(captchaBody.body);
       const remoteip = $('input[name="remoteip"]').attr('value');
       const dCFTicket = $('input[name="dCF_ticket"]').attr('value');
       const action = $('#distilCaptchaForm').attr('action');
@@ -933,7 +944,7 @@ class AccountCreator extends Component {
       loginBody = await request({
         method: 'GET',
         jar: this.cookieJars[tokenID],
-        uri: 'https://www.endclothing.com/gb/customer/account/login/'
+        uri: `https://www.endclothing.com/${countryCode}/customer/account/login/`
       });
     }
     const $ = cheerio.load(loginBody);
@@ -953,7 +964,7 @@ class AccountCreator extends Component {
         password: accountPass,
         password_confirmation: accountPass
       },
-      uri: 'https://www.endclothing.com/gb/customer/account/createpost/',
+      uri: `https://www.endclothing.com/${countryCode}/customer/account/createpost/`,
       maxRedirects: 1,
       followAllRedirects: true,
       followRedirect: true

@@ -124,7 +124,7 @@ export default class Homepage extends Component {
             <Row className="h-100">
               <Col>
                 <p className="text-center">
-                  {settings.theme === 'Neutrino' ? (
+                  {settings.theme !== 'SSX' ? (
                     <img
                       alt="Neutrino Non-Text Logo"
                       src={icon}

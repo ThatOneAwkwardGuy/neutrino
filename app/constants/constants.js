@@ -145,7 +145,7 @@ export const sites = {
   exclucitylife: 'https://shop.exclucitylife.com',
   extrabutterny: 'https://extrabutterny.com',
   fearofgod: 'https://fearofgod.com',
-  featuresneakerboutique: 'https://www.featuresneakerboutique.com',
+  featuresneakerboutique: 'https://feature.com',
   ficegallery: 'https://www.ficegallery.com',
   flatspot: 'https://www.flatspot.com',
   freshragsfl: 'https://freshragsfl.com',

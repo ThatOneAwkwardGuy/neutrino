@@ -387,7 +387,16 @@ export default class RaffleBot extends Component {
       parseInt(settings.parallelRaffleEntries, 10)
     );
     // eslint-disable-next-line no-restricted-syntax
-    for (const chunkedEntryGroup of chunkedEntries) {
+    for (const [index, chunkedEntryGroup] of chunkedEntries.entries()) {
+      if (index !== 0) {
+        chunkedEntryGroup.forEach(entry => {
+          entry.changeStatus(
+            `Waiting ${settings.raffleEntryDelay / 1000}s Before Raffle Entry`
+          );
+        });
+        // eslint-disable-next-line no-await-in-loop
+        await sleep(parseInt(settings.raffleEntryDelay, 10));
+      }
       // eslint-disable-next-line no-await-in-loop
       await Promise.all(
         chunkedEntryGroup.map(entry => {
@@ -396,8 +405,6 @@ export default class RaffleBot extends Component {
           return entry.start();
         })
       );
-      // eslint-disable-next-line no-await-in-loop
-      await sleep(parseInt(settings.raffleEntryDelay, 10));
     }
   };
 

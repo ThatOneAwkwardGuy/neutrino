@@ -279,14 +279,9 @@ export default class END {
       headers: {
         Authorization: `Bearer ${authToken}`,
         authority: 'launches-api.endclothing.com',
-        accept: 'application/json',
-        'access-control-allow-credentials': 'true',
-        'sec-fetch-dest': 'empty',
         'user-agent':
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
-        'content-type': 'application/json',
-        origin: 'https://launches.endclothing.com',
-        'accept-language': 'en-US,en;q=0.9'
+        origin: 'https://launches.endclothing.com'
       },
       json: true,
       body: {

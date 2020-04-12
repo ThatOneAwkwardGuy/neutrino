@@ -46,6 +46,10 @@ class Login extends Component {
     if (settings.theme === 'SSX') {
       changeTheme('SSX');
       this.setState({ authServer: 'SSX' });
+    } else if (settings.theme === 'SoleSociety') {
+      console.log('here');
+      changeTheme('SoleSociety');
+      this.setState({ authServer: 'soleNotify' });
     } else {
       changeTheme('Neutrino');
     }
@@ -62,6 +66,8 @@ class Login extends Component {
     }
     if (e.target.value === 'SSX') {
       setKeyInSetting('theme', 'SSX');
+    } else if (e.target.value === 'soleNotify') {
+      setKeyInSetting('theme', 'SoleSociety');
     } else {
       setKeyInSetting('theme', 'Neutrino');
     }
@@ -267,7 +273,6 @@ class Login extends Component {
           win.close();
         } else {
           reject();
-          win.close();
         }
       });
     });
