@@ -182,7 +182,14 @@ class ProfileTaskEditorConverter extends Component {
     const { profiles, fromBot, toBot } = this.state;
     const { toastManager } = this.props;
     try {
-      const baseProfiles = profiles.map(profile =>
+      let filteredProfiles = [...profiles];
+      if (fromBot === 'NSB') {
+        filteredProfiles = filteredProfiles.filter(profile => {
+          const keys = Object.keys(profile);
+          return keys.includes('shipping') && keys.includes('billing');
+        });
+      }
+      const baseProfiles = filteredProfiles.map(profile =>
         convertToBase(fromBot, profile)
       );
       const convertedProfiles = baseProfiles.map((profile, index) =>

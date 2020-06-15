@@ -4,7 +4,10 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Container, Row, Col, Label, Input, Button } from 'reactstrap';
 import PropTypes from 'prop-types';
 import Table from '../Table/index';
-import { testAccountPromise } from '../OneClickGenerator/functions';
+import {
+  testPuppeteerAccount,
+  testPuppeteerAccountV3
+} from '../OneClickGenerator/functions';
 
 export default class OneClickTester extends Component {
   constructor(props) {
@@ -28,6 +31,7 @@ export default class OneClickTester extends Component {
     const accounts = massAccountsArray
       .map(massAccount => {
         const splitMassAccount = massAccount.split(':');
+        console.log(splitMassAccount);
         if (splitMassAccount.length === 2) {
           const [email, pass] = splitMassAccount;
           return { email, pass, proxy: '', status: 'Not Started' };
@@ -72,12 +76,26 @@ export default class OneClickTester extends Component {
     }
   };
 
+  setAccountScore = (index, score) => {
+    const { accounts } = this.state;
+    const googleAccounts = [...accounts];
+    if (googleAccounts[index]) {
+      googleAccounts[index].oneClickV3Score = score;
+      this.setState({ accounts: googleAccounts });
+    }
+  };
+
   testAllAccounts = () => {
     const { accounts } = this.state;
     const { settings } = this.props;
     this.windows = accounts.map((account, index) =>
-      testAccountPromise(index, account, settings, this.setAccountStatus)
+      this.testAccount(index, account, settings)
     );
+  };
+
+  testAccount = (index, account, settings) => {
+    testPuppeteerAccount(index, account, settings, this.setAccountStatus);
+    testPuppeteerAccountV3(index, account, settings, this.setAccountScore);
   };
 
   stopAccount = async row => {
@@ -128,6 +146,10 @@ export default class OneClickTester extends Component {
         accessor: 'status'
       },
       {
+        Header: 'One Click V3 Score',
+        accessor: 'oneClickV3Score'
+      },
+      {
         Header: 'Actions',
         Cell: row => (
           <div>
@@ -136,14 +158,7 @@ export default class OneClickTester extends Component {
               icon="play"
               onClick={() => {
                 this.windows.push(
-                  Promise.resolve(
-                    testAccountPromise(
-                      row.row.index,
-                      row.row.original,
-                      settings,
-                      this.setAccountStatus
-                    )
-                  )
+                  this.testAccount(row.row.index, row.row.original, settings)
                 );
               }}
             />

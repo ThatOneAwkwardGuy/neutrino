@@ -82,9 +82,9 @@ export default class END {
         'sec-fetch-site': 'same-site',
         referrer: this.url
       },
-      uri: 'https://launches-api.endclothing.com/api/account/login',
+      uri: 'https://api2.endclothing.com/rest/V1/integration/customer/token',
       json: true,
-      body: { email: this.profile.email, password: this.profile.password }
+      body: { username: this.profile.email, password: this.profile.password }
     });
 
   getAccountInfo = async authToken =>
@@ -175,8 +175,8 @@ export default class END {
         if (err) {
           return new Error();
         }
-        console.log(address);
-        await this.rp({
+
+        return this.rp({
           method: 'POST',
           uri: 'https://launches-api.endclothing.com/api/payment-methods',
           headers: {
@@ -197,7 +197,7 @@ export default class END {
             website_id: 1,
             payment_method_nonce: nonce,
             device_data:
-              '{"device_session_id":"10ac1a2c94748e35f01403d6d14d6427","fraud_merchant_id":"600810"}',
+              '{"device_session_id":"fa44db94ff1d73c36643e36db3764ab1","fraud_merchant_id":"600810"}',
             billing_address: {
               id: address.id,
               firstName: address.firstname,
@@ -259,11 +259,10 @@ export default class END {
   getOrCreatePayment = async (account, address, authToken) => {
     this.changeStatus('Getting Payment Info');
     const paymentMethods = await this.getPaymentMethods(authToken);
-    console.log(paymentMethods);
     if (paymentMethods.length === 0) {
       this.changeStatus('Adding New Payment Method');
       try {
-        return await this.addPaymentMethod(account, address, authToken);
+        return this.addPaymentMethod(account, address, authToken);
       } catch (error) {
         throw new Error('Error adding new payment info to account.');
       }
@@ -281,7 +280,14 @@ export default class END {
         authority: 'launches-api.endclothing.com',
         'user-agent':
           'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36',
-        origin: 'https://launches.endclothing.com'
+        origin: 'https://launches.endclothing.com',
+        accept: 'application/json',
+        'accept-language': 'en-US,en;q=0.9',
+        'access-control-allow-credentials': 'true',
+        'content-type': 'application/json; charset=UTF-8',
+        'sec-fetch-dest': 'empty',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site'
       },
       json: true,
       body: {
@@ -290,7 +296,7 @@ export default class END {
         shipping_address_id: address.id,
         billing_address_id: address.id,
         payment_method_id: payment.entity_id,
-        shipping_method_id: 1,
+        shipping_method_id: 159,
         website_id: 1,
         postcode: address.postcode,
         street: address.street[0],

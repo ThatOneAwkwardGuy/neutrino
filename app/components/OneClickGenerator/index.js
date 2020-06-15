@@ -11,14 +11,12 @@ import {
 } from 'reactstrap';
 import PropTypes from 'prop-types';
 
-import { createActivityWindow, runAcitivitiesOnWindow } from './functions';
-import { setProxyForWindow } from '../../utils/utils';
+import {
+  createPuppeteerActivityWindow,
+  runPuppeteerActivitiesOnWindow
+} from './functions';
 
 import Table from '../Table';
-
-const { remote } = require('electron');
-const { BrowserWindow } = require('electron').remote;
-const uuidv4 = require('uuid/v4');
 
 export default class OneClickGenerator extends Component {
   constructor(props) {
@@ -95,7 +93,7 @@ export default class OneClickGenerator extends Component {
     deleteAllActivities();
   };
 
-  runActivity = async (
+  runActivityPuppeteer = async (
     index,
     activity,
     settings,
@@ -103,49 +101,14 @@ export default class OneClickGenerator extends Component {
     incrementActivity,
     showAcitivtyWindows
   ) => {
-    const tokenID = uuidv4();
-    this.windows[index] = new BrowserWindow({
-      width: 500,
-      height: 650,
-      show: true,
-      frame: true,
-      resizable: true,
-      focusable: true,
-      minimizable: true,
-      closable: true,
-      webPreferences: {
-        webviewTag: true,
-        session: remote.session.fromPartition(`activity-${tokenID}`)
-      }
-    });
-    this.windows[index].webContents.session.webRequest.onBeforeSendHeaders(
-      (details, callback) => {
-        const requestHeaders = { ...details.requestHeaders };
-        requestHeaders['User-Agent'] = details.url.includes('google')
-          ? 'Chrome'
-          : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36';
-        callback({ requestHeaders });
-      }
-    );
-    if (activity.proxy !== '') {
-      await setProxyForWindow(activity.proxy, this.windows[index]);
-    }
-    await createActivityWindow(
-      this.windows[index],
+    this.windows[index] = await createPuppeteerActivityWindow(
       index,
       activity,
       settings,
       updateActivity,
       showAcitivtyWindows
     );
-    if (
-      !showAcitivtyWindows &&
-      process.platform === 'win32' &&
-      !this.windows[index].isMinimized()
-    ) {
-      this.windows[index].minimize();
-    }
-    runAcitivitiesOnWindow(
+    runPuppeteerActivitiesOnWindow(
       this.windows[index],
       index,
       settings,
@@ -157,7 +120,7 @@ export default class OneClickGenerator extends Component {
 
   stopActivity = index => {
     const { updateActivity } = this.props;
-    if (this.windows[index] && !this.windows[index].isDestroyed()) {
+    if (this.windows[index] && this.windows[index].process() !== null) {
       this.windows[index].close();
     }
     updateActivity(index, { status: 'Not Started' });
@@ -172,7 +135,7 @@ export default class OneClickGenerator extends Component {
       showAcitivtyWindows
     } = this.props;
     activities.activities.forEach((activity, index) => {
-      this.runActivity(
+      this.runActivityPuppeteer(
         index,
         activity,
         settings,
@@ -205,7 +168,8 @@ export default class OneClickGenerator extends Component {
       settings,
       activities,
       updateActivity,
-      incrementActivity
+      incrementActivity,
+      showAcitivtyWindows
     } = this.props;
     const columns = [
       {
@@ -220,6 +184,21 @@ export default class OneClickGenerator extends Component {
       {
         Header: 'One Click',
         accessor: 'oneClickStatus'
+      },
+      {
+        Header: 'One Click V3 Score',
+        accessor: 'oneClickV3Score'
+      },
+      {
+        Header: 'Last Time Tested',
+        Cell: row => (
+          <div>
+            {row.row.original.lastTimeTested instanceof Date
+              ? row.row.original.lastTimeTested.toLocaleString()
+              : 'N/A'}
+          </div>
+        ),
+        width: 20
       },
       {
         Header: 'Email',
@@ -291,12 +270,13 @@ export default class OneClickGenerator extends Component {
             className="mx-3"
             icon="play"
             onClick={() => {
-              this.runActivity(
+              this.runActivityPuppeteer(
                 row.row.index,
                 row.row.original,
                 settings,
                 updateActivity,
-                incrementActivity
+                incrementActivity,
+                showAcitivtyWindows
               );
             }}
           />

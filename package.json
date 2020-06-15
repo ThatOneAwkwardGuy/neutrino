@@ -6,7 +6,7 @@
     "name": "ThatOneAwkwardGuy",
     "email": "support@neutrino.app"
   },
-  "version": "2.1.42",
+  "version": "2.2.8",
   "scripts": {
     "build": "concurrently \"yarn build-main\" \"yarn build-renderer\"",
     "build-dev": "concurrently \"yarn build-main\" \"yarn build-renderer-dev\"",
@@ -23,7 +23,7 @@
     "lint-styles": "stylelint --ignore-path .eslintignore '**/*.*(css|scss)' --syntax scss",
     "lint-styles-fix": "yarn --silent lint-styles --fix; exit 0",
     "package": "yarn build && electron-builder build --publish never",
-    "package-dev": "cross-env NODE_ENV=development yarn build-dev && electron-builder build --publish never",
+    "package-dev": "cross-env NODE_ENV=development DEBUG_PROD=true yarn build-dev && NODE_ENV=development DEBUG_PROD=true electron-builder build --publish never",
     "package-all": "yarn build && electron-builder build -mw",
     "package-ci": "yarn postinstall && yarn build && electron-builder -mw --publish always",
     "package-linux": "yarn build && electron-builder build --linux",
@@ -88,7 +88,10 @@
       "hardenedRuntime": true,
       "gatekeeperAssess": false,
       "entitlements": "./entitlements.mac.plist",
-      "entitlementsInherit": "./entitlements.mac.plist"
+      "entitlementsInherit": "./entitlements.mac.plist",
+      "extraResources": [
+        "chrome/chrome-mac/**/*"
+      ]
     },
     "win": {
       "icon": "./app/images/icn.png",
@@ -100,6 +103,9 @@
             "ia32"
           ]
         }
+      ],
+      "extraResources": [
+        "chrome/chrome-win/**/*"
       ]
     },
     "directories": {
@@ -171,8 +177,9 @@
     "css-loader": "^1.0.1",
     "detect-port": "^1.3.0",
     "electron": "7.1.13",
-    "electron-builder": "22.3.5",
+    "electron-builder": "22.6.0",
     "electron-devtools-installer": "^2.2.4",
+    "electron-notarize": "^0.1.1",
     "enzyme": "^3.7.0",
     "enzyme-adapter-react-16": "^1.7.0",
     "enzyme-to-json": "^3.3.4",
@@ -189,6 +196,7 @@
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-react": "^7.11.1",
     "eslint-plugin-testcafe": "^0.2.1",
+    "expose-loader": "^0.7.5",
     "fbjs-scripts": "^1.0.1",
     "file-loader": "^2.0.0",
     "flow-bin": "^0.77.0",
@@ -206,6 +214,7 @@
     "prettier-eslint": "^9.0.0",
     "react-test-renderer": "^16.6.3",
     "redux-logger": "^3.0.6",
+    "regenerator-runtime": "^0.13.3",
     "rimraf": "^2.6.2",
     "sass-loader": "^7.1.0",
     "sinon": "^7.1.1",
@@ -253,12 +262,10 @@
     "electron-as-browser": "^1.0.0",
     "electron-debug": "^2.0.0",
     "electron-log": "^3.0.6",
-    "electron-notarize": "^0.1.1",
     "electron-oauth-helper": "^5.0.1",
     "electron-store": "^4.0.0",
     "electron-tabs": "^0.9.5",
     "electron-updater": "^4.1.2",
-    "expose-loader": "^0.7.5",
     "firebase": "7.5.0",
     "font-awesome": "^4.7.0",
     "history": "^4.9.0",
@@ -270,6 +277,10 @@
     "linode-api-node": "^1.2.3",
     "lodash": "^4.17.15",
     "node-machine-id": "^1.1.12",
+    "puppeteer-core": "^3.0.4",
+    "puppeteer-extra": "^3.1.9",
+    "puppeteer-extra-plugin-recaptcha": "^3.1.10",
+    "puppeteer-extra-plugin-stealth": "^2.4.9",
     "random-email": "^1.0.3",
     "random-name": "^0.1.2",
     "randomatic": "^3.1.1",
@@ -277,7 +288,6 @@
     "react-bootstrap-table-next": "^3.1.5",
     "react-dom": "^16.8.6",
     "react-hot-loader": "^4.3.12",
-    "react-json-tree": "^0.11.2",
     "react-redux": "^5.1.1",
     "react-router": "^4.3.1",
     "react-router-dom": "^4.3.1",
@@ -291,7 +301,6 @@
     "redux-persist": "^5.10.0",
     "redux-persist-electron-storage": "^2.1.0",
     "redux-thunk": "^2.3.0",
-    "regenerator-runtime": "^0.13.3",
     "request-promise": "^4.2.4",
     "source-map-support": "^0.5.9",
     "styled-components": "^4.3.2",

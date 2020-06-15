@@ -127,7 +127,7 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
     window.location.href.includes('doverstreetmarket') ||
     window.location.href.includes('bstn') ||
     window.location.href.includes('hollywood.se') ||
-    window.location.href.includes('nakedcph.com') ||
+    // window.location.href.includes('nakedcph.com') ||
     window.location.href.includes('mailchi.mp') ||
     window.location.href.includes('ymeuniverse')
   ) {
@@ -145,7 +145,7 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
   if (
     !window.location.href.includes('youtube.') &&
     !window.location.href.includes('google.') &&
-    !window.location.href.includes('naked.') &&
+    !window.location.href.includes('naked') &&
     !window.location.href.includes('bstn.')
   ) {
     document.addEventListener('DOMContentLoaded', () => {
@@ -156,5 +156,7 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
       document.body.appendChild(document.querySelector('div.g-recaptcha'));
     });
   }
-  captchaChecker = setInterval(checkCaptcha, 300);
+  if (!window.location.href.includes('nakedcph.com')) {
+    captchaChecker = setInterval(checkCaptcha, 300);
+  }
 }

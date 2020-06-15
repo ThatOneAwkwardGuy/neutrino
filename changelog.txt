@@ -299,6 +299,49 @@ Need to add animations
 - Account Creator - END Redirect error fix
 - Raffle Bot - Added Waiting Status
 
+2.1.43
+- Raffle Bot - END raffle entry fix
+
+2.1.44
+- Profile Converter - NSB Fix
+
+2.1.45
+- Account Creator - END Fix
+
+2.1.46
+- Raffle Bot - END Fix Attempt
+- Raffle Bot - NakedCPH Fix Attempt
+
+2.2.0
+- One Click Generator - Now uses proper Chrome windows to fully simulate user browsing (BETA)
+- One Click Tester - Now uses Chrome windows for testing (BETA)
+- One Click Generator - Recaptcha V3 Score 
+- One Click Tester - Recaptcha V3 Score Testing
+
+2.2.1
+- Fix for One Click Gen freezing on opening google chrome instance
+
+2.2.2
+- Fix for One Click Gen not supporting proxies that use admin and pass
+
+2.2.3
+- Updated Windows Chrome Version
+
+2.2.4
+- Updated Windows Chrome Version User Agent
+
+2.2.5
+- Fix Youtube video not autoplaying in activity gen
+
+2.2.6
+- Updated One Click Gen User Agent
+
+2.2.7
+- Removal of Chrome Stealth plugin
+
+2.2.8
+- Potential Login Fix for one click gen windows users
+
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
 

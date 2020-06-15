@@ -75,7 +75,7 @@ class AccountCreator extends Component {
       const filePath = filePaths.filePaths[0];
       const file = await fsPromises.readFile(filePath, { encoding: 'utf-8' });
       if (filePath.split('.').slice(-1)[0] === 'txt') {
-        const emails = file.split('\n');
+        const emails = file.split('\n').filter(email => email !== '');
         this.setState({ emails, quantity: emails.length });
       }
     }
@@ -223,6 +223,7 @@ class AccountCreator extends Component {
     }
     const accountPromises = Array.from(Array(parseInt(quantity, 10))).map(
       (value, index) => {
+        console.log(index);
         switch (site) {
           case '': {
             const { toastManager } = this.props;
@@ -636,7 +637,7 @@ class AccountCreator extends Component {
       const accountLastName = randomName ? random.last() : lastName;
       const tokenID = uuidv4();
       const proxy = useProxies ? this.getRandomProxy() : '';
-
+      console.log({ email, accountPass, accountFirstName, accountLastName });
       const window = await createNewWindow(tokenID, proxy);
       window.webContents.on('close', () => {
         reject(new Error('Closed Window Before Finished'));
@@ -648,6 +649,7 @@ class AccountCreator extends Component {
           false
         );
         if (!botOrNotPage.includes('BOT or NOT?!')) {
+          window.webContents.removeAllListeners('did-finish-load');
           await window.webContents.executeJavaScript(
             `
           document.getElementById('firstNameInput').value = '${accountFirstName} ${accountLastName}';
@@ -913,6 +915,7 @@ class AccountCreator extends Component {
         ? this.getEndClothingCountryCode(loginBody)
         : this.getEndClothingCountryCode(captchaBody);
     if (captchaBody !== '' && captchaBody.body !== '') {
+      console.log('HERE');
       const captchaID = uuidv4();
       const captchaResponse = await getCaptchaResponse({
         cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
@@ -944,11 +947,24 @@ class AccountCreator extends Component {
       loginBody = await request({
         method: 'GET',
         jar: this.cookieJars[tokenID],
+        resolveWithFullResponse: true,
         uri: `https://www.endclothing.com/${countryCode}/customer/account/login/`
       });
     }
-    const $ = cheerio.load(loginBody);
+    console.log(loginBody);
+    const $ = cheerio.load(loginBody.body);
     const formKey = $('input[name="form_key"]').attr('value');
+    console.log({
+      form_key: formKey,
+      success_url: '',
+      error_url: '',
+      firstname: accountFirstName,
+      lastname: accountLastName,
+      email,
+      dob,
+      password: accountPass,
+      password_confirmation: accountPass
+    });
     const finalAccountResponse = await request({
       method: 'POST',
       jar: this.cookieJars[tokenID],

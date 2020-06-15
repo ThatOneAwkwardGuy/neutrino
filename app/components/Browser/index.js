@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import { convertCSVToBase } from '../ProfileTaskEditorConverter/functions';
 import { convertBaseToNeutrino } from '../ProfileCreator/functions';
 import Table from '../Table';
-import { setProxyForSession, generateUEID } from '../../utils/utils';
+import { setProxyForWindow, generateUEID } from '../../utils/utils';
 import { userAgents } from './utils';
 
 const { remote } = require('electron');
@@ -168,12 +168,9 @@ class Browser extends Component {
       }
     });
     if (proxy !== '') {
-      await setProxyForSession(
-        proxy,
-        this.windows[profile.email],
-        remote.session.fromPartition(`persist:browser-${profile.email}`)
-      );
+      await setProxyForWindow(proxy, this.windows[profile.email]);
     }
+    console.log(proxy);
     if (userAgent !== '') {
       const session = remote.session.fromPartition(
         `persist:browser-${profile.email}`

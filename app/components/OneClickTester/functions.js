@@ -37,10 +37,10 @@ export const testAccount = (index, account, setAccountStatus) => {
       win.webContents.once('did-navigate-in-page', async () => {
         await win.webContents.executeJavaScript(`
                     var passwdObserver = new MutationObserver(function(mutations, me) {
-                      var canvas = document.getElementById("Passwd");
+                      var canvas = document.querySelector("input[type='password']")
                       if (canvas) {
                         canvas.value = "${account.pass}";
-                        document.getElementById("signIn").click();
+                        document.querySelector("input[type='submit']").click();
                         me.disconnect();
                         return;
                       }

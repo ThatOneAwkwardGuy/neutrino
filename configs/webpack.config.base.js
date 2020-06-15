@@ -8,7 +8,10 @@ import TerserPlugin from 'terser-webpack-plugin';
 import { dependencies } from '../package.json';
 
 export default {
-  externals: [...Object.keys(dependencies || {})],
+  externals: [
+    ...Object.keys(dependencies || {}),
+    { puppeteer: 'require("puppeteer")' }
+  ],
 
   module: {
     rules: [
