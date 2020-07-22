@@ -58,6 +58,9 @@ export default class Routes extends Component {
           case 'soleNotify':
             await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
             break;
+          case 'noctua':
+            await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
+            break;
           case 'globalHeat':
             await getExternalAuth(uid.split(/-(.+)/)[0], uid.split(/-(.+)/)[1]);
             break;

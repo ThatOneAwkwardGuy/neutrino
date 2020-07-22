@@ -5,7 +5,7 @@ $themes: (
     mainColourDarker2: #1930a5,
     dark1Colour: #222,
     dark2Colour: #2d2d2d,
-    white: #fff,
+    textColour: #fff,
     red: red
   ),
   SSX: (
@@ -14,8 +14,8 @@ $themes: (
     mainColourDarker2: #fe4922,
     dark1Colour: #000,
     dark2Colour: rgb(20, 20, 20),
-    white: #fff,
-    red: #fe4922
+    textColour: #fff,
+    red: red
   ),
   SoleSociety: (
     mainColour: #7252ff,
@@ -23,7 +23,16 @@ $themes: (
     mainColourDarker2: #7252ff,
     dark1Colour: #000,
     dark2Colour: rgb(20, 20, 20),
-    white: #fff,
+    textColour: #fff,
+    red: #fe4922
+  ),
+  Noctua: (
+    mainColour: #6375b5,
+    mainColourDarker1: #6375b5,
+    mainColourDarker2: #6375b5,
+    dark1Colour: #000,
+    dark2Colour: rgb(20, 20, 20),
+    textColour: #fff,
     red: #fe4922
   )
 );
@@ -33,5 +42,5 @@ $themes: (
 // $mainColourDarker2: #1930a5;
 // $dark1Colour: #222;
 // $dark2Colour: #2d2d2d;
-// $white: #fff;
+// themed('textColour'): #fff;
 // $red: red;

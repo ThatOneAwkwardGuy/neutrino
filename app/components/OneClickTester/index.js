@@ -94,8 +94,14 @@ export default class OneClickTester extends Component {
   };
 
   testAccount = (index, account, settings) => {
-    testPuppeteerAccount(index, account, settings, this.setAccountStatus);
-    testPuppeteerAccountV3(index, account, settings, this.setAccountScore);
+    testPuppeteerAccount(index, account, settings, this.setAccountStatus, true);
+    testPuppeteerAccountV3(
+      index,
+      account,
+      settings,
+      this.setAccountScore,
+      true
+    );
   };
 
   stopAccount = async row => {

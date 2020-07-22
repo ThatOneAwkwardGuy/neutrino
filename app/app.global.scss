@@ -29,11 +29,9 @@ html {
   @include themify($themes) {
     background-color: themed('dark1Colour');
     position: relative;
-    color: white;
+    color: themed('textColour') !important;
     height: 100vh;
     font-family: 'Montserrat', Arial, Helvetica, Helvetica Neue, serif;
-    /* stylelint-disable */
-    /* stylelint-enable */
     overflow-y: hidden;
   }
   @include fluid-type(font-size, 320px, 1366px, 4px, 14px);
@@ -71,7 +69,7 @@ textarea,
     border: 0 !important;
     border-radius: 0 !important;
     background-color: themed('dark1Colour') !important;
-    color: white !important;
+    color: themed('textColour') !important;
     font-weight: bold !important;
   }
 }
@@ -270,10 +268,12 @@ label {
 .react-bootstrap-table th,
 .react-bootstrap-table .table thead th,
 .react-bootstrap-table tbody td {
-  color: white !important;
-  border: none;
-  text-align: center;
-  outline: none;
+  @include themify($themes) {
+    color: themed('textColour') !important;
+    border: none;
+    text-align: center;
+    outline: none;
+  }
 }
 
 .noselect {

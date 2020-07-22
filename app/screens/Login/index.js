@@ -26,6 +26,7 @@ import soleNotifyLogo from '../../images/solesociety.png';
 import globalHeatLogo from '../../images/globalHeat.png';
 import ssxLogo from '../../images/ssx.png';
 import juicedSnkrsLogo from '../../images/juicedsnkrs.png';
+import noctuaLogo from '../../images/noctua.png';
 
 const { BrowserWindow } = require('electron').remote;
 
@@ -47,8 +48,10 @@ class Login extends Component {
       changeTheme('SSX');
       this.setState({ authServer: 'SSX' });
     } else if (settings.theme === 'SoleSociety') {
-      console.log('here');
       changeTheme('SoleSociety');
+      this.setState({ authServer: 'soleNotify' });
+    } else if (settings.theme === 'Noctua') {
+      changeTheme('Noctua');
       this.setState({ authServer: 'soleNotify' });
     } else {
       changeTheme('Neutrino');
@@ -68,6 +71,8 @@ class Login extends Component {
       setKeyInSetting('theme', 'SSX');
     } else if (e.target.value === 'soleNotify') {
       setKeyInSetting('theme', 'SoleSociety');
+    } else if (e.target.value === 'noctua') {
+      setKeyInSetting('theme', 'Noctua');
     } else {
       setKeyInSetting('theme', 'Neutrino');
     }
@@ -100,6 +105,9 @@ class Login extends Component {
         break;
       case 'juicedSnkrs':
         authServerImage = juicedSnkrsLogo;
+        break;
+      case 'noctua':
+        authServerImage = noctuaLogo;
         break;
       default:
         break;
@@ -166,31 +174,7 @@ class Login extends Component {
         this.loginWithFirebase();
         break;
       }
-      case 'gloryNotify': {
-        const code = await this.loginWithDiscord();
-        this.setState(
-          {
-            key: code
-          },
-          () => {
-            this.loginWithExternalAuth();
-          }
-        );
-        break;
-      }
       case 'soleNotify': {
-        const code = await this.loginWithDiscord();
-        this.setState(
-          {
-            key: code
-          },
-          () => {
-            this.loginWithExternalAuth();
-          }
-        );
-        break;
-      }
-      case 'globalHeat': {
         const code = await this.loginWithDiscord();
         this.setState(
           {
@@ -214,7 +198,7 @@ class Login extends Component {
         );
         break;
       }
-      case 'juicedSnkrs': {
+      case 'noctua': {
         const code = await this.loginWithDiscord();
         this.setState(
           {
@@ -313,39 +297,7 @@ class Login extends Component {
       );
     }
 
-    if (authServer === 'blazeUnlimited') {
-      return (
-        <div>
-          <FormGroup className="my-4">
-            <Label className="boldLabel">Key</Label>
-            <Input
-              name="key"
-              type="text"
-              onChange={this.handleChange}
-              onKeyPress={this.handleKeyPress}
-            />
-          </FormGroup>
-          <FormGroup>
-            {showLoader ? (
-              <BarLoader width={100} widthUnit="%" color="#2745fb" />
-            ) : null}
-            <Button className="neutrinoButton my-4" onClick={this.login}>
-              Login
-            </Button>
-          </FormGroup>
-        </div>
-      );
-    }
-
-    if (
-      [
-        'gloryNotify',
-        'soleNotify',
-        'globalHeat',
-        'SSX',
-        'juicedSnkrs'
-      ].includes(authServer)
-    ) {
+    if (['soleNotify', 'SSX', 'noctua'].includes(authServer)) {
       return (
         <div>
           <FormGroup>
@@ -409,11 +361,8 @@ class Login extends Component {
                 >
                   <option value="neutrino">Neutrino</option>
                   <option value="SSX">SneakerSquadX</option>
-                  <option value="blazeUnlimited">BlazeUnlimited</option>
-                  <option value="gloryNotify">GloryNotify</option>
                   <option value="soleNotify">SoleSociety</option>
-                  <option value="globalHeat">GlobalHeat</option>
-                  <option value="juicedSnkrs">JuicedSnkrs</option>
+                  <option value="noctua">Noctua</option>
                 </Input>
               </FormGroup>
             </Form>

@@ -11582,9 +11582,9 @@ pupa@^2.0.1:
     escape-goat "^2.0.0"
 
 puppeteer-core@^3.0.4:
-  version "3.0.4"
-  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-3.0.4.tgz#2948b31c83a46500bdf4b6f1024180039e65fd09"
-  integrity sha512-DhsR97T84FguRBuWJbNXMIOzrO64a80CMFOoLyiQWX7MGu+ZlhcqAagZyvRDRYfSoyqYUiIqH0vgtfQkfRgQFg==
+  version "3.3.0"
+  resolved "https://registry.yarnpkg.com/puppeteer-core/-/puppeteer-core-3.3.0.tgz#6178a6a0f6efa261cd79e42e34ab0780d8775f0d"
+  integrity sha512-hynQ3r0J/lkGrKeBCqu160jrj0WhthYLIzDQPkBxLzxPokjw4elk1sn6mXAian/kfD2NRzpdh9FSykxZyL56uA==
   dependencies:
     debug "^4.1.0"
     extract-zip "^2.0.0"

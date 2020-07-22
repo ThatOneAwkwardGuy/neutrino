@@ -15,7 +15,9 @@
 }
 
 .table {
-  color: white !important;
+  @include themify($themes) {
+    color: themed('textColour') !important;
+  }
 }
 
 .td:not(:first-child),

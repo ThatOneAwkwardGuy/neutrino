@@ -33,7 +33,7 @@
     height: 100%;
     font-weight: bold;
     border: none;
-    color: white;
+    color: themed('textColour') !important;
   }
 }
 

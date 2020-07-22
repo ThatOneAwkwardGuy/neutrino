@@ -342,6 +342,20 @@ Need to add animations
 2.2.8
 - Potential Login Fix for one click gen windows users
 
+2.2.9
+- One Click Generator - Fix for activities not running properly
+- One Click Generator - Fix for generator getting stuck in headless mode
+
+2.2.10
+- Neutrino - Added Noctua as a partner
+
+2.2.11
+- Neutrino  - Fix text colour
+
+2.2.12
+One Click Tester - Show windows when testing account to make it clearer something is happening.
+
+
 Linode API Token - 31eff8ddbe15c0883c486ca6cc2ea34a3525fd8f314a75cd28f197a197aba88e
 DigitalOcean API Token - 1f4a3502f0ee8ba347e9ea5f2b0b110ed66ef4880f1ba175522cccd28ff1e19a
 

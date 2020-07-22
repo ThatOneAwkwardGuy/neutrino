@@ -1,9 +1,11 @@
 .proxyIcon {
   padding: 10px 5px 10px 5px;
-  color: white;
-  width: 100%;
-  transition: 0.3s;
-  word-break: break-word;
+  @include themify($themes) {
+    color: themed('textColour') !important;
+    width: 100%;
+    transition: 0.3s;
+    word-break: break-word;
+  }
 }
 
 .proxyIcon img {

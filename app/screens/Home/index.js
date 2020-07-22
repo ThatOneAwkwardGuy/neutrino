@@ -84,6 +84,8 @@ class Home extends Component {
       changeTheme('SSX');
     } else if (settings.theme === 'SoleSociety') {
       changeTheme('SoleSociety');
+    } else if (settings.theme === 'Noctua') {
+      changeTheme('Noctua');
     } else {
       changeTheme('Neutrino');
     }

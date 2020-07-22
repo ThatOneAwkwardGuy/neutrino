@@ -146,7 +146,8 @@ if (window.location.href.split('/').slice(-1)[0] !== 'waiting.html') {
     !window.location.href.includes('youtube.') &&
     !window.location.href.includes('google.') &&
     !window.location.href.includes('naked') &&
-    !window.location.href.includes('bstn.')
+    !window.location.href.includes('bstn.') &&
+    !window.location.href.includes('endclothing.')
   ) {
     document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('body > :not(.g-recaptcha)').forEach(box => {

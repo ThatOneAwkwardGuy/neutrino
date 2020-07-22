@@ -105,6 +105,7 @@ export const sites = {
   // bdgastore: 'https://bdgastore.com',
   // 'gmail - US': 'https://google.com',
   // 'nike - US': 'http://google.com',
+  'Alumni Of NY': 'https://www.alumniofny.com',
   yme: 'https://www.ymeuniverse.com',
   end: 'https://www.endclothing.com',
   crusoeAndSons: 'https://crusoeandsons.com',

@@ -23,8 +23,10 @@
 
 .sidebarIcon,
 .sidebarIcon span {
-  color: white;
-  transition: 0.3s;
+  @include themify($themes) {
+    color: themed('textColour') !important;
+    transition: 0.3s;
+  }
 }
 
 .sidebarIconActive span {
@@ -34,8 +36,10 @@
 }
 
 .sidebarIconActive:hover span {
-  color: white;
-  text-decoration: none;
+  @include themify($themes) {
+    color: themed('textColour') !important;
+    text-decoration: none;
+  }
 }
 
 #sidebar span {
@@ -83,5 +87,7 @@
 }
 
 .sidebarIconActive .sidebarIconLabel {
-  color: white !important;
+  @include themify($themes) {
+    color: themed('textColour') !important;
+  }
 }

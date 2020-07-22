@@ -102,11 +102,7 @@ export const createPuppeteerActivityWindow = async (
   if (updateActivity) {
     updateActivity(index, { status: 'Launching Browser Instance' });
   }
-  const args = [
-    '--mute-audio',
-    '--disable-web-security',
-    '--allow-running-insecure-content'
-  ];
+  const args = ['--mute-audio'];
   const proxyArray = activity.proxy.split(/@|:/);
   if (activity.proxy !== '') {
     args.push(
@@ -120,7 +116,8 @@ export const createPuppeteerActivityWindow = async (
     executablePath: getChromeExecutablePath(),
     headless: !showAcitivtyWindows,
     ignoreHTTPSErrors: true,
-    defaultViewport: { width: 1920, height: 1080 }
+    defaultViewport: { width: 1920, height: 1080 },
+    ignoreDefaultArgs: ['--disable-extensions']
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
@@ -155,13 +152,31 @@ export const createPuppeteerActivityWindow = async (
     updateActivity(index, { status: 'Loading Google Sign In Page' });
   }
   await page.goto('https://stackoverflow.com/users/login', {
-    waitUntil: 'domcontentloaded'
+    waitUntil: 'networkidle0'
   });
   await page.click('button[data-provider="google"]');
-
+  await new Promise(resolve => {
+    page.once('domcontentloaded', () => {
+      resolve();
+    });
+  });
+  const potentialCaptchaPageUrl = page.url();
+  if (potentialCaptchaPageUrl.includes('/nocaptcha')) {
+    if (!showAcitivtyWindows) {
+      updateActivity(index, {
+        status:
+          'Stuck on Captcha, please enable Show Activity Windows in the settings to complete the captcha'
+      });
+    }
+    await new Promise(resolve => {
+      page.once('domcontentloaded', () => {
+        resolve();
+      });
+    });
+  }
   await page.waitFor('input[type="email"]', {
     visible: true,
-    timeout: 10000
+    timeout: 30000
   });
   if (updateActivity) {
     updateActivity(index, { status: 'Entering Email' });
@@ -209,12 +224,12 @@ const randomPuppeteerGoogleSearch = async (
   updateActivity,
   incrementActivity
 ) => {
-  console.log(window);
   updateActivity(index, { status: 'Google Search' });
   const question = `${randomFromArray(questionWordList)} ${randomFromArray(
     auxiliaryVerbList
   )} ${randomFromArray(subjectList)} ${randomFromArray(actionVerbList)}`;
-  const page = await window.newPage();
+  const pages = await window.pages();
+  const [page] = pages.slice(-1);
   await page.goto(`https://www.google.com/search?q=${encodeURI(question)}`);
   incrementActivity(index, 'googleSearch');
 };
@@ -225,11 +240,10 @@ const randomPuppeteerGoogleNewsSearch = async (
   updateActivity,
   incrementActivity
 ) => {
-  console.log(window);
-
   updateActivity(index, { status: 'Google News' });
   const chosenQuery = randomFromArray(brands);
-  const page = await window.newPage();
+  const pages = await window.pages();
+  const [page] = pages.slice(-1);
   await page.goto(
     `https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=nws`
   );
@@ -242,11 +256,10 @@ const randomPuppeteerGoogleShoppingSearch = async (
   updateActivity,
   incrementActivity
 ) => {
-  console.log(window);
-
   updateActivity(index, { status: 'Google Shopping' });
   const chosenQuery = `buy ${randomFromArray(brands)}`;
-  const page = await window.newPage();
+  const pages = await window.pages();
+  const [page] = pages.slice(-1);
   await page.goto(
     `https://www.google.com/search?q=${encodeURI(chosenQuery)}&tbm=shop`
   );
@@ -259,10 +272,9 @@ const randomPuppeteerTrendingYoutubeVideo = async (
   updateActivity,
   incrementActivity
 ) => {
-  console.log(window);
-
   updateActivity(index, { status: 'Watching Youtube' });
-  const page = await window.newPage();
+  const pages = await window.pages();
+  const [page] = pages.slice(-1);
   await page.goto('https://www.youtube.com/feed/trending');
   const links = await page.evaluate(() =>
     Array.from(
@@ -466,14 +478,15 @@ export const testPuppeteerAccount = async (
   index,
   activity,
   settings,
-  setAccountStatus
+  setAccountStatus,
+  showWindows = false
 ) => {
   const browser = await createPuppeteerActivityWindow(
     index,
     activity,
     settings,
     false,
-    false
+    showWindows
   );
   const page = await browser.newPage();
   await page.goto('https://neutrinotools.app/captcha', {
@@ -510,14 +523,15 @@ export const testPuppeteerAccountV3 = async (
   index,
   activity,
   settings,
-  setAccountStatus
+  setAccountStatus,
+  showWindows
 ) => {
   const browser = await createPuppeteerActivityWindow(
     index,
     activity,
     settings,
     false,
-    false
+    showWindows
   );
   const page = await browser.newPage();
   await page.goto('https://neutrinotools.app/captchaV3', {
@@ -544,12 +558,8 @@ export const testPuppeteerAccountV3 = async (
 };
 
 export const windowStillOpen = window => {
-  if (window) {
-    const windowProcess = window.process();
-    if (windowProcess.connected) {
-      return true;
-    }
-    return false;
+  if (window && window.isConnected()) {
+    return true;
   }
   return false;
 };

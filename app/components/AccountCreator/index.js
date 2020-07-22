@@ -878,14 +878,14 @@ class AccountCreator extends Component {
     const {
       randomPass,
       randomName,
-      useProxies,
+      // useProxies,
       catchall,
       pass,
       firstName,
       lastName,
       site
     } = this.state;
-    const { addCreatedAccount, settings } = this.props;
+    const { addCreatedAccount } = this.props;
     const email =
       gmailEmail || `${generateRandomNLengthString(10)}@${catchall}`;
     const accountPass = randomPass ? randomize('*', 10) : pass;
@@ -895,7 +895,7 @@ class AccountCreator extends Component {
       1,
       12
     )}/${randomNumberInRange(1980, 1999)}`;
-    const proxy = useProxies ? this.getRandomProxy() : '';
+    // const proxy = useProxies ? this.getRandomProxy() : '';
     const tokenID = uuidv4();
     this.cookieJars[tokenID] = request.jar();
     let captchaBody = '';
@@ -914,43 +914,42 @@ class AccountCreator extends Component {
       loginBody.body !== undefined
         ? this.getEndClothingCountryCode(loginBody)
         : this.getEndClothingCountryCode(captchaBody);
-    if (captchaBody !== '' && captchaBody.body !== '') {
-      console.log('HERE');
-      const captchaID = uuidv4();
-      const captchaResponse = await getCaptchaResponse({
-        cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
-        url: `https://www.endclothing.com/${countryCode}/customer/account/login/`,
-        id: captchaID,
-        agent: useProxies ? new HttpsProxyAgent(proxy) : null,
-        baseURL: sites[site],
-        site,
-        accountPass,
-        settings,
-        siteKey: '6LdC3UgUAAAAAJIcyA3Ym4j_nCP-ainSgf1NoFku'
-      });
-      console.log(captchaBody);
-      const $ = cheerio.load(captchaBody.body);
-      const remoteip = $('input[name="remoteip"]').attr('value');
-      const dCFTicket = $('input[name="dCF_ticket"]').attr('value');
-      const action = $('#distilCaptchaForm').attr('action');
-      await request({
-        method: 'POST',
-        uri: `https://www.endclothing.com${action}`,
-        jar: this.cookieJars[tokenID],
-        form: {
-          remoteip,
-          dCF_ticket: dCFTicket,
-          'g-recaptcha-response': captchaResponse.captchaToken,
-          isAjax: 1
-        }
-      });
-      loginBody = await request({
-        method: 'GET',
-        jar: this.cookieJars[tokenID],
-        resolveWithFullResponse: true,
-        uri: `https://www.endclothing.com/${countryCode}/customer/account/login/`
-      });
-    }
+    // if (captchaBody !== '' && captchaBody.body !== '') {
+    //   const captchaID = uuidv4();
+    //   const captchaResponse = await getCaptchaResponse({
+    //     cookiesObject: this.cookieJars[tokenID]._jar.store.idx,
+    //     url: `https://www.endclothing.com/${countryCode}/customer/account/login/`,
+    //     id: captchaID,
+    //     agent: useProxies ? new HttpsProxyAgent(proxy) : null,
+    //     baseURL: sites[site],
+    //     site,
+    //     accountPass,
+    //     settings,
+    //     siteKey: '6LdC3UgUAAAAAJIcyA3Ym4j_nCP-ainSgf1NoFku'
+    //   });
+    //   console.log(captchaBody);
+    //   const $ = cheerio.load(captchaBody.body);
+    //   const remoteip = $('input[name="remoteip"]').attr('value');
+    //   const dCFTicket = $('input[name="dCF_ticket"]').attr('value');
+    //   const action = $('#distilCaptchaForm').attr('action');
+    //   await request({
+    //     method: 'POST',
+    //     uri: `https://www.endclothing.com${action}`,
+    //     jar: this.cookieJars[tokenID],
+    //     form: {
+    //       remoteip,
+    //       dCF_ticket: dCFTicket,
+    //       'g-recaptcha-response': captchaResponse.captchaToken,
+    //       isAjax: 1
+    //     }
+    //   });
+    //   loginBody = await request({
+    //     method: 'GET',
+    //     jar: this.cookieJars[tokenID],
+    //     resolveWithFullResponse: true,
+    //     uri: `https://www.endclothing.com/${countryCode}/customer/account/login/`
+    //   });
+    // }
     console.log(loginBody);
     const $ = cheerio.load(loginBody.body);
     const formKey = $('input[name="form_key"]').attr('value');
